@@ -26,6 +26,7 @@ window.addEventListener('load', function (event) {
 			carouselbuttons = item.getAttribute('data-buttons') ? item.getAttribute('data-buttons') : 'bullets';
 			carouselView = item.getAttribute('data-view') ? item.getAttribute('data-view') : 4;
 			carouselAutoplay = item.getAttribute('data-autoplay') ? item.getAttribute('data-autoplay') : 0;
+			carouselResView = item.getAttribute('data-res-view') ? item.getAttribute('data-res-view') : 1;
 
 			// Add classes
 			item.classList.add( 'glide__slides', 'glide-' + Math.floor(Math.random() * 1000) );
@@ -56,10 +57,10 @@ window.addEventListener('load', function (event) {
 				gap: 0,
 				breakpoints: {
 					600: {
-						perView: 1
+						perView: carouselResView
 					},
 					768: {
-						perView: 1
+						perView: carouselResView
 					},
 				}
 			}).mount();

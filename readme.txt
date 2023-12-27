@@ -13,9 +13,10 @@ Custom enhacements for front developing.
 
 Data Attributes for Carrousel:
 - data-type: slider, carousel
-- data-autoplay: true, false
+- data-autoplay: 0 - time ms
 - data-view: 1, 2, 3, 4, 5, 6
 - data-buttons: bullets, arrows, none
+- data-res-view: 1, 2, 3, 4, 5, 6
 
 Others Plugins:
 - [Closemarketing Plugins](https://profiles.wordpress.org/closemarketing/#content-plugins)
