@@ -1,4 +1,4 @@
-=== Closemarketing Custom Admin ===
+=== FrontBlocks ===
 Contributors: closemarketing, davidperez, sacrajaimez, alexbreagarcia
 Tags: custom-admin
 Donate link: https://close.marketing/go/donate/
