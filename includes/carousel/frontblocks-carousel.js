@@ -21,6 +21,7 @@ window.addEventListener('load', function (event) {
 			wrapperParent.appendChild(wrapper);
 			wrapperParent.classList.add('glide');
 
+			// Options
 			type = item.getAttribute('data-type') ? item.getAttribute('data-type') : 'carousel';
 			buttons = item.getAttribute('data-buttons') ? item.getAttribute('data-buttons') : 'bullets';
 
