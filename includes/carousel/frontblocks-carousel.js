@@ -49,6 +49,14 @@ window.addEventListener('load', function (event) {
 				wrapperParent.appendChild(bullets);
 			}
 
+			if ( carouselbuttons == 'arrows' ) {
+				const arrows = document.createElement('div');
+				arrows.classList.add('glide__arrows');
+				arrows.setAttribute('data-glide-el', 'controls');
+				arrows.innerHTML = '<button class="glide__arrow glide__arrow--left glide__arrow glide__arrow--left" data-glide-dir="<"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="glide__arrow glide__arrow--right glide__arrow glide__arrow--right" data-glide-dir=">"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 11L6 6L1 1" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+				wrapperParent.appendChild(arrows);
+			}
+
 			new Glide( wrapperParent, {
 				type: carouselType,
 				perView: carouselView,
@@ -56,6 +64,9 @@ window.addEventListener('load', function (event) {
 				autoplay: 2000,
 				gap: 0,
 				breakpoints: {
+					430: {
+						perView: carouselResView
+					},
 					600: {
 						perView: carouselResView
 					},

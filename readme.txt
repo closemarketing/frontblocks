@@ -13,6 +13,9 @@ Custom enhacements for front developing.
 
 Data Attributes for Carrousel:
 - data-type: slider, carousel
+slider - rewinds slider to the start/end when it reaches first or last slide,
+carousel - changes slides without starting over when it reaches first or last slide.
+
 - data-autoplay: 0 - time ms
 - data-view: 1, 2, 3, 4, 5, 6
 - data-buttons: bullets, arrows, none
