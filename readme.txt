@@ -1,4 +1,4 @@
-=== Closemarketing Custom Admin ===
+=== FrontBlocks ===
 Contributors: closemarketing, davidperez, sacrajaimez, alexbreagarcia
 Tags: custom-admin
 Donate link: https://close.marketing/go/donate/
@@ -10,39 +10,9 @@ Version: 0.1.0
 Custom enhacements for front developing.
 
 == Description ==
-Makes some changes in WordPress admin for better customization in Closemarketing Webs:
-
-- Custom logo and login screen.
-- Unpublished posts in other colour.
-- Custom info.
-- Clean stop words from url.
-- Count Entries from Post Types in Dashboard.
-- Custom admin colour bar (diferent in local).
-- Sanitize filenames for better support in Safari.
-
-Optimizations:
-- Remove Emoji in public.
-- Remove Dashicons in public.
-- Remove WordPress Generator in public.
-- Remove Feed Links and Feed Comments in body.
-
-In Genesis Framework:
-- Remove WordPress Generator, Feed Links and Feed Comments, Emoji and Dashicons.
-- Base CSS.
-- Loads Favicon.
-- Show excerpts instead of content in archive pages.
-- Remove version in CSS and Scripts for development.
-- Custom redirect depending of author.
-- Adds term excerpts.
-- Adds Taxonomy archive with Genesis WooCommerce Connect.
-
-In WooCommerce enhacements:
-- Remove scripts not necessary in non WooCommerce pages.
-- Add theme support compatibility.
 
 
 Others Plugins:
-
 - [Closemarketing Plugins](https://profiles.wordpress.org/closemarketing/#content-plugins)
 
 == Installation ==
