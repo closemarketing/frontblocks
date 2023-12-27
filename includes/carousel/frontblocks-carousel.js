@@ -1,5 +1,5 @@
 window.addEventListener('load', function (event) {
-	const carouselItem = document.querySelectorAll('.glide-carousel');
+	const carouselItem = document.querySelectorAll('.frontblocks-carousel');
 	
 	if (carouselItem.length > 0) {
 		carouselItem.forEach( (item) => {

@@ -34,7 +34,7 @@ function frbl_theme_scripts() {
 
 	wp_enqueue_script(
 		'frontblocks-carousel-custom',
-		FRBL_PLUGIN_URL . 'includes/carousel/js/glide.custom.js',
+		FRBL_PLUGIN_URL . 'includes/carousel/js/frontblocks-carousel.js',
 		array( 'frontblocks-carousel' ),
 		FRBL_VERSION,
 		true
