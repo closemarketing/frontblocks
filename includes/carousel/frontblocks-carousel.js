@@ -22,8 +22,10 @@ window.addEventListener('load', function (event) {
 			wrapperParent.classList.add('glide');
 
 			// Options
-			type = item.getAttribute('data-type') ? item.getAttribute('data-type') : 'carousel';
-			buttons = item.getAttribute('data-buttons') ? item.getAttribute('data-buttons') : 'bullets';
+			carouselType = item.getAttribute('data-type') ? item.getAttribute('data-type') : 'carousel';
+			carouselbuttons = item.getAttribute('data-buttons') ? item.getAttribute('data-buttons') : 'bullets';
+			carouselView = item.getAttribute('data-view') ? item.getAttribute('data-view') : 4;
+			carouselAutoplay = item.getAttribute('data-autoplay') ? item.getAttribute('data-autoplay') : 0;
 
 			// Add classes
 			item.classList.add( 'glide__slides', 'glide-' + Math.floor(Math.random() * 1000) );
@@ -31,7 +33,7 @@ window.addEventListener('load', function (event) {
 				child.classList.add('glide__slide');
 			}
 
-			if ( buttons == 'bullets' ) {
+			if ( carouselbuttons == 'bullets' ) {
 				const bullets = document.createElement('div');
 				bullets.classList.add('glide__bullets');
 				bullets.setAttribute('data-glide-el', 'controls[nav]');
@@ -47,8 +49,8 @@ window.addEventListener('load', function (event) {
 			}
 
 			new Glide( wrapperParent, {
-				type: 'carousel',
-				perView: 1,
+				type: carouselType,
+				perView: carouselView,
 				startAt: 0,
 				autoplay: 2000,
 				gap: 0,
