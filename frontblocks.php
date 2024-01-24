@@ -5,7 +5,7 @@
  * Description: Blocks and helpers to facilitate GeneratePress frontend developing.
  * Version:     0.1.0
  * Author:      Closemarketing
- * Author URI:  https://close.technology
+ * Author URI:  https://close.marketing
  * Text Domain: frontblocks
  * Domain Path: /languages
  * License:     GPL-2.0+
