@@ -36,7 +36,7 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
-= 0.1 =
+= 0.1.0 =
 *   Created Carousel/Slider class block.
 *   First released.
 
