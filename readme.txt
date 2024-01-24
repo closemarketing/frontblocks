@@ -37,6 +37,7 @@ WordPress installation and then activate the Plugin from Plugins page.
 
 == Changelog ==
 = 0.1 =
+*   Created Carousel/Slider class block.
 *   First released.
 
 == Links ==
