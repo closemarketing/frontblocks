@@ -4,8 +4,8 @@ Tags: custom-admin
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 0.1.0
-Version: 0.1.0
+Stable tag: 0.2.0
+Version: 0.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -84,6 +84,9 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+= 0.2.0 =
+*   Created Animation feature.
+
 = 0.1.0 =
 *   Created Carousel/Slider class block.
 *   First released.
