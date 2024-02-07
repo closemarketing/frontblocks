@@ -27,7 +27,7 @@ function frbl_theme_scripts_animations() {
 	wp_enqueue_script(
 		'frontblocks-animations-custom',
 		FRBL_PLUGIN_URL . 'includes/animations/frontblocks-animations.js',
-		array( 'frontblocks-animations' ),
+		array(),
 		FRBL_VERSION,
 		true
 	);
