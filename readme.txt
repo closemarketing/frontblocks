@@ -30,90 +30,43 @@ Attention seekers:
 frbl-bounce, frbl-flash, frbl-pulse, frbl-rubberBand, frbl-shakeX, frbl-shakeY, frbl-headShake, frbl-swing, frbl-tada, frbl-wobble, frbl-jello, frbl-heartBeat
 
 Back entrances:
-backInDown, frbl-backInLeft, frbl-backInRight, frbl-backInUp
+frbl-backInDown, frbl-backInLeft, frbl-backInRight, frbl-backInUp
 
-Back exits
+Back exits:
 frbl-backOutDown, frbl-backOutLeft, frbl-backOutRight, frbl-backOutUp
 
-Bouncing entrances
+Bouncing entrances:
 frbl-bounceIn, frbl-bounceInDown, frbl-bounceInLeft, frbl-bounceInRight, frbl-bounceInUp
 
-Bouncing exits
+Bouncing exits:
 frbl-bounceOut, frbl-bounceOutDown, frbl-bounceOutLeft, frbl-bounceOutRight, frbl-bounceOutUp
 
-Fading entrances
+Fading entrances:
 frbl-fadeIn, frbl-fadeInDown, frbl-fadeInDownBig, frbl-fadeInLeft, frbl-fadeInLeftBig, frbl-fadeInRight, frbl-fadeInRightBig, frbl-fadeInUp, frbl-fadeInUpBig, frbl-fadeInTopLeft, frbl-fadeInTopRight, frbl-fadeInBottomLeft, frbl-fadeInBottomRight
 
-Fading exits
-fadeOut
-fadeOutDown
-fadeOutDownBig
-fadeOutLeft
-fadeOutLeftBig
-fadeOutRight
-fadeOutRightBig
-fadeOutUp
-fadeOutUpBig
-fadeOutTopLeft
-fadeOutTopRight
-fadeOutBottomRight
-fadeOutBottomLeft
+Fading exits:
+frbl-fadeOut, frbl-fadeOutDown, frbl-fadeOutDownBig, frbl-fadeOutLeft, frbl-fadeOutLeftBig, frbl-fadeOutRight, frbl-fadeOutRightBig, frbl-fadeOutUp, frbl-fadeOutUpBig, frbl-fadeOutTopLeft, frbl-fadeOutTopRight, frbl-fadeOutBottomRight, frbl-fadeOutBottomLeft
 
-Flippers
-flip
-flipInX
-flipInY
-flipOutX
-flipOutY
-Lightspeed
-lightSpeedInRight
-lightSpeedInLeft
-lightSpeedOutRight
-lightSpeedOutLeft
+Flippers:
+frbl-flip, frbl-flipInX, frbl-flipInY, frbl-flipOutX, frbl-flipOutY, frbl-Lightspeed, frbl-lightSpeedInRight, frbl-lightSpeedInLeft, frbl-lightSpeedOutRight, frbl-lightSpeedOutLeft
 
-Rotating entrances
-rotateIn
-rotateInDownLeft
-rotateInDownRight
-rotateInUpLeft
-rotateInUpRight
-Rotating exits
-rotateOut
-rotateOutDownLeft
-rotateOutDownRight
-rotateOutUpLeft
-rotateOutUpRight
+Rotating entrances:
+frbl-rotateIn, frbl-rotateInDownLeft, frbl-rotateInDownRight, frbl-rotateInUpLeft, frbl-rotateInUpRight
 
-Specials
-hinge
-jackInTheBox
-rollIn
-rollOut
+Rotating exits:
+frbl-rotateOut, frbl-rotateOutDownLeft, frbl-rotateOutDownRight, frbl-rotateOutUpLeft, frbl-rotateOutUpRight
 
-Zooming entrances
-zoomIn
-zoomInDown
-zoomInLeft
-zoomInRight
-zoomInUp
+Specials:
+frbl-hinge, frbl-jackInTheBox, frbl-rollIn, frbl-rollOut
 
-Zooming exits
-zoomOut
-zoomOutDown
-zoomOutLeft
-zoomOutRight
-zoomOutUp
+Zooming entrances: 
+frbl-zoomIn, frbl-zoomInDown, frbl-zoomInLeft, frbl-zoomInRight, frbl-zoomInUp
 
-Sliding entrances
-slideInDown
-slideInLeft
-slideInRight
-slideInUp
-Sliding exits
-slideOutDown
-slideOutLeft
-slideOutRight
-slideOutUp
+Zooming exits: 
+frbl-zoomOut, zoomOutDown frbl-zoomOutLeft, frbl-zoomOutRight, frbl-zoomOutUp
+
+Sliding entrances: 
+frbl-slideInDown, frbl-slideInLeft, frbl-slideInRight, frbl-slideInUp, frbl-Sliding, exits frbl-slideOutDown, frbl-slideOutLeft, frbl-slideOutRight, frbl-slideOutUp
 
 Others Plugins:
 - [Closemarketing Plugins](https://profiles.wordpress.org/closemarketing/#content-plugins)
