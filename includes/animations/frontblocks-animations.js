@@ -1,6 +1,5 @@
-(function($)
-
-{
+window.addEventListener('load', (event) => {
+	
 	const scrollElements  = document.querySelectorAll(".js-scroll");
 	const scrollElements2 = document.querySelectorAll(".js-scroll-2");
 	const scrollElements3 = document.querySelectorAll(".js-scroll-3");
@@ -9,8 +8,7 @@
 		const elementTop = el.getBoundingClientRect().top;
 
 		return (
-			elementTop <=
-			(window.innerHeight || document.documentElement.clientHeight) / dividend
+			elementTop <= (window.innerHeight || document.documentElement.clientHeight) / dividend
 		);
 	};
 
@@ -31,10 +29,10 @@
 			if (elementInView(el, 1.25)) {
 				displayScrollElement(el);
 			} else if (elementOutofView(el)) {
-				hideScrollElement(el)
+				hideScrollElement(el);
 			}
 		})
-	}
+	};
 
 	const handleScrollAnimation2 = () => {
 		scrollElements2.forEach((el) => {
@@ -44,7 +42,7 @@
 				hideScrollElement(el)
 			}
 		})
-	}
+	};
 
 	const handleScrollAnimation3 = () => {
 		scrollElements3.forEach((el) => {
@@ -54,7 +52,7 @@
 				hideScrollElement(el)
 			}
 		})
-	}
+	};
 
 	window.addEventListener("scroll", () => { 
 		handleScrollAnimation();
@@ -62,14 +60,13 @@
 		handleScrollAnimation3();
 	});
 
-})( jQuery );
-
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-	anchor.addEventListener('click', function (e) {
-	    e.preventDefault();
-		
-	    document.querySelector(this.getAttribute('href')).scrollIntoView({
-		  behavior: 'smooth'
-	    });
+	document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+		anchor.addEventListener('click', function (e) {
+			e.preventDefault();
+			
+			document.querySelector(this.getAttribute('href')).scrollIntoView({
+			  behavior: 'smooth'
+			});
+		});
 	});
 });
