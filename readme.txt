@@ -23,50 +23,53 @@ carousel - changes slides without starting over when it reaches first or last sl
 - data-buttons: bullets, arrows, none
 - data-res-view: 1, 2, 3, 4, 5, 6
 
+Data Attributes for Animation:
+- data-frontblocks-animation: defines the animation class name that will be assigned to the element.
+
 Animations:
 Based on [Animate.css](https://animate.style/)
 
 Attention seekers:
-frbl-bounce, frbl-flash, frbl-pulse, frbl-rubberBand, frbl-shakeX, frbl-shakeY, frbl-headShake, frbl-swing, frbl-tada, frbl-wobble, frbl-jello, frbl-heartBeat
+bounce, flash, pulse, rubberBand, shakeX, shakeY, headShake, swing, tada, wobble, jello, heartBeat
 
 Back entrances:
-frbl-backInDown, frbl-backInLeft, frbl-backInRight, frbl-backInUp
+backInDown, backInLeft, backInRight, backInUp
 
 Back exits:
-frbl-backOutDown, frbl-backOutLeft, frbl-backOutRight, frbl-backOutUp
+backOutDown, backOutLeft, backOutRight, backOutUp
 
 Bouncing entrances:
-frbl-bounceIn, frbl-bounceInDown, frbl-bounceInLeft, frbl-bounceInRight, frbl-bounceInUp
+bounceIn, bounceInDown, bounceInLeft, bounceInRight, bounceInUp
 
 Bouncing exits:
-frbl-bounceOut, frbl-bounceOutDown, frbl-bounceOutLeft, frbl-bounceOutRight, frbl-bounceOutUp
+bounceOut, bounceOutDown, bounceOutLeft, bounceOutRight, bounceOutUp
 
 Fading entrances:
-frbl-fadeIn, frbl-fadeInDown, frbl-fadeInDownBig, frbl-fadeInLeft, frbl-fadeInLeftBig, frbl-fadeInRight, frbl-fadeInRightBig, frbl-fadeInUp, frbl-fadeInUpBig, frbl-fadeInTopLeft, frbl-fadeInTopRight, frbl-fadeInBottomLeft, frbl-fadeInBottomRight
+fadeIn, fadeInDown, fadeInDownBig, fadeInLeft, fadeInLeftBig, fadeInRight, fadeInRightBig, fadeInUp, fadeInUpBig, fadeInTopLeft, fadeInTopRight, fadeInBottomLeft, fadeInBottomRight
 
 Fading exits:
-frbl-fadeOut, frbl-fadeOutDown, frbl-fadeOutDownBig, frbl-fadeOutLeft, frbl-fadeOutLeftBig, frbl-fadeOutRight, frbl-fadeOutRightBig, frbl-fadeOutUp, frbl-fadeOutUpBig, frbl-fadeOutTopLeft, frbl-fadeOutTopRight, frbl-fadeOutBottomRight, frbl-fadeOutBottomLeft
+fadeOut, fadeOutDown, fadeOutDownBig, fadeOutLeft, fadeOutLeftBig, fadeOutRight, fadeOutRightBig, fadeOutUp, fadeOutUpBig, fadeOutTopLeft, fadeOutTopRight, fadeOutBottomRight, fadeOutBottomLeft
 
 Flippers:
-frbl-flip, frbl-flipInX, frbl-flipInY, frbl-flipOutX, frbl-flipOutY, frbl-Lightspeed, frbl-lightSpeedInRight, frbl-lightSpeedInLeft, frbl-lightSpeedOutRight, frbl-lightSpeedOutLeft
+flip, flipInX, flipInY, flipOutX, flipOutY, Lightspeed, lightSpeedInRight, lightSpeedInLeft, lightSpeedOutRight, lightSpeedOutLeft
 
 Rotating entrances:
-frbl-rotateIn, frbl-rotateInDownLeft, frbl-rotateInDownRight, frbl-rotateInUpLeft, frbl-rotateInUpRight
+rotateIn, rotateInDownLeft, rotateInDownRight, rotateInUpLeft, rotateInUpRight
 
 Rotating exits:
-frbl-rotateOut, frbl-rotateOutDownLeft, frbl-rotateOutDownRight, frbl-rotateOutUpLeft, frbl-rotateOutUpRight
+rotateOut, rotateOutDownLeft, rotateOutDownRight, rotateOutUpLeft, rotateOutUpRight
 
 Specials:
-frbl-hinge, frbl-jackInTheBox, frbl-rollIn, frbl-rollOut
+hinge, jackInTheBox, rollIn, rollOut
 
 Zooming entrances: 
-frbl-zoomIn, frbl-zoomInDown, frbl-zoomInLeft, frbl-zoomInRight, frbl-zoomInUp
+zoomIn, zoomInDown, zoomInLeft, zoomInRight, zoomInUp
 
 Zooming exits: 
-frbl-zoomOut, zoomOutDown frbl-zoomOutLeft, frbl-zoomOutRight, frbl-zoomOutUp
+zoomOut, zoomOutDown zoomOutLeft, zoomOutRight, zoomOutUp
 
 Sliding entrances: 
-frbl-slideInDown, frbl-slideInLeft, frbl-slideInRight, frbl-slideInUp, frbl-Sliding, exits frbl-slideOutDown, frbl-slideOutLeft, frbl-slideOutRight, frbl-slideOutUp
+slideInDown, slideInLeft, slideInRight, slideInUp, Sliding, exits slideOutDown, slideOutLeft, slideOutRight, slideOutUp
 
 Others Plugins:
 - [Closemarketing Plugins](https://profiles.wordpress.org/closemarketing/#content-plugins)
