@@ -23,6 +23,107 @@ carousel - changes slides without starting over when it reaches first or last sl
 - data-buttons: bullets, arrows, none
 - data-res-view: 1, 2, 3, 4, 5, 6
 
+Animations:
+Based on [Animate.css](https://animate.style/)
+
+Attention seekers:
+frbl-bounce, frbl-flash, frbl-pulse, frbl-rubberBand, frbl-shakeX, frbl-shakeY, frbl-headShake, frbl-swing, frbl-tada, frbl-wobble, frbl-jello, frbl-heartBeat
+
+Back entrances:
+backInDown, frbl-backInLeft, frbl-backInRight, frbl-backInUp
+
+Back exits
+frbl-backOutDown, frbl-backOutLeft, frbl-backOutRight, frbl-backOutUp
+
+Bouncing entrances
+frbl-bounceIn, frbl-bounceInDown, frbl-bounceInLeft, frbl-bounceInRight, frbl-bounceInUp
+
+Bouncing exits
+bounceOut
+bounceOutDown
+bounceOutLeft
+bounceOutRight
+bounceOutUp
+
+Fading entrances
+fadeIn
+fadeInDown
+fadeInDownBig
+fadeInLeft
+fadeInLeftBig
+fadeInRight
+fadeInRightBig
+fadeInUp
+fadeInUpBig
+fadeInTopLeft
+fadeInTopRight
+fadeInBottomLeft
+fadeInBottomRight
+Fading exits
+fadeOut
+fadeOutDown
+fadeOutDownBig
+fadeOutLeft
+fadeOutLeftBig
+fadeOutRight
+fadeOutRightBig
+fadeOutUp
+fadeOutUpBig
+fadeOutTopLeft
+fadeOutTopRight
+fadeOutBottomRight
+fadeOutBottomLeft
+Flippers
+flip
+flipInX
+flipInY
+flipOutX
+flipOutY
+Lightspeed
+lightSpeedInRight
+lightSpeedInLeft
+lightSpeedOutRight
+lightSpeedOutLeft
+Rotating entrances
+rotateIn
+rotateInDownLeft
+rotateInDownRight
+rotateInUpLeft
+rotateInUpRight
+Rotating exits
+rotateOut
+rotateOutDownLeft
+rotateOutDownRight
+rotateOutUpLeft
+rotateOutUpRight
+Specials
+hinge
+jackInTheBox
+rollIn
+rollOut
+Zooming entrances
+zoomIn
+zoomInDown
+zoomInLeft
+zoomInRight
+zoomInUp
+Zooming exits
+zoomOut
+zoomOutDown
+zoomOutLeft
+zoomOutRight
+zoomOutUp
+Sliding entrances
+slideInDown
+slideInLeft
+slideInRight
+slideInUp
+Sliding exits
+slideOutDown
+slideOutLeft
+slideOutRight
+slideOutUp
+
 Others Plugins:
 - [Closemarketing Plugins](https://profiles.wordpress.org/closemarketing/#content-plugins)
 

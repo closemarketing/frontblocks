@@ -44,3 +44,6 @@ function frbl__plugin_init() {
 
 // Carousel.
 require_once FRBL_PLUGIN_PATH . 'includes/carousel/frontblocks-carousel.php';
+
+// Animations.
+require_once FRBL_PLUGIN_PATH . 'includes/animations/frontblocks-animations.php';
