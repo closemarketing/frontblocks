@@ -1,72 +1,41 @@
 window.addEventListener('load', (event) => {
-	
-	const scrollElements  = document.querySelectorAll(".js-scroll");
-	const scrollElements2 = document.querySelectorAll(".js-scroll-2");
-	const scrollElements3 = document.querySelectorAll(".js-scroll-3");
+	/**
+	 * onIntersection will be triggered each time an observed item is visible in the viewport.
+	 * 
+	 * @param {elements} The list of queried elements  
+	 * @param {*} Defines the option parameters for the observer API 
+	 */
+	const onIntersection = (elements, options) => {
+		elements.forEach((element) => {
+			let animationData = element.target.dataset.frontblocks_animation;
 
-	const elementInView = (el, dividend = 1) => {
-		const elementTop = el.getBoundingClientRect().top;
-
-		return (
-			elementTop <= (window.innerHeight || document.documentElement.clientHeight) / dividend
-		);
-	};
-
-	const elementOutofView = (el) => {
-		const elementTop = el.getBoundingClientRect().top;
-
-		return (
-			elementTop > (window.innerHeight || document.documentElement.clientHeight)
-		);
-	};
-
-	const displayScrollElement = (element) => {
-		element.classList.add("scrolled");
-	};
-
-	const handleScrollAnimation = () => {
-		scrollElements.forEach((el) => {
-			if (elementInView(el, 1.25)) {
-				displayScrollElement(el);
-			} else if (elementOutofView(el)) {
-				hideScrollElement(el);
+			// Check if the data attribute doesn't include the prefix, and add it otherwise.
+			if (!animationData.includes('animate__')) {
+				animationData = 'animate__'.concat(animationData);
 			}
-		})
-	};
 
-	const handleScrollAnimation2 = () => {
-		scrollElements2.forEach((el) => {
-			if (elementInView(el, 1.45)) {
-				displayScrollElement(el);
-			} else if (elementOutofView(el)) {
-				hideScrollElement(el)
+			// Add the CSS class if the element is visible.
+			if (element.isIntersecting) {
+				element.target.classList.add('animate__animated', animationData);
 			}
-		})
-	};
+		});
+	}
 
-	const handleScrollAnimation3 = () => {
-		scrollElements3.forEach((el) => {
-			if (elementInView(el, 1.65)) {
-				displayScrollElement(el);
-			} else if (elementOutofView(el)) {
-				hideScrollElement(el)
-			}
-		})
-	};
-
-	window.addEventListener("scroll", () => { 
-		handleScrollAnimation();
-		handleScrollAnimation2();
-		handleScrollAnimation3();
+	/**
+	 * Declares an instance of the IntersectionObserver API, which receives a function that will execute each time an observed
+	 * item is present in the viewport.
+	 */
+	const observer = new IntersectionObserver(onIntersection, {
+		root: null, 
+		threshold: 0.5,
 	});
 
-	document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-		anchor.addEventListener('click', function (e) {
-			e.preventDefault();
-			
-			document.querySelector(this.getAttribute('href')).scrollIntoView({
-			  behavior: 'smooth'
-			});
-		});
+	/**
+	 * Gather a list of all the DOM elements which contain the 'data-frontblocks-animation' attribute.
+	 * Then, observe the presence of each one in the viewport.
+	 */
+	const animatedElements = document.querySelectorAll('[data-frontblocks_animation]');
+	animatedElements.forEach((element) => {
+		observer.observe(element);
 	});
 });
