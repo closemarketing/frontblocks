@@ -39,26 +39,11 @@ Bouncing entrances
 frbl-bounceIn, frbl-bounceInDown, frbl-bounceInLeft, frbl-bounceInRight, frbl-bounceInUp
 
 Bouncing exits
-bounceOut
-bounceOutDown
-bounceOutLeft
-bounceOutRight
-bounceOutUp
+frbl-bounceOut, frbl-bounceOutDown, frbl-bounceOutLeft, frbl-bounceOutRight, frbl-bounceOutUp
 
 Fading entrances
-fadeIn
-fadeInDown
-fadeInDownBig
-fadeInLeft
-fadeInLeftBig
-fadeInRight
-fadeInRightBig
-fadeInUp
-fadeInUpBig
-fadeInTopLeft
-fadeInTopRight
-fadeInBottomLeft
-fadeInBottomRight
+frbl-fadeIn, frbl-fadeInDown, frbl-fadeInDownBig, frbl-fadeInLeft, frbl-fadeInLeftBig, frbl-fadeInRight, frbl-fadeInRightBig, frbl-fadeInUp, frbl-fadeInUpBig, frbl-fadeInTopLeft, frbl-fadeInTopRight, frbl-fadeInBottomLeft, frbl-fadeInBottomRight
+
 Fading exits
 fadeOut
 fadeOutDown
@@ -73,6 +58,7 @@ fadeOutTopLeft
 fadeOutTopRight
 fadeOutBottomRight
 fadeOutBottomLeft
+
 Flippers
 flip
 flipInX
@@ -84,6 +70,7 @@ lightSpeedInRight
 lightSpeedInLeft
 lightSpeedOutRight
 lightSpeedOutLeft
+
 Rotating entrances
 rotateIn
 rotateInDownLeft
@@ -96,23 +83,27 @@ rotateOutDownLeft
 rotateOutDownRight
 rotateOutUpLeft
 rotateOutUpRight
+
 Specials
 hinge
 jackInTheBox
 rollIn
 rollOut
+
 Zooming entrances
 zoomIn
 zoomInDown
 zoomInLeft
 zoomInRight
 zoomInUp
+
 Zooming exits
 zoomOut
 zoomOutDown
 zoomOutLeft
 zoomOutRight
 zoomOutUp
+
 Sliding entrances
 slideInDown
 slideInLeft
