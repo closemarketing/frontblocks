@@ -1,5 +1,5 @@
 === FrontBlocks ===
-Contributors: closemarketing, davidperez, sacrajaimez, alexbreagarcia
+Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero
 Tags: custom-admin
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
