@@ -1,6 +1,6 @@
 === FrontBlocks ===
 Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, manoloramos
-Tags: custom-admin
+Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 6.4
