@@ -4,8 +4,8 @@ Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 0.2.1
-Version: 0.2.1
+Stable tag: 0.2.2
+Version: 0.2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,9 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+= 0.2.2 =
+*   Updated images.
+
 = 0.2.1 =
 *   New image for WordPress Plugin.
 
