@@ -4,14 +4,16 @@ Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 0.2.0
-Version: 0.2.0
+Stable tag: 0.2.1
+Version: 0.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Custom enhacements for front developing.
 
 == Description ==
+
+Plugin to create custom blocks for the front of the website. It includes a carousel/slider block and an animation block.
 
 Data Attributes for Carrousel:
 - data-type: slider, carousel
