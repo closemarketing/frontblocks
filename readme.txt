@@ -86,6 +86,9 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+= 0.2.1 =
+*   New image for WordPress Plugin.
+
 = 0.2.0 =
 *   Created Animation feature.
 
