@@ -1,0 +1,52 @@
+@media (min-width: 769px) {
+	/* nav .main-nav .mega-menu {
+			position: static;
+			margin-left: 0px;
+	} */
+
+	/* nav .main-nav .mega-menu > ul {
+	position: absolute;
+    left: -75% !important;
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+	} */
+
+	nav .main-nav .mega-menu > ul > li > a {
+		font-weight: bold;
+	}
+
+	nav .main-nav .mega-menu>ul>li {
+		display: inline-block;
+		vertical-align: top;
+	}
+
+	nav .main-nav .mega-menu > ul > li:hover > a,
+	nav .main-nav .mega-menu > ul > li:focus > a,
+	nav .main-nav .mega-menu > ul > li[class*="current-"] > a,
+	nav .main-nav .mega-menu ul ul {
+			background-color: transparent !important;
+			color: inherit;
+	}
+
+	nav .main-nav .mega-menu ul .sub-menu {
+			position: static;
+			display: block;
+			opacity: 1;
+			visibility: visible;
+			width: 100%;
+			box-shadow: 0 0 0;
+			left: 0;
+			height: auto;
+			pointer-events: auto;
+			transform: scale(1);
+	}
+
+	nav .main-nav .mega-menu ul.toggled-on .sub-menu {
+			pointer-events: auto;
+	}
+
+
+
+
+}
