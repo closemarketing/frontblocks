@@ -13,6 +13,8 @@ Custom enhacements for front developing.
 
 == Description ==
 
+To start using the Carousel, add the frontblocks-carousel class to the element and then, include any of the following attributes:
+
 Data Attributes for Carrousel:
 - data-type: slider, carousel
 slider - rewinds slider to the start/end when it reaches first or last slide,
