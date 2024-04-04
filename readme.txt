@@ -13,7 +13,7 @@ Custom enhacements for front developing.
 
 == Description ==
 
-Plugin to create custom blocks for the front of the website. It includes a carousel/slider block and an animation block.
+To start using the Carousel, add the frontblocks-carousel class to the element and then, include any of the following attributes:
 
 Data Attributes for Carrousel:
 - data-type: slider, carousel
@@ -86,6 +86,9 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+= 0.2.3 =
+*   Updated Glide autoplay value assignation.
+
 = 0.2.2 =
 *   Updated images.
 
