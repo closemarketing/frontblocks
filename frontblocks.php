@@ -3,7 +3,7 @@
  * Plugin Name: FrontBlocks
  * Plugin URI:  https://github.com/closemarketing/frontblocks
  * Description: Blocks and helpers to facilitate GeneratePress frontend developing.
- * Version:     0.2.2
+ * Version:     0.2.3
  * Author:      Closemarketing
  * Author URI:  https://close.marketing
  * Text Domain: frontblocks
@@ -27,7 +27,7 @@
 
 defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
-define( 'FRBL_VERSION', '0.2.2' );
+define( 'FRBL_VERSION', '0.2.3' );
 define( 'FRBL_PLUGIN', __FILE__ );
 define( 'FRBL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'FRBL_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
