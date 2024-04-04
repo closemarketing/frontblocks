@@ -86,6 +86,9 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+= 0.2.3 =
+*   Updated Glide autoplay value assignation.
+
 = 0.2.2 =
 *   Updated images.
 
