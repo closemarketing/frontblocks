@@ -61,7 +61,7 @@ window.addEventListener('load', function (event) {
 				type: carouselType,
 				perView: carouselView,
 				startAt: 0,
-				autoplay: 2000,
+				autoplay: carouselAutoplay,
 				gap: 0,
 				breakpoints: {
 					430: {
