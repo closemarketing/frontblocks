@@ -84,10 +84,10 @@
   border-color: white;
 }
 .glide__arrow--left {
-  left: 2em;
+  left: -1em;
 }
 .glide__arrow--right {
-  right: 2em;
+  right: -1em;
 }
 .glide__arrow--disabled {
   opacity: 0.33;
@@ -95,7 +95,7 @@
 .glide__bullets {
   position: absolute;
   z-index: 2;
-  bottom: 2em;
+  bottom: -1em;
   left: 50%;
   display: inline-flex;
   list-style: none;
