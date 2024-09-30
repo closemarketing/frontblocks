@@ -135,5 +135,14 @@
   cursor: -webkit-grabbing;
 }
 
+/* Responsive */
+@media only screen and (max-width: 768px) {
+	.glide__arrow--left {
+		left: 0;
+	}
+	.glide__arrow--right {
+		right: 0;
+	}
+}
 
 /*# sourceMappingURL=glide.theme.css.map */
