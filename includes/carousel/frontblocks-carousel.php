@@ -17,16 +17,17 @@ add_action( 'wp_enqueue_scripts', 'frbl_theme_scripts', 99 );
  * @return void
  */
 function frbl_theme_scripts() {
+	$dist_dir = WP_DEBUG ? 'carousel/' : 'dist/';
 	wp_enqueue_style(
 		'frontblocks-carousel',
-		FRBL_PLUGIN_URL . 'includes/carousel/frontblocks-carousel.css',
+		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-carousel.css',
 		array(),
 		FRBL_VERSION
 	);
 
 	wp_enqueue_script(
 		'frontblocks-carousel',
-		FRBL_PLUGIN_URL . 'includes/carousel/glide.min.js',
+		FRBL_PLUGIN_URL . 'includes/dist/glide.min.js',
 		array(),
 		FRBL_VERSION,
 		true
@@ -34,7 +35,7 @@ function frbl_theme_scripts() {
 
 	wp_enqueue_script(
 		'frontblocks-carousel-custom',
-		FRBL_PLUGIN_URL . 'includes/carousel/frontblocks-carousel.js',
+		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-carousel.js',
 		array( 'frontblocks-carousel' ),
 		FRBL_VERSION,
 		true

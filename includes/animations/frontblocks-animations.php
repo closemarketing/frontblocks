@@ -17,16 +17,18 @@ add_action( 'wp_enqueue_scripts', 'frbl_theme_scripts_animations', 99 );
  * @return void
  */
 function frbl_theme_scripts_animations() {
+	$dist_dir = WP_DEBUG ? 'animations/' : 'dist/';
+
 	wp_enqueue_style(
 		'frontblocks-animations',
-		FRBL_PLUGIN_URL . 'includes/animations/frontblocks-animations.css',
+		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-animations.css',
 		array(),
 		FRBL_VERSION
 	);
 
 	wp_enqueue_script(
 		'frontblocks-animations-custom',
-		FRBL_PLUGIN_URL . 'includes/animations/frontblocks-animations.js',
+		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-animations.js',
 		array(),
 		FRBL_VERSION,
 		true
