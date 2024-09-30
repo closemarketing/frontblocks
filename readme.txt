@@ -23,6 +23,8 @@ carousel - changes slides without starting over when it reaches first or last sl
 - data-autoplay: 0 - time ms
 - data-view: 1, 2, 3, 4, 5, 6
 - data-buttons: bullets, arrows, none
+- data-buttons-color: hex color
+- data-buttons-background-color: hex color or transparent
 - data-res-view: 1, 2, 3, 4, 5, 6
 
 Data Attributes for Animation:
@@ -86,6 +88,11 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+= 0.2.4 =
+*   Fixed: Buttons not overlapping the carousel.
+*   Added: New data attribute for carousel buttons color.
+*   Added: Not show bullets in responsive view and more than 5 items.
+
 = 0.2.3 =
 *   Updated Glide autoplay value assignation.
 
