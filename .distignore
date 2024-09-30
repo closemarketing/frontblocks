@@ -9,3 +9,7 @@ circle.yml
 composer.json
 composer.lock
 .wordpress-org
+node_modules/
+gulpfile.js
+package.json
+package-lock.json

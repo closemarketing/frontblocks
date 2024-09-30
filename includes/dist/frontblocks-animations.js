@@ -1,0 +1,1 @@
+window.addEventListener("load",t=>{const e=new IntersectionObserver((t,e)=>{t.forEach(t=>{let e=t.target.dataset.frontblocks_animation;e.includes("animate__")||(e="animate__".concat(e)),t.isIntersecting&&t.target.classList.add("animate__animated",e)})},{root:null,threshold:.5});document.querySelectorAll("[data-frontblocks_animation]").forEach(t=>{e.observe(t)})});
