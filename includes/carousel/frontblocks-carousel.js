@@ -38,7 +38,16 @@ window.addEventListener('load', function (event) {
 				child.classList.add('glide__slide');
 			}
 
-			if ( carouselbuttons == 'bullets' ) {
+			// Don't show bullets on responsive and more than 6 items.
+			if ( window.screen.availWidth < 768 && item.children.length < 6 ) {
+				showBullets = true;
+			} else if ( window.screen.availWidth > 768 ) {
+				showBullets = true;
+			} else {
+				showBullets = false;
+			}
+
+			if ( showBullets && carouselbuttons == 'bullets' ) {
 				const bullets = document.createElement('div');
 				bullets.classList.add('glide__bullets');
 				bullets.setAttribute('data-glide-el', 'controls[nav]');

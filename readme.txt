@@ -91,6 +91,7 @@ WordPress installation and then activate the Plugin from Plugins page.
 = 0.2.4 =
 *   Fixed: Buttons not overlapping the carousel.
 *   Added: New data attribute for carousel buttons color.
+*   Added: Not show bullets in responsive view and more than 5 items.
 
 = 0.2.3 =
 *   Updated Glide autoplay value assignation.
