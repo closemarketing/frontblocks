@@ -3,9 +3,9 @@ Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, man
 Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
-Tested up to: 6.4
-Stable tag: 0.2.2
-Version: 0.2.2
+Tested up to: 6.6
+Stable tag: 0.2.4
+Version: 0.2.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
