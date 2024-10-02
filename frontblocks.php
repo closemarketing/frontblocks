@@ -47,3 +47,6 @@ require_once FRBL_PLUGIN_PATH . 'includes/carousel/frontblocks-carousel.php';
 
 // Animations.
 require_once FRBL_PLUGIN_PATH . 'includes/animations/frontblocks-animations.php';
+
+// Block.
+require_once FRBL_PLUGIN_PATH . 'includes/blocks/content-link/content-link.php';

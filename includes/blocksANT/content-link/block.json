@@ -1,0 +1,19 @@
+{
+  "apiVersion": 2,
+  "name": "close/ContentLink",
+  "title": "Content Link",
+  "category": "widgets",
+  "icon": "list-view",
+  "description": "Show ContentLink.",
+  "keywords": ["posts", "ContentLink", "close"],
+  "version": "0.0.1",
+  "textdomain": "frontblocks",
+  "attributes": {
+    "category": {
+      "type": "interger"
+    }
+  },
+  "editorScript": "file:./build/index.js",
+  "editorStyle": "file:./build/index.css",
+  "style": "file:./build/style-index.css"
+}
