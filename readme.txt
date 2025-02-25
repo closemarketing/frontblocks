@@ -3,9 +3,9 @@ Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, man
 Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
-Tested up to: 6.6
-Stable tag: 0.2.4
-Version: 0.2.4
+Tested up to: 6.7
+Stable tag: 0.2.5
+Version: 0.2.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,6 +88,9 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+= 0.2.5 =
+*   Update version.
+
 = 0.2.4 =
 *   Fixed: Buttons not overlapping the carousel.
 *   Added: New data attribute for carousel buttons color.
