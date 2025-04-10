@@ -1,0 +1,118 @@
+/**
+ * WooCommerce Categories Grid Block CSS
+ */
+
+.frbl-woo-categories-grid {
+  display: grid;
+  grid-gap: 20px;
+  margin-bottom: 30px;
+}
+
+.frbl-woo-categories-grid.columns-1 {
+  grid-template-columns: 1fr;
+}
+
+.frbl-woo-categories-grid.columns-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.frbl-woo-categories-grid.columns-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.frbl-woo-categories-grid.columns-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.frbl-woo-categories-grid.columns-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.frbl-woo-categories-grid.columns-6 {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .frbl-woo-categories-grid.columns-5,
+  .frbl-woo-categories-grid.columns-6 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .frbl-woo-categories-grid.columns-4,
+  .frbl-woo-categories-grid.columns-5,
+  .frbl-woo-categories-grid.columns-6 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .frbl-woo-categories-grid.columns-3,
+  .frbl-woo-categories-grid.columns-4,
+  .frbl-woo-categories-grid.columns-5,
+  .frbl-woo-categories-grid.columns-6 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .frbl-woo-categories-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.frbl-woo-category {
+  border: 1px solid #eee;
+  border-radius: 5px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.frbl-woo-category:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.frbl-woo-category a {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.frbl-woo-category-image {
+  position: relative;
+  overflow: hidden;
+  padding-top: 75%; /* 4:3 Aspect Ratio */
+}
+
+.frbl-woo-category-image img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.frbl-woo-category:hover .frbl-woo-category-image img {
+  transform: scale(1.05);
+}
+
+.frbl-woo-category-title {
+  padding: 15px 15px 10px;
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: 600;
+  text-align: center;
+}
+
+.frbl-woo-category-description {
+  padding: 0 15px 15px;
+  font-size: 0.9em;
+  color: #777;
+  text-align: center;
+} 

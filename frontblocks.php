@@ -46,3 +46,6 @@ require_once FRBL_PLUGIN_PATH . 'includes/carousel/frontblocks-carousel.php';
 
 // Animations.
 require_once FRBL_PLUGIN_PATH . 'includes/animations/frontblocks-animations.php';
+
+// WooCommerce Categories Grid.
+require_once FRBL_PLUGIN_PATH . 'includes/woo-categories/frontblocks-woo-categories.php';
