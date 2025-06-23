@@ -46,3 +46,36 @@ require_once FRBL_PLUGIN_PATH . 'includes/carousel/frontblocks-carousel.php';
 
 // Animations.
 require_once FRBL_PLUGIN_PATH . 'includes/animations/frontblocks-animations.php';
+
+
+// Enqueue custom block editor script
+add_action( 'enqueue_block_editor_assets', 'enqueue_block_editor_assets' );
+
+function enqueue_block_editor_assets() {
+	wp_enqueue_script(
+		'frontblocks-advanced-option',
+		FRBL_PLUGIN_URL . 'includes/dist/frontblocks-advanced-option.js',
+		array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-edit-post' ),
+		FRBL_VERSION,
+		true
+	);
+}
+
+// Register the custom attribute for the block.
+add_filter(
+	'generateblocks_blocks_registered_block',
+	function ( $block_args, $block_type ) {
+		if ( $block_type !== 'generateblocks/grid' ) {
+			return $block_args;
+		}
+
+		$block_args['attributes']['cmCustomGridOption'] = array(
+			'type'    => 'string',
+			'default' => '',
+		);
+
+		return $block_args;
+	},
+	10,
+	2
+);

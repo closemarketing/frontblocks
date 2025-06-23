@@ -1,7 +1,14 @@
 {
   "devDependencies": {
+    "@babel/cli": "^7.27.2",
+    "@babel/core": "^7.27.4",
+    "@babel/preset-env": "^7.27.2",
+    "@babel/preset-react": "^7.27.1",
     "gulp": "^5.0.0",
     "gulp-clean-css": "^4.3.0",
     "gulp-minify": "^3.1.0"
-  }
+  },
+	"scripts": {
+		"build": "babel includes/carousel/frontblocks-advanced-option.jsx --out-file includes/dist/frontblocks-advanced-option.js"
+	}
 }
