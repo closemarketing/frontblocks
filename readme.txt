@@ -86,6 +86,9 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+= 1.0.0 =
+*   Improve interface to making Carousel/Slider in GenerateBlocks Grid.
+
 = 0.2.5 =
 *   Update version.
 
