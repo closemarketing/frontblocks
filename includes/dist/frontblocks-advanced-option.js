@@ -17,64 +17,67 @@ function addCustomCarouselPanel(BlockEdit) {
       return /*#__PURE__*/React.createElement(BlockEdit, props);
     }
     var _props$attributes = props.attributes,
-      _props$attributes$cmC = _props$attributes.cmCustomGridOption,
-      cmCustomGridOption = _props$attributes$cmC === void 0 ? 'none' : _props$attributes$cmC,
-      _props$attributes$cmI = _props$attributes.cmItemsToView,
-      cmItemsToView = _props$attributes$cmI === void 0 ? '4' : _props$attributes$cmI,
-      _props$attributes$cmR = _props$attributes.cmResponsiveToView,
-      cmResponsiveToView = _props$attributes$cmR === void 0 ? '1' : _props$attributes$cmR,
-      _props$attributes$cmA = _props$attributes.cmAutoplay,
-      cmAutoplay = _props$attributes$cmA === void 0 ? '' : _props$attributes$cmA,
-      _props$attributes$cmB = _props$attributes.cmButtons,
-      cmButtons = _props$attributes$cmB === void 0 ? 'arrows' : _props$attributes$cmB,
-      cmButtonColor = _props$attributes.cmButtonColor,
-      cmButtonBgColor = _props$attributes.cmButtonBgColor;
+      _props$attributes$frb = _props$attributes.frblGridOption,
+      frblGridOption = _props$attributes$frb === void 0 ? 'none' : _props$attributes$frb,
+      _props$attributes$frb2 = _props$attributes.frblItemsToView,
+      frblItemsToView = _props$attributes$frb2 === void 0 ? '4' : _props$attributes$frb2,
+      _props$attributes$frb3 = _props$attributes.frblResponsiveToView,
+      frblResponsiveToView = _props$attributes$frb3 === void 0 ? '1' : _props$attributes$frb3,
+      _props$attributes$frb4 = _props$attributes.frblAutoplay,
+      frblAutoplay = _props$attributes$frb4 === void 0 ? '' : _props$attributes$frb4,
+      _props$attributes$frb5 = _props$attributes.frblButtons,
+      frblButtons = _props$attributes$frb5 === void 0 ? 'arrows' : _props$attributes$frb5,
+      frblButtonColor = _props$attributes.frblButtonColor,
+      frblButtonBgColor = _props$attributes.frblButtonBgColor;
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
       title: __('Carousel Settings', 'frontblocks'),
       initialOpen: true
     }, /*#__PURE__*/React.createElement(SelectControl, {
-      label: __('Custom Grid Option', 'frontblocks'),
-      value: cmCustomGridOption,
+      label: __('FrontBlocks Grid Option', 'frontblocks'),
+      value: frblGridOption,
       options: [{
         label: __('None', 'frontblocks'),
         value: 'none'
       }, {
         label: __('Carousel', 'frontblocks'),
         value: 'carousel'
+      }, {
+        label: __('Slider', 'frontblocks'),
+        value: 'slider'
       }],
       onChange: function onChange(value) {
         props.setAttributes({
-          cmCustomGridOption: value
+          frblGridOption: value
         });
       },
-      help: __('This is a custom option for the Grid block.', 'frontblocks')
-    }), /*#__PURE__*/React.createElement(TextControl, {
+      help: __('This option gives the option to make carousel in your grid block.', 'frontblocks')
+    }), frblGridOption !== 'none' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(TextControl, {
       label: __('Items to view', 'frontblocks'),
-      value: cmItemsToView,
+      value: frblItemsToView,
       onChange: function onChange(value) {
         return props.setAttributes({
-          cmItemsToView: value
+          frblItemsToView: value
         });
       }
     }), /*#__PURE__*/React.createElement(TextControl, {
       label: __('Responsive to view', 'frontblocks'),
-      value: cmResponsiveToView,
+      value: frblResponsiveToView,
       onChange: function onChange(value) {
         return props.setAttributes({
-          cmResponsiveToView: value
+          frblResponsiveToView: value
         });
       }
     }), /*#__PURE__*/React.createElement(TextControl, {
-      label: __('Autoplay (ms)', 'frontblocks'),
-      value: cmAutoplay,
+      label: __('Autoplay (seconds)', 'frontblocks'),
+      value: frblAutoplay,
       onChange: function onChange(value) {
         return props.setAttributes({
-          cmAutoplay: value
+          frblAutoplay: value
         });
       }
     }), /*#__PURE__*/React.createElement(SelectControl, {
       label: __('Buttons', 'frontblocks'),
-      value: cmButtons,
+      value: frblButtons,
       options: [{
         label: __('None', 'frontblocks'),
         value: 'none'
@@ -87,29 +90,29 @@ function addCustomCarouselPanel(BlockEdit) {
       }],
       onChange: function onChange(value) {
         return props.setAttributes({
-          cmButtons: value
+          frblButtons: value
         });
       }
     }), /*#__PURE__*/React.createElement(PanelColorSettings, {
       title: __('Button Colors', 'frontblocks'),
       colorSettings: [{
-        value: cmButtonColor,
+        value: frblButtonColor,
         onChange: function onChange(color) {
           return props.setAttributes({
-            cmButtonColor: color
+            frblButtonColor: color
           });
         },
         label: __('Color button', 'frontblocks')
       }, {
-        value: cmButtonBgColor,
+        value: frblButtonBgColor,
         onChange: function onChange(color) {
           return props.setAttributes({
-            cmButtonBgColor: color
+            frblButtonBgColor: color
           });
         },
         label: __('Color background button', 'frontblocks')
       }]
-    }))));
+    })))));
   };
 }
-addFilter('editor.BlockEdit', 'cm/gb-grid-carousel-panel', addCustomCarouselPanel);
+addFilter('editor.BlockEdit', 'frontblocks/gb-grid-carousel-panel', addCustomCarouselPanel);
