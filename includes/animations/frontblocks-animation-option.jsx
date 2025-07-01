@@ -190,6 +190,34 @@ const animationOptions = [
     }
 ];
 
+// Create flattened options with group labels for SelectControl
+const createFlattenedOptions = () => {
+    const flattenedOptions = [];
+    
+    animationOptions.forEach(category => {
+        if (category.options) {
+            // Add group header
+            flattenedOptions.push({
+                label: `━━━ ${category.label} ━━━`,
+                value: '',
+                disabled: true
+            });
+            // Add options under this group
+            category.options.forEach(option => {
+                flattenedOptions.push({
+                    label: `  ${option.label}`,
+                    value: option.value
+                });
+            });
+        } else if (category.value !== undefined) {
+            // Single option (like "None")
+            flattenedOptions.push(category);
+        }
+    });
+    
+    return flattenedOptions;
+};
+
 function addAnimationControls(BlockEdit) {
     return (props) => {
         // Applicable to all blocks - no filtering by block name
@@ -202,16 +230,9 @@ function addAnimationControls(BlockEdit) {
             frblAnimationRepeat = false,
             frblAnimationInfinite = false,
         } = props.attributes;
-
-        // Create a flat list of all animation options for the preview dropdown
-        const flattenedOptions = [];
-        animationOptions.forEach(category => {
-            if (category.options) {
-                flattenedOptions.push(...category.options);
-            } else if (category.value !== undefined) {
-                flattenedOptions.push(category);
-            }
-        });
+        
+        // Create flattened options for the SelectControl
+        const flattenedOptions = createFlattenedOptions();
 
         // Function to find the animation label from its value
         const getAnimationLabel = (value) => {
@@ -230,7 +251,7 @@ function addAnimationControls(BlockEdit) {
                         <SelectControl
                             label={__('Animation Type', 'frontblocks')}
                             value={frblAnimation}
-                            options={animationOptions}
+                            options={flattenedOptions}
                             onChange={(value) => {
                                 props.setAttributes({ frblAnimation: value });
                             }}

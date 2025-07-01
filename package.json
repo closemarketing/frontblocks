@@ -8,6 +8,18 @@
     "gulp-clean-css": "^4.3.0",
     "gulp-minify": "^3.1.0"
   },
+  "babel": {
+    "presets": [
+      ["@babel/preset-env", {
+        "targets": {
+          "browsers": ["> 1%", "last 2 versions"]
+        }
+      }],
+      ["@babel/preset-react", {
+        "runtime": "automatic"
+      }]
+    ]
+  },
 	"scripts": {
 		"build:carousel": "babel includes/carousel/frontblocks-advanced-option.jsx --out-file includes/dist/frontblocks-advanced-option.js",
 		"build:animations": "babel includes/animations/frontblocks-animation-option.jsx --out-file includes/dist/frontblocks-animation-option.js",

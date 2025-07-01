@@ -30,26 +30,36 @@ window.addEventListener('load', (event) => {
                 element.target.style.animationPlayState = 'running';
                 
                 // If this element should repeat, set up the animation to repeat
-                const repeatValue = element.target.style.getPropertyValue('--animate-repeat');
+                // Check multiple possible sources for repeat value
+                const repeatValue = element.target.style.getPropertyValue('--animate-repeat') || 
+                                   element.target.dataset.animateRepeat ||
+                                   element.target.getAttribute('data-animate-repeat');
+                
                 if (repeatValue === 'infinite') {
-                    // For infinite animations, nothing else needed
-                } else if (repeatValue) {
+                    // For infinite animations, set the iteration count to infinite
+                    element.target.style.animationIterationCount = 'infinite';
+                } else if (repeatValue && repeatValue !== '1') {
                     // For numbered repeats, we handle it
                     const repeat = parseInt(repeatValue);
                     if (!isNaN(repeat) && repeat > 1) {
-                        element.target.addEventListener('animationend', () => {
-                            let currentRepeat = parseInt(element.target.dataset.currentRepeat || 0);
-                            if (currentRepeat < repeat - 1) {
-                                element.target.dataset.currentRepeat = currentRepeat + 1;
-                                // Trigger animation again by quickly toggling the class
-                                setTimeout(() => {
-                                    element.target.classList.remove('animate__animated');
+                        // Only add the event listener if it hasn't been added before
+                        if (!element.target.dataset.repeatListenerAdded) {
+                            element.target.dataset.repeatListenerAdded = 'true';
+                            element.target.dataset.currentRepeat = '0';
+                            
+                            element.target.addEventListener('animationend', () => {
+                                let currentRepeat = parseInt(element.target.dataset.currentRepeat || 0);
+                                if (currentRepeat < repeat - 1) {
+                                    element.target.dataset.currentRepeat = currentRepeat + 1;
+                                    // Trigger animation again by restarting it
+                                    element.target.style.animation = 'none';
                                     setTimeout(() => {
-                                        element.target.classList.add('animate__animated');
+                                        element.target.style.animation = '';
+                                        element.target.style.animationPlayState = 'running';
                                     }, 10);
-                                }, 10);
-                            }
-                        });
+                                }
+                            });
+                        }
                     }
                 }
             }
