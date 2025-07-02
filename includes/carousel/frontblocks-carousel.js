@@ -22,14 +22,14 @@ window.addEventListener('load', function (event) {
 			wrapperParent.classList.add('glide');
 
 			// Options
-			carouselType = item.getAttribute('data-type') ? item.getAttribute('data-type') : 'carousel';
-			carouselbuttons = item.getAttribute('data-buttons') ? item.getAttribute('data-buttons') : 'bullets';
-			carouselView = item.getAttribute('data-view') ? item.getAttribute('data-view') : 4;
-			carouselAutoplay = item.getAttribute('data-autoplay') ? item.getAttribute('data-autoplay') : 0;
-			carouselResView = item.getAttribute('data-res-view') ? item.getAttribute('data-res-view') : 1;
-
-			carouselbuttonsColor = item.getAttribute('data-buttons-color') ? item.getAttribute('data-buttons-color') : 'black';
-			carouselbuttonsBackgroundColor = item.getAttribute('data-buttons-background-color') ? item.getAttribute('data-buttons-background-color') : 'transparent';
+			const carouselType = item.getAttribute('data-type') ? item.getAttribute('data-type') : 'carousel';
+			const carouselbuttons = item.getAttribute('data-buttons') ? item.getAttribute('data-buttons') : 'bullets';
+			const carouselView = item.getAttribute('data-view') ? item.getAttribute('data-view') : 4;
+			const carouselAutoplay = item.getAttribute('data-autoplay') ? item.getAttribute('data-autoplay') : 0;
+			const carouselResView = item.getAttribute('data-res-view') ? item.getAttribute('data-res-view') : 1;
+            const carouselRewind = item.getAttribute('data-rewind') ? item.getAttribute('data-rewind') : false;
+			const carouselbuttonsColor = item.getAttribute('data-buttons-color') ? item.getAttribute('data-buttons-color') : 'black';
+			const carouselbuttonsBackgroundColor = item.getAttribute('data-buttons-background-color') ? item.getAttribute('data-buttons-background-color') : 'transparent';
 
 
 			// Add classes
@@ -39,12 +39,11 @@ window.addEventListener('load', function (event) {
 			}
 
 			// Don't show bullets on responsive and more than 6 items.
+            let showBullets = false;
 			if ( window.screen.availWidth < 768 && item.children.length < 6 ) {
 				showBullets = true;
 			} else if ( window.screen.availWidth > 768 ) {
 				showBullets = true;
-			} else {
-				showBullets = false;
 			}
 
 			if ( showBullets && carouselbuttons == 'bullets' ) {
@@ -80,13 +79,13 @@ window.addEventListener('load', function (event) {
 				arrows.innerHTML = arrowsHTML;
 				wrapperParent.appendChild(arrows);
 			}
-
 			new Glide( wrapperParent, {
 				type: carouselType,
 				perView: carouselView,
 				startAt: 0,
 				autoplay: carouselAutoplay === 0 ? 2500 : carouselAutoplay,
 				gap: 0,
+                rewind: carouselRewind,
 				breakpoints: {
 					430: {
 						perView: carouselResView

@@ -2,7 +2,7 @@
 const { addFilter } = wp.hooks;
 const { Fragment } = wp.element;
 const { InspectorControls, PanelColorSettings } = wp.blockEditor;
-const { SelectControl, TextControl, PanelBody } = wp.components;
+const { SelectControl, TextControl, PanelBody, ToggleControl } = wp.components;
 const { __ } = wp.i18n;
 
 function addCustomCarouselPanel(BlockEdit) {
@@ -17,6 +17,7 @@ function addCustomCarouselPanel(BlockEdit) {
 				frblResponsiveToView = '1',
 				frblAutoplay = '',
 				frblButtons = 'arrows',
+				frblRewind = true,
 				frblButtonColor,
 				frblButtonBgColor,
 		} = props.attributes;
@@ -59,6 +60,15 @@ function addCustomCarouselPanel(BlockEdit) {
 									value={frblAutoplay}
 									onChange={(value) => props.setAttributes({ frblAutoplay: value })}
 								/>
+                                {frblGridOption === 'slider' && (
+                                    <>
+                                        <ToggleControl
+                                            label={__('Rewind', 'frontblocks')}
+                                            checked={frblRewind}
+                                            onChange={(value) => props.setAttributes({ frblRewind: value })}
+                                        />
+                                    </>
+                                )}
 								<SelectControl
 									label={__('Buttons', 'frontblocks')}
 									value={frblButtons}
