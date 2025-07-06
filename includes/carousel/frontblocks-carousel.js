@@ -30,6 +30,7 @@ window.addEventListener('load', function (event) {
             const carouselRewind = item.getAttribute('data-rewind') ? item.getAttribute('data-rewind') : false;
 			const carouselbuttonsColor = item.getAttribute('data-buttons-color') ? item.getAttribute('data-buttons-color') : 'black';
 			const carouselbuttonsBackgroundColor = item.getAttribute('data-buttons-background-color') ? item.getAttribute('data-buttons-background-color') : 'transparent';
+			const carouselbuttonsPosition = item.getAttribute('data-buttons-position') ? item.getAttribute('data-buttons-position') : 'side';
 
 
 			// Add classes
@@ -45,7 +46,7 @@ window.addEventListener('load', function (event) {
 			} else if ( window.screen.availWidth > 768 ) {
 				showBullets = true;
 			}
-
+            
 			if ( showBullets && carouselbuttons == 'bullets' ) {
 				const bullets = document.createElement('div');
 				bullets.classList.add('glide__bullets');
@@ -60,11 +61,26 @@ window.addEventListener('load', function (event) {
 				}
 
 				wrapperParent.appendChild(bullets);
+				
+				// Add custom CSS for active bullet color
+				const style = document.createElement('style');
+				style.textContent = `
+					.glide__bullet.glide__bullet--active {
+						background-color: ${carouselbuttonsColor} !important;
+					}
+				`;
+				document.head.appendChild(style);
 			}
 
 			if ( carouselbuttons == 'arrows' ) {
 				const arrows = document.createElement('div');
 				arrows.classList.add('glide__arrows');
+                if ( carouselbuttonsPosition == 'bottom' ) {
+                    arrows.classList.add('glide__arrows--bottom');
+                } else {
+                    arrows.classList.add('glide__arrows--top');
+                }
+                
 				arrows.setAttribute('data-glide-el', 'controls');
 				arrowsHTML = '<button class="glide__arrow glide__arrow--left glide__arrow glide__arrow--left" data-glide-dir="<"';
 				arrowsHTML += ' style="background-color: ' + carouselbuttonsBackgroundColor + '"';
@@ -79,11 +95,11 @@ window.addEventListener('load', function (event) {
 				arrows.innerHTML = arrowsHTML;
 				wrapperParent.appendChild(arrows);
 			}
-			new Glide( wrapperParent, {
+            new Glide( wrapperParent, {
 				type: carouselType,
 				perView: carouselView,
 				startAt: 0,
-				autoplay: carouselAutoplay === 0 ? 2500 : carouselAutoplay,
+				autoplay: false, //carouselAutoplay === 0 ? 2500 : carouselAutoplay,
 				gap: 0,
                 rewind: carouselRewind,
 				breakpoints: {

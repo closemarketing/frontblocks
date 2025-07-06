@@ -77,7 +77,8 @@ function frbl_add_custom_attributes_to_grid_block( $block_content, $block ) {
 		$buttons            = isset( $attrs['frblButtons'] ) ? sanitize_text_field( $attrs['frblButtons'] ) : 'arrows';
 		$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
 		$button_bg_color    = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
-
+		$buttons_position   = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
+        
 		// Example: Add data attributes to the wrapper div if carousel is enabled.
 	if ( 'carousel' === $custom_option || 'slider' === $custom_option ) {
             $attributes = '';
@@ -95,6 +96,7 @@ function frbl_add_custom_attributes_to_grid_block( $block_content, $block ) {
 					' data-buttons="' . esc_attr( $buttons ) . '"' .
 					' data-buttons-color="' . esc_attr( $button_color ) . '"' .
 					' data-buttons-background-color="' . esc_attr( $button_bg_color ) . '"' .
+					' data-buttons-position="' . esc_attr( $buttons_position ) . '"' .
                     $attributes .
 					'>',
 				$block_content,
@@ -153,6 +155,10 @@ add_action(
 								frblButtons: {
 									type: 'string',
 									default: 'arrows'
+								},
+								frblButtonsPosition: {
+									type: 'string',
+									default: 'side'
 								},
 								frblButtonColor: {
 									type: 'string',
@@ -224,6 +230,9 @@ function frbl_register_custom_attributes_for_grid_block( $block_args, $block_typ
 		'type'    => 'string',
 		'default' => '',
 	);
-
+	$block_args['attributes']['frblButtonsPosition'] = array(
+		'type'    => 'string',
+		'default' => 'side',
+	);
 	return $block_args;
 }

@@ -20,6 +20,7 @@ function addCustomCarouselPanel(BlockEdit) {
 				frblRewind = true,
 				frblButtonColor,
 				frblButtonBgColor,
+				frblButtonsPosition = 'side',
 		} = props.attributes;
 
 		return (
@@ -79,6 +80,19 @@ function addCustomCarouselPanel(BlockEdit) {
 									]}
 									onChange={(value) => props.setAttributes({ frblButtons: value })}
 								/>
+                                {frblButtons === 'arrows' && (
+                                    <>
+                                        <SelectControl
+                                            label={__('Buttons Position', 'frontblocks')}
+                                            value={frblButtonsPosition}
+                                            options={[
+                                                { label: __('Side', 'frontblocks'), value: 'side' },
+                                                { label: __('Bottom', 'frontblocks'), value: 'bottom' },
+                                            ]}
+                                            onChange={(value) => props.setAttributes({ frblButtonsPosition: value })}
+                                        />
+                                    </>
+                                )}
 								<PanelColorSettings
 									title={__('Button Colors', 'frontblocks')}
 									colorSettings={[
