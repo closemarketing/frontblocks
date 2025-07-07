@@ -9,7 +9,8 @@ var _wp$blockEditor = wp.blockEditor,
 var _wp$components = wp.components,
   SelectControl = _wp$components.SelectControl,
   TextControl = _wp$components.TextControl,
-  PanelBody = _wp$components.PanelBody;
+  PanelBody = _wp$components.PanelBody,
+  ToggleControl = _wp$components.ToggleControl;
 var __ = wp.i18n.__;
 function addCustomCarouselPanel(BlockEdit) {
   return function (props) {
@@ -27,8 +28,12 @@ function addCustomCarouselPanel(BlockEdit) {
       frblAutoplay = _props$attributes$frb4 === void 0 ? '' : _props$attributes$frb4,
       _props$attributes$frb5 = _props$attributes.frblButtons,
       frblButtons = _props$attributes$frb5 === void 0 ? 'arrows' : _props$attributes$frb5,
+      _props$attributes$frb6 = _props$attributes.frblRewind,
+      frblRewind = _props$attributes$frb6 === void 0 ? true : _props$attributes$frb6,
       frblButtonColor = _props$attributes.frblButtonColor,
-      frblButtonBgColor = _props$attributes.frblButtonBgColor;
+      frblButtonBgColor = _props$attributes.frblButtonBgColor,
+      _props$attributes$frb7 = _props$attributes.frblButtonsPosition,
+      frblButtonsPosition = _props$attributes$frb7 === void 0 ? 'side' : _props$attributes$frb7;
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
       title: __('Carousel Settings', 'frontblocks'),
       initialOpen: true
@@ -75,7 +80,15 @@ function addCustomCarouselPanel(BlockEdit) {
           frblAutoplay: value
         });
       }
-    }), /*#__PURE__*/React.createElement(SelectControl, {
+    }), frblGridOption === 'slider' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(ToggleControl, {
+      label: __('Rewind', 'frontblocks'),
+      checked: frblRewind,
+      onChange: function onChange(value) {
+        return props.setAttributes({
+          frblRewind: value
+        });
+      }
+    })), /*#__PURE__*/React.createElement(SelectControl, {
       label: __('Buttons', 'frontblocks'),
       value: frblButtons,
       options: [{
@@ -93,7 +106,22 @@ function addCustomCarouselPanel(BlockEdit) {
           frblButtons: value
         });
       }
-    }), /*#__PURE__*/React.createElement(PanelColorSettings, {
+    }), frblButtons === 'arrows' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(SelectControl, {
+      label: __('Buttons Position', 'frontblocks'),
+      value: frblButtonsPosition,
+      options: [{
+        label: __('Side', 'frontblocks'),
+        value: 'side'
+      }, {
+        label: __('Bottom', 'frontblocks'),
+        value: 'bottom'
+      }],
+      onChange: function onChange(value) {
+        return props.setAttributes({
+          frblButtonsPosition: value
+        });
+      }
+    })), /*#__PURE__*/React.createElement(PanelColorSettings, {
       title: __('Button Colors', 'frontblocks'),
       colorSettings: [{
         value: frblButtonColor,
