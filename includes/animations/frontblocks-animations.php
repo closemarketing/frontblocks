@@ -35,6 +35,7 @@ function frbl_theme_scripts_animations() {
 	);
 }
 
+add_action( 'enqueue_block_editor_assets', 'frbl_editor_scripts_animations' );
 /**
  * Enqueue Animation Scripts and Styles for Editor
  */
@@ -48,7 +49,7 @@ function frbl_editor_scripts_animations() {
 		FRBL_VERSION
 	);
 
-	// Enqueue our custom block editor script
+	// Enqueue our custom block editor script.
 	wp_enqueue_script(
 		'frontblocks-animation-options',
 		FRBL_PLUGIN_URL . 'includes/dist/frontblocks-animation-option.js',
@@ -57,13 +58,13 @@ function frbl_editor_scripts_animations() {
 		true
 	);
 }
-add_action( 'enqueue_block_editor_assets', 'frbl_editor_scripts_animations' );
 
+add_action( 'enqueue_block_editor_assets', 'frbl_register_animation_attributes', 9 );
 /**
  * Register animation attributes for all blocks
  */
 function frbl_register_animation_attributes() {
-	// This script runs on the client side to add animation attributes to all blocks
+	// This script runs on the client side to add animation attributes to all blocks.
 	wp_add_inline_script(
 		'wp-blocks',
 		"
@@ -101,8 +102,9 @@ function frbl_register_animation_attributes() {
 		"
 	);
 }
-add_action( 'enqueue_block_editor_assets', 'frbl_register_animation_attributes', 9 );
 
+
+add_filter( 'render_block', 'frbl_add_animation_classes_to_blocks', 10, 2 );
 /**
  * Add animation classes to blocks on frontend render
  *
@@ -127,7 +129,7 @@ function frbl_add_animation_classes_to_blocks( $block_content, $block ) {
 	$repeat          = isset( $attrs['frblAnimationRepeat'] ) ? $attrs['frblAnimationRepeat'] : false;
 	$infinite_repeat = isset( $attrs['frblAnimationInfinite'] ) ? $attrs['frblAnimationInfinite'] : false;
 
-	// Build style attributes
+	// Build style attributes.
 	$style_attr = '';
 	if ( $delay > 0 ) {
 		$style_attr .= '--animate-delay:' . esc_attr( $delay ) . 's;';
@@ -166,7 +168,7 @@ function frbl_add_animation_classes_to_blocks( $block_content, $block ) {
 				$beginning .= ' class="' . $classes . '"';
 			}
 
-			// Add styles if needed
+			// Add styles if needed.
 			if ( ! empty( $style_attr ) ) {
 				$combined_style = $existing_style . ( ! empty( $existing_style ) ? ';' : '' ) . $style_attr;
 				return '<' . $tag . ' ' . $beginning . ' style="' . $combined_style . '">';
@@ -180,4 +182,3 @@ function frbl_add_animation_classes_to_blocks( $block_content, $block ) {
 
 	return $block_content;
 }
-add_filter( 'render_block', 'frbl_add_animation_classes_to_blocks', 10, 2 );
