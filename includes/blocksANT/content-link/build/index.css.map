@@ -1,1 +1,0 @@
-{"version":3,"file":"index.css","mappings":";;;AAAA;EACE;AACF;AACE;EACE;AACJ,C","sources":["webpack://blocks/./content-link/src/editor.scss"],"sourcesContent":[".editor-styles-wrapper .block-editor-block-list__block.wp-block-plz-news {\n  color: #acd9b2;\n\n  a {\n    color: #acd9b2;\n  }\n}\n"],"names":[],"sourceRoot":""}

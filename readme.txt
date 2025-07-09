@@ -88,6 +88,9 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+= 1.0.0 =
+*   New block read content from other page/post type.
+
 = 0.2.5 =
 *   Update version.
 
