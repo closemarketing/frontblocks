@@ -10,19 +10,32 @@
   },
   "babel": {
     "presets": [
-      ["@babel/preset-env", {
-        "targets": {
-          "browsers": ["> 1%", "last 2 versions"]
+      [
+        "@babel/preset-env",
+        {
+          "targets": {
+            "browsers": [
+              "> 1%",
+              "last 2 versions"
+            ]
+          }
         }
-      }],
-      ["@babel/preset-react", {
-        "runtime": "automatic"
-      }]
+      ],
+      [
+        "@babel/preset-react",
+        {
+          "runtime": "automatic"
+        }
+      ]
     ]
   },
-	"scripts": {
-		"build:carousel": "babel includes/carousel/frontblocks-advanced-option.jsx --out-file includes/dist/frontblocks-advanced-option.js",
-		"build:animations": "babel includes/animations/frontblocks-animation-option.jsx --out-file includes/dist/frontblocks-animation-option.js",
-		"build": "npm run build:carousel && npm run build:animations"
-	}
+  "scripts": {
+    "build:carousel": "babel includes/carousel/frontblocks-advanced-option.jsx --out-file includes/dist/frontblocks-advanced-option.js",
+    "build:animations": "babel includes/animations/frontblocks-animation-option.jsx --out-file includes/dist/frontblocks-animation-option.js",
+    "build": "npm run build:carousel && npm run build:animations"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  }
 }
