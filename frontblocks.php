@@ -3,7 +3,7 @@
  * Plugin Name: FrontBlocks
  * Plugin URI:  https://github.com/closemarketing/frontblocks
  * Description: Blocks and helpers to facilitate GeneratePress frontend developing.
- * Version:     0.2.4
+ * Version:     0.2.5
  * Author:      Closemarketing
  * Author URI:  https://close.marketing
  * Text Domain: frontblocks
@@ -11,9 +11,8 @@
  * License:     GPL-2.0+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  *
- * Requires at least: 5.4
+ * Requires at least: 6.7
  * Requires PHP: 7.0
- * Requires Plugins: GeneratePress, GenerateBlocks
  *
  * @package     FrontBlocks
  * @author      Closemarketing
@@ -27,7 +26,7 @@
 
 defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
-define( 'FRBL_VERSION', '0.2.4' );
+define( 'FRBL_VERSION', '0.2.5' );
 define( 'FRBL_PLUGIN', __FILE__ );
 define( 'FRBL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'FRBL_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
