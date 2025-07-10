@@ -1,12 +1,5 @@
 "use strict";
 
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-var _jsxRuntime = require("react/jsx-runtime");
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 // Add custom animation controls to any block based on Animate.css
 var addFilter = wp.hooks.addFilter;
 var Fragment = wp.element.Fragment;
@@ -417,64 +410,57 @@ function addAnimationControls(BlockEdit) {
       });
       return animation ? animation.label : value;
     };
-    return /*#__PURE__*/(0, _jsxRuntime.jsxs)(Fragment, {
-      children: [/*#__PURE__*/(0, _jsxRuntime.jsx)(BlockEdit, _objectSpread({}, props)), /*#__PURE__*/(0, _jsxRuntime.jsx)(InspectorControls, {
-        children: /*#__PURE__*/(0, _jsxRuntime.jsxs)(PanelBody, {
-          title: __('Animations', 'frontblocks'),
-          initialOpen: false,
-          children: [/*#__PURE__*/(0, _jsxRuntime.jsx)(SelectControl, {
-            label: __('Animation Type', 'frontblocks'),
-            value: frblAnimation,
-            options: flattenedOptions,
-            onChange: function onChange(value) {
-              props.setAttributes({
-                frblAnimation: value
-              });
-            }
-          }), frblAnimation && /*#__PURE__*/(0, _jsxRuntime.jsxs)(_jsxRuntime.Fragment, {
-            children: [/*#__PURE__*/(0, _jsxRuntime.jsx)(RangeControl, {
-              label: __('Delay (seconds)', 'frontblocks'),
-              value: frblAnimationDelay,
-              onChange: function onChange(value) {
-                return props.setAttributes({
-                  frblAnimationDelay: value
-                });
-              },
-              min: 0,
-              max: 10,
-              step: 0.1
-            }), /*#__PURE__*/(0, _jsxRuntime.jsx)(RangeControl, {
-              label: __('Duration (seconds)', 'frontblocks'),
-              value: frblAnimationDuration,
-              onChange: function onChange(value) {
-                return props.setAttributes({
-                  frblAnimationDuration: value
-                });
-              },
-              min: 0.1,
-              max: 10,
-              step: 0.1
-            }), /*#__PURE__*/(0, _jsxRuntime.jsx)(ToggleControl, {
-              label: __('Repeat animation', 'frontblocks'),
-              checked: frblAnimationRepeat,
-              onChange: function onChange(value) {
-                return props.setAttributes({
-                  frblAnimationRepeat: value
-                });
-              }
-            }), frblAnimationRepeat && /*#__PURE__*/(0, _jsxRuntime.jsx)(ToggleControl, {
-              label: __('Infinite repeat', 'frontblocks'),
-              checked: frblAnimationInfinite,
-              onChange: function onChange(value) {
-                return props.setAttributes({
-                  frblAnimationInfinite: value
-                });
-              }
-            })]
-          })]
-        })
-      })]
-    });
+    return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
+      title: __('Animations', 'frontblocks'),
+      initialOpen: false
+    }, /*#__PURE__*/React.createElement(SelectControl, {
+      label: __('Animation Type', 'frontblocks'),
+      value: frblAnimation,
+      options: flattenedOptions,
+      onChange: function onChange(value) {
+        props.setAttributes({
+          frblAnimation: value
+        });
+      }
+    }), frblAnimation && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(RangeControl, {
+      label: __('Delay (seconds)', 'frontblocks'),
+      value: frblAnimationDelay,
+      onChange: function onChange(value) {
+        return props.setAttributes({
+          frblAnimationDelay: value
+        });
+      },
+      min: 0,
+      max: 10,
+      step: 0.1
+    }), /*#__PURE__*/React.createElement(RangeControl, {
+      label: __('Duration (seconds)', 'frontblocks'),
+      value: frblAnimationDuration,
+      onChange: function onChange(value) {
+        return props.setAttributes({
+          frblAnimationDuration: value
+        });
+      },
+      min: 0.1,
+      max: 10,
+      step: 0.1
+    }), /*#__PURE__*/React.createElement(ToggleControl, {
+      label: __('Repeat animation', 'frontblocks'),
+      checked: frblAnimationRepeat,
+      onChange: function onChange(value) {
+        return props.setAttributes({
+          frblAnimationRepeat: value
+        });
+      }
+    }), frblAnimationRepeat && /*#__PURE__*/React.createElement(ToggleControl, {
+      label: __('Infinite repeat', 'frontblocks'),
+      checked: frblAnimationInfinite,
+      onChange: function onChange(value) {
+        return props.setAttributes({
+          frblAnimationInfinite: value
+        });
+      }
+    })))));
   };
 }
 
