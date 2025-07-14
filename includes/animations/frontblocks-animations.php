@@ -164,9 +164,7 @@ function frbl_add_animation_classes_to_blocks( $block_content, $block ) {
 			$beginning      = $matches[2] ?? '';
 			$existing_style = $matches[3] ?? '';
 			$ending         = $matches[4] ?? '';
-            echo '<pre>';
-            print_r($matches);
-            echo '</pre>';
+            
 			$classes = 'animate__animated animate__' . esc_attr( $properties['animation'] );
 
 			// Add classes to existing class attribute or create new one.
