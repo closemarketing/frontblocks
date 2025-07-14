@@ -133,11 +133,12 @@ function frbl_add_animation_classes_to_blocks( $block_content, $block ) {
 		return $block_content;
 	}
 
-	$animation       = $attrs['frblAnimation'];
-	$delay           = isset( $attrs['frblAnimationDelay'] ) ? $attrs['frblAnimationDelay'] : 0;
-	$duration        = isset( $attrs['frblAnimationDuration'] ) ? $attrs['frblAnimationDuration'] : 1;
-	$repeat          = isset( $attrs['frblAnimationRepeat'] ) ? $attrs['frblAnimationRepeat'] : false;
-	$infinite_repeat = isset( $attrs['frblAnimationInfinite'] ) ? $attrs['frblAnimationInfinite'] : false;
+    $properties = array();
+    $animation       = $properties['animation'] = $attrs['frblAnimation'];
+	$delay           = $properties['delay'] = isset( $attrs['frblAnimationDelay'] ) ? $attrs['frblAnimationDelay'] : 0;
+	$duration        = $properties['duration'] = isset( $attrs['frblAnimationDuration'] ) ? $attrs['frblAnimationDuration'] : 1;
+	$repeat          = $properties['repeat'] = isset( $attrs['frblAnimationRepeat'] ) ? $attrs['frblAnimationRepeat'] : false;
+	$infinite_repeat = $properties['infinite_repeat'] = isset( $attrs['frblAnimationInfinite'] ) ? $attrs['frblAnimationInfinite'] : false;
 
 	// Build style attributes.
 	$style_attr = '';
@@ -158,13 +159,15 @@ function frbl_add_animation_classes_to_blocks( $block_content, $block ) {
 	// Add animation classes and styles to the first HTML tag.
 	$block_content = preg_replace_callback(
 		'/^<([a-z][a-z0-9]*)\s*((?:[^>]|\\n)*?)(?:style="([^"]*?)")?([^>]*?)>/i',
-		function ( $matches ) use ( $animation, $style_attr ) {
+		function ( $matches ) use ( $properties, $style_attr ) {
 			$tag            = $matches[1] ?? 'div';
 			$beginning      = $matches[2] ?? '';
 			$existing_style = $matches[3] ?? '';
 			$ending         = $matches[4] ?? '';
-
-			$classes = 'animate__animated animate__' . esc_attr( $animation );
+            echo '<pre>';
+            print_r($matches);
+            echo '</pre>';
+			$classes = 'animate__animated animate__' . esc_attr( $properties['animation'] );
 
 			// Add classes to existing class attribute or create new one.
 			if ( strpos( $beginning . $ending, 'class="' ) !== false ) {
@@ -177,7 +180,11 @@ function frbl_add_animation_classes_to_blocks( $block_content, $block ) {
 			} else {
 				$beginning .= ' class="' . $classes . '"';
 			}
-
+            $beginning .= ' data-frontblocks-animation="' . esc_attr( $properties['animation'] ) . '"';
+            $beginning .= ' data-frontblocks-animation-delay="' . esc_attr( $properties['delay'] ) . '"';
+            $beginning .= ' data-frontblocks-animation-duration="' . esc_attr( $properties['duration'] ) . '"';
+            $beginning .= ' data-frontblocks-animation-repeat="' . esc_attr( $properties['repeat'] ) . '"';
+            $beginning .= ' data-frontblocks-animation-infinite="' . esc_attr( $properties['infinite_repeat'] ) . '"';
 			// Add styles if needed.
 			if ( ! empty( $style_attr ) ) {
 				$combined_style = $existing_style . ( ! empty( $existing_style ) ? ';' : '' ) . $style_attr;
