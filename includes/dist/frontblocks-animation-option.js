@@ -1,8 +1,14 @@
 "use strict";
 
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 // Add custom animation controls to any block based on Animate.css
 var addFilter = wp.hooks.addFilter;
-var Fragment = wp.element.Fragment;
+var _wp$element = wp.element,
+  Fragment = _wp$element.Fragment,
+  useEffect = _wp$element.useEffect,
+  useRef = _wp$element.useRef;
 var InspectorControls = wp.blockEditor.InspectorControls;
 var _wp$components = wp.components,
   SelectControl = _wp$components.SelectControl,
@@ -10,7 +16,8 @@ var _wp$components = wp.components,
   ToggleControl = _wp$components.ToggleControl,
   PanelBody = _wp$components.PanelBody,
   Placeholder = _wp$components.Placeholder,
-  Disabled = _wp$components.Disabled;
+  Disabled = _wp$components.Disabled,
+  Button = _wp$components.Button;
 var __ = wp.i18n.__;
 
 // Organizar las animaciones por categorías
@@ -385,8 +392,6 @@ var createFlattenedOptions = function createFlattenedOptions() {
 };
 function addAnimationControls(BlockEdit) {
   return function (props) {
-    // Applicable to all blocks - no filtering by block name
-
     // Extract animation attributes with default values
     var _props$attributes = props.attributes,
       _props$attributes$frb = _props$attributes.frblAnimation,
@@ -403,12 +408,120 @@ function addAnimationControls(BlockEdit) {
     // Create flattened options for the SelectControl
     var flattenedOptions = createFlattenedOptions();
 
-    // Function to find the animation label from its value
-    var getAnimationLabel = function getAnimationLabel(value) {
-      var animation = flattenedOptions.find(function (option) {
-        return option.value === value;
+    // Function to trigger animation preview
+    var triggerAnimationPreview = function triggerAnimationPreview() {
+      if (!frblAnimation) return;
+
+      // --- IFRAME SUPPORT ---
+      // Try to get the editor-canvas iframe (site editor or block editor)
+      var doc = document;
+      var iframe = document.querySelector('iframe[name="editor-canvas"], iframe#editor-canvas');
+      if (iframe && iframe.contentDocument) {
+        doc = iframe.contentDocument;
+        console.log('Using iframe document for block search');
+      } else {
+        console.log('Using main document for block search');
+      }
+
+      // Try multiple selectors to find the block element
+      var blockElement = doc.querySelector("[data-block=\"".concat(props.clientId, "\"]"));
+      if (!blockElement) {
+        blockElement = doc.querySelector("[data-block-id=\"".concat(props.clientId, "\"]"));
+      }
+      if (!blockElement) {
+        blockElement = doc.querySelector(".wp-block[data-block=\"".concat(props.clientId, "\"]"));
+      }
+      if (!blockElement) {
+        blockElement = doc.querySelector(".block-editor-block-list__block[data-block=\"".concat(props.clientId, "\"]"));
+      }
+
+      // Fallback: search for any element whose outerHTML contains the clientId
+      if (!blockElement) {
+        var allElements = doc.querySelectorAll('*');
+        var _iterator = _createForOfIteratorHelper(allElements),
+          _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var el = _step.value;
+            if (el.outerHTML && el.outerHTML.includes(props.clientId)) {
+              blockElement = el;
+              console.log('Found block element by outerHTML containing clientId:', el);
+              break;
+            }
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+      }
+
+      // Find the first element with the animation classes
+      var animatedElement = blockElement.querySelector('.animate__animated') || blockElement;
+      // Remove existing animation classes and styles
+      animatedElement.classList.remove('animate__animated');
+      animationOptions.forEach(function (category) {
+        if (category.options) {
+          category.options.forEach(function (option) {
+            animatedElement.classList.remove("animate__".concat(option.value));
+          });
+        }
       });
-      return animation ? animation.label : value;
+      animatedElement.style.removeProperty('--animate-duration');
+      animatedElement.style.removeProperty('--animate-delay');
+      animatedElement.style.removeProperty('--animate-repeat');
+      animatedElement.style.removeProperty('animation-iteration-count');
+
+      // Force reflow and re-add classes in the next frame
+      void animatedElement.offsetWidth; // This is a more reliable reflow trigger
+
+      // Function to apply animation
+      var applyAnimation = function applyAnimation() {
+        animatedElement.classList.add('animate__animated', "animate__".concat(frblAnimation));
+        if (frblAnimationDuration !== 1) {
+          animatedElement.style.setProperty('--animate-duration', "".concat(frblAnimationDuration, "s"));
+        }
+        if (frblAnimationDelay > 0) {
+          animatedElement.style.setProperty('--animate-delay', "".concat(frblAnimationDelay, "s"));
+        }
+        if (frblAnimationInfinite) {
+          animatedElement.style.setProperty('--animate-repeat', 'infinite');
+          animatedElement.style.setProperty('animation-iteration-count', 'infinite');
+        } else if (frblAnimationRepeat) {
+          animatedElement.style.setProperty('--animate-repeat', '2');
+          animatedElement.style.setProperty('animation-iteration-count', '2');
+        }
+      };
+
+      // Wait for Animate.css to be available
+      var waitForAnimateCSS = function waitForAnimateCSS() {
+        var testElem = doc.createElement('div');
+        testElem.className = 'animate__animated animate__bounce';
+        testElem.style.position = 'absolute';
+        testElem.style.left = '-9999px';
+        doc.body.appendChild(testElem);
+        var checkAnimation = function checkAnimation() {
+          var computed = doc.defaultView.getComputedStyle(testElem);
+          var hasAnimation = computed.animationName && computed.animationName !== 'none';
+          doc.body.removeChild(testElem);
+          if (hasAnimation) {
+            console.log('Animate.css is ready, applying animation');
+            applyAnimation();
+          } else {
+            console.error('Animate.css failed to load, loading statically...');
+            // Fallback: load Animate.css dynamically
+            var link = doc.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = frontblocksAnimationData.customCss;
+            link.onload = function () {
+              setTimeout(applyAnimation, 50);
+            };
+            doc.head.appendChild(link);
+          }
+        };
+        setTimeout(checkAnimation, 50);
+      };
+      waitForAnimateCSS();
     };
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
       title: __('Animations', 'frontblocks'),
@@ -460,7 +573,17 @@ function addAnimationControls(BlockEdit) {
           frblAnimationInfinite: value
         });
       }
-    })))));
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: '16px'
+      }
+    }, /*#__PURE__*/React.createElement(Button, {
+      isPrimary: true,
+      onClick: triggerAnimationPreview,
+      style: {
+        width: '100%'
+      }
+    }, __('Preview Animation', 'frontblocks')))))));
   };
 }
 

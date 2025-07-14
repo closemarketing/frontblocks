@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'wp_enqueue_scripts', 'frbl_theme_scripts_animations', 99 );
+add_action( 'wp_enqueue_scripts', 'frbl_theme_scripts_animations', 100 );
 /**
  * Loads Scripts
  *
@@ -19,10 +19,11 @@ add_action( 'wp_enqueue_scripts', 'frbl_theme_scripts_animations', 99 );
 function frbl_theme_scripts_animations() {
 	$dist_dir = WP_DEBUG ? 'animations/' : 'dist/';
 
+	// Then enqueue our custom animations CSS
 	wp_enqueue_style(
 		'frontblocks-animations',
 		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-animations.css',
-		array( 'animate-css' ),
+		array(),
 		FRBL_VERSION
 	);
 
@@ -35,28 +36,37 @@ function frbl_theme_scripts_animations() {
 	);
 }
 
-add_action( 'enqueue_block_editor_assets', 'frbl_editor_scripts_animations' );
+add_action( 'enqueue_block_editor_assets', 'frbl_editor_scripts_animations', 5 );
 /**
  * Enqueue Animation Scripts and Styles for Editor
  */
 function frbl_editor_scripts_animations() {
 	$dist_dir = WP_DEBUG ? 'animations/' : 'dist/';
 
+	// Then enqueue our custom animations CSS
 	wp_enqueue_style(
-		'frontblocks-animations',
+		'frontblocks-animations-editor',
 		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-animations.css',
-		array( 'animate-css' ),
+		array(),
 		FRBL_VERSION
 	);
 
 	// Enqueue our custom block editor script.
 	wp_enqueue_script(
-		'frontblocks-animation-options',
+		'frontblocks-animation-editor',
 		FRBL_PLUGIN_URL . 'includes/dist/frontblocks-animation-option.js',
 		array( 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-i18n' ),
 		FRBL_VERSION,
 		true
 	);
+    // Localize script with custom CSS URL
+    wp_localize_script(
+        'frontblocks-animation-editor',
+        'frontblocksAnimationData',
+        array(
+            'customCss' => FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-animations.css',
+        )
+    );
 }
 
 add_action( 'enqueue_block_editor_assets', 'frbl_register_animation_attributes', 9 );
@@ -182,3 +192,4 @@ function frbl_add_animation_classes_to_blocks( $block_content, $block ) {
 
 	return $block_content;
 }
+

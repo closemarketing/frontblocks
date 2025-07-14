@@ -1,8 +1,8 @@
 // Add custom animation controls to any block based on Animate.css
 const { addFilter } = wp.hooks;
-const { Fragment } = wp.element;
+const { Fragment, useEffect, useRef } = wp.element;
 const { InspectorControls } = wp.blockEditor;
-const { SelectControl, RangeControl, ToggleControl, PanelBody, Placeholder, Disabled } = wp.components;
+const { SelectControl, RangeControl, ToggleControl, PanelBody, Placeholder, Disabled, Button } = wp.components;
 const { __ } = wp.i18n;
 
 // Organizar las animaciones por categorías
@@ -220,7 +220,6 @@ const createFlattenedOptions = () => {
 
 function addAnimationControls(BlockEdit) {
     return (props) => {
-        // Applicable to all blocks - no filtering by block name
         
         // Extract animation attributes with default values
         const {
@@ -234,10 +233,115 @@ function addAnimationControls(BlockEdit) {
         // Create flattened options for the SelectControl
         const flattenedOptions = createFlattenedOptions();
 
-        // Function to find the animation label from its value
-        const getAnimationLabel = (value) => {
-            const animation = flattenedOptions.find(option => option.value === value);
-            return animation ? animation.label : value;
+        // Function to trigger animation preview
+        const triggerAnimationPreview = () => {
+            if (!frblAnimation) return;
+
+            // --- IFRAME SUPPORT ---
+            // Try to get the editor-canvas iframe (site editor or block editor)
+            let doc = document;
+            const iframe = document.querySelector('iframe[name="editor-canvas"], iframe#editor-canvas');
+            if (iframe && iframe.contentDocument) {
+                doc = iframe.contentDocument;
+                console.log('Using iframe document for block search');
+            } else {
+                console.log('Using main document for block search');
+            }
+
+            // Try multiple selectors to find the block element
+            let blockElement = doc.querySelector(`[data-block="${props.clientId}"]`);
+            if (!blockElement) {
+                blockElement = doc.querySelector(`[data-block-id="${props.clientId}"]`);
+            }
+            if (!blockElement) {
+                blockElement = doc.querySelector(`.wp-block[data-block="${props.clientId}"]`);
+            }
+            if (!blockElement) {
+                blockElement = doc.querySelector(`.block-editor-block-list__block[data-block="${props.clientId}"]`);
+            }
+
+            // Fallback: search for any element whose outerHTML contains the clientId
+            if (!blockElement) {
+                const allElements = doc.querySelectorAll('*');
+                for (const el of allElements) {
+                    if (el.outerHTML && el.outerHTML.includes(props.clientId)) {
+                        blockElement = el;
+                        console.log('Found block element by outerHTML containing clientId:', el);
+                        break;
+                    }
+                }
+            }
+
+            // Find the first element with the animation classes
+            const animatedElement = blockElement.querySelector('.animate__animated') || blockElement;
+            // Remove existing animation classes and styles
+            animatedElement.classList.remove('animate__animated');
+            animationOptions.forEach(category => {
+                if (category.options) {
+                    category.options.forEach(option => {
+                        animatedElement.classList.remove(`animate__${option.value}`);
+                    });
+                }
+            });
+            animatedElement.style.removeProperty('--animate-duration');
+            animatedElement.style.removeProperty('--animate-delay');
+            animatedElement.style.removeProperty('--animate-repeat');
+            animatedElement.style.removeProperty('animation-iteration-count');
+
+            // Force reflow and re-add classes in the next frame
+            void animatedElement.offsetWidth; // This is a more reliable reflow trigger
+
+            // Function to apply animation
+            const applyAnimation = () => {
+                animatedElement.classList.add('animate__animated', `animate__${frblAnimation}`);
+                if (frblAnimationDuration !== 1) {
+                    animatedElement.style.setProperty('--animate-duration', `${frblAnimationDuration}s`);
+                }
+                if (frblAnimationDelay > 0) {
+                    animatedElement.style.setProperty('--animate-delay', `${frblAnimationDelay}s`);
+                }
+                if (frblAnimationInfinite) {
+                    animatedElement.style.setProperty('--animate-repeat', 'infinite');
+                    animatedElement.style.setProperty('animation-iteration-count', 'infinite');
+                } else if (frblAnimationRepeat) {
+                    animatedElement.style.setProperty('--animate-repeat', '2');
+                    animatedElement.style.setProperty('animation-iteration-count', '2');
+                }
+            };
+
+            // Wait for Animate.css to be available
+            const waitForAnimateCSS = () => {
+                
+                const testElem = doc.createElement('div');
+                testElem.className = 'animate__animated animate__bounce';
+                testElem.style.position = 'absolute';
+                testElem.style.left = '-9999px';
+                doc.body.appendChild(testElem);
+                
+                const checkAnimation = () => {
+                    const computed = doc.defaultView.getComputedStyle(testElem);
+                    const hasAnimation = computed.animationName && computed.animationName !== 'none';
+                    doc.body.removeChild(testElem);
+                    if (hasAnimation) {
+                        console.log('Animate.css is ready, applying animation');
+                        applyAnimation();
+                    } else {
+                        console.error('Animate.css failed to load, loading statically...');
+                        // Fallback: load Animate.css dynamically
+                        const link = doc.createElement('link');
+                        link.rel = 'stylesheet';
+                        link.href = frontblocksAnimationData.customCss;
+                        link.onload = () => {
+                            setTimeout(applyAnimation, 50);
+                        };
+                        doc.head.appendChild(link);
+                    }
+                };
+                
+                setTimeout(checkAnimation, 50);
+            };
+
+            waitForAnimateCSS();
         };
 
         return (
@@ -290,6 +394,16 @@ function addAnimationControls(BlockEdit) {
                                         onChange={(value) => props.setAttributes({ frblAnimationInfinite: value })}
                                     />
                                 )}
+                                
+                                <div style={{ marginTop: '16px' }}>
+                                    <Button
+                                        isPrimary
+                                        onClick={triggerAnimationPreview}
+                                        style={{ width: '100%' }}
+                                    >
+                                        {__('Preview Animation', 'frontblocks')}
+                                    </Button>
+                                </div>
                             </>
                         )}
                     </PanelBody>
