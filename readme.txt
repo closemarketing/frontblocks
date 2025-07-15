@@ -3,30 +3,32 @@ Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, man
 Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
-Tested up to: 6.8
-Stable tag: 1.0.0
-Version: 1.0.0
+Tested up to: 6.7
+Stable tag: 0.2.5
+Version: 0.2.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Custom enhacements for blocks in Gutenberg.
+Custom enhacements for front developing.
 
 == Description ==
 
-We have added options to the Gutenberg blocks that allow you to create a carousel or slider with the blocks you want.
+To start using the Carousel, add the frontblocks-carousel class to the element and then, include any of the following attributes:
 
-Actually extends the following blocks:
-- GenerateBlocks Grid
+Data Attributes for Carrousel:
+- data-type: slider, carousel
+slider - rewinds slider to the start/end when it reaches first or last slide,
+carousel - changes slides without starting over when it reaches first or last slide.
 
-To start using the Carousel, go to the grid block and select the "Carousel" or "Slider" option in the "FrontBlocks Grid Option" section.
+- data-autoplay: 0 - time ms
+- data-view: 1, 2, 3, 4, 5, 6
+- data-buttons: bullets, arrows, none
+- data-buttons-color: hex color
+- data-buttons-background-color: hex color or transparent
+- data-res-view: 1, 2, 3, 4, 5, 6
 
-Attributes for the Carousel/Slider:
-- Autoplay - automatically change the slides after a certain time in seconds.
-- View - number of items to show in the carousel/slider.
-- Responsive View - number of items to show in the carousel/slider in responsive view.
-- Buttons - type of buttons to show in the carousel/slider (bullets, arrows, none).
-- Buttons Color - color of the buttons.
-- Buttons Background Color - background color of the buttons (can be transparent).
+Data Attributes for Animation:
+- data-frontblocks-animation: defines the animation class name that will be assigned to the element.
 
 Animations:
 Based on [Animate.css](https://animate.style/)
@@ -86,9 +88,6 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
-= 0.2.6 =
-*   Improve interface to making Carousel/Slider in GenerateBlocks Grid.
-
 = 0.2.5 =
 *   Update version.
 
