@@ -75,6 +75,9 @@ zoomOut, zoomOutDown zoomOutLeft, zoomOutRight, zoomOutUp
 Sliding entrances: 
 slideInDown, slideInLeft, slideInRight, slideInUp, Sliding, exits slideOutDown, slideOutLeft, slideOutRight, slideOutUp
 
+**Sticky option for Grid block:**
+Sticky option allows you to make the Grid block stick to the top of the viewport when scrolling down. To use this feature, you will have the option in Grid block settings to enable the "Sticky" option. When enabled, the Grid block will remain fixed at the top of the viewport as you scroll down the page.
+
 Others Plugins:
 - [Closemarketing Plugins](https://profiles.wordpress.org/closemarketing/#content-plugins)
 
