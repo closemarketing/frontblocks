@@ -64,8 +64,8 @@ function frbl_add_sticky_attributes_to_grid_block( $block_content, $block ) {
 	$sticky_enabled = isset( $attrs['frblStickyEnabled'] ) ? (bool) $attrs['frblStickyEnabled'] : false;
 	$sticky_offset = isset( $attrs['frblStickyOffset'] ) ? (int) $attrs['frblStickyOffset'] : 0;
 	$sticky_column_index = isset( $attrs['frblStickyColumnIndex'] ) ? (int) $attrs['frblStickyColumnIndex'] : 0;
-	
-	// Add sticky attributes to the wrapper div if sticky is enabled
+
+	// Add sticky attributes to the wrapper div if sticky is enabled.
 	if ( $sticky_enabled ) {
 		$block_content = preg_replace(
 			'/<div([^>]*)class="([^"]*gb-grid-wrapper[^"]*)"([^>]*)>/',
@@ -75,18 +75,22 @@ function frbl_add_sticky_attributes_to_grid_block( $block_content, $block ) {
 				' data-sticky-column-index="' . esc_attr( $sticky_column_index ) . '"' .
 				'>',
 			$block_content,
-			1 // Only replace the first occurrence
+			1 // Only replace the first occurrence.
 		);
 	}
 
 	return $block_content;
 }
 
-// Register attributes before GenerateBlocks registers its blocks
+/**
+ * Register sticky attributes for GenerateBlocks Grid block.
+ *
+ * @return void
+ */
 add_action(
 	'init',
 	function () {
-		// Use priority 9 (before default 10)
+		// Use priority 9 (before default 10).
 		add_filter(
 			'generateblocks_blocks_registered_block',
 			'frbl_register_sticky_attributes_for_grid_block',
@@ -94,7 +98,7 @@ add_action(
 			2
 		);
 
-		// Register attributes from frontend side as well
+		// Register attributes from frontend side as well.
 		add_action(
 			'enqueue_block_editor_assets',
 			function () {
@@ -161,6 +165,6 @@ function frbl_register_sticky_attributes_for_grid_block( $block_args, $block_typ
 		'type'    => 'number',
 		'default' => 0,
 	);
-	
+
 	return $block_args;
 }
