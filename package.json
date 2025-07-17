@@ -32,7 +32,8 @@
   "scripts": {
     "build:carousel": "babel includes/carousel/frontblocks-advanced-option.jsx --out-file includes/dist/frontblocks-advanced-option.js",
     "build:animations": "babel includes/animations/frontblocks-animation-option.jsx --out-file includes/dist/frontblocks-animation-option.js",
-    "build": "npm run build:carousel && npm run build:animations"
+    "build:sticky":  "babel includes/sticky-column/frontblocks-sticky-column-option.jsx --out-file includes/dist/frontblocks-sticky-column-option.js",
+    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky"
   },
   "dependencies": {
     "react": "^19.1.0",
