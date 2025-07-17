@@ -1,5 +1,5 @@
-=== FrontBlocks ===
-Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, manoloramos
+=== FrontBlocks for GeneratePress ===
+Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit2sumit
 Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
@@ -9,14 +9,12 @@ Version: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Custom enhacements for blocks in Gutenberg.
+Extends GeneratePress with carousel, slider, animations and sticky column.
 
 == Description ==
 
+**Carousel/Slider for GenerateBlocks Grid**
 We have added options to the Gutenberg blocks that allow you to create a carousel or slider with the blocks you want.
-
-Actually extends the following blocks:
-- GenerateBlocks Grid
 
 To start using the Carousel, go to the grid block and select the "Carousel" or "Slider" option in the "FrontBlocks Grid Option" section.
 
@@ -27,6 +25,9 @@ Attributes for the Carousel/Slider:
 - Buttons - type of buttons to show in the carousel/slider (bullets, arrows, none).
 - Buttons Color - color of the buttons.
 - Buttons Background Color - background color of the buttons (can be transparent).
+
+**Animations for Blocks**
+- data-frontblocks-animation: defines the animation class name that will be assigned to the element.
 
 Animations:
 Based on [Animate.css](https://animate.style/)
@@ -73,6 +74,9 @@ zoomOut, zoomOutDown zoomOutLeft, zoomOutRight, zoomOutUp
 Sliding entrances: 
 slideInDown, slideInLeft, slideInRight, slideInUp, Sliding, exits slideOutDown, slideOutLeft, slideOutRight, slideOutUp
 
+**Sticky option for Grid block:**
+Sticky option allows you to make the Grid block stick to the top of the viewport when scrolling down. To use this feature, you will have the option in Grid block settings to enable the "Sticky" option. When enabled, the Grid block will remain fixed at the top of the viewport as you scroll down the page.
+
 Others Plugins:
 - [Closemarketing Plugins](https://profiles.wordpress.org/closemarketing/#content-plugins)
 
@@ -86,8 +90,8 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
-= 0.2.6 =
-*   Improve interface to making Carousel/Slider in GenerateBlocks Grid.
+= 1.0.0 =
+*   Added sticked option for Grid block.
 
 = 0.2.5 =
 *   Update version.
