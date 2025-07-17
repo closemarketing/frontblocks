@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: FrontBlocks for GenerateBlocks
+ * Plugin Name: FrontBlocks for GeneratePress
  * Plugin URI:  https://github.com/closemarketing/frontblocks
  * Description: Blocks and helpers that extends GeneratePress blocks.
  * Version:     1.0.0
