@@ -27,7 +27,7 @@ function frbl_sticky_column_scripts() {
 
 	wp_enqueue_script(
 		'frontblocks-sticky-column-custom',
-		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-sticky-column.js',
+		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-sticky-column.js' : 'frontblocks-sticky-column-min.js' ),
 		array( ),
 		FRBL_VERSION,
 		true

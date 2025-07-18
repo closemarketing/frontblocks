@@ -26,9 +26,9 @@ function frbl_gallery_scripts() {
 	);
 
 	// Enqueue Masonry library
-	wp_enqueue_script(
-		'masonry',
-		'https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js',
+    wp_enqueue_script(
+		'frontblocks-masonry',
+		FRBL_PLUGIN_URL . 'includes/dist/masonry.min.js',
 		array(),
 		'4.2.2',
 		true
@@ -37,8 +37,8 @@ function frbl_gallery_scripts() {
 
 	wp_enqueue_script(
 		'frontblocks-gallery-custom',
-		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-gallery.js',
-		array( 'masonry' ),
+		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-gallery.js' : 'frontblocks-gallery-min.js' ),
+		array( 'frontblocks-masonry' ),
 		FRBL_VERSION,
 		true
 	);

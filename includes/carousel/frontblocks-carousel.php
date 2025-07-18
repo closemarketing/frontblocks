@@ -35,7 +35,7 @@ function frbl_theme_scripts() {
 
 	wp_enqueue_script(
 		'frontblocks-carousel-custom',
-		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-carousel.js',
+		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-carousel.js' : 'frontblocks-carousel-min.js' ),
 		array( 'frontblocks-carousel' ),
 		FRBL_VERSION,
 		true
