@@ -1,1 +1,119 @@
-window.addEventListener("load",function(t){const e=document.querySelectorAll(".frontblocks-carousel");e.length>0&&e.forEach(t=>{const e=t.parentNode,o=document.createElement("div");e.replaceChild(o,t),o.appendChild(t),o.classList.add("glide__track"),o.setAttribute("data-glide-el","track");const r=o.parentNode,a=document.createElement("div");r.replaceChild(a,o),a.appendChild(o),a.classList.add("glide"),carouselType=t.getAttribute("data-type")?t.getAttribute("data-type"):"carousel",carouselbuttons=t.getAttribute("data-buttons")?t.getAttribute("data-buttons"):"bullets",carouselView=t.getAttribute("data-view")?t.getAttribute("data-view"):4,carouselAutoplay=t.getAttribute("data-autoplay")?t.getAttribute("data-autoplay"):0,carouselResView=t.getAttribute("data-res-view")?t.getAttribute("data-res-view"):1,carouselbuttonsColor=t.getAttribute("data-buttons-color")?t.getAttribute("data-buttons-color"):"black",carouselbuttonsBackgroundColor=t.getAttribute("data-buttons-background-color")?t.getAttribute("data-buttons-background-color"):"transparent",t.classList.add("glide__slides","glide-"+Math.floor(1e3*Math.random()));for(const e of t.children)e.classList.add("glide__slide");if(window.screen.availWidth<768&&t.children.length<6?showBullets=!0:window.screen.availWidth>768?showBullets=!0:showBullets=!1,showBullets&&"bullets"==carouselbuttons){const e=document.createElement("div");e.classList.add("glide__bullets"),e.setAttribute("data-glide-el","controls[nav]");for(let o=0;o<t.children.length;o++){const t=document.createElement("button");t.classList.add("glide__bullet"),t.setAttribute("data-glide-dir","="+o),t.style.backgroundColor=carouselbuttonsBackgroundColor,e.appendChild(t)}a.appendChild(e)}if("arrows"==carouselbuttons){const t=document.createElement("div");t.classList.add("glide__arrows"),t.setAttribute("data-glide-el","controls"),arrowsHTML='<button class="glide__arrow glide__arrow--left glide__arrow glide__arrow--left" data-glide-dir="<"',arrowsHTML+=' style="background-color: '+carouselbuttonsBackgroundColor+'"',arrowsHTML+='><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="',arrowsHTML+=carouselbuttonsColor,arrowsHTML+='" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="glide__arrow glide__arrow--right glide__arrow glide__arrow--right" data-glide-dir=">"',arrowsHTML+=' style="background-color: '+carouselbuttonsBackgroundColor+'"',arrowsHTML+='><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 11L6 6L1 1" stroke="',arrowsHTML+=carouselbuttonsColor,arrowsHTML+='" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>',t.innerHTML=arrowsHTML,a.appendChild(t)}new Glide(a,{type:carouselType,perView:carouselView,startAt:0,autoplay:0===carouselAutoplay?2500:carouselAutoplay,gap:0,breakpoints:{430:{perView:carouselResView},600:{perView:carouselResView},768:{perView:carouselResView}}}).mount()})});
+window.addEventListener('load', function (event) {
+	const carouselItem = document.querySelectorAll('.frontblocks-carousel');
+	
+	if (carouselItem.length > 0) {
+		carouselItem.forEach( (item) => {
+			// First Parent.
+			const parent = item.parentNode;
+			const wrapper = document.createElement('div');
+
+			parent.replaceChild(wrapper, item);
+			wrapper.appendChild(item);
+
+			wrapper.classList.add('glide__track');
+			wrapper.setAttribute('data-glide-el', 'track');
+
+			// Second Parent.
+			const parentwrap = wrapper.parentNode;
+			const wrapperParent = document.createElement('div');
+
+			parentwrap.replaceChild(wrapperParent, wrapper);
+			wrapperParent.appendChild(wrapper);
+			wrapperParent.classList.add('glide');
+
+			// Options
+			const carouselType = item.getAttribute('data-type') ? item.getAttribute('data-type') : 'carousel';
+			const carouselbuttons = item.getAttribute('data-buttons') ? item.getAttribute('data-buttons') : 'bullets';
+			const carouselView = item.getAttribute('data-view') ? item.getAttribute('data-view') : 4;
+			const carouselAutoplay = item.getAttribute('data-autoplay') ? item.getAttribute('data-autoplay') : 0;
+			const carouselResView = item.getAttribute('data-res-view') ? item.getAttribute('data-res-view') : 1;
+            const carouselRewind = item.getAttribute('data-rewind') ? item.getAttribute('data-rewind') : false;
+			const carouselbuttonsColor = item.getAttribute('data-buttons-color') ? item.getAttribute('data-buttons-color') : 'black';
+			const carouselbuttonsBackgroundColor = item.getAttribute('data-buttons-background-color') ? item.getAttribute('data-buttons-background-color') : 'transparent';
+			const carouselbuttonsPosition = item.getAttribute('data-buttons-position') ? item.getAttribute('data-buttons-position') : 'side';
+
+
+			// Add classes
+			item.classList.add( 'glide__slides', 'glide-' + Math.floor(Math.random() * 1000) );
+			for (const child of item.children) {
+				child.classList.add('glide__slide');
+			}
+
+			// Don't show bullets on responsive and more than 6 items.
+            let showBullets = false;
+			if ( window.screen.availWidth < 768 && item.children.length < 6 ) {
+				showBullets = true;
+			} else if ( window.screen.availWidth > 768 ) {
+				showBullets = true;
+			}
+            
+			if ( showBullets && carouselbuttons == 'bullets' ) {
+				const bullets = document.createElement('div');
+				bullets.classList.add('glide__bullets');
+				bullets.setAttribute('data-glide-el', 'controls[nav]');
+
+				for (let i = 0; i < item.children.length; i++) {
+					const bullet = document.createElement('button');
+					bullet.classList.add('glide__bullet');
+					bullet.setAttribute('data-glide-dir', '=' + i);
+					bullet.style.backgroundColor = carouselbuttonsBackgroundColor;
+					bullets.appendChild(bullet);
+				}
+
+				wrapperParent.appendChild(bullets);
+				
+				// Add custom CSS for active bullet color
+				const style = document.createElement('style');
+				style.textContent = `
+					.glide__bullet.glide__bullet--active {
+						background-color: ${carouselbuttonsColor} !important;
+					}
+				`;
+				document.head.appendChild(style);
+			}
+
+			if ( carouselbuttons == 'arrows' ) {
+				const arrows = document.createElement('div');
+				arrows.classList.add('glide__arrows');
+                if ( carouselbuttonsPosition == 'bottom' ) {
+                    arrows.classList.add('glide__arrows--bottom');
+                } else {
+                    arrows.classList.add('glide__arrows--top');
+                }
+                
+				arrows.setAttribute('data-glide-el', 'controls');
+				arrowsHTML = '<button class="glide__arrow glide__arrow--left glide__arrow glide__arrow--left" data-glide-dir="<"';
+				arrowsHTML += ' style="background-color: ' + carouselbuttonsBackgroundColor + '"';
+				arrowsHTML += '><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="';
+				arrowsHTML += carouselbuttonsColor;
+				arrowsHTML += '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="glide__arrow glide__arrow--right glide__arrow glide__arrow--right" data-glide-dir=">"';
+				
+				arrowsHTML += ' style="background-color: ' + carouselbuttonsBackgroundColor + '"';
+				arrowsHTML += '><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 11L6 6L1 1" stroke="';
+				arrowsHTML += carouselbuttonsColor;
+				arrowsHTML += '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+				arrows.innerHTML = arrowsHTML;
+				wrapperParent.appendChild(arrows);
+			}
+            new Glide( wrapperParent, {
+				type: carouselType,
+				perView: carouselView,
+				startAt: 0,
+				autoplay: false, //carouselAutoplay === 0 ? 2500 : carouselAutoplay,
+				gap: 0,
+                rewind: carouselRewind,
+				breakpoints: {
+					430: {
+						perView: carouselResView
+					},
+					600: {
+						perView: carouselResView
+					},
+					768: {
+						perView: carouselResView
+					},
+				}
+			}).mount();
+		});
+	}
+});

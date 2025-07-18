@@ -12,6 +12,9 @@ gulp.task('compress', async function() {
 	gulp.src(['./includes/sticky-column/*.js'])
     .pipe(minify())
     .pipe(gulp.dest('./includes/dist'));    
+	gulp.src(['./includes/gallery/*.js'])
+    .pipe(minify())
+    .pipe(gulp.dest('./includes/dist'));
 	gulp.src('./includes/animations/*.css')
     .pipe(cleanCSS({compatibility: 'ie8'}))
     .pipe(gulp.dest('./includes/dist'));
@@ -19,6 +22,9 @@ gulp.task('compress', async function() {
 		.pipe(cleanCSS({compatibility: 'ie8'}))
 		.pipe(gulp.dest('./includes/dist'));
 	gulp.src('./includes/sticky-column/*.css')
+		.pipe(cleanCSS({compatibility: 'ie8'}))
+		.pipe(gulp.dest('./includes/dist'));
+	gulp.src('./includes/gallery/*.css')
 		.pipe(cleanCSS({compatibility: 'ie8'}))
 		.pipe(gulp.dest('./includes/dist'));
 });
