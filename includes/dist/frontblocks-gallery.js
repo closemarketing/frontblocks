@@ -1,31 +1,19 @@
 window.addEventListener('load', function() {
-    // Initialize gallery functionality
     initFrontBlocksGallery();
 });
 
 function initFrontBlocksGallery() {
-    // Initialize masonry galleries
     initMasonryGalleries();
-    
-    // Initialize grid galleries
     initGridGalleries();
-    
-    // Initialize lightbox functionality
     initLightbox();
 }
 
 function initMasonryGalleries() {
     const masonryGalleries = document.querySelectorAll('.frontblocks-gallery-masonry');
     
-    console.log('Found masonry galleries:', masonryGalleries.length);
-    
-    masonryGalleries.forEach(function(gallery, index) {
+    masonryGalleries.forEach(function(gallery) {
         const columns = parseInt(gallery.getAttribute('data-columns')) || 3;
         const gutter = parseInt(gallery.getAttribute('data-gutter')) || 20;
-        
-        console.log(`Masonry Gallery ${index + 1}: columns=${columns}, gutter=${gutter}`);
-        
-        // Set up masonry layout using Masonry.js
         setupMasonryLayout(gallery, columns, gutter);
     });
 }
@@ -33,26 +21,16 @@ function initMasonryGalleries() {
 function initGridGalleries() {
     const gridGalleries = document.querySelectorAll('.frontblocks-gallery-grid');
     
-    console.log('Foundgrid galleries:', gridGalleries.length);
-    
-    gridGalleries.forEach(function(gallery, index) {
+    gridGalleries.forEach(function(gallery) {
         const columns = parseInt(gallery.getAttribute('data-columns')) || 3;
         const gutter = parseInt(gallery.getAttribute('data-gutter')) || 20;
-        console.log(gallery);
-        console.log(gallery.getAttribute('data-gutter'));
-        
-        console.log(`Grid Gallery ${index + 1}: columns=${columns}, gutter=${gutter}`);
-        
         // Set up grid layout
         setupGridLayout(gallery, columns, gutter);
     });
 }
 
 function setupGridLayout(gallery, columns, gutter) {
-    // Set CSS custom property for gutter so CSS calc() can use it
     gallery.style.setProperty('--frontblocks-gutter', gutter + 'px');
-    
-    console.log(`Setting up grid layout with ${columns} columns and ${gutter}px gutter`);
 }
 
 function setupMasonryLayout(gallery, columns, gutter) {
@@ -60,31 +38,24 @@ function setupMasonryLayout(gallery, columns, gutter) {
     gallery.style.position = 'relative';
     gallery.style.display = 'block';
     gallery.style.width = '100%';
-    
-    // Set CSS custom property for gutter so CSS calc() can use it
     gallery.style.setProperty('--frontblocks-gutter', gutter + 'px');
     
     // Get all figure elements
     const figures = gallery.querySelectorAll('figure.wp-block-image');
-    console.log(`Setting up masonry for ${figures.length} images with ${columns} columns`);
-    
     if (figures.length === 0) return;
     
-    // Calculate optimal column count based on available width
+    // Calculate optimal column count based on available width and breakpoints
     const containerWidth = gallery.offsetWidth;
-    const minColumnWidth = 200; // Minimum width for a column (adjust as needed)
+    const minColumnWidth = 200;
     const totalGutterWidth = gutter * (columns - 1);
     const availableWidthForColumns = containerWidth - totalGutterWidth;
     const actualColumnWidth = availableWidthForColumns / columns;
     
-    console.log(`Container width: ${containerWidth}px, Gutter: ${gutter}px, Desired columns: ${columns}`);
-    console.log(`Available width for columns: ${availableWidthForColumns}px, Actual column width: ${actualColumnWidth}px`);
+    let optimalColumns = getResponsiveColumns(columns, containerWidth);
     
     // If columns are too narrow, reduce the number of columns
-    let optimalColumns = columns;
     if (actualColumnWidth < minColumnWidth) {
         optimalColumns = Math.max(1, Math.floor((containerWidth + gutter) / (minColumnWidth + gutter)));
-        console.log(`Columns too narrow, reducing to ${optimalColumns} columns`);
     }
     
     // Only set margin-bottom for gutter spacing
@@ -139,21 +110,22 @@ function setupMasonryLayout(gallery, columns, gutter) {
     // Handle window resize
     window.addEventListener('resize', function() {
         if (gallery.masonryInstance) {
-            // Recalculate optimal columns on resize
-            const newContainerWidth = gallery.offsetWidth;
-            const newTotalGutterWidth = gutter * (columns - 1);
-            const newAvailableWidthForColumns = newContainerWidth - newTotalGutterWidth;
-            const newActualColumnWidth = newAvailableWidthForColumns / columns;
-            
-            if (newActualColumnWidth < minColumnWidth) {
-                const newOptimalColumns = Math.max(1, Math.floor((newContainerWidth + gutter) / (minColumnWidth + gutter)));
-                console.log(`Resize: Container width ${newContainerWidth}px, reducing to ${newOptimalColumns} columns`);
-            }
-            
-            // Just relayout, no need to recalculate widths
             gallery.masonryInstance.layout();
         }
     });
+}
+
+function getResponsiveColumns(originalColumns, containerWidth) {
+    // Responsive breakpoints
+    if (containerWidth <= 480) {
+        return Math.min(originalColumns, 2);
+    } else if (containerWidth <= 768) {
+        return Math.min(originalColumns, 3);
+    } else if (containerWidth <= 1024) {
+        return Math.min(originalColumns, 4);
+    } else {
+        return originalColumns;
+    }
 }
 
 function initLightbox() {
@@ -317,13 +289,7 @@ function updateLightboxCaption() {
     }
     
     captionElement.textContent = caption;
-    
-    // Show/hide caption element based on whether there's content
-    if (caption) {
-        captionElement.style.display = 'block';
-    } else {
-        captionElement.style.display = 'none';
-    }
+    captionElement.style.display = caption ? 'block' : 'none';
 }
 
 function updateLightboxCounter() {
@@ -344,14 +310,9 @@ function updateLightboxNavigation() {
     const prevBtn = lightbox.querySelector('.frontblocks-lightbox-prev');
     const nextBtn = lightbox.querySelector('.frontblocks-lightbox-next');
     
-    // Show/hide navigation buttons based on number of images
-    if (currentImages.length <= 1) {
-        prevBtn.style.display = 'none';
-        nextBtn.style.display = 'none';
-    } else {
-        prevBtn.style.display = 'block';
-        nextBtn.style.display = 'block';
-    }
+    const showNav = currentImages.length > 1;
+    prevBtn.style.display = showNav ? 'block' : 'none';
+    nextBtn.style.display = showNav ? 'block' : 'none';
 }
 
 // Handle dynamic content loading (for AJAX-loaded galleries)

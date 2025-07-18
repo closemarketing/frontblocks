@@ -63,6 +63,55 @@
 	transform: scale(1.01);
 }
 
+/* Responsive breakpoints for gallery layouts */
+@media (max-width: 1024px) {
+	/* Small desktop: maximum 4 columns */
+	.wp-block-gallery.frontblocks-gallery-masonry.has-nested-images.columns-5 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-masonry.has-nested-images.columns-6 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-masonry.has-nested-images.columns-7 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-masonry.has-nested-images.columns-8 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-grid.has-nested-images.columns-5 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-grid.has-nested-images.columns-6 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-grid.has-nested-images.columns-7 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-grid.has-nested-images.columns-8 figure.wp-block-image:not(#individual-image) {
+		width: calc(25% - var(--frontblocks-gutter, 20px) * 0.75) !important;
+	}
+}
+
+@media (max-width: 768px) {
+	/* Tablet: maximum 3 columns */
+	.wp-block-gallery.frontblocks-gallery-masonry.has-nested-images.columns-4 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-masonry.has-nested-images.columns-5 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-masonry.has-nested-images.columns-6 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-masonry.has-nested-images.columns-7 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-masonry.has-nested-images.columns-8 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-grid.has-nested-images.columns-4 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-grid.has-nested-images.columns-5 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-grid.has-nested-images.columns-6 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-grid.has-nested-images.columns-7 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-grid.has-nested-images.columns-8 figure.wp-block-image:not(#individual-image) {
+		width: calc(33.33333% - var(--frontblocks-gutter, 20px) * 0.66667) !important;
+	}
+}
+
+@media (max-width: 480px) {
+	/* Mobile: maximum 2 columns */
+	.wp-block-gallery.frontblocks-gallery-masonry.has-nested-images.columns-3 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-masonry.has-nested-images.columns-4 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-masonry.has-nested-images.columns-5 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-masonry.has-nested-images.columns-6 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-masonry.has-nested-images.columns-7 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-masonry.has-nested-images.columns-8 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-grid.has-nested-images.columns-3 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-grid.has-nested-images.columns-4 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-grid.has-nested-images.columns-5 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-grid.has-nested-images.columns-6 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-grid.has-nested-images.columns-7 figure.wp-block-image:not(#individual-image),
+	.wp-block-gallery.frontblocks-gallery-grid.has-nested-images.columns-8 figure.wp-block-image:not(#individual-image) {
+		width: calc(50% - var(--frontblocks-gutter, 20px) * 0.5) !important;
+	}
+}
+
 /* Lightbox Styles */
 .frontblocks-lightbox {
 	position: fixed;
@@ -102,7 +151,7 @@
 	left: 0;
 	text-align: left;
 	color: #fff;
-    max-width: 80%;
+	max-width: 80%;
 	font-size: 16px;
 	line-height: 1.4;
 	padding: 5px;
