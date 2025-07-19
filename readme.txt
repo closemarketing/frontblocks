@@ -26,6 +26,9 @@ Attributes for the Carousel/Slider:
 - Buttons Color - color of the buttons.
 - Buttons Background Color - background color of the buttons (can be transparent).
 
+**Enhanced WordPress Native Gallery**
+We have added options to the native WordPress gallery that allow you to create a different layout as Grid or Masonry, and also make click to carousel with the images.
+
 **Animations for Blocks**
 - data-frontblocks-animation: defines the animation class name that will be assigned to the element.
 
