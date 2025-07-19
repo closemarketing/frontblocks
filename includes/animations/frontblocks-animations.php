@@ -28,7 +28,7 @@ function frbl_theme_scripts_animations() {
 
 	wp_enqueue_script(
 		'frontblocks-animations-custom',
-		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-animations.js',
+		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-animations.js' : 'frontblocks-animations-min.js' ),
 		array(),
 		FRBL_VERSION,
 		true

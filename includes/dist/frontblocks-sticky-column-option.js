@@ -45,7 +45,7 @@
       // If no columns found, provide a default option
       if (columnOptions.length === 0) {
         columnOptions.push({
-          label: 'No columns found',
+          label: __('No columns found', 'frontblocks'),
           value: 0
         });
       }

@@ -49,3 +49,6 @@ require_once FRBL_PLUGIN_PATH . 'includes/animations/frontblocks-animations.php'
 
 // Sticky Column.
 require_once FRBL_PLUGIN_PATH . 'includes/sticky-column/frontblocks-sticky-column.php';
+
+// Gallery.
+require_once FRBL_PLUGIN_PATH . 'includes/gallery/frontblocks-gallery.php';
