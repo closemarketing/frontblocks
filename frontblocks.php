@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: FrontBlocks
+ * Plugin Name: FrontBlocks for GeneratePress
  * Plugin URI:  https://github.com/closemarketing/frontblocks
- * Description: Blocks and helpers to facilitate GeneratePress frontend developing.
- * Version:     0.2.5
+ * Description: Blocks and helpers that extends GeneratePress blocks.
+ * Version:     1.0.0
  * Author:      Closemarketing
  * Author URI:  https://close.marketing
  * Text Domain: frontblocks
@@ -26,7 +26,7 @@
 
 defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
-define( 'FRBL_VERSION', '0.2.5' );
+define( 'FRBL_VERSION', '1.0.0' );
 define( 'FRBL_PLUGIN', __FILE__ );
 define( 'FRBL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'FRBL_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
@@ -46,3 +46,6 @@ require_once FRBL_PLUGIN_PATH . 'includes/carousel/frontblocks-carousel.php';
 
 // Animations.
 require_once FRBL_PLUGIN_PATH . 'includes/animations/frontblocks-animations.php';
+
+// Sticky Column.
+require_once FRBL_PLUGIN_PATH . 'includes/sticky-column/frontblocks-sticky-column.php';
