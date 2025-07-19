@@ -27,52 +27,24 @@ Attributes for the Carousel/Slider:
 - Buttons Background Color - background color of the buttons (can be transparent).
 
 **Animations for Blocks**
-- data-frontblocks-animation: defines the animation class name that will be assigned to the element.
+You can add animations to the blocks you want. To do this, go to the block settings and select the "FrontBlocks Animation Option" section. There you will find a list of animations that you can apply to the block.
 
-Animations:
-Based on [Animate.css](https://animate.style/)
+Animations are based on [Animate.css](https://animate.style/).
 
-Attention seekers:
-bounce, flash, pulse, rubberBand, shakeX, shakeY, headShake, swing, tada, wobble, jello, heartBeat
-
-Back entrances:
-backInDown, backInLeft, backInRight, backInUp
-
-Back exits:
-backOutDown, backOutLeft, backOutRight, backOutUp
-
-Bouncing entrances:
-bounceIn, bounceInDown, bounceInLeft, bounceInRight, bounceInUp
-
-Bouncing exits:
-bounceOut, bounceOutDown, bounceOutLeft, bounceOutRight, bounceOutUp
-
-Fading entrances:
-fadeIn, fadeInDown, fadeInDownBig, fadeInLeft, fadeInLeftBig, fadeInRight, fadeInRightBig, fadeInUp, fadeInUpBig, fadeInTopLeft, fadeInTopRight, fadeInBottomLeft, fadeInBottomRight
-
-Fading exits:
-fadeOut, fadeOutDown, fadeOutDownBig, fadeOutLeft, fadeOutLeftBig, fadeOutRight, fadeOutRightBig, fadeOutUp, fadeOutUpBig, fadeOutTopLeft, fadeOutTopRight, fadeOutBottomRight, fadeOutBottomLeft
-
-Flippers:
-flip, flipInX, flipInY, flipOutX, flipOutY, Lightspeed, lightSpeedInRight, lightSpeedInLeft, lightSpeedOutRight, lightSpeedOutLeft
-
-Rotating entrances:
-rotateIn, rotateInDownLeft, rotateInDownRight, rotateInUpLeft, rotateInUpRight
-
-Rotating exits:
-rotateOut, rotateOutDownLeft, rotateOutDownRight, rotateOutUpLeft, rotateOutUpRight
-
-Specials:
-hinge, jackInTheBox, rollIn, rollOut
-
-Zooming entrances: 
-zoomIn, zoomInDown, zoomInLeft, zoomInRight, zoomInUp
-
-Zooming exits: 
-zoomOut, zoomOutDown zoomOutLeft, zoomOutRight, zoomOutUp
-
-Sliding entrances: 
-slideInDown, slideInLeft, slideInRight, slideInUp, Sliding, exits slideOutDown, slideOutLeft, slideOutRight, slideOutUp
+- Attention seekers: bounce, flash, pulse, rubberBand, shakeX, shakeY, headShake, swing, tada, wobble, jello, heartBeat
+- Back entrances: backInDown, backInLeft, backInRight, backInUp
+- Back exits: backOutDown, backOutLeft, backOutRight, backOutUp
+- Bouncing entrances: bounceIn, bounceInDown, bounceInLeft, bounceInRight, bounceInUp
+- Bouncing exits: bounceOut, bounceOutDown, bounceOutLeft, bounceOutRight, bounceOutUp
+- Fading entrances: fadeIn, fadeInDown, fadeInDownBig, fadeInLeft, fadeInLeftBig, fadeInRight, fadeInRightBig, fadeInUp, fadeInUpBig, fadeInTopLeft, fadeInTopRight, fadeInBottomLeft, fadeInBottomRight
+- Fading exits: fadeOut, fadeOutDown, fadeOutDownBig, fadeOutLeft, fadeOutLeftBig, fadeOutRight, fadeOutRightBig, fadeOutUp, fadeOutUpBig, fadeOutTopLeft, fadeOutTopRight, fadeOutBottomRight, fadeOutBottomLeft
+- Flippers: flip, flipInX, flipInY, flipOutX, flipOutY, Lightspeed, lightSpeedInRight, lightSpeedInLeft, lightSpeedOutRight, lightSpeedOutLeft
+- Rotating entrances: rotateIn, rotateInDownLeft, rotateInDownRight, rotateInUpLeft, rotateInUpRight
+- Rotating exits: rotateOut, rotateOutDownLeft, rotateOutDownRight, rotateOutUpLeft, rotateOutUpRight
+- Specials: hinge, jackInTheBox, rollIn, rollOut
+- Zooming entrances: zoomIn, zoomInDown, zoomInLeft, zoomInRight, zoomInUp
+- Zooming exits: zoomOut, zoomOutDown zoomOutLeft, zoomOutRight, zoomOutUp
+- Sliding entrances: slideInDown, slideInLeft, slideInRight, slideInUp, Sliding, exits slideOutDown, slideOutLeft, slideOutRight, slideOutUp
 
 **Sticky option for Grid block:**
 Sticky option allows you to make the Grid block stick to the top of the viewport when scrolling down. To use this feature, you will have the option in Grid block settings to enable the "Sticky" option. When enabled, the Grid block will remain fixed at the top of the viewport as you scroll down the page.
@@ -92,6 +64,9 @@ WordPress installation and then activate the Plugin from Plugins page.
 == Changelog ==
 = 1.0.0 =
 *   Added sticked option for Grid block.
+*   Improved interface for animations.
+*   Improved interface for carousel/slider.
+*   Added options in native gallery block.
 
 = 0.2.5 =
 *   Update version.
