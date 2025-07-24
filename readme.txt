@@ -1,79 +1,59 @@
-=== FrontBlocks ===
-Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, manoloramos
+=== FrontBlocks for GeneratePress ===
+Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit2sumit
 Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
-Tested up to: 6.7
-Stable tag: 0.2.5
-Version: 0.2.5
+Tested up to: 6.8
+Stable tag: 1.0.0
+Version: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Custom enhacements for front developing.
+Extends GeneratePress with carousel, slider, animations, sticky column, and insert post functionality.
 
 == Description ==
 
-To start using the Carousel, add the frontblocks-carousel class to the element and then, include any of the following attributes:
+**Carousel/Slider for GenerateBlocks Grid**
+We have added options to the Gutenberg blocks that allow you to create a carousel or slider with the blocks you want.
 
-Data Attributes for Carrousel:
-- data-type: slider, carousel
-slider - rewinds slider to the start/end when it reaches first or last slide,
-carousel - changes slides without starting over when it reaches first or last slide.
+To start using the Carousel, go to the grid block and select the "Carousel" or "Slider" option in the "FrontBlocks Grid Option" section.
 
-- data-autoplay: 0 - time ms
-- data-view: 1, 2, 3, 4, 5, 6
-- data-buttons: bullets, arrows, none
-- data-buttons-color: hex color
-- data-buttons-background-color: hex color or transparent
-- data-res-view: 1, 2, 3, 4, 5, 6
+Attributes for the Carousel/Slider:
+- Autoplay - automatically change the slides after a certain time in seconds.
+- View - number of items to show in the carousel/slider.
+- Responsive View - number of items to show in the carousel/slider in responsive view.
+- Buttons - type of buttons to show in the carousel/slider (bullets, arrows, none).
+- Buttons Color - color of the buttons.
+- Buttons Background Color - background color of the buttons (can be transparent).
 
-Data Attributes for Animation:
-- data-frontblocks-animation: defines the animation class name that will be assigned to the element.
+**Enhanced WordPress Native Gallery**
+We have added options to the native WordPress gallery that allow you to create a different layout as Grid or Masonry, and also make click to carousel with the images.
 
-Animations:
-Based on [Animate.css](https://animate.style/)
+**Animations for Blocks**
+You can add animations to the blocks you want. To do this, go to the block settings and select the "FrontBlocks Animation Option" section. There you will find a list of animations that you can apply to the block.
 
-Attention seekers:
-bounce, flash, pulse, rubberBand, shakeX, shakeY, headShake, swing, tada, wobble, jello, heartBeat
+Animations are based on [Animate.css](https://animate.style/).
 
-Back entrances:
-backInDown, backInLeft, backInRight, backInUp
+- Attention seekers: bounce, flash, pulse, rubberBand, shakeX, shakeY, headShake, swing, tada, wobble, jello, heartBeat
+- Back entrances: backInDown, backInLeft, backInRight, backInUp
+- Back exits: backOutDown, backOutLeft, backOutRight, backOutUp
+- Bouncing entrances: bounceIn, bounceInDown, bounceInLeft, bounceInRight, bounceInUp
+- Bouncing exits: bounceOut, bounceOutDown, bounceOutLeft, bounceOutRight, bounceOutUp
+- Fading entrances: fadeIn, fadeInDown, fadeInDownBig, fadeInLeft, fadeInLeftBig, fadeInRight, fadeInRightBig, fadeInUp, fadeInUpBig, fadeInTopLeft, fadeInTopRight, fadeInBottomLeft, fadeInBottomRight
+- Fading exits: fadeOut, fadeOutDown, fadeOutDownBig, fadeOutLeft, fadeOutLeftBig, fadeOutRight, fadeOutRightBig, fadeOutUp, fadeOutUpBig, fadeOutTopLeft, fadeOutTopRight, fadeOutBottomRight, fadeOutBottomLeft
+- Flippers: flip, flipInX, flipInY, flipOutX, flipOutY, Lightspeed, lightSpeedInRight, lightSpeedInLeft, lightSpeedOutRight, lightSpeedOutLeft
+- Rotating entrances: rotateIn, rotateInDownLeft, rotateInDownRight, rotateInUpLeft, rotateInUpRight
+- Rotating exits: rotateOut, rotateOutDownLeft, rotateOutDownRight, rotateOutUpLeft, rotateOutUpRight
+- Specials: hinge, jackInTheBox, rollIn, rollOut
+- Zooming entrances: zoomIn, zoomInDown, zoomInLeft, zoomInRight, zoomInUp
+- Zooming exits: zoomOut, zoomOutDown zoomOutLeft, zoomOutRight, zoomOutUp
+- Sliding entrances: slideInDown, slideInLeft, slideInRight, slideInUp, Sliding, exits slideOutDown, slideOutLeft, slideOutRight, slideOutUp
 
-Back exits:
-backOutDown, backOutLeft, backOutRight, backOutUp
+**Sticky option for Grid block:**
+Sticky option allows you to make the Grid block stick to the top of the viewport when scrolling down. To use this feature, you will have the option in Grid block settings to enable the "Sticky" option. When enabled, the Grid block will remain fixed at the top of the viewport as you scroll down the page.
 
-Bouncing entrances:
-bounceIn, bounceInDown, bounceInLeft, bounceInRight, bounceInUp
-
-Bouncing exits:
-bounceOut, bounceOutDown, bounceOutLeft, bounceOutRight, bounceOutUp
-
-Fading entrances:
-fadeIn, fadeInDown, fadeInDownBig, fadeInLeft, fadeInLeftBig, fadeInRight, fadeInRightBig, fadeInUp, fadeInUpBig, fadeInTopLeft, fadeInTopRight, fadeInBottomLeft, fadeInBottomRight
-
-Fading exits:
-fadeOut, fadeOutDown, fadeOutDownBig, fadeOutLeft, fadeOutLeftBig, fadeOutRight, fadeOutRightBig, fadeOutUp, fadeOutUpBig, fadeOutTopLeft, fadeOutTopRight, fadeOutBottomRight, fadeOutBottomLeft
-
-Flippers:
-flip, flipInX, flipInY, flipOutX, flipOutY, Lightspeed, lightSpeedInRight, lightSpeedInLeft, lightSpeedOutRight, lightSpeedOutLeft
-
-Rotating entrances:
-rotateIn, rotateInDownLeft, rotateInDownRight, rotateInUpLeft, rotateInUpRight
-
-Rotating exits:
-rotateOut, rotateOutDownLeft, rotateOutDownRight, rotateOutUpLeft, rotateOutUpRight
-
-Specials:
-hinge, jackInTheBox, rollIn, rollOut
-
-Zooming entrances: 
-zoomIn, zoomInDown, zoomInLeft, zoomInRight, zoomInUp
-
-Zooming exits: 
-zoomOut, zoomOutDown zoomOutLeft, zoomOutRight, zoomOutUp
-
-Sliding entrances: 
-slideInDown, slideInLeft, slideInRight, slideInUp, Sliding, exits slideOutDown, slideOutLeft, slideOutRight, slideOutUp
+**Insert Post Block:**
+Display content from other posts, pages, or custom post types. Search and select any published content to display its title as H2 and full content. Perfect for creating dynamic content sections without duplicating content.
 
 Others Plugins:
 - [Closemarketing Plugins](https://profiles.wordpress.org/closemarketing/#content-plugins)
@@ -89,7 +69,10 @@ WordPress installation and then activate the Plugin from Plugins page.
 
 == Changelog ==
 = 1.0.0 =
-*   New block read content from other page/post type.
+*   Added sticked option for Grid block.
+*   Improved interface for animations.
+*   Improved interface for carousel/slider.
+*   Added options in native gallery block.
 
 = 0.2.5 =
 *   Update version.

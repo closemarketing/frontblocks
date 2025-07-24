@@ -1,23 +1,45 @@
 {
-	"name": "FrontBlocks",
-	"version": "1.0.0",
-	"description": "Plugin for front blocks development.",
-	"author": "CLOSE",
-	"license": "GPL-2.0-or-later",
-	"main": "build/index.js",
-	"scripts": {
-		"build": "wp-scripts build --webpack-copy-php",
-		"format": "wp-scripts format",
-		"lint:css": "wp-scripts lint-style",
-		"lint:js": "wp-scripts lint-js",
-		"packages-update": "wp-scripts packages-update",
-		"plugin-zip": "wp-scripts plugin-zip",
-		"start": "wp-scripts start --webpack-copy-php"
-	},
   "devDependencies": {
-		"@wordpress/scripts": "^30.0.2",
+    "@babel/cli": "^7.27.2",
+    "@babel/core": "^7.27.4",
+    "@babel/preset-env": "^7.27.2",
+    "@babel/preset-react": "^7.27.1",
     "gulp": "^5.0.0",
     "gulp-clean-css": "^4.3.0",
     "gulp-minify": "^3.1.0"
+  },
+  "babel": {
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": {
+            "browsers": [
+              "> 1%",
+              "last 2 versions"
+            ]
+          }
+        }
+      ],
+      [
+        "@babel/preset-react",
+        {
+          "runtime": "classic"
+        }
+      ]
+    ]
+  },
+  "scripts": {
+    "gulp": "gulp compress",
+    "build:carousel": "babel includes/carousel/frontblocks-advanced-option.jsx --out-file includes/dist/frontblocks-advanced-option.js",
+    "build:animations": "babel includes/animations/frontblocks-animation-option.jsx --out-file includes/dist/frontblocks-animation-option.js",
+    "build:sticky":  "babel includes/sticky-column/frontblocks-sticky-column-option.jsx --out-file includes/dist/frontblocks-sticky-column-option.js",
+    "build:gallery": "babel includes/gallery/frontblocks-gallery-option.jsx --out-file includes/dist/frontblocks-gallery-option.js",
+    "build:post": "babel includes/post/frontblocks-insert-post-option.jsx --out-file includes/dist/frontblocks-insert-post-option.js",
+    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run gulp"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   }
 }

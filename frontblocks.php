@@ -47,5 +47,11 @@ require_once FRBL_PLUGIN_PATH . 'includes/carousel/frontblocks-carousel.php';
 // Animations.
 require_once FRBL_PLUGIN_PATH . 'includes/animations/frontblocks-animations.php';
 
-// Block.
-require_once FRBL_PLUGIN_PATH . 'includes/blocks/content-link/content-link.php';
+// Sticky Column.
+require_once FRBL_PLUGIN_PATH . 'includes/sticky-column/frontblocks-sticky-column.php';
+
+// Gallery.
+require_once FRBL_PLUGIN_PATH . 'includes/gallery/frontblocks-gallery.php';
+
+// Insert Post Block.
+require_once FRBL_PLUGIN_PATH . 'includes/post/frontblocks-insert-post.php';
