@@ -1,8 +1,13 @@
 === FrontBlocks for GeneratePress ===
 Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit2sumit
+=== FrontBlocks for GeneratePress ===
+Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit2sumit
 Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
+Tested up to: 6.8
+Stable tag: 1.0.0
+Version: 1.0.0
 Tested up to: 6.8
 Stable tag: 1.0.0
 Version: 1.0.0
@@ -13,6 +18,24 @@ Extends GeneratePress with carousel, slider, animations, sticky column, and inse
 
 == Description ==
 
+**Carousel/Slider for GenerateBlocks Grid**
+We have added options to the Gutenberg blocks that allow you to create a carousel or slider with the blocks you want.
+
+To start using the Carousel, go to the grid block and select the "Carousel" or "Slider" option in the "FrontBlocks Grid Option" section.
+
+Attributes for the Carousel/Slider:
+- Autoplay - automatically change the slides after a certain time in seconds.
+- View - number of items to show in the carousel/slider.
+- Responsive View - number of items to show in the carousel/slider in responsive view.
+- Buttons - type of buttons to show in the carousel/slider (bullets, arrows, none).
+- Buttons Color - color of the buttons.
+- Buttons Background Color - background color of the buttons (can be transparent).
+
+**Enhanced WordPress Native Gallery**
+We have added options to the native WordPress gallery that allow you to create a different layout as Grid or Masonry, and also make click to carousel with the images.
+
+**Animations for Blocks**
+You can add animations to the blocks you want. To do this, go to the block settings and select the "FrontBlocks Animation Option" section. There you will find a list of animations that you can apply to the block.
 **Carousel/Slider for GenerateBlocks Grid**
 We have added options to the Gutenberg blocks that allow you to create a carousel or slider with the blocks you want.
 
@@ -68,6 +91,12 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+= 1.0.0 =
+*   Added sticked option for Grid block.
+*   Improved interface for animations.
+*   Improved interface for carousel/slider.
+*   Added options in native gallery block.
+
 = 1.0.0 =
 *   Added sticked option for Grid block.
 *   Improved interface for animations.
