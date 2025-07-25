@@ -31,16 +31,6 @@ define( 'FRBL_PLUGIN', __FILE__ );
 define( 'FRBL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'FRBL_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 
-add_action( 'plugins_loaded', 'frbl__plugin_init' );
-/**
- * Load localization files
- *
- * @return void
- */
-function frbl__plugin_init() {
-	load_plugin_textdomain( 'frontblocks', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-}
-
 // Carousel.
 require_once FRBL_PLUGIN_PATH . 'includes/carousel/frontblocks-carousel.php';
 
