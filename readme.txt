@@ -1,13 +1,8 @@
 === FrontBlocks for GeneratePress ===
 Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit2sumit
-=== FrontBlocks for GeneratePress ===
-Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit2sumit
 Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
-Tested up to: 6.8
-Stable tag: 1.0.0
-Version: 1.0.0
 Tested up to: 6.8
 Stable tag: 1.0.0
 Version: 1.0.0
@@ -96,6 +91,7 @@ WordPress installation and then activate the Plugin from Plugins page.
 *   Improved interface for animations.
 *   Improved interface for carousel/slider.
 *   Added options in native gallery block.
+*   Added: Insert Post block to display content from other posts, pages, or custom post types.
 
 = 1.0.0 =
 *   Added sticked option for Grid block.
