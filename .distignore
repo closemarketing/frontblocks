@@ -15,3 +15,4 @@ package.json
 package-lock.json
 .babelrc
 webpack.config.js
+readme.md

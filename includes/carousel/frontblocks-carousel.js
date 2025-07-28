@@ -27,7 +27,7 @@ window.addEventListener('load', function (event) {
 			const carouselView = item.getAttribute('data-view') ? item.getAttribute('data-view') : 4;
 			const carouselAutoplay = item.getAttribute('data-autoplay') ? item.getAttribute('data-autoplay') : 0;
 			const carouselResView = item.getAttribute('data-res-view') ? item.getAttribute('data-res-view') : 1;
-            const carouselRewind = item.getAttribute('data-rewind') ? item.getAttribute('data-rewind') : false;
+      const carouselRewind = item.getAttribute('data-rewind') ? item.getAttribute('data-rewind') : false;
 			const carouselbuttonsColor = item.getAttribute('data-buttons-color') ? item.getAttribute('data-buttons-color') : 'black';
 			const carouselbuttonsBackgroundColor = item.getAttribute('data-buttons-background-color') ? item.getAttribute('data-buttons-background-color') : 'transparent';
 			const carouselbuttonsPosition = item.getAttribute('data-buttons-position') ? item.getAttribute('data-buttons-position') : 'side';
@@ -40,7 +40,7 @@ window.addEventListener('load', function (event) {
 			}
 
 			// Don't show bullets on responsive and more than 6 items.
-            let showBullets = false;
+      let showBullets = false;
 			if ( window.screen.availWidth < 768 && item.children.length < 6 ) {
 				showBullets = true;
 			} else if ( window.screen.availWidth > 768 ) {
@@ -75,11 +75,11 @@ window.addEventListener('load', function (event) {
 			if ( carouselbuttons == 'arrows' ) {
 				const arrows = document.createElement('div');
 				arrows.classList.add('glide__arrows');
-                if ( carouselbuttonsPosition == 'bottom' ) {
-                    arrows.classList.add('glide__arrows--bottom');
-                } else {
-                    arrows.classList.add('glide__arrows--top');
-                }
+				if ( carouselbuttonsPosition == 'bottom' ) {
+						arrows.classList.add('glide__arrows--bottom');
+				} else {
+						arrows.classList.add('glide__arrows--top');
+				}
                 
 				arrows.setAttribute('data-glide-el', 'controls');
 				arrowsHTML = '<button class="glide__arrow glide__arrow--left glide__arrow glide__arrow--left" data-glide-dir="<"';
@@ -95,13 +95,13 @@ window.addEventListener('load', function (event) {
 				arrows.innerHTML = arrowsHTML;
 				wrapperParent.appendChild(arrows);
 			}
-            new Glide( wrapperParent, {
+      const glideFrontBlocks = new Glide( wrapperParent, {
 				type: carouselType,
 				perView: carouselView,
 				startAt: 0,
 				autoplay: false, //carouselAutoplay === 0 ? 2500 : carouselAutoplay,
 				gap: 0,
-                rewind: carouselRewind,
+        rewind: carouselRewind,
 				breakpoints: {
 					430: {
 						perView: carouselResView
@@ -113,7 +113,24 @@ window.addEventListener('load', function (event) {
 						perView: carouselResView
 					},
 				}
-			}).mount();
+			});
+
+			if ( 'slider' === carouselType ) {
+				glideFrontBlocks.on('run.after', () => {
+					const currentIndex = glideFrontBlocks.index;
+					const lastIndex = glideFrontBlocks.selector.querySelectorAll('.glide__slide').length;
+
+					actualView = parseInt(currentIndex) + parseInt(carouselView);
+
+					if ( actualView > lastIndex ) {
+						setTimeout(() => {
+							glideFrontBlocks.go('=0');
+						}, 5);
+					}
+				});
+			}
+
+			glideFrontBlocks.mount();
 		});
 	}
 });

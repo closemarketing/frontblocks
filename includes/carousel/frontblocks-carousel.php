@@ -78,30 +78,30 @@ function frbl_add_custom_attributes_to_grid_block( $block_content, $block ) {
 		$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
 		$button_bg_color    = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
 		$buttons_position   = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
-        
-		// Example: Add data attributes to the wrapper div if carousel is enabled.
+
+	// Example: Add data attributes to the wrapper div if carousel is enabled.
 	if ( 'carousel' === $custom_option || 'slider' === $custom_option ) {
-            $attributes = '';
-            if('slider' === $custom_option){
-                $attributes .= ' data-rewind="' . esc_attr( $rewind ) . '"';
-            }
-			// Add data attributes and the 'frontblocks-carousel' class to the first div in the block content.
-			$block_content = preg_replace(
-				'/<div([^>]*)class="([^"]*gb-grid-wrapper[^"]*)"([^>]*)>/',
-				'<div$1class="$2 frontblocks-carousel"$3' .
-					' data-type="' . esc_attr( $custom_option ) . '"' .
-					' data-view="' . esc_attr( $items_to_view ) . '"' .
-					' data-res-view="' . esc_attr( $responsive_to_view ) . '"' .
-					' data-autoplay="' . esc_attr( $autoplay ) . '"' .
-					' data-buttons="' . esc_attr( $buttons ) . '"' .
-					' data-buttons-color="' . esc_attr( $button_color ) . '"' .
-					' data-buttons-background-color="' . esc_attr( $button_bg_color ) . '"' .
-					' data-buttons-position="' . esc_attr( $buttons_position ) . '"' .
-                    $attributes .
-					'>',
-				$block_content,
-				1 // Only replace the first occurrence
-			);
+		$attributes = '';
+		if ( 'slider' === $custom_option ) {
+			$attributes .= ' data-rewind="' . esc_attr( $rewind ) . '"';
+		}
+		// Add data attributes and the 'frontblocks-carousel' class to the first div in the block content.
+		$block_content = preg_replace(
+			'/<div([^>]*)class="([^"]*gb-grid-wrapper[^"]*)"([^>]*)>/',
+			'<div$1class="$2 frontblocks-carousel"$3' .
+				' data-type="' . esc_attr( $custom_option ) . '"' .
+				' data-view="' . esc_attr( $items_to_view ) . '"' .
+				' data-res-view="' . esc_attr( $responsive_to_view ) . '"' .
+				' data-autoplay="' . esc_attr( $autoplay ) . '"' .
+				' data-buttons="' . esc_attr( $buttons ) . '"' .
+				' data-buttons-color="' . esc_attr( $button_color ) . '"' .
+				' data-buttons-background-color="' . esc_attr( $button_bg_color ) . '"' .
+				' data-buttons-position="' . esc_attr( $buttons_position ) . '"' .
+									$attributes .
+				'>',
+			$block_content,
+			1 // Only replace the first occurrence.
+		);
 	}
 
 		return $block_content;
