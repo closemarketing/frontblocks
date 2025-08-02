@@ -35,7 +35,8 @@
     "build:animations": "babel includes/animations/frontblocks-animation-option.jsx --out-file includes/dist/frontblocks-animation-option.js",
     "build:sticky":  "babel includes/sticky-column/frontblocks-sticky-column-option.jsx --out-file includes/dist/frontblocks-sticky-column-option.js",
     "build:gallery": "babel includes/gallery/frontblocks-gallery-option.jsx --out-file includes/dist/frontblocks-gallery-option.js",
-    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run gulp"
+    "build:post": "babel includes/post/frontblocks-insert-post-option.jsx --out-file includes/dist/frontblocks-insert-post-option.js",
+    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run gulp"
   },
   "dependencies": {
     "react": "^19.1.0",

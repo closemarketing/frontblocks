@@ -9,10 +9,28 @@ Version: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Extends GeneratePress with carousel, slider, animations and sticky column.
+Extends GeneratePress with carousel, slider, animations, sticky column, and insert post functionality.
 
 == Description ==
 
+**Carousel/Slider for GenerateBlocks Grid**
+We have added options to the Gutenberg blocks that allow you to create a carousel or slider with the blocks you want.
+
+To start using the Carousel, go to the grid block and select the "Carousel" or "Slider" option in the "FrontBlocks Grid Option" section.
+
+Attributes for the Carousel/Slider:
+- Autoplay - automatically change the slides after a certain time in seconds.
+- View - number of items to show in the carousel/slider.
+- Responsive View - number of items to show in the carousel/slider in responsive view.
+- Buttons - type of buttons to show in the carousel/slider (bullets, arrows, none).
+- Buttons Color - color of the buttons.
+- Buttons Background Color - background color of the buttons (can be transparent).
+
+**Enhanced WordPress Native Gallery**
+We have added options to the native WordPress gallery that allow you to create a different layout as Grid or Masonry, and also make click to carousel with the images.
+
+**Animations for Blocks**
+You can add animations to the blocks you want. To do this, go to the block settings and select the "FrontBlocks Animation Option" section. There you will find a list of animations that you can apply to the block.
 **Carousel/Slider for GenerateBlocks Grid**
 We have added options to the Gutenberg blocks that allow you to create a carousel or slider with the blocks you want.
 
@@ -52,6 +70,9 @@ Animations are based on [Animate.css](https://animate.style/).
 **Sticky option for Grid block:**
 Sticky option allows you to make the Grid block stick to the top of the viewport when scrolling down. To use this feature, you will have the option in Grid block settings to enable the "Sticky" option. When enabled, the Grid block will remain fixed at the top of the viewport as you scroll down the page.
 
+**Insert Post Block:**
+Display content from other posts, pages, or custom post types. Search and select any published content to display its title as H2 and full content. Perfect for creating dynamic content sections without duplicating content.
+
 Others Plugins:
 - [Closemarketing Plugins](https://profiles.wordpress.org/closemarketing/#content-plugins)
 
@@ -65,6 +86,13 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+= 1.0.0 =
+*   Added sticked option for Grid block.
+*   Improved interface for animations.
+*   Improved interface for carousel/slider.
+*   Added options in native gallery block.
+*   Added: Insert Post block to display content from other posts, pages, or custom post types.
+
 = 1.0.0 =
 *   Added sticked option for Grid block.
 *   Improved interface for animations.
