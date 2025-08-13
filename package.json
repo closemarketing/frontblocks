@@ -8,6 +8,11 @@
     "gulp-clean-css": "^4.3.0",
     "gulp-minify": "^3.1.0"
   },
+  "dependencies": {
+    "fullpage.js": "^4.0.37",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
   "babel": {
     "presets": [
       [
@@ -37,9 +42,5 @@
     "build:gallery": "babel includes/gallery/frontblocks-gallery-option.jsx --out-file includes/dist/frontblocks-gallery-option.js",
     "build:post": "babel includes/post/frontblocks-insert-post-option.jsx --out-file includes/dist/frontblocks-insert-post-option.js",
     "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run gulp"
-  },
-  "dependencies": {
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
   }
 }
