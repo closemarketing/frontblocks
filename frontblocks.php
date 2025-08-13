@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: FrontBlocks for GeneratePress
- * Plugin URI:  https://github.com/closemarketing/frontblocks
+ * Plugin URI:  https://wordpress.org/plugins/frontblocks/
  * Description: Blocks and helpers that extends GeneratePress blocks.
  * Version:     1.0.0
  * Author:      Closemarketing
@@ -11,12 +11,12 @@
  * License:     GPL-2.0+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  *
- * Requires at least: 6.7
+ * Requires at least: 5.0
  * Requires PHP: 7.0
  *
  * @package     FrontBlocks
  * @author      Closemarketing
- * @copyright   2023 Closemarketing
+ * @copyright   2025 Closemarketing
  * @license     GPL-2.0+
  *
  * @wordpress-plugin
