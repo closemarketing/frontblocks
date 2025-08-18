@@ -68,6 +68,9 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+= 1.1.0 =
+*   Added: FullPage.js integration for creating vertical scrolling sections.
+
 = 1.0.0 =
 *   Added sticked option for Grid block.
 *   Improved interface for animations.
