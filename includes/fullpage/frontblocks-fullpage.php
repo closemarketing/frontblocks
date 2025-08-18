@@ -10,55 +10,76 @@
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'wp_enqueue_scripts', 'frblp_theme_scripts', 99 );
+add_action( 'wp_enqueue_scripts', 'frbl_fullpage_scripts', 99 );
 /**
  * Loads Scripts
  *
  * @return void
  */
-function frblp_theme_scripts() {
+function frbl_fullpage_scripts() {
 	$dist_dir = WP_DEBUG ? 'fullpage/' : 'dist/';
+	
+	// Enqueue fullpage.js CSS
+	wp_enqueue_style(
+		'fullpage-css',
+		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'fullpage.min.css',
+		array(),
+		'4.0.37'
+	);
+	
+	// Enqueue custom fullpage styles
 	wp_enqueue_style(
 		'frontblocks-fullpage',
-		FRBLP_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-fullpage.css',
-		array(),
-		FRBLP_VERSION
+		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-fullpage.css',
+		array( 'fullpage-css' ),
+		FRBL_VERSION
 	);
 
+	// Enqueue fullpage.js extensions (includes scrolloverflow)
 	wp_enqueue_script(
 		'frontblocks-fullpage',
-		FRBLP_PLUGIN_URL . 'includes/dist/glide.min.js',
+		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'fullpage.extensions.min.js',
 		array(),
-		FRBLP_VERSION,
+		'4.0.37',
 		true
 	);
 
+	// Enqueue custom fullpage code
 	wp_enqueue_script(
 		'frontblocks-fullpage-custom',
-		FRBLP_PLUGIN_URL . 'includes/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-fullpage.js' : 'frontblocks-fullpage-min.js' ),
+		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-fullpage.js' : 'frontblocks-fullpage-min.js' ),
 		array( 'frontblocks-fullpage' ),
-		FRBLP_VERSION,
+		FRBL_VERSION,
 		true
+	);
+
+	// Localize script with license key
+	wp_localize_script(
+		'frontblocks-fullpage-custom',
+		'frblFullpageData',
+		array(
+			'licenseKey' => frbl_get_fullpage_license_key(),
+		)
 	);
 }
 
-add_action( 'enqueue_block_editor_assets', 'frblp_enqueue_block_editor_assets' );
+add_action( 'enqueue_block_editor_assets', 'frbl_enqueue_fullpage_block_editor_assets' );
 /**
  * Enqueue custom block editor script
  *
  * @return void
  */
-function frblp_enqueue_block_editor_assets() {
+function frbl_enqueue_fullpage_block_editor_assets() {
 	wp_enqueue_script(
-		'frontblocks-advanced-option',
-		FRBLP_PLUGIN_URL . 'includes/dist/frontblocks-advanced-option.js',
+		'frontblocks-fullpage-option',
+		FRBL_PLUGIN_URL . 'includes/dist/frontblocks-fullpage-option.js',
 		array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-edit-post' ),
-		FRBLP_VERSION,
+		FRBL_VERSION,
 		true
 	);
 }
 
-add_filter( 'render_block_generateblocks/grid', 'frblp_add_custom_attributes_to_grid_block', 10, 2 );
+add_filter( 'render_block_generateblocks/container', 'frbl_add_fullpage_attributes_to_container_block', 10, 2 );
 /**
  * Hook to filter the block output on frontend.
  *
@@ -67,59 +88,58 @@ add_filter( 'render_block_generateblocks/grid', 'frblp_add_custom_attributes_to_
  *
  * @return html
  */
-function frblp_add_custom_attributes_to_grid_block( $block_content, $block ) {
-		$attrs              = $block['attrs'] ?? array();
-		$custom_option      = isset( $attrs['frblGridOption'] ) ? sanitize_text_field( $attrs['frblGridOption'] ) : '';
-		$items_to_view      = isset( $attrs['frblItemsToView'] ) ? (int) $attrs['frblItemsToView'] : 4;
-		$responsive_to_view = isset( $attrs['frblResponsiveToView'] ) ? (int) $attrs['frblResponsiveToView'] : 1;
-		$autoplay           = isset( $attrs['frblAutoplay'] ) ? ( (int) $attrs['frblAutoplay'] * 1000 ) : '';
-		$rewind             = isset( $attrs['frblRewind'] ) ? (bool) $attrs['frblRewind'] : true;
-		$buttons            = isset( $attrs['frblButtons'] ) ? sanitize_text_field( $attrs['frblButtons'] ) : 'arrows';
-		$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
-		$button_bg_color    = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
-		$buttons_position   = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
+function frbl_add_fullpage_attributes_to_container_block( $block_content, $block ) {
+	$attrs = $block['attrs'] ?? array();
+	$fullpage_enabled = isset( $attrs['frblFullpageEnabled'] ) ? (bool) $attrs['frblFullpageEnabled'] : false;
+	$show_navigation = isset( $attrs['frblShowNavigation'] ) ? (bool) $attrs['frblShowNavigation'] : true;
+	$show_scrollbar = isset( $attrs['frblShowScrollbar'] ) ? (bool) $attrs['frblShowScrollbar'] : true;
+	$navigation_position = isset( $attrs['frblNavigationPosition'] ) ? sanitize_text_field( $attrs['frblNavigationPosition'] ) : 'right';
+	$navigation_color = isset( $attrs['frblNavigationColor'] ) ? sanitize_text_field( $attrs['frblNavigationColor'] ) : '#000';
+	$auto_scroll = isset( $attrs['frblAutoScroll'] ) ? (bool) $attrs['frblAutoScroll'] : false;
+	$scroll_speed = isset( $attrs['frblScrollSpeed'] ) ? (int) $attrs['frblScrollSpeed'] : 700;
+	$loop_bottom = isset( $attrs['frblLoopBottom'] ) ? (bool) $attrs['frblLoopBottom'] : false;
+	$loop_top = isset( $attrs['frblLoopTop'] ) ? (bool) $attrs['frblLoopTop'] : false;
+	$scrolloverflow = isset( $attrs['frblScrolloverflow'] ) ? (bool) $attrs['frblScrolloverflow'] : false;
 
-	// Example: Add data attributes to the wrapper div if fullpage is enabled.
-	if ( 'fullpage' === $custom_option || 'slider' === $custom_option ) {
+	// Add fullpage attributes if enabled
+	if ( $fullpage_enabled ) {
 		$attributes = '';
-		if ( 'slider' === $custom_option ) {
-			$attributes .= ' data-rewind="' . esc_attr( $rewind ) . '"';
-		}
-		// Add data attributes and the 'frontblocks-fullpage' class to the first div in the block content.
+		$attributes .= ' data-fullpage="true"';
+		$attributes .= ' data-navigation="' . esc_attr( $show_navigation ? 'true' : 'false' ) . '"';
+		$attributes .= ' data-scrollbar="' . esc_attr( $show_scrollbar ? 'true' : 'false' ) . '"';
+		$attributes .= ' data-navigation-position="' . esc_attr( $navigation_position ) . '"';
+		$attributes .= ' data-navigation-color="' . esc_attr( $navigation_color ) . '"';
+		$attributes .= ' data-auto-scroll="' . esc_attr( $auto_scroll ? 'true' : 'false' ) . '"';
+		$attributes .= ' data-scroll-speed="' . esc_attr( $scroll_speed ) . '"';
+		$attributes .= ' data-loop-bottom="' . esc_attr( $loop_bottom ? 'true' : 'false' ) . '"';
+		$attributes .= ' data-loop-top="' . esc_attr( $loop_top ? 'true' : 'false' ) . '"';
+		$attributes .= ' data-scrolloverflow="' . esc_attr( $scrolloverflow ? 'true' : 'false' ) . '"';
+
+		// Add data attributes and the 'frontblocks-fullpage' class to the first div in the block content
 		$block_content = preg_replace(
-			'/<div([^>]*)class="([^"]*gb-grid-wrapper[^"]*)"([^>]*)>/',
-			'<div$1class="$2 frontblocks-fullpage"$3' .
-				' data-type="' . esc_attr( $custom_option ) . '"' .
-				' data-view="' . esc_attr( $items_to_view ) . '"' .
-				' data-res-view="' . esc_attr( $responsive_to_view ) . '"' .
-				' data-autoplay="' . esc_attr( $autoplay ) . '"' .
-				' data-buttons="' . esc_attr( $buttons ) . '"' .
-				' data-buttons-color="' . esc_attr( $button_color ) . '"' .
-				' data-buttons-background-color="' . esc_attr( $button_bg_color ) . '"' .
-				' data-buttons-position="' . esc_attr( $buttons_position ) . '"' .
-									$attributes .
-				'>',
+			'/<div([^>]*)class="([^"]*gb-container[^"]*)"([^>]*)>/',
+			'<div$1class="$2 frontblocks-fullpage"$3' . $attributes . '>',
 			$block_content,
-			1 // Only replace the first occurrence.
+			1 // Only replace the first occurrence
 		);
 	}
 
-		return $block_content;
+	return $block_content;
 }
 
-// Registrar atributos antes que GenerateBlocks registre sus bloques.
+// Register attributes before GenerateBlocks registers its blocks
 add_action(
 	'init',
 	function () {
-		// Usar prioridad 9 (antes del 10 predeterminado).
+		// Use priority 9 (before the default 10)
 		add_filter(
 			'generateblocks_blocks_registered_block',
-			'frblp_register_custom_attributes_for_grid_block',
+			'frbl_register_fullpage_attributes_for_container_block',
 			9,
 			2
 		);
 
-		// Registrar atributos desde el lado del frontend también.
+		// Register attributes from the frontend side as well
 		add_action(
 			'enqueue_block_editor_assets',
 			function () {
@@ -128,49 +148,65 @@ add_action(
 					"
 					wp.hooks.addFilter(
 						'blocks.registerBlockType',
-						'frontblocks/grid-attributes',
+						'frontblocks/container-fullpage-attributes',
 						function( settings, name ) {
-							if ( name !== 'generateblocks/grid' ) {
+							if ( name !== 'generateblocks/container' ) {
 								return settings;
 							}
 
 							settings.attributes = {
 								...settings.attributes,
-								frblGridOption: {
-									type: 'string',
-									default: 'none'
+								frblFullpageEnabled: {
+									type: 'boolean',
+									default: false
 								},
-								frblItemsToView: {
-									type: 'string',
-									default: '4'
-								},
-								frblResponsiveToView: {
-									type: 'string',
-									default: '1'
-								},
-								frblAutoplay: {
-									type: 'string',
-									default: ''
-								},
-								frblButtons: {
-									type: 'string',
-									default: 'arrows'
-								},
-								frblButtonsPosition: {
-									type: 'string',
-									default: 'side'
-								},
-								frblButtonColor: {
-									type: 'string',
-									default: ''
-								},
-								frblButtonBgColor: {
-									type: 'string',
-									default: ''
-								},
-								frblRewind: {
+								frblShowNavigation: {
 									type: 'boolean',
 									default: true
+								},
+								frblShowArrows: {
+									type: 'boolean',
+									default: true
+								},
+								frblShowScrollbar: {
+									type: 'boolean',
+									default: true
+								},
+								frblNavigationPosition: {
+									type: 'string',
+									default: 'right'
+								},
+								frblNavigationColor: {
+									type: 'string',
+									default: '#000'
+								},
+								frblArrowColor: {
+									type: 'string',
+									default: '#000'
+								},
+								frblScrollbarColor: {
+									type: 'string',
+									default: '#000'
+								},
+								frblAutoScroll: {
+									type: 'boolean',
+									default: false
+								},
+								frblScrollSpeed: {
+									type: 'number',
+									default: 700
+								},
+								frblLoopBottom: {
+									type: 'boolean',
+									default: false
+								},
+								frblLoopTop: {
+									type: 'boolean',
+									default: false
+								},
+								frblScrolloverflow: {
+									type: 'boolean',
+									default: false
 								}
 							};
 
@@ -186,53 +222,60 @@ add_action(
 );
 
 /**
- * Register custom attributes for GenerateBlocks Grid block.
+ * Register custom attributes for GenerateBlocks Container block.
  *
  * @param array  $block_args The block arguments.
  * @param string $block_type The name of the block.
  * @return array Modified block arguments.
  * @author Closetechnology
  */
-function frblp_register_custom_attributes_for_grid_block( $block_args, $block_type ) {
-	if ( 'generateblocks/grid' !== $block_type ) {
+function frbl_register_fullpage_attributes_for_container_block( $block_args, $block_type ) {
+	if ( 'generateblocks/container' !== $block_type ) {
 		return $block_args;
 	}
 
-	$block_args['attributes']['frblGridOption'] = array(
-		'type'    => 'string',
-		'default' => 'none',
+	$block_args['attributes']['frblFullpageEnabled'] = array(
+		'type'    => 'boolean',
+		'default' => false,
 	);
-	$block_args['attributes']['frblItemsToView']      = array(
-		'type'    => 'string',
-		'default' => '4',
-	);
-	$block_args['attributes']['frblResponsiveToView'] = array(
-		'type'    => 'string',
-		'default' => '1',
-	);
-	$block_args['attributes']['frblAutoplay']         = array(
-		'type'    => 'string',
-		'default' => '',
-	);
-	$block_args['attributes']['frblRewind']           = array(
+	$block_args['attributes']['frblShowNavigation'] = array(
 		'type'    => 'boolean',
 		'default' => true,
 	);
-	$block_args['attributes']['frblButtons']          = array(
-		'type'    => 'string',
-		'default' => 'arrows',
+
+	$block_args['attributes']['frblShowScrollbar'] = array(
+		'type'    => 'boolean',
+		'default' => true,
 	);
-	$block_args['attributes']['frblButtonColor']      = array(
+	$block_args['attributes']['frblNavigationPosition'] = array(
 		'type'    => 'string',
-		'default' => '',
+		'default' => 'right',
 	);
-	$block_args['attributes']['frblButtonBgColor']    = array(
+	$block_args['attributes']['frblNavigationColor'] = array(
 		'type'    => 'string',
-		'default' => '',
+		'default' => '#000',
 	);
-	$block_args['attributes']['frblButtonsPosition'] = array(
-		'type'    => 'string',
-		'default' => 'side',
+
+	$block_args['attributes']['frblAutoScroll'] = array(
+		'type'    => 'boolean',
+		'default' => false,
 	);
+	$block_args['attributes']['frblScrollSpeed'] = array(
+		'type'    => 'number',
+		'default' => 700,
+	);
+	$block_args['attributes']['frblLoopBottom'] = array(
+		'type'    => 'boolean',
+		'default' => false,
+	);
+	$block_args['attributes']['frblLoopTop'] = array(
+		'type'    => 'boolean',
+		'default' => false,
+	);
+	$block_args['attributes']['frblScrolloverflow'] = array(
+		'type'    => 'boolean',
+		'default' => false,
+	);
+
 	return $block_args;
 }

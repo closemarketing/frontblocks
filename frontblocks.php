@@ -45,3 +45,9 @@ require_once FRBL_PLUGIN_PATH . 'includes/gallery/frontblocks-gallery.php';
 
 // Insert Post Block.
 require_once FRBL_PLUGIN_PATH . 'includes/post/frontblocks-insert-post.php';
+
+// Full Page.
+require_once FRBL_PLUGIN_PATH . 'includes/fullpage/frontblocks-fullpage.php';
+
+// Admin settings.
+require_once FRBL_PLUGIN_PATH . 'includes/admin/frontblocks-admin.php';

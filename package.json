@@ -38,9 +38,10 @@
     "gulp": "gulp compress",
     "build:carousel": "babel includes/carousel/frontblocks-advanced-option.jsx --out-file includes/dist/frontblocks-advanced-option.js",
     "build:animations": "babel includes/animations/frontblocks-animation-option.jsx --out-file includes/dist/frontblocks-animation-option.js",
-    "build:sticky":  "babel includes/sticky-column/frontblocks-sticky-column-option.jsx --out-file includes/dist/frontblocks-sticky-column-option.js",
+    "build:sticky": "babel includes/sticky-column/frontblocks-sticky-column-option.jsx --out-file includes/dist/frontblocks-sticky-column-option.js",
     "build:gallery": "babel includes/gallery/frontblocks-gallery-option.jsx --out-file includes/dist/frontblocks-gallery-option.js",
     "build:post": "babel includes/post/frontblocks-insert-post-option.jsx --out-file includes/dist/frontblocks-insert-post-option.js",
-    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run gulp"
+    "build:fullpage": "babel includes/fullpage/frontblocks-fullpage-option.jsx --out-file includes/dist/frontblocks-fullpage-option.js",
+    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:fullpage && npm run gulp"
   }
 }

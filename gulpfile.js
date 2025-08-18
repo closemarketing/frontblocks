@@ -18,6 +18,9 @@ gulp.task('compress', async function() {
 	gulp.src(['./includes/post/*.js'])
     .pipe(minify())
     .pipe(gulp.dest('./includes/dist'));
+	gulp.src(['./includes/fullpage/*.js'])
+    .pipe(minify())
+    .pipe(gulp.dest('./includes/dist'));
 	gulp.src('./includes/animations/*.css')
     .pipe(cleanCSS({compatibility: 'ie8'}))
     .pipe(gulp.dest('./includes/dist'));
@@ -31,6 +34,9 @@ gulp.task('compress', async function() {
     .pipe(cleanCSS({compatibility: 'ie8'}))
     .pipe(gulp.dest('./includes/dist'));
 	gulp.src('./includes/post/*.css')
+    .pipe(cleanCSS({compatibility: 'ie8'}))
+    .pipe(gulp.dest('./includes/dist'));
+	gulp.src('./includes/fullpage/*.css')
     .pipe(cleanCSS({compatibility: 'ie8'}))
     .pipe(gulp.dest('./includes/dist'));
 });

@@ -1,155 +1,265 @@
 /**
-* ## Glide Carousel style
-* --------------------------- */
+ * FrontBlocks FullPage Styles
+ * Custom styles for fullpage.js integration with GenerateBlocks Container
+ */
 
-.glide {
-  position: relative;
-  width: 100%;
-  box-sizing: border-box;
-}
-.glide * {
-  box-sizing: inherit;
-}
-.glide__track {
-  overflow: hidden;
-}
-.glide__slides {
-  position: relative;
-  width: 100%;
-  list-style: none;
-  backface-visibility: hidden;
-  transform-style: preserve-3d;
-  touch-action: pan-Y;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-  white-space: nowrap;
-  display: flex;
-  flex-wrap: nowrap;
-  will-change: transform;
-}
-.glide__slides--dragging {
-  user-select: none;
-}
-.glide__slide {
-  width: 100%;
-  height: 100%;
-  flex-shrink: 0;
-  white-space: normal;
-  user-select: none;
-  -webkit-touch-callout: none;
-  -webkit-tap-highlight-color: transparent;
-}
-.glide__slide a {
-  user-select: none;
-  -webkit-user-drag: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-.glide__arrows {
-  -webkit-touch-callout: none;
-  user-select: none;
-}
-.glide__bullets {
-  -webkit-touch-callout: none;
-  user-select: none;
-}
-.glide--rtl {
-  direction: rtl;
+/* FullPage Container */
+.frontblocks-fullpage {
+	position: relative;
 }
 
-/*# sourceMappingURL=glide.core.css.map */
+/* Navigation Dots */
+#fp-nav ul li a span,
+.fp-slidesNav ul li a span {
+	background: var(--fp-navigation-color, #000);
+}
 
-.glide__arrow {
-  position: absolute;
-  display: block;
-  top: 50%;
-  z-index: 2;
-  color: white;
-  text-transform: uppercase;
-  padding: 9px 12px;
-  background-color: transparent;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  border-radius: 4px;
-  opacity: 1;
-  cursor: pointer;
-  transition: opacity 150ms ease, border 300ms ease-in-out;
-  transform: translateY(-50%);
-  line-height: 1;
+#fp-nav ul li a.active span,
+.fp-slidesNav ul li a.active span {
+	background: var(--fp-navigation-color, #000);
 }
-.glide__arrow:focus {
-  outline: none;
+
+/* Navigation Position */
+#fp-nav.fp-right {
+	right: 17px;
 }
-.glide__arrow:hover {
-  border-color: white;
+
+#fp-nav.fp-left {
+	left: 17px;
 }
-.glide__arrow--left {
-  left: -1em;
+
+/* Arrow Styling */
+.fp-controlArrow {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 0;
+	height: 0;
+	border: solid transparent;
+	cursor: pointer;
+	z-index: 1000;
 }
-.glide__arrow--right {
-  right: -1em;
+
+.fp-controlArrow.fp-prev {
+	left: 15px;
+	border-width: 38.5px 34px 38.5px 0;
+	border-right-color: var(--fp-arrow-color, #000);
 }
-.glide__arrow--disabled {
-  opacity: 0.33;
+
+.fp-controlArrow.fp-next {
+	right: 15px;
+	border-width: 38.5px 0 38.5px 34px;
+	border-left-color: var(--fp-arrow-color, #000);
 }
-.glide__bullets {
-  position: absolute;
-  z-index: 2;
-  bottom: -1em;
-  left: 50%;
-  display: inline-flex;
-  list-style: none;
-  transform: translateX(-50%);
+
+.fp-controlArrow.fp-prev:hover {
+	border-right-color: var(--fp-arrow-color-hover, #333);
 }
-.glide__bullet {
-  background-color: rgba(255, 255, 255, 0.5);
-  width: 9px;
-  height: 9px;
-  padding: 0;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  transition: all 300ms ease-in-out;
-  cursor: pointer;
-  line-height: 0;
-  box-shadow: 0 0.25em 0.5em 0 rgba(0, 0, 0, 0.1);
-  margin: 0 0.25em;
+
+.fp-controlArrow.fp-next:hover {
+	border-left-color: var(--fp-arrow-color-hover, #333);
 }
-.glide__bullet:focus {
-  outline: none;
+
+/* Scrollbar Styling */
+.fp-scrollable .fp-scroller {
+	overflow: hidden;
 }
-.glide__bullet:hover, .glide__bullet:focus {
-  border: 2px solid white;
-  background-color: rgba(255, 255, 255, 0.5);
+
+.fp-scrollable .fp-scroller::-webkit-scrollbar {
+	width: 8px;
 }
-.glide__bullet--active {
-  background-color: white;
+
+.fp-scrollable .fp-scroller::-webkit-scrollbar-track {
+	background: transparent;
 }
-.glide--swipeable {
-  cursor: grab;
-  cursor: -moz-grab;
-  cursor: -webkit-grab;
+
+.fp-scrollable .fp-scroller::-webkit-scrollbar-thumb {
+	background: var(--fp-scrollbar-color, #000);
+	border-radius: 4px;
 }
-.glide--dragging {
-  cursor: grabbing;
-  cursor: -moz-grabbing;
-  cursor: -webkit-grabbing;
+
+.fp-scrollable .fp-scroller::-webkit-scrollbar-thumb:hover {
+	background: var(--fp-scrollbar-color-hover, #333);
 }
-.glide__arrows--bottom .glide__arrow {
-    top: calc(100% + 25px);
-    left: 0;
+
+/* Section Styling */
+.frontblocks-fullpage .gb-container {
+	height: 100vh;
+	position: relative;
 }
-.glide__arrows--bottom .glide__arrow--right {
-    left: 50px;
-    right: unset;
-}
-/* Responsive */
-@media only screen and (max-width: 768px) {
-	.glide__arrow--left {
-		left: 0;
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	#fp-nav {
+		display: none;
 	}
-	.glide__arrow--right {
-		right: 0;
+	
+	.fp-controlArrow {
+		display: none;
 	}
 }
 
-/*# sourceMappingURL=glide.theme.css.map */
+/* Custom Navigation Dots */
+#fp-nav ul li {
+	width: 14px;
+	height: 13px;
+	margin: 7px;
+	position: relative;
+}
+
+#fp-nav ul li a {
+	display: block;
+	position: relative;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+	cursor: pointer;
+	text-decoration: none;
+}
+
+#fp-nav ul li a span {
+	border-radius: 50%;
+	position: absolute;
+	z-index: 1;
+	height: 8px;
+	width: 8px;
+	border: 0;
+	background: var(--fp-navigation-color, #000);
+	left: 50%;
+	top: 50%;
+	transition: all 0.1s ease-in-out;
+}
+
+#fp-nav ul li a.active span {
+	background: var(--fp-navigation-color, #000);
+	transform: scale(1.5);
+}
+
+#fp-nav ul li a:hover span {
+	background: var(--fp-navigation-color-hover, #333);
+	transform: scale(1.2);
+}
+
+/* Tooltip for navigation dots */
+#fp-nav ul li .fp-tooltip {
+	position: absolute;
+	top: -2px;
+	color: var(--fp-navigation-color, #000);
+	font-size: 14px;
+	font-family: arial, helvetica, sans-serif;
+	white-space: nowrap;
+	max-width: 220px;
+	overflow: hidden;
+	display: block;
+	opacity: 0;
+	width: 0;
+	cursor: pointer;
+}
+
+#fp-nav ul li:hover .fp-tooltip {
+	transition: all 0.2s ease-in;
+	width: auto;
+	opacity: 1;
+}
+
+#fp-nav.fp-right ul li .fp-tooltip {
+	right: 20px;
+}
+
+#fp-nav.fp-left ul li .fp-tooltip {
+	left: 20px;
+}
+
+/* FullPage Sections */
+.frontblocks-fullpage .gb-container > *:not(hr) {
+	height: 100vh;
+	position: relative;
+}
+
+/* Ensure proper stacking */
+.frontblocks-fullpage {
+	z-index: 1;
+}
+
+/* Loading state */
+.frontblocks-fullpage.loading {
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.frontblocks-fullpage.loaded {
+	opacity: 1;
+}
+
+/* Accessibility improvements */
+.fp-controlArrow:focus {
+	outline: 2px solid var(--fp-arrow-color, #000);
+	outline-offset: 2px;
+}
+
+/* Scrolloverflow Styles */
+.fp-section.fp-table {
+	display: table;
+	table-layout: fixed;
+	width: 100%;
+	height: 100%;
+}
+
+.fp-tableCell {
+	display: table-cell;
+	vertical-align: middle;
+	width: 100%;
+	height: 100%;
+}
+
+/* Scrolloverflow container */
+.fp-scrollable .fp-scroller {
+	overflow: hidden;
+	position: relative;
+}
+
+/* Custom scrollbar for scrolloverflow */
+.fp-scrollable .fp-scroller::-webkit-scrollbar {
+	width: 8px;
+}
+
+.fp-scrollable .fp-scroller::-webkit-scrollbar-track {
+	background: rgba(0, 0, 0, 0.1);
+	border-radius: 4px;
+}
+
+.fp-scrollable .fp-scroller::-webkit-scrollbar-thumb {
+	background: #000;
+	border-radius: 4px;
+}
+
+.fp-scrollable .fp-scroller::-webkit-scrollbar-thumb:hover {
+	background: #333;
+}
+
+/* Ensure proper height for scrolloverflow sections */
+.frontblocks-fullpage .section.fp-scrollable {
+	height: 100vh !important;
+	overflow: hidden;
+}
+
+/* Hide overflow content when scroll overflow is disabled */
+.frontblocks-fullpage:not([data-scrolloverflow="true"]) .section {
+	overflow: hidden !important;
+}
+
+.frontblocks-fullpage:not([data-scrolloverflow="true"]) .section > * {
+	max-height: 100vh;
+	overflow: hidden;
+}
+
+/* Content within scrolloverflow sections */
+.frontblocks-fullpage .section.fp-scrollable .fp-scroller {
+	height: 100%;
+	padding: 20px;
+	box-sizing: border-box;
+}
+
+.frontblocks-fullpage .gb-container .fp-watermark {
+    display: none !important;
+}
