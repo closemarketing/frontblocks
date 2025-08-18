@@ -81,7 +81,7 @@ function frbl_admin_page() {
 				echo sprintf(
 					/* translators: %s: FullPage.js pricing URL */
 					__( 'FullPage.js is free for personal and non-profit projects. For commercial use, you need a license. %s', 'frontblocks' ),
-					'<a href="https://alvarotrigo.com/fullPage/pricing/" target="_blank">' . esc_html__( 'Get your license here', 'frontblocks' ) . '</a>'
+					'<a href="https://close.technology/likes/fullpage/" target="_blank">' . esc_html__( 'Get your license here', 'frontblocks' ) . '</a>'
 				);
 				?>
 			</p>
