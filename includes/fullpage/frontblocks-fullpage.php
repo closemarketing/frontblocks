@@ -18,16 +18,16 @@ add_action( 'wp_enqueue_scripts', 'frbl_fullpage_scripts', 99 );
  */
 function frbl_fullpage_scripts() {
 	$dist_dir = WP_DEBUG ? 'fullpage/' : 'dist/';
-	
-	// Enqueue fullpage.js CSS
+
+	// Enqueue fullpage.js CSS.
 	wp_enqueue_style(
 		'fullpage-css',
-		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'fullpage.min.css',
+		FRBL_PLUGIN_URL . 'includes/dist/fullpage.min.css',
 		array(),
 		'4.0.37'
 	);
-	
-	// Enqueue custom fullpage styles
+
+	// Enqueue custom fullpage styles.
 	wp_enqueue_style(
 		'frontblocks-fullpage',
 		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-fullpage.css',
@@ -35,16 +35,16 @@ function frbl_fullpage_scripts() {
 		FRBL_VERSION
 	);
 
-	// Enqueue fullpage.js extensions (includes scrolloverflow)
+	// Enqueue fullpage.js extensions (includes scrolloverflow).
 	wp_enqueue_script(
 		'frontblocks-fullpage',
-		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'fullpage.extensions.min.js',
+		FRBL_PLUGIN_URL . 'includes/dist/fullpage.extensions.min.js',
 		array(),
 		'4.0.37',
 		true
 	);
 
-	// Enqueue custom fullpage code
+	// Enqueue custom fullpage code.
 	wp_enqueue_script(
 		'frontblocks-fullpage-custom',
 		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-fullpage.js' : 'frontblocks-fullpage-min.js' ),
@@ -53,7 +53,7 @@ function frbl_fullpage_scripts() {
 		true
 	);
 
-	// Localize script with license key
+	// Localize script with license key.
 	wp_localize_script(
 		'frontblocks-fullpage-custom',
 		'frblFullpageData',
@@ -101,9 +101,9 @@ function frbl_add_fullpage_attributes_to_container_block( $block_content, $block
 	$loop_top = isset( $attrs['frblLoopTop'] ) ? (bool) $attrs['frblLoopTop'] : false;
 	$scrolloverflow = isset( $attrs['frblScrolloverflow'] ) ? (bool) $attrs['frblScrolloverflow'] : false;
 
-	// Add fullpage attributes if enabled
+	// Add fullpage attributes if enabled.
 	if ( $fullpage_enabled ) {
-		$attributes = '';
+		$attributes  = '';
 		$attributes .= ' data-fullpage="true"';
 		$attributes .= ' data-navigation="' . esc_attr( $show_navigation ? 'true' : 'false' ) . '"';
 		$attributes .= ' data-scrollbar="' . esc_attr( $show_scrollbar ? 'true' : 'false' ) . '"';
@@ -115,23 +115,23 @@ function frbl_add_fullpage_attributes_to_container_block( $block_content, $block
 		$attributes .= ' data-loop-top="' . esc_attr( $loop_top ? 'true' : 'false' ) . '"';
 		$attributes .= ' data-scrolloverflow="' . esc_attr( $scrolloverflow ? 'true' : 'false' ) . '"';
 
-		// Add data attributes and the 'frontblocks-fullpage' class to the first div in the block content
+		// Add data attributes and the 'frontblocks-fullpage' class to the first div in the block content.
 		$block_content = preg_replace(
 			'/<div([^>]*)class="([^"]*gb-container[^"]*)"([^>]*)>/',
 			'<div$1class="$2 frontblocks-fullpage"$3' . $attributes . '>',
 			$block_content,
-			1 // Only replace the first occurrence
+			1 // Only replace the first occurrence.
 		);
 	}
 
 	return $block_content;
 }
 
-// Register attributes before GenerateBlocks registers its blocks
+// Register attributes before GenerateBlocks registers its blocks.
 add_action(
 	'init',
 	function () {
-		// Use priority 9 (before the default 10)
+		// Use priority 9 (before the default 10).
 		add_filter(
 			'generateblocks_blocks_registered_block',
 			'frbl_register_fullpage_attributes_for_container_block',
@@ -139,7 +139,7 @@ add_action(
 			2
 		);
 
-		// Register attributes from the frontend side as well
+		// Register attributes from the frontend side as well.
 		add_action(
 			'enqueue_block_editor_assets',
 			function () {
