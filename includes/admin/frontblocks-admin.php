@@ -60,7 +60,7 @@ function frbl_license_key_callback() {
 function frbl_admin_page() {
 	?>
 	<div class="wrap">
-		<h1>FrontBlocks Settings</h1>
+		<h1><?php esc_html_e( 'FrontBlocks Settings', 'frontblocks' ); ?></h1>
 		<form method="post" action="options.php">
 			<?php
 			settings_fields( 'frbl_settings' );
@@ -70,19 +70,29 @@ function frbl_admin_page() {
 		</form>
 		
 		<div class="card" style="max-width: 600px; margin-top: 20px;">
-			<h2>About FrontBlocks</h2>
-			<p>FrontBlocks extends GenerateBlocks with additional functionality including FullPage.js integration for creating vertical scrolling sections.</p>
+			<h2><?php esc_html_e( 'About FrontBlocks', 'frontblocks' ); ?></h2>
+			<p>
+				<?php esc_html_e( 'FrontBlocks extends GenerateBlocks with additional functionality including FullPage.js integration for creating vertical scrolling sections.', 'frontblocks' ); ?>
+			</p>
 			
-			<h3>FullPage.js License</h3>
-			<p>FullPage.js is free for personal and non-profit projects. For commercial use, you need a license. <a href="https://alvarotrigo.com/fullPage/pricing/" target="_blank">Get your license here</a>.</p>
+			<h3><?php esc_html_e( 'FullPage.js License', 'frontblocks' ); ?></h3>
+			<p>
+				<?php
+				echo sprintf(
+					/* translators: %s: FullPage.js pricing URL */
+					__( 'FullPage.js is free for personal and non-profit projects. For commercial use, you need a license. %s', 'frontblocks' ),
+					'<a href="https://alvarotrigo.com/fullPage/pricing/" target="_blank">' . esc_html__( 'Get your license here', 'frontblocks' ) . '</a>'
+				);
+				?>
+			</p>
 			
-			<h3>Features</h3>
+			<h3><?php esc_html_e( 'Features', 'frontblocks' ); ?></h3>
 			<ul>
-				<li>Vertical scrolling sections</li>
-				<li>Customizable navigation dots</li>
-				<li>Scroll overflow support</li>
-				<li>Auto scroll functionality</li>
-				<li>Responsive design</li>
+				<li><?php esc_html_e( 'Vertical scrolling sections', 'frontblocks' ); ?></li>
+				<li><?php esc_html_e( 'Customizable navigation dots', 'frontblocks' ); ?></li>
+				<li><?php esc_html_e( 'Scroll overflow support', 'frontblocks' ); ?></li>
+				<li><?php esc_html_e( 'Auto scroll functionality', 'frontblocks' ); ?></li>
+				<li><?php esc_html_e( 'Responsive design', 'frontblocks' ); ?></li>
 			</ul>
 		</div>
 	</div>
