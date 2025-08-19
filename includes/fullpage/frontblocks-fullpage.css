@@ -6,6 +6,15 @@
 /* FullPage Container */
 .frontblocks-fullpage {
 	position: relative;
+	-webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+	scroll-behavior: smooth; /* Smooth scrolling for modern browsers */
+}
+
+/* Optimize scrolling performance */
+.frontblocks-fullpage .section {
+	will-change: transform; /* Optimize for animations */
+	transform: translateZ(0); /* Force hardware acceleration */
+	backface-visibility: hidden; /* Prevent flickering */
 }
 
 /* Navigation Dots */

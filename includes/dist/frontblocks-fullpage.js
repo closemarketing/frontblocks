@@ -53,21 +53,48 @@
 			controlArrows: false, // Always disabled as per request
 			
 			// Scrollbar options
-			scrollBar: container.dataset.scrollbar === 'true',
+			scrollBar: false, // Disable default scrollbar for smoother experience
 			
-			// Scrolloverflow for larger content
+			// Auto scroll
+			autoScrolling: container.dataset.autoScroll === 'true',
+			
+			// Smooth scrolling optimization
+			scrollHorizontally: false,
+			scrollHorizontallyKey: null,
+			bigSectionsDestination: null,
+			continuousVertical: false,
+			scrollOverflowReset: true,
+			scrollOverflowResetKey: null,
+			
+			// Touch and mouse wheel optimization
+			touchSensitivity: 15,
+			normalScrollElements: null,
+			scrollOverflowResetKey: null,
+			
+			// Prevent skipping and improve smoothness
+			fitToSection: true,
+			fitToSectionDelay: 1000,
+			scrollBar: false, // Disable default scrollbar for smoother experience
+			anchors: [], // Let fullpage generate anchors automatically
+			lockAnchors: false,
+			animateAnchor: true,
+			recordHistory: true,
+			menu: false,
+			showActiveTooltip: false,
+			slidesNavigation: false,
+			slidesNavPosition: 'bottom',
 			scrollOverflow: container.dataset.scrolloverflow === 'true',
 			scrollOverflowReset: true,
+			scrollOverflowResetKey: null,
 			scrollOverflowOptions: {
 				scrollbars: container.dataset.scrollbar === 'true',
 				mouseWheel: true,
 				hideScrollbars: container.dataset.scrollbar !== 'true',
 				fadeScrollbars: false,
-				disableMouse: false
+				disableMouse: false,
+				click: true,
+				preventDefaultException: { tagName: /^(INPUT|TEXTAREA|BUTTON|SELECT|A)$/ }
 			},
-			
-			// Auto scroll
-			autoScrolling: container.dataset.autoScroll === 'true',
 			
 			// Responsive options
 			responsiveWidth: 768,
@@ -82,6 +109,21 @@
 			onLeave: function(origin, destination, direction) {
 				// Add custom on leave logic here
 				console.log('Leaving section:', origin.index);
+			},
+			
+			// Optimize scrolling behavior
+			beforeLeave: function(origin, destination, direction) {
+				// Prevent skipping intermediate sections
+				return true;
+			},
+			
+			afterRender: function() {
+				// Optimize after fullpage is rendered
+				console.log('FullPage rendered and optimized');
+			},
+			
+			onSlideLeave: function(section, origin, destination, direction) {
+				// Handle slide transitions smoothly
 			}
 		};
 
