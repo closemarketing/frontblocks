@@ -55,7 +55,7 @@
 			// Scrollbar options
 			scrollBar: false, // Disable default scrollbar for smoother experience
 			
-			// Auto scroll
+			// Auto scroll - use the toggle from Gutenberg
 			autoScrolling: container.dataset.autoScroll === 'true',
 			
 			// Smooth scrolling optimization
@@ -71,21 +71,26 @@
 			normalScrollElements: null,
 			scrollOverflowResetKey: null,
 			
+			// Mobile-specific optimizations
+			allowTouchMove: true,
+			allowPageOneByOne: true,
+			keyboardScrolling: true,
+			keyboardScrollingForTouch: true,
+			
 			// Prevent skipping and improve smoothness
 			fitToSection: true,
-			fitToSectionDelay: 1000,
-			scrollBar: false, // Disable default scrollbar for smoother experience
+			fitToSectionDelay: 600,
 			anchors: [], // Let fullpage generate anchors automatically
 			lockAnchors: false,
 			animateAnchor: true,
 			recordHistory: true,
 			menu: false,
-			showActiveTooltip: false,
 			slidesNavigation: false,
 			slidesNavPosition: 'bottom',
+			
+			// Scrolloverflow configuration
 			scrollOverflow: container.dataset.scrolloverflow === 'true',
 			scrollOverflowReset: true,
-			scrollOverflowResetKey: null,
 			scrollOverflowOptions: {
 				scrollbars: container.dataset.scrollbar === 'true',
 				mouseWheel: true,
@@ -96,9 +101,9 @@
 				preventDefaultException: { tagName: /^(INPUT|TEXTAREA|BUTTON|SELECT|A)$/ }
 			},
 			
-			// Responsive options
-			responsiveWidth: 768,
-			responsiveHeight: 600,
+			// Responsive options - Keep fullpage active on mobile
+			responsiveWidth: 0, // Disable responsive breakpoint to keep fullpage active on mobile
+			responsiveHeight: 0,
 			
 			// Callbacks
 			afterLoad: function(origin, destination, direction) {
@@ -162,13 +167,16 @@
 				child.classList.add('section');
 			}
 			
-			// Ensure proper height
-			if (!child.style.height) {
-				child.style.height = '100vh';
-			}
+			// Ensure proper height and visibility
+			child.style.height = '100vh';
+			child.style.display = 'block';
+			child.style.visibility = 'visible';
+			child.style.opacity = '1';
 			
 			// Add data attributes for fullpage
 			child.setAttribute('data-anchor', 'section-' + (index + 1));
+			
+			console.log('Prepared section', index + 1, ':', child);
 		});
 		
 		console.log('Prepared', sectionElements.length, 'sections for fullpage (filtered from', children.length, 'total children)');
@@ -187,11 +195,28 @@
 				console.log('Scrolloverflow is enabled - using fullpage.extensions.min.js');
 			}
 
+			// Mobile optimizations
+			const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+			if (isMobile) {
+				console.log('Mobile device detected - applying mobile optimizations');
+				config.touchSensitivity = 20; // Slightly higher sensitivity for mobile
+				config.scrollingSpeed = Math.min(config.scrollingSpeed, 500); // Faster scrolling on mobile
+				
+				// Ensure auto scroll works on mobile
+				if (container.dataset.autoScroll === 'true') {
+					config.autoScrolling = true;
+					console.log('Auto scroll enabled for mobile device');
+				}
+			}
+
 			// Initialize fullpage
 			const fullpageInstance = fullpage(container, config);
 			
 			// Mark as initialized
 			container.classList.add('fp-initialized');
+			if (isMobile) {
+				container.classList.add('fp-mobile');
+			}
 			
 			// Apply custom styles based on data attributes
 			applyCustomStyles(container);
@@ -199,12 +224,14 @@
 			// Store instance for potential future use
 			container.fullpageInstance = fullpageInstance;
 			
-			console.log('FullPage initialized for container:', container, 'with scrolloverflow:', config.scrollOverflow);
+			console.log('FullPage initialized for container:', container, 'with scrolloverflow:', config.scrollOverflow, 'mobile:', isMobile, 'autoScroll:', container.dataset.autoScroll === 'true');
 			
 		} catch (error) {
 			console.error('Error initializing FullPage:', error);
 		}
 	}
+
+
 
 	function applyCustomStyles(container) {
 		// Apply navigation color

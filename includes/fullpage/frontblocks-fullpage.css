@@ -92,19 +92,83 @@
 }
 
 /* Section Styling */
-.frontblocks-fullpage .gb-container {
+.frontblocks-fullpage > .gb-container {
+	height: auto;
+	position: relative;
+}
+
+/* Ensure sections are properly sized */
+.frontblocks-fullpage .section {
 	height: 100vh;
 	position: relative;
+	display: block;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
+	/* Keep navigation visible on mobile but make it smaller */
 	#fp-nav {
+		display: block !important;
+		right: 10px !important;
+	}
+	
+	#fp-nav ul li {
+		width: 10px;
+		height: 10px;
+		margin: 5px;
+	}
+	
+	#fp-nav ul li a span {
+		height: 6px;
+		width: 6px;
+	}
+	
+	/* Hide arrows on mobile since we disabled them */
+	.fp-controlArrow {
 		display: none;
 	}
 	
-	.fp-controlArrow {
-		display: none;
+	/* Ensure proper touch scrolling on mobile */
+	.frontblocks-fullpage {
+		touch-action: pan-y;
+		-webkit-overflow-scrolling: touch;
+	}
+	
+	/* Optimize sections for mobile */
+	.frontblocks-fullpage .section {
+		height: 100vh !important;
+		min-height: 100vh;
+		overflow: visible !important;
+		visibility: visible !important;
+		opacity: 1 !important;
+	}
+	
+	/* Mobile-specific fullpage optimizations */
+	.frontblocks-fullpage.fp-mobile {
+		position: relative;
+	}
+	
+	.frontblocks-fullpage.fp-mobile .section {
+		position: relative;
+		overflow: visible;
+	}
+}
+
+/* Additional mobile optimizations */
+@media (max-width: 480px) {
+	#fp-nav {
+		right: 5px !important;
+	}
+	
+	#fp-nav ul li {
+		width: 8px;
+		height: 8px;
+		margin: 3px;
+	}
+	
+	#fp-nav ul li a span {
+		height: 4px;
+		width: 4px;
 	}
 }
 
@@ -179,12 +243,6 @@
 	left: 20px;
 }
 
-/* FullPage Sections */
-.frontblocks-fullpage .gb-container > *:not(hr) {
-	height: 100vh;
-	position: relative;
-}
-
 /* Ensure proper stacking */
 .frontblocks-fullpage {
 	z-index: 1;
@@ -252,14 +310,29 @@
 	overflow: hidden;
 }
 
-/* Hide overflow content when scroll overflow is disabled */
+/* Hide overflow content when scroll overflow is disabled - but allow sections to be visible */
 .frontblocks-fullpage:not([data-scrolloverflow="true"]) .section {
-	overflow: hidden !important;
+	overflow: visible !important;
 }
 
 .frontblocks-fullpage:not([data-scrolloverflow="true"]) .section > * {
-	max-height: 100vh;
-	overflow: hidden;
+	max-height: none;
+	overflow: visible;
+}
+
+/* Ensure all sections are visible on mobile */
+@media (max-width: 768px) {
+	.frontblocks-fullpage .section {
+		overflow: visible !important;
+		visibility: visible !important;
+		opacity: 1 !important;
+		display: block !important;
+	}
+	
+	.frontblocks-fullpage .section > * {
+		overflow: visible !important;
+		max-height: none !important;
+	}
 }
 
 /* Content within scrolloverflow sections */
