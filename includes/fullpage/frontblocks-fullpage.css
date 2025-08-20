@@ -342,6 +342,13 @@
 	box-sizing: border-box;
 }
 
+/* Override fullpage.js overflow height for better vertical centering */
+.frontblocks-fullpage .fp-overflow {
+	height: 100vh !important;
+	height: 100dvh !important;
+	max-height: none !important;
+}
+
 .frontblocks-fullpage .gb-container .fp-watermark {
     display: none !important;
 }
