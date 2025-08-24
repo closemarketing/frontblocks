@@ -7,8 +7,17 @@ const { __ } = wp.i18n;
 
 function addCustomCarouselPanel(BlockEdit) {
 	return (props) => {
-		if (props.name !== 'generateblocks/grid') {
+		// Support both grid blocks and element blocks with grid display
+		if (props.name !== 'generateblocks/grid' && props.name !== 'generateblocks/element') {
+			return <BlockEdit {...props} />;
+		}
+
+		// For element blocks, only show carousel options if it has grid display
+		if (props.name === 'generateblocks/element') {
+			const styles = props.attributes.styles || {};
+			if (styles.display !== 'grid') {
 				return <BlockEdit {...props} />;
+			}
 		}
 
 		const {
