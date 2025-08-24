@@ -4,8 +4,8 @@ Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 6.8
-Stable tag: 1.0.0
-Version: 1.0.0
+Stable tag: 1.0.1
+Version: 1.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,18 +68,15 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
-= 1.0.0 =
-*   Added sticked option for Grid block.
-*   Improved interface for animations.
-*   Improved interface for carousel/slider.
-*   Added options in native gallery block.
-*   Added: Insert Post block to display content from other posts, pages, or custom post types.
+= 1.0.1 =
+*   Fixed: options for carousel/slider not showing.
 
 = 1.0.0 =
 *   Added sticked option for Grid block.
 *   Improved interface for animations.
 *   Improved interface for carousel/slider.
 *   Added options in native gallery block.
+*   Added: Insert Post block to display content from other posts, pages, or custom post types.
 
 = 0.2.5 =
 *   Update version.
