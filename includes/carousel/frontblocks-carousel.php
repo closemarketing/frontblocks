@@ -59,8 +59,9 @@ function frbl_enqueue_block_editor_assets() {
 }
 
 add_filter( 'render_block_generateblocks/grid', 'frbl_add_custom_attributes_to_grid_block', 10, 2 );
+add_filter( 'render_block_generateblocks/element', 'frbl_add_custom_attributes_to_element_block', 10, 2 );
 /**
- * Hook to filter the block output on frontend.
+ * Hook to filter the block output on frontend for grid blocks.
  *
  * @param html  $block_content Block content.
  * @param array $block Block attributes.
@@ -68,16 +69,16 @@ add_filter( 'render_block_generateblocks/grid', 'frbl_add_custom_attributes_to_g
  * @return html
  */
 function frbl_add_custom_attributes_to_grid_block( $block_content, $block ) {
-		$attrs              = $block['attrs'] ?? array();
-		$custom_option      = isset( $attrs['frblGridOption'] ) ? sanitize_text_field( $attrs['frblGridOption'] ) : '';
-		$items_to_view      = isset( $attrs['frblItemsToView'] ) ? (int) $attrs['frblItemsToView'] : 4;
-		$responsive_to_view = isset( $attrs['frblResponsiveToView'] ) ? (int) $attrs['frblResponsiveToView'] : 1;
-		$autoplay           = isset( $attrs['frblAutoplay'] ) ? ( (int) $attrs['frblAutoplay'] * 1000 ) : '';
-		$rewind             = isset( $attrs['frblRewind'] ) ? (bool) $attrs['frblRewind'] : true;
-		$buttons            = isset( $attrs['frblButtons'] ) ? sanitize_text_field( $attrs['frblButtons'] ) : 'arrows';
-		$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
-		$button_bg_color    = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
-		$buttons_position   = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
+	$attrs              = $block['attrs'] ?? array();
+	$custom_option      = isset( $attrs['frblGridOption'] ) ? sanitize_text_field( $attrs['frblGridOption'] ) : '';
+	$items_to_view      = isset( $attrs['frblItemsToView'] ) ? (int) $attrs['frblItemsToView'] : 4;
+	$responsive_to_view = isset( $attrs['frblResponsiveToView'] ) ? (int) $attrs['frblResponsiveToView'] : 1;
+	$autoplay           = isset( $attrs['frblAutoplay'] ) ? ( (int) $attrs['frblAutoplay'] * 1000 ) : '';
+	$rewind             = isset( $attrs['frblRewind'] ) ? (bool) $attrs['frblRewind'] : true;
+	$buttons            = isset( $attrs['frblButtons'] ) ? sanitize_text_field( $attrs['frblButtons'] ) : 'arrows';
+	$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
+	$button_bg_color    = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
+	$buttons_position   = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
 
 	// Example: Add data attributes to the wrapper div if carousel is enabled.
 	if ( 'carousel' === $custom_option || 'slider' === $custom_option ) {
@@ -104,7 +105,65 @@ function frbl_add_custom_attributes_to_grid_block( $block_content, $block ) {
 		);
 	}
 
+	return $block_content;
+}
+
+/**
+ * Hook to filter the block output on frontend for element blocks with grid display.
+ *
+ * @param html  $block_content Block content.
+ * @param array $block Block attributes.
+ *
+ * @return html
+ */
+function frbl_add_custom_attributes_to_element_block( $block_content, $block ) {
+	$attrs = $block['attrs'] ?? array();
+	
+	// Check if this element has grid display
+	$styles = $attrs['styles'] ?? array();
+	$display = $styles['display'] ?? '';
+	
+	// Only process if it's a grid element
+	if ( 'grid' !== $display ) {
 		return $block_content;
+	}
+	
+	$custom_option      = isset( $attrs['frblGridOption'] ) ? sanitize_text_field( $attrs['frblGridOption'] ) : '';
+	$items_to_view      = isset( $attrs['frblItemsToView'] ) ? (int) $attrs['frblItemsToView'] : 4;
+	$responsive_to_view = isset( $attrs['frblResponsiveToView'] ) ? (int) $attrs['frblResponsiveToView'] : 1;
+	$autoplay           = isset( $attrs['frblAutoplay'] ) ? ( (int) $attrs['frblAutoplay'] * 1000 ) : '';
+	$rewind             = isset( $attrs['frblRewind'] ) ? (bool) $attrs['frblRewind'] : true;
+	$buttons            = isset( $attrs['frblButtons'] ) ? sanitize_text_field( $attrs['frblButtons'] ) : 'arrows';
+	$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
+	$button_bg_color    = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
+	$buttons_position   = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
+
+	// Example: Add data attributes to the wrapper div if carousel is enabled.
+	if ( 'carousel' === $custom_option || 'slider' === $custom_option ) {
+		$attributes = '';
+		if ( 'slider' === $custom_option ) {
+			$attributes .= ' data-rewind="' . esc_attr( $rewind ) . '"';
+		}
+		// Add data attributes and the 'frontblocks-carousel' class to the first div in the block content.
+		$block_content = preg_replace(
+			'/<div([^>]*)class="([^"]*gb-element-[^"]*)"([^>]*)>/',
+			'<div$1class="$2 frontblocks-carousel"$3' .
+				' data-type="' . esc_attr( $custom_option ) . '"' .
+				' data-view="' . esc_attr( $items_to_view ) . '"' .
+				' data-res-view="' . esc_attr( $responsive_to_view ) . '"' .
+				' data-autoplay="' . esc_attr( $autoplay ) . '"' .
+				' data-buttons="' . esc_attr( $buttons ) . '"' .
+				' data-buttons-color="' . esc_attr( $button_color ) . '"' .
+				' data-buttons-background-color="' . esc_attr( $button_bg_color ) . '"' .
+				' data-buttons-position="' . esc_attr( $buttons_position ) . '"' .
+									$attributes .
+				'>',
+			$block_content,
+			1 // Only replace the first occurrence.
+		);
+	}
+
+	return $block_content;
 }
 
 // Registrar atributos antes que GenerateBlocks registre sus bloques.
@@ -130,7 +189,7 @@ add_action(
 						'blocks.registerBlockType',
 						'frontblocks/grid-attributes',
 						function( settings, name ) {
-							if ( name !== 'generateblocks/grid' ) {
+							if ( name !== 'generateblocks/grid' && name !== 'generateblocks/element' ) {
 								return settings;
 							}
 
@@ -186,7 +245,7 @@ add_action(
 );
 
 /**
- * Register custom attributes for GenerateBlocks Grid block.
+ * Register custom attributes for GenerateBlocks Grid and Element blocks.
  *
  * @param array  $block_args The block arguments.
  * @param string $block_type The name of the block.
@@ -194,7 +253,7 @@ add_action(
  * @author Closetechnology
  */
 function frbl_register_custom_attributes_for_grid_block( $block_args, $block_type ) {
-	if ( 'generateblocks/grid' !== $block_type ) {
+	if ( 'generateblocks/grid' !== $block_type && 'generateblocks/element' !== $block_type ) {
 		return $block_args;
 	}
 
