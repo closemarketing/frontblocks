@@ -69,7 +69,7 @@ function frbl_editor_scripts_animations() {
     );
 }
 
-add_action( 'enqueue_block_editor_assets', 'frbl_register_animation_attributes', 9 );
+add_action( 'enqueue_block_editor_assets', 'frbl_register_animation_attributes', 15 );
 /**
  * Register animation attributes for all blocks
  */
@@ -82,33 +82,53 @@ function frbl_register_animation_attributes() {
 			'blocks.registerBlockType',
 			'frontblocks/animation-attributes',
 			function( settings, name ) {
-				// Add animation attributes to all blocks
-				settings.attributes = Object.assign( settings.attributes || {}, {
-					frblAnimation: {
-						type: 'string',
-						default: ''
-					},
-					frblAnimationDelay: {
-						type: 'number',
-						default: 0
-					},
-					frblAnimationDuration: {
-						type: 'number',
-						default: 1
-					},
-					frblAnimationRepeat: {
-						type: 'boolean',
-						default: false
-					},
-					frblAnimationInfinite: {
-						type: 'boolean',
-						default: false
-					}
-				});
+            // Exclude Gravity Forms blocks from animation attributes
+            if ( name && name.indexOf('gravityforms/') === 0 ) {
+                return settings;
+            }
+            
+            // Defensive check for settings object
+            if ( ! settings || typeof settings !== 'object' ) {
+                return settings;
+            }
+            
+            // Ensure attributes property exists and is an object
+            if ( ! settings.attributes || typeof settings.attributes !== 'object' || Array.isArray( settings.attributes ) ) {
+                settings.attributes = {};
+            }
+            
+            // Use spread operator for safer attribute merging
+            try {
+                settings.attributes = {
+                    ...settings.attributes,
+                    frblAnimation: {
+                        type: 'string',
+                        default: ''
+                    },
+                    frblAnimationDelay: {
+                        type: 'number',
+                        default: 0
+                    },
+                    frblAnimationDuration: {
+                        type: 'number',
+                        default: 1
+                    },
+                    frblAnimationRepeat: {
+                        type: 'boolean',
+                        default: false
+                    },
+                    frblAnimationInfinite: {
+                        type: 'boolean',
+                        default: false
+                    }
+                };
+            } catch( error ) {
+                return settings;
+            }
 
-				return settings;
-			}
-		);
+            return settings;
+        }
+    );
 		"
 	);
 }
