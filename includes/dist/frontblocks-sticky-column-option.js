@@ -15,7 +15,7 @@
   var select = wp.data.select;
 
   // Add sticky column controls to the GenerateBlocks Grid block
-  addFilter('editor.BlockEdit', 'frontblocks/sticky-column-controls', function (BlockEdit) {
+  addFilter('editor.BlockEdit', 'frontblocks_sticky_column_controls', function (BlockEdit) {
     return function (props) {
       // Only add controls to GenerateBlocks Grid block
       if (props.name !== 'generateblocks/grid') {

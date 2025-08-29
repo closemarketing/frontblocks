@@ -128,6 +128,6 @@ function addCustomCarouselPanel(BlockEdit) {
 
 addFilter(
     'editor.BlockEdit',
-    'frontblocks/gb-grid-carousel-panel',
+    'frontblocks_gb_grid_carousel_panel',
     addCustomCarouselPanel
 );

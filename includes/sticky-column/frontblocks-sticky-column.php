@@ -107,7 +107,7 @@ add_action(
 					"
 					wp.hooks.addFilter(
 						'blocks.registerBlockType',
-						'frontblocks/sticky-attributes',
+						'frontblocks_sticky_attributes',
 						function( settings, name ) {
 							if ( name !== 'generateblocks/grid' ) {
 								return settings;

@@ -80,7 +80,7 @@ function frbl_register_animation_attributes() {
 		"
 		wp.hooks.addFilter(
 			'blocks.registerBlockType',
-			'frontblocks/animation-attributes',
+			'frontblocks_animation_attributes',
 			function( settings, name ) {
 				// Add animation attributes to all blocks
 				settings.attributes = Object.assign( settings.attributes || {}, {

@@ -187,7 +187,7 @@ add_action(
 					"
 					wp.hooks.addFilter(
 						'blocks.registerBlockType',
-						'frontblocks/grid-attributes',
+						'frontblocks_grid_attributes',
 						function( settings, name ) {
 							if ( name !== 'generateblocks/grid' && name !== 'generateblocks/element' ) {
 								return settings;

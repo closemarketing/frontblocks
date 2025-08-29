@@ -416,14 +416,14 @@ function addAnimationControls(BlockEdit) {
 // Add the animation controls to all blocks
 addFilter(
     'editor.BlockEdit',
-    'frontblocks/animation-controls',
+    'frontblocks_animation_controls',
     addAnimationControls
 );
 
 // Add custom class to blocks with animations
 addFilter(
     'blocks.getSaveContent.extraProps',
-    'frontblocks/apply-animations',
+    'frontblocks_apply_animations',
     (props, blockType, attributes) => {
         const { 
             frblAnimation,

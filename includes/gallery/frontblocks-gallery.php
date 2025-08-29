@@ -129,7 +129,7 @@ add_action(
 					"
 					wp.hooks.addFilter(
 						'blocks.registerBlockType',
-						'frontblocks/gallery-attributes',
+						'frontblocks_gallery_attributes',
 						function( settings, name ) {
 							if ( name !== 'core/gallery' ) {
 								return settings;

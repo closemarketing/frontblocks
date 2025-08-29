@@ -270,7 +270,7 @@ function InsertPostBlock(props) {
 
 // Register the custom block
 var registerBlockType = wp.blocks.registerBlockType;
-registerBlockType('frontblocks/insert-post', {
+registerBlockType('frontblocks_insert_post', {
   title: __('Insert Post', 'frontblocks'),
   description: __('Display content from another post or page', 'frontblocks'),
   category: 'generateblocks',
@@ -331,4 +331,4 @@ function addInsertPostPanel(BlockEdit) {
     }))));
   };
 }
-addFilter('editor.BlockEdit', 'frontblocks/insert-post-grid-panel', addInsertPostPanel);
+addFilter('editor.BlockEdit', 'frontblocks_insert_post_grid_panel', addInsertPostPanel);

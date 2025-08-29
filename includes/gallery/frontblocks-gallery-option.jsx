@@ -84,4 +84,4 @@ function addCustomGalleryPanel(BlockEdit) {
   };
 }
 
-addFilter('editor.BlockEdit', 'frontblocks/gallery-panel', addCustomGalleryPanel); 
+addFilter('editor.BlockEdit', 'frontblocks_gallery_panel', addCustomGalleryPanel); 

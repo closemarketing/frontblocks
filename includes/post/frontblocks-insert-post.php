@@ -115,7 +115,7 @@ add_action( 'init', 'frbl_register_insert_post_block' );
  */
 function frbl_register_insert_post_block() {
 	register_block_type(
-		'frontblocks/insert-post',
+		'frontblocks_insert_post',
 		array(
 			'editor_script' => 'frontblocks-insert-post-option',
 			'render_callback' => 'frbl_render_insert_post_block',
@@ -235,7 +235,7 @@ add_action(
 					"
 					wp.hooks.addFilter(
 						'blocks.registerBlockType',
-						'frontblocks/insert-post-grid-attributes',
+						'frontblocks_insert_post_grid_attributes',
 						function( settings, name ) {
 							if ( name !== 'generateblocks/grid' ) {
 								return settings;

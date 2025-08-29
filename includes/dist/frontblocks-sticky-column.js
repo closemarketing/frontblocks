@@ -78,7 +78,7 @@
 
     // Re-initialize when new content is loaded (for AJAX content)
     if (typeof wp !== 'undefined' && wp.hooks) {
-        wp.hooks.addAction('frontblocks/sticky-columns-reinit', 'frontblocks/sticky-columns', initStickyColumns);
+        wp.hooks.addAction('frontblocks_sticky_columns_reinit', 'frontblocks_sticky_columns', initStickyColumns);
     }
 
 })(); 

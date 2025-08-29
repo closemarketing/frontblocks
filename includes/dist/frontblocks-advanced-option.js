@@ -152,4 +152,4 @@ function addCustomCarouselPanel(BlockEdit) {
     })))));
   };
 }
-addFilter('editor.BlockEdit', 'frontblocks/gb-grid-carousel-panel', addCustomCarouselPanel);
+addFilter('editor.BlockEdit', 'frontblocks_gb_grid_carousel_panel', addCustomCarouselPanel);
