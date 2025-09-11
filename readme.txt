@@ -68,6 +68,9 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+= 1.0.3 =
+*   Fixed: interaction with Gravity Forms.
+
 = 1.0.1 & 1.0.2 =
 *   Fixed: options for carousel/slider not showing.
 
