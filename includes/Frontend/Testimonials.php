@@ -18,35 +18,34 @@ defined( 'ABSPATH' ) || exit;
  * @since 1.0.0
  */
 class Testimonials {
+	/**
+	 * Option key for testimonials feature.
+	 *
+	 * @var string
+	 */
+	private $option_enable_testimonials = 'enable_testimonials';
 
-    /**
-     * Option key for testimonials feature.
-     *
-     * @var string
-     */
-    private $option_enable_testimonials = 'enable_testimonials';
+	/**
+	 * Page slug.
+	 *
+	 * @var string
+	 */
+	private $page_slug = 'frontblocks-settings';
 
-    /**
-     * Page slug.
-     *
-     * @var string
-     */
-    private $page_slug = 'frontblocks-settings';
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		if ( ! $this->is_testimonials_enabled() ) {
+				return;
+		}
 
-    /**
-     * Constructor.
-     */
-    public function __construct() {
-        if ( ! $this->is_testimonials_enabled() ) {
-            return;
-        }
-
-        // Frontend hooks.
-        add_action( 'init', array( $this, 'register_cpt_testimonials' ) );
-        add_action( 'add_meta_boxes', array( $this, 'add_metabox_stars' ) );
-        add_action( 'save_post', array( $this, 'save_metabox_stars' ) );
-        add_shortcode( 'frontblocks_testimonials_carousel', array( $this, 'testimonials_shortcode' ) );
-    }
+		// Frontend hooks.
+		add_action( 'init', array( $this, 'register_cpt_testimonials' ) );
+		add_action( 'add_meta_boxes', array( $this, 'add_metabox_stars' ) );
+		add_action( 'save_post', array( $this, 'save_metabox_stars' ) );
+		add_shortcode( 'frontblocks_testimonials_carousel', array( $this, 'testimonials_shortcode' ) );
+	}
 
     /**
      * Check if testimonials are enabled.
@@ -178,106 +177,104 @@ class Testimonials {
      * @return string
      */
     public function testimonials_shortcode() {
-        // Enqueue Swiper assets.
-        wp_enqueue_style( 'swiper-css', 'https://unpkg.com/swiper/swiper-bundle.min.css' );
-        wp_enqueue_script( 'swiper-js', 'https://unpkg.com/swiper/swiper-bundle.min.js', array(), '11.0.5', true );
-		wp_enqueue_style( 'frontblocks-testimonials-style', FRBL_PLUGIN_URL . 'assets/testimonials/frontblocks-testimonials.css', array(), '1.0.0' );
+			// Enqueue Swiper assets.
+			wp_enqueue_style( 'swiper-css', 'https://unpkg.com/swiper/swiper-bundle.min.css' );
+			wp_enqueue_script( 'swiper-js', 'https://unpkg.com/swiper/swiper-bundle.min.js', array(), '11.0.5', true );
+			wp_enqueue_style( 'frontblocks-testimonials-style', FRBL_PLUGIN_URL . 'assets/testimonials/frontblocks-testimonials.css', array(), '1.0.0' );
 
-        $args = array(
-            'post_type'      => 'fbrl_testimonial',
-            'posts_per_page' => -1,
-            'orderby'        => 'date',
-            'order'          => 'DESC',
-        );
+			$args = array(
+				'post_type'      => 'fbrl_testimonial',
+				'posts_per_page' => -1,
+				'orderby'        => 'date',
+				'order'          => 'DESC',
+			);
 
-        $query_testimonios = new \WP_Query( $args );
-        ob_start();
+			$query_testimonios = new \WP_Query( $args );
+			ob_start();
 
-        if ( $query_testimonios->have_posts() ) {
-            ?>
-            <div class="swiper-container frontblocks-testimonials-carousel">
-                <div class="swiper-wrapper">
-                    <?php
-                    while ( $query_testimonios->have_posts() ) :
-                        $query_testimonios->the_post();
-                        $nombre = get_the_title();
-                        $texto_resena = get_the_content();
-                        $imagen_url = get_the_post_thumbnail_url( get_the_ID(), 'full' );
-                        
-                        $stars = get_post_meta( get_the_ID(), 'frontblocks_stars', true );
-                        
-                        $stars = $stars ? intval( $stars ) : 0;
-                        $stars_html = '';
+			if ( ! $query_testimonios->have_posts() ) {
+				return '';
+			}
+			?>
+			<div class="swiper-container frontblocks-testimonials-carousel">
+				<div class="swiper-wrapper">
+						<?php
+						while ( $query_testimonios->have_posts() ) :
+								$query_testimonios->the_post();
+								$nombre = get_the_title();
+								$texto_resena = get_the_content();
+								$imagen_url = get_the_post_thumbnail_url( get_the_ID(), 'full' );
+								
+								$stars = get_post_meta( get_the_ID(), 'frontblocks_stars', true );
+								
+								$stars = $stars ? intval( $stars ) : 0;
+								$stars_html = '';
 
-                        for ( $i = 1; $i <= 5; $i++ ) {
-                            if ( $i <= $stars ) {
-                                $stars_html .= '<span class="star filled">★</span>';
-                            } else {
-                                $stars_html .= '<span class="star">★</span>';
-                            }
-                        }
-                        ?>
-                            <div class="swiper-slide">
-                                <div class="testimonial-card">
-                                    <div class="testimonial-header">
-                                    <?php if ( $imagen_url ) : ?>
-                                            <div class="testimonial-image-container">
-                                                <img src="<?php echo esc_url( $imagen_url ); ?>" alt="<?php echo esc_attr( $nombre ); ?>" class="testimonial-image" />
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="testimonial-content">
-                                    <h3 class="testimonial-name"><?php echo esc_html( $nombre ); ?></h3>
-                                    <p class="testimonial-text">"<?php echo esc_html( $texto_resena ); ?>"</p>
-                                    <div class="stars-container">
-                                        <?php echo $stars_html; ?>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <?php
-                    endwhile;
-                    ?>
-                </div>
-                <div class="swiper-pagination"></div>
-                <div class="swiper-button-prev"></div>
-                <div class="swiper-button-next"></div>
-            </div>
-            <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                var swiper = new Swiper(".frontblocks-testimonials-carousel", { 
-                    loop: true,
-                    navigation: {
-                        nextEl: ".swiper-button-next",
-                        prevEl: ".swiper-button-prev",
-                    },
-                    pagination: {
-                        el: ".swiper-pagination",
-                        clickable: true,
-                    },
-                    breakpoints: {
-                        320: {
-                            slidesPerView: 1,
-                            spaceBetween: 20
-                        },
-                        768: {
-                            slidesPerView: 2,
-                            spaceBetween: 30
-                        },
-                        1024: {
-                            slidesPerView: 4,
-                            spaceBetween: 40
-                        }
-                    }
-                });
-            });
-            </script>
-            <?php
-        } else {
-            echo '<p>' . esc_html__( 'No testimonials available.', 'frontblocks' ) . '</p>';
-        }
-
-        wp_reset_postdata();
-        return ob_get_clean();
-    }
+								for ( $i = 1; $i <= 5; $i++ ) {
+										if ( $i <= $stars ) {
+												$stars_html .= '<span class="star filled">★</span>';
+										} else {
+												$stars_html .= '<span class="star">★</span>';
+										}
+								}
+								?>
+										<div class="swiper-slide">
+												<div class="testimonial-card">
+														<div class="testimonial-header">
+														<?php if ( $imagen_url ) : ?>
+																		<div class="testimonial-image-container">
+																				<img src="<?php echo esc_url( $imagen_url ); ?>" alt="<?php echo esc_attr( $nombre ); ?>" class="testimonial-image" />
+																</div>
+														<?php endif; ?>
+												</div>
+												<div class="testimonial-content">
+														<h3 class="testimonial-name"><?php echo esc_html( $nombre ); ?></h3>
+														<p class="testimonial-text">"<?php echo esc_html( $texto_resena ); ?>"</p>
+														<div class="stars-container">
+																<?php echo $stars_html; ?>
+														</div>
+												</div>
+										</div>
+								</div>
+								<?php
+						endwhile;
+						?>
+				</div>
+				<div class="swiper-pagination"></div>
+				<div class="swiper-button-prev"></div>
+				<div class="swiper-button-next"></div>
+			</div>
+			<script>
+				document.addEventListener("DOMContentLoaded", function() {
+						var swiper = new Swiper(".frontblocks-testimonials-carousel", { 
+								loop: true,
+								navigation: {
+										nextEl: ".swiper-button-next",
+										prevEl: ".swiper-button-prev",
+								},
+								pagination: {
+										el: ".swiper-pagination",
+										clickable: true,
+								},
+								breakpoints: {
+										320: {
+												slidesPerView: 1,
+												spaceBetween: 20
+										},
+										768: {
+												slidesPerView: 2,
+												spaceBetween: 30
+										},
+										1024: {
+												slidesPerView: 4,
+												spaceBetween: 40
+										}
+								}
+						});
+				});
+			</script>
+			<?php
+			wp_reset_postdata();
+			return ob_get_clean();
+	}
 }
