@@ -55,6 +55,11 @@ Sticky option allows you to make the Grid block stick to the top of the viewport
 **Insert Post Block:**
 Display content from other posts, pages, or custom post types. Search and select any published content to display its title as H2 and full content. Perfect for creating dynamic content sections without duplicating content.
 
+**Testimonials:**
+Display testimonials from other posts, pages, or custom post types. Search and select any published content to display its title as H2 and full content. Perfect for creating dynamic content sections without duplicating content.
+
+Shortcode: [frontblocks_testimonials_carousel]
+
 Others Plugins:
 - [Closemarketing Plugins](https://profiles.wordpress.org/closemarketing/#content-plugins)
 
