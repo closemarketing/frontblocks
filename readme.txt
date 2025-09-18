@@ -70,6 +70,7 @@ WordPress installation and then activate the Plugin from Plugins page.
 == Changelog ==
 = 1.0.3 =
 *   Fixed: interaction with Gravity Forms.
+*   Added: Settings page and simple testimonials feature.
 
 = 1.0.1 & 1.0.2 =
 *   Fixed: options for carousel/slider not showing.
