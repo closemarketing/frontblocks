@@ -43,8 +43,8 @@ class Testimonials {
 
 		// Frontend hooks.
 		add_action( 'init', array( $this, 'register_cpt_testimonials' ) );
-		add_action( 'add_meta_boxes', array( $this, 'add_metabox_estrellas' ) );
-		add_action( 'save_post', array( $this, 'save_metabox_estrellas' ) );
+		add_action( 'add_meta_boxes', array( $this, 'add_metabox_stars' ) );
+		add_action( 'save_post', array( $this, 'save_metabox_stars' ) );
 		add_shortcode( 'frontblocks_testimonials_carousel', array( $this, 'testimonials_shortcode' ) );
 	}
 
@@ -113,12 +113,12 @@ class Testimonials {
 	 *
 	 * @return void
 	 */
-	public function add_metabox_estrellas() {
+	public function add_metabox_stars() {
 		add_meta_box(
 			'testimonial_rating_metabox',
 			__( 'Rating (Stars)', 'frontblocks' ),
-			array( $this, 'render_metabox_estrellas' ),
-			'testimonial',
+			array( $this, 'render_metabox_stars' ),
+			'fbrl_testimonial',
 			'side',
 			'high'
 		);
@@ -130,19 +130,19 @@ class Testimonials {
 	 * @param WP_Post $post Post object.
 	 * @return void
 	 */
-	public function render_metabox_estrellas( $post ) {
+	public function render_metabox_stars( $post ) {
 		wp_nonce_field( basename( __FILE__ ), 'frontblocks_testimonials_nonce' );
-		$estrellas = get_post_meta( $post->ID, 'frontblocks_stars', true );
+		$stars = get_post_meta( $post->ID, 'frontblocks_stars', true );
 		?>
 		<p>
 			<label for="frontblocks_stars"><?php esc_html_e( 'Select rating:', 'frontblocks' ); ?></label>
 			<select name="frontblocks_stars" id="frontblocks_stars">
-				<option value="0" <?php selected( $estrellas, 0 ); ?>><?php esc_html_e( '0 Stars', 'frontblocks' ); ?></option>
-				<option value="1" <?php selected( $estrellas, 1 ); ?>><?php esc_html_e( '1 Star', 'frontblocks' ); ?></option>
-				<option value="2" <?php selected( $estrellas, 2 ); ?>><?php esc_html_e( '2 Stars', 'frontblocks' ); ?></option>
-				<option value="3" <?php selected( $estrellas, 3 ); ?>><?php esc_html_e( '3 Stars', 'frontblocks' ); ?></option>
-				<option value="4" <?php selected( $estrellas, 4 ); ?>><?php esc_html_e( '4 Stars', 'frontblocks' ); ?></option>
-				<option value="5" <?php selected( $estrellas, 5 ); ?>><?php esc_html_e( '5 Stars', 'frontblocks' ); ?></option>
+				<option value="0" <?php selected( $stars, 0 ); ?>><?php esc_html_e( '0 Stars', 'frontblocks' ); ?></option>
+				<option value="1" <?php selected( $stars, 1 ); ?>><?php esc_html_e( '1 Star', 'frontblocks' ); ?></option>
+				<option value="2" <?php selected( $stars, 2 ); ?>><?php esc_html_e( '2 Stars', 'frontblocks' ); ?></option>
+				<option value="3" <?php selected( $stars, 3 ); ?>><?php esc_html_e( '3 Stars', 'frontblocks' ); ?></option>
+				<option value="4" <?php selected( $stars, 4 ); ?>><?php esc_html_e( '4 Stars', 'frontblocks' ); ?></option>
+				<option value="5" <?php selected( $stars, 5 ); ?>><?php esc_html_e( '5 Stars', 'frontblocks' ); ?></option>
 			</select>
 		</p>
 		<?php
@@ -154,7 +154,7 @@ class Testimonials {
 	 * @param int $post_id Post ID.
 	 * @return void
 	 */
-	public function save_metabox_estrellas( $post_id ) {
+	public function save_metabox_stars( $post_id ) {
 		if ( ! isset( $_POST['frontblocks_testimonials_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['frontblocks_testimonials_nonce'] ) ), basename( __FILE__ ) ) ) {
 			return;
 		}
@@ -204,13 +204,13 @@ class Testimonials {
 						$imagen_url = get_the_post_thumbnail_url( get_the_ID(), 'full' );
 						$stars = get_post_meta( get_the_ID(), '_stars', true );
 						$stars = $stars ? intval( $stars ) : 0;
-						$estrellas_html = '';
+						$stars_html = '';
 
 						for ( $i = 1; $i <= 5; $i++ ) {
 							if ( $i <= $stars ) {
-								$estrellas_html .= '<span class="star filled">★</span>';
+								$stars_html .= '<span class="star filled">★</span>';
 							} else {
-								$estrellas_html .= '<span class="star">★</span>';
+								$stars_html .= '<span class="star">★</span>';
 							}
 						}
 						?>
@@ -227,7 +227,7 @@ class Testimonials {
 									<h3 class="testimonial-name"><?php echo esc_html( $nombre ); ?></h3>
 									<p class="testimonial-text">"<?php echo esc_html( $texto_resena ); ?>"</p>
 									<div class="stars-container">
-										<?php echo $estrellas_html; ?>
+										<?php echo $stars_html; ?>
 									</div>
 								</div>
 							</div>
