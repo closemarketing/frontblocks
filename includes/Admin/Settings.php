@@ -143,7 +143,9 @@ class Settings {
 			<form method="post" action="options.php" style="margin-top:20px;">
 				<?php
 				settings_fields( 'frontblocks_settings' );
-				do_settings_sections( $this->page_slug );
+				do_settings_sections( $this->page_slug );?>
+				<p>Use this shortcode: [frontblocks_testimonials_carousel]</p>
+				<?php
 				submit_button();
 				?>
 			</form>
