@@ -98,3 +98,6 @@
 .frontblocks-testimonials-carousel .swiper-pagination-bullet-active {
     background: var(--primary);
 }
+.frontblocks-testimonials-carousel .swiper-pagination{
+    display:none;
+}
