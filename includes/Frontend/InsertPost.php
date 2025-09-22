@@ -187,8 +187,12 @@ class InsertPost {
 			return '<div class="frbl-insert-post-error">' . __( 'Selected post not found or not published', 'frontblocks' ) . '</div>';
 		}
 
-		$title = get_the_title( $post_id );
-		$content = apply_filters( 'the_content', $post->post_content );
+		$title   = get_the_title( $post_id );
+		$content = $post->post_content;
+
+		if ( empty( $content ) ) {
+			return '';
+		}
 		
 		$wrapper_class = 'frbl-insert-post';
 		if ( ! empty( $attributes['className'] ) ) {
@@ -202,11 +206,9 @@ class InsertPost {
 				<h2 class="frbl-insert-post-title"><?php echo esc_html( $title ); ?></h2>
 			<?php endif; ?>
 			
-			<?php if ( ! empty( $content ) ) : ?>
-				<div class="frbl-insert-post-content">
-					<?php echo wp_kses_post( $content ); ?>
-				</div>
-			<?php endif; ?>
+			<div class="frbl-insert-post-content">
+				<?php echo apply_filters( 'the_content', $content ); ?>
+			</div>
 		</div>
 		<?php
 		return ob_get_clean();
