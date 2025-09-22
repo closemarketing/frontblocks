@@ -1,4 +1,4 @@
-name: PHP PHPStan
+name: PHP Linting
 
 on:
   push:
@@ -54,3 +54,6 @@ jobs:
 
       - name: PHP Lint
         run: composer lint
+
+      - name: PHP PHPStan
+        run: composer phpstan
