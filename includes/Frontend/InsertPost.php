@@ -48,7 +48,7 @@ class InsertPost {
 	 */
 	public function enqueue_scripts() {
 		$dist_dir = WP_DEBUG ? 'post/' : 'dist/';
-		
+
 		wp_enqueue_style(
 			'frontblocks-insert-post',
 			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-insert-post.css',
@@ -65,7 +65,7 @@ class InsertPost {
 	public function enqueue_block_editor_assets() {
 		// Enqueue jQuery UI for autocomplete.
 		wp_enqueue_script( 'jquery-ui-autocomplete' );
-		wp_enqueue_style( 'jquery-ui', 'https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css' );
+		wp_enqueue_style( 'jquery-ui', 'https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css', array(), '1.13.2' );
 
 		wp_enqueue_script(
 			'frontblocks-insert-post-option',
@@ -93,12 +93,13 @@ class InsertPost {
 	 */
 	public function search_posts_callback() {
 		// Verify nonce.
-		if ( ! wp_verify_nonce( $_POST['nonce'], 'frbl_insert_post_nonce' ) ) {
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'frbl_insert_post_nonce' ) ) {
 			wp_die( 'Security check failed' );
 		}
 
-		$search_term = sanitize_text_field( $_POST['search'] ?? '' );
-		$post_type   = sanitize_text_field( $_POST['post_type'] ?? 'post' );
+		$search_term = sanitize_text_field( wp_unslash( $_POST['search'] ?? '' ) );
+		$post_type   = sanitize_text_field( wp_unslash( $_POST['post_type'] ?? 'post' ) );
 
 		if ( empty( $search_term ) ) {
 			wp_send_json_error( 'Search term is required' );
@@ -140,27 +141,27 @@ class InsertPost {
 		register_block_type(
 			'frontblocks/insert-post',
 			array(
-				'editor_script' => 'frontblocks-insert-post-option',
+				'editor_script'   => 'frontblocks-insert-post-option',
 				'render_callback' => array( $this, 'render_insert_post_block' ),
-				'attributes' => array(
-					'selectedPostId' => array(
-						'type' => 'number',
+				'attributes'      => array(
+					'selectedPostId'      => array(
+						'type'    => 'number',
 						'default' => 0,
 					),
-					'selectedPostType' => array(
-						'type' => 'string',
+					'selectedPostType'    => array(
+						'type'    => 'string',
 						'default' => 'post',
 					),
-					'selectedPostTitle' => array(
-						'type' => 'string',
+					'selectedPostTitle'   => array(
+						'type'    => 'string',
 						'default' => '',
 					),
 					'selectedPostContent' => array(
-						'type' => 'string',
+						'type'    => 'string',
 						'default' => '',
 					),
-					'className' => array(
-						'type' => 'string',
+					'className'           => array(
+						'type'    => 'string',
 						'default' => '',
 					),
 				),
@@ -176,13 +177,13 @@ class InsertPost {
 	 */
 	public function render_insert_post_block( $attributes ) {
 		$post_id = $attributes['selectedPostId'] ?? 0;
-		
+
 		if ( ! $post_id ) {
 			return '<div class="frbl-insert-post-empty">' . __( 'No post selected', 'frontblocks' ) . '</div>';
 		}
 
 		$post = get_post( $post_id );
-		
+
 		if ( ! $post || 'publish' !== $post->post_status ) {
 			return '<div class="frbl-insert-post-error">' . __( 'Selected post not found or not published', 'frontblocks' ) . '</div>';
 		}
@@ -193,7 +194,7 @@ class InsertPost {
 		if ( empty( $content ) ) {
 			return '';
 		}
-		
+
 		$wrapper_class = 'frbl-insert-post';
 		if ( ! empty( $attributes['className'] ) ) {
 			$wrapper_class .= ' ' . esc_attr( $attributes['className'] );
@@ -207,7 +208,7 @@ class InsertPost {
 			<?php endif; ?>
 			
 			<div class="frbl-insert-post-content">
-				<?php echo apply_filters( 'the_content', $content ); ?>
+				<?php echo wp_kses_post( apply_filters( 'the_content', $content ) ); ?>
 			</div>
 		</div>
 		<?php
@@ -222,9 +223,9 @@ class InsertPost {
 	 * @return string
 	 */
 	public function add_insert_post_attributes_to_grid_block( $block_content, $block ) {
-		$attrs = $block['attrs'] ?? array();
+		$attrs               = $block['attrs'] ?? array();
 		$insert_post_enabled = isset( $attrs['frblInsertPostEnabled'] ) ? (bool) $attrs['frblInsertPostEnabled'] : false;
-		
+
 		if ( $insert_post_enabled ) {
 			// Add data attribute to indicate insert post functionality.
 			$block_content = preg_replace(

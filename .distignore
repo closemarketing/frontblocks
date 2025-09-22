@@ -16,3 +16,6 @@ package-lock.json
 .babelrc
 webpack.config.js
 readme.md
+phpstan.neon.dist
+.phplint.yml
+phpcs.xml.dist

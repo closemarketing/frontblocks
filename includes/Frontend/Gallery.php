@@ -45,7 +45,7 @@ class Gallery {
 	 */
 	public function enqueue_scripts() {
 		$dist_dir = WP_DEBUG ? 'gallery/' : 'dist/';
-		
+
 		wp_enqueue_style(
 			'frontblocks-gallery',
 			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-gallery.css',
@@ -94,14 +94,14 @@ class Gallery {
 	 * @return string
 	 */
 	public function add_custom_attributes_to_gallery_block( $block_content, $block ) {
-		$attrs = $block['attrs'] ?? array();
-		$gallery_layout = isset( $attrs['frblGalleryLayout'] ) ? sanitize_text_field( $attrs['frblGalleryLayout'] ) : 'grid';
-		$gutter_size = isset( $attrs['frblGutterSize'] ) ? (int) $attrs['frblGutterSize'] : 20;
+		$attrs           = $block['attrs'] ?? array();
+		$gallery_layout  = isset( $attrs['frblGalleryLayout'] ) ? sanitize_text_field( $attrs['frblGalleryLayout'] ) : 'grid';
+		$gutter_size     = isset( $attrs['frblGutterSize'] ) ? (int) $attrs['frblGutterSize'] : 20;
 		$enable_lightbox = isset( $attrs['frblEnableLightbox'] ) ? (bool) $attrs['frblEnableLightbox'] : false;
-		
+
 		// Use WordPress built-in columns setting.
 		$columns = isset( $attrs['columns'] ) ? (int) $attrs['columns'] : 3;
-		
+
 		// Add data attributes to the figure element if masonry is enabled.
 		if ( 'masonry' === $gallery_layout ) {
 			$block_content = preg_replace(
@@ -165,11 +165,11 @@ class Gallery {
 			return $args;
 		}
 
-		$args['attributes']['frblGalleryLayout'] = array(
+		$args['attributes']['frblGalleryLayout']  = array(
 			'type'    => 'string',
 			'default' => 'grid',
 		);
-		$args['attributes']['frblGutterSize'] = array(
+		$args['attributes']['frblGutterSize']     = array(
 			'type'    => 'number',
 			'default' => 20,
 		);
@@ -177,7 +177,7 @@ class Gallery {
 			'type'    => 'boolean',
 			'default' => false,
 		);
-		
+
 		return $args;
 	}
 

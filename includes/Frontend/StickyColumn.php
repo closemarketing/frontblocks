@@ -45,7 +45,7 @@ class StickyColumn {
 	 */
 	public function enqueue_scripts() {
 		$dist_dir = WP_DEBUG ? 'sticky-column/' : 'dist/';
-		
+
 		wp_enqueue_style(
 			'frontblocks-sticky-column',
 			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-sticky-column.css',
@@ -85,9 +85,9 @@ class StickyColumn {
 	 * @return string
 	 */
 	public function add_sticky_attributes_to_grid_block( $block_content, $block ) {
-		$attrs = $block['attrs'] ?? array();
-		$sticky_enabled = isset( $attrs['frblStickyEnabled'] ) ? (bool) $attrs['frblStickyEnabled'] : false;
-		$sticky_offset = isset( $attrs['frblStickyOffset'] ) ? (int) $attrs['frblStickyOffset'] : 0;
+		$attrs               = $block['attrs'] ?? array();
+		$sticky_enabled      = isset( $attrs['frblStickyEnabled'] ) ? (bool) $attrs['frblStickyEnabled'] : false;
+		$sticky_offset       = isset( $attrs['frblStickyOffset'] ) ? (int) $attrs['frblStickyOffset'] : 0;
 		$sticky_column_index = isset( $attrs['frblStickyColumnIndex'] ) ? (int) $attrs['frblStickyColumnIndex'] : 0;
 
 		// Add sticky attributes to the wrapper div if sticky is enabled.
@@ -140,11 +140,11 @@ class StickyColumn {
 			return $block_args;
 		}
 
-		$block_args['attributes']['frblStickyEnabled'] = array(
+		$block_args['attributes']['frblStickyEnabled']     = array(
 			'type'    => 'boolean',
 			'default' => false,
 		);
-		$block_args['attributes']['frblStickyOffset'] = array(
+		$block_args['attributes']['frblStickyOffset']      = array(
 			'type'    => 'number',
 			'default' => 0,
 		);

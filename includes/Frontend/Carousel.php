@@ -78,7 +78,7 @@ class Carousel {
 			if ( 'slider' === $custom_option ) {
 				$attributes .= ' data-rewind="' . esc_attr( $rewind ) . '"';
 			}
-			
+
 			// Add data attributes and the 'frontblocks-carousel' class to the first div in the block content.
 			$block_content = preg_replace(
 				'/<div([^>]*)class="([^"]*gb-grid-wrapper[^"]*)"([^>]*)>/',
@@ -110,16 +110,16 @@ class Carousel {
 	 */
 	public function add_custom_attributes_to_element_block( $block_content, $block ) {
 		$attrs = $block['attrs'] ?? array();
-		
+
 		// Check if this element has grid display.
-		$styles = $attrs['styles'] ?? array();
+		$styles  = $attrs['styles'] ?? array();
 		$display = $styles['display'] ?? '';
-		
+
 		// Only process if it's a grid element.
 		if ( 'grid' !== $display ) {
 			return $block_content;
 		}
-		
+
 		$custom_option      = isset( $attrs['frblGridOption'] ) ? sanitize_text_field( $attrs['frblGridOption'] ) : '';
 		$items_to_view      = isset( $attrs['frblItemsToView'] ) ? (int) $attrs['frblItemsToView'] : 4;
 		$responsive_to_view = isset( $attrs['frblResponsiveToView'] ) ? (int) $attrs['frblResponsiveToView'] : 1;
@@ -136,7 +136,7 @@ class Carousel {
 			if ( 'slider' === $custom_option ) {
 				$attributes .= ' data-rewind="' . esc_attr( $rewind ) . '"';
 			}
-			
+
 			// Add data attributes and the 'frontblocks-carousel' class to the first div in the block content.
 			$block_content = preg_replace(
 				'/<div([^>]*)class="([^"]*gb-element-[^"]*)"([^>]*)>/',
@@ -192,7 +192,7 @@ class Carousel {
 			return $block_args;
 		}
 
-		$block_args['attributes']['frblGridOption'] = array(
+		$block_args['attributes']['frblGridOption']       = array(
 			'type'    => 'string',
 			'default' => 'none',
 		);
@@ -224,11 +224,11 @@ class Carousel {
 			'type'    => 'string',
 			'default' => '',
 		);
-		$block_args['attributes']['frblButtonsPosition'] = array(
+		$block_args['attributes']['frblButtonsPosition']  = array(
 			'type'    => 'string',
 			'default' => 'side',
 		);
-		
+
 		return $block_args;
 	}
 
