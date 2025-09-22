@@ -20,7 +20,7 @@ function frbl_insert_post_scripts() {
 	$dist_dir = WP_DEBUG ? 'post/' : 'dist/';
 	wp_enqueue_style(
 		'frontblocks-insert-post',
-		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-insert-post.css',
+		FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-insert-post.css',
 		array(),
 		FRBL_VERSION
 	);

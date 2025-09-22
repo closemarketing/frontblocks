@@ -20,7 +20,7 @@ function frbl_gallery_scripts() {
 	$dist_dir = WP_DEBUG ? 'gallery/' : 'dist/';
 	wp_enqueue_style(
 		'frontblocks-gallery',
-		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-gallery.css',
+		FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-gallery.css',
 		array(),
 		FRBL_VERSION
 	);
@@ -37,7 +37,7 @@ function frbl_gallery_scripts() {
 
 	wp_enqueue_script(
 		'frontblocks-gallery-custom',
-		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-gallery.js' : 'frontblocks-gallery-min.js' ),
+		FRBL_PLUGIN_URL . 'assets/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-gallery.js' : 'frontblocks-gallery-min.js' ),
 		array( 'frontblocks-masonry' ),
 		FRBL_VERSION,
 		true

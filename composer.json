@@ -24,8 +24,8 @@
 		"yoast/phpunit-polyfills": "^1.0"
 	},
 	"autoload": {
-		"classmap": [
-			"./vendor/wp-coding-standards/wpcs/"
-		]
+		"psr-4": {
+			"FrontBlocks\\": "includes/"
+		}
 	}
 }

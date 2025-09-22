@@ -31,11 +31,11 @@
   },
   "scripts": {
     "gulp": "gulp compress",
-    "build:carousel": "babel includes/carousel/frontblocks-advanced-option.jsx --out-file includes/dist/frontblocks-advanced-option.js",
-    "build:animations": "babel includes/animations/frontblocks-animation-option.jsx --out-file includes/dist/frontblocks-animation-option.js",
-    "build:sticky":  "babel includes/sticky-column/frontblocks-sticky-column-option.jsx --out-file includes/dist/frontblocks-sticky-column-option.js",
-    "build:gallery": "babel includes/gallery/frontblocks-gallery-option.jsx --out-file includes/dist/frontblocks-gallery-option.js",
-    "build:post": "babel includes/post/frontblocks-insert-post-option.jsx --out-file includes/dist/frontblocks-insert-post-option.js",
+    "build:carousel": "babel assets/carousel/frontblocks-advanced-option.jsx --out-file assets/dist/frontblocks-advanced-option.js",
+    "build:animations": "babel assets/animations/frontblocks-animation-option.jsx --out-file assets/dist/frontblocks-animation-option.js",
+    "build:sticky":  "babel assets/sticky-column/frontblocks-sticky-column-option.jsx --out-file assets/dist/frontblocks-sticky-column-option.js",
+    "build:gallery": "babel assets/gallery/frontblocks-gallery-option.jsx --out-file assets/dist/frontblocks-gallery-option.js",
+    "build:post": "babel assets/post/frontblocks-insert-post-option.jsx --out-file assets/dist/frontblocks-insert-post-option.js",
     "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run gulp"
   },
   "dependencies": {

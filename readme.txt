@@ -55,6 +55,11 @@ Sticky option allows you to make the Grid block stick to the top of the viewport
 **Insert Post Block:**
 Display content from other posts, pages, or custom post types. Search and select any published content to display its title as H2 and full content. Perfect for creating dynamic content sections without duplicating content.
 
+**Testimonials:**
+Display testimonials from other posts, pages, or custom post types. Search and select any published content to display its title as H2 and full content. Perfect for creating dynamic content sections without duplicating content.
+
+Shortcode: [frontblocks_testimonials_carousel]
+
 Others Plugins:
 - [Closemarketing Plugins](https://profiles.wordpress.org/closemarketing/#content-plugins)
 
@@ -68,6 +73,10 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+= 1.0.3 =
+*   Fixed: interaction with Gravity Forms.
+*   Added: Settings page and simple testimonials feature.
+
 = 1.0.1 & 1.0.2 =
 *   Fixed: options for carousel/slider not showing.
 

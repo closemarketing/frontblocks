@@ -221,6 +221,11 @@ const createFlattenedOptions = () => {
 function addAnimationControls(BlockEdit) {
     return (props) => {
         
+        // Exclude Gravity Forms blocks from animation controls
+        if (props.name && props.name.startsWith('gravityforms/')) {
+            return <BlockEdit {...props} />;
+        }
+        
         // Extract animation attributes with default values
         const {
             frblAnimation = '',
