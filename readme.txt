@@ -1,5 +1,5 @@
 === FrontBlocks for GeneratePress ===
-Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit2sumit
+Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit2sumit, alexcm13
 Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
@@ -55,6 +55,11 @@ Sticky option allows you to make the Grid block stick to the top of the viewport
 **Insert Post Block:**
 Display content from other posts, pages, or custom post types. Search and select any published content to display its title as H2 and full content. Perfect for creating dynamic content sections without duplicating content.
 
+**Testimonials:**
+Display testimonials from other posts, pages, or custom post types. Search and select any published content to display its title as H2 and full content. Perfect for creating dynamic content sections without duplicating content.
+
+Shortcode: [frontblocks_testimonials_carousel]
+
 Others Plugins:
 - [Closemarketing Plugins](https://profiles.wordpress.org/closemarketing/#content-plugins)
 
@@ -69,7 +74,9 @@ WordPress installation and then activate the Plugin from Plugins page.
 
 == Changelog ==
 = 1.0.3 =
+*   Added: Settings page and simple testimonials feature.
 *   Fixed: interaction with Gravity Forms.
+*   Fixed: not rendering correctly the content of the insert post block.
 
 = 1.0.1 & 1.0.2 =
 *   Fixed: options for carousel/slider not showing.

@@ -20,14 +20,14 @@ function frbl_theme_scripts() {
 	$dist_dir = WP_DEBUG ? 'carousel/' : 'dist/';
 	wp_enqueue_style(
 		'frontblocks-carousel',
-		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-carousel.css',
+		FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-carousel.css',
 		array(),
 		FRBL_VERSION
 	);
 
 	wp_enqueue_script(
 		'frontblocks-carousel',
-		FRBL_PLUGIN_URL . 'includes/dist/glide.min.js',
+		FRBL_PLUGIN_URL . 'assets/dist/glide.min.js',
 		array(),
 		FRBL_VERSION,
 		true
@@ -35,7 +35,7 @@ function frbl_theme_scripts() {
 
 	wp_enqueue_script(
 		'frontblocks-carousel-custom',
-		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-carousel.js' : 'frontblocks-carousel-min.js' ),
+		FRBL_PLUGIN_URL . 'assets/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-carousel.js' : 'frontblocks-carousel-min.js' ),
 		array( 'frontblocks-carousel' ),
 		FRBL_VERSION,
 		true
@@ -51,7 +51,7 @@ add_action( 'enqueue_block_editor_assets', 'frbl_enqueue_block_editor_assets' );
 function frbl_enqueue_block_editor_assets() {
 	wp_enqueue_script(
 		'frontblocks-advanced-option',
-		FRBL_PLUGIN_URL . 'includes/dist/frontblocks-advanced-option.js',
+		FRBL_PLUGIN_URL . 'assets/dist/frontblocks-advanced-option.js',
 		array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-edit-post' ),
 		FRBL_VERSION,
 		true

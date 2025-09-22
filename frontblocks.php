@@ -3,7 +3,7 @@
  * Plugin Name: FrontBlocks for GeneratePress
  * Plugin URI:  https://wordpress.org/plugins/frontblocks/
  * Description: Blocks and helpers that extends GeneratePress blocks.
- * Version:     1.0.3-beta.1
+ * Version:     1.0.3-beta.3
  * Author:      Closemarketing
  * Author URI:  https://close.marketing
  * Text Domain: frontblocks
@@ -26,22 +26,15 @@
 
 defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
-define( 'FRBL_VERSION', '1.0.3-beta.1' );
+define( 'FRBL_VERSION', '1.0.3-beta.3' );
 define( 'FRBL_PLUGIN', __FILE__ );
 define( 'FRBL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'FRBL_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 
-// Carousel.
-require_once FRBL_PLUGIN_PATH . 'includes/carousel/frontblocks-carousel.php';
+// Load Composer autoloader.
+if ( file_exists( FRBL_PLUGIN_PATH . 'vendor/autoload.php' ) ) {
+	require_once FRBL_PLUGIN_PATH . 'vendor/autoload.php';
+}
 
-// Animations.
-require_once FRBL_PLUGIN_PATH . 'includes/animations/frontblocks-animations.php';
-
-// Sticky Column.
-require_once FRBL_PLUGIN_PATH . 'includes/sticky-column/frontblocks-sticky-column.php';
-
-// Gallery.
-require_once FRBL_PLUGIN_PATH . 'includes/gallery/frontblocks-gallery.php';
-
-// Insert Post Block.
-require_once FRBL_PLUGIN_PATH . 'includes/post/frontblocks-insert-post.php';
+// Initialize the plugin.
+FrontBlocks\Plugin_Main::get_instance();

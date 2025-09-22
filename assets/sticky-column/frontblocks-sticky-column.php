@@ -20,14 +20,14 @@ function frbl_sticky_column_scripts() {
 	$dist_dir = WP_DEBUG ? 'sticky-column/' : 'dist/';
 	wp_enqueue_style(
 		'frontblocks-sticky-column',
-		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . 'frontblocks-sticky-column.css',
+		FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-sticky-column.css',
 		array(),
 		FRBL_VERSION
 	);
 
 	wp_enqueue_script(
 		'frontblocks-sticky-column-custom',
-		FRBL_PLUGIN_URL . 'includes/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-sticky-column.js' : 'frontblocks-sticky-column-min.js' ),
+		FRBL_PLUGIN_URL . 'assets/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-sticky-column.js' : 'frontblocks-sticky-column-min.js' ),
 		array( ),
 		FRBL_VERSION,
 		true
