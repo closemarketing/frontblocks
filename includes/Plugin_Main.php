@@ -95,7 +95,7 @@ class Plugin_Main {
 	 */
 	public function enqueue_scripts() {
 		$dist_dir = WP_DEBUG ? 'carousel/' : 'dist/';
-		
+
 		wp_enqueue_style(
 			'frontblocks-carousel',
 			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-carousel.css',
