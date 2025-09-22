@@ -45,7 +45,22 @@ class Testimonials {
 		add_action( 'add_meta_boxes', array( $this, 'add_metabox_stars' ) );
 		add_action( 'save_post', array( $this, 'save_metabox_stars' ) );
 		add_shortcode( 'frontblocks_testimonials_carousel', array( $this, 'testimonials_shortcode' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 	}
+
+    /**
+     * Enqueue scripts.
+     *
+     * @return void
+     */
+    public function enqueue_scripts() {
+			wp_register_style(
+				'frontblocks-testimonials-style',
+				FRBL_PLUGIN_URL . 'assets/testimonials/frontblocks-testimonials.css',
+				array(),
+				FRBL_VERSION
+			);
+    }
 
     /**
      * Check if testimonials are enabled.
@@ -177,11 +192,7 @@ class Testimonials {
      * @return string
      */
     public function testimonials_shortcode() {
-			// Enqueue Swiper assets.
-			wp_enqueue_style( 'swiper-css', 'https://unpkg.com/swiper/swiper-bundle.min.css' );
-			wp_enqueue_script( 'swiper-js', 'https://unpkg.com/swiper/swiper-bundle.min.js', array(), '11.0.5', true );
-			wp_enqueue_style( 'frontblocks-testimonials-style', FRBL_PLUGIN_URL . 'assets/testimonials/frontblocks-testimonials.css', array(), '1.0.0' );
-
+			wp_enqueue_style( 'frontblocks-testimonials-style' );
 			$args = array(
 				'post_type'      => 'fbrl_testimonial',
 				'posts_per_page' => -1,
@@ -196,8 +207,7 @@ class Testimonials {
 				return '';
 			}
 			?>
-			<div class="swiper-container frontblocks-testimonials-carousel">
-				<div class="swiper-wrapper">
+		<div class="frontblocks-carousel frontblocks-testimonials-carousel" data-type="carousel" data-view="4" data-res-view="1" data-buttons="bullets" data-autoplay="0">
 						<?php
 						while ( $query_testimonios->have_posts() ) :
 								$query_testimonios->the_post();
@@ -218,8 +228,7 @@ class Testimonials {
 										}
 								}
 								?>
-										<div class="swiper-slide">
-												<div class="testimonial-card">
+										<div class="testimonial-card">
 														<div class="testimonial-header">
 														<?php if ( $imagen_url ) : ?>
 																		<div class="testimonial-image-container">
@@ -235,44 +244,10 @@ class Testimonials {
 														</div>
 												</div>
 										</div>
-								</div>
 								<?php
 						endwhile;
 						?>
-				</div>
-				<div class="swiper-pagination"></div>
-				<div class="swiper-button-prev"></div>
-				<div class="swiper-button-next"></div>
-			</div>
-			<script>
-				document.addEventListener("DOMContentLoaded", function() {
-						var swiper = new Swiper(".frontblocks-testimonials-carousel", { 
-								loop: true,
-								navigation: {
-										nextEl: ".swiper-button-next",
-										prevEl: ".swiper-button-prev",
-								},
-								pagination: {
-										el: ".swiper-pagination",
-										clickable: true,
-								},
-								breakpoints: {
-										320: {
-												slidesPerView: 1,
-												spaceBetween: 20
-										},
-										768: {
-												slidesPerView: 2,
-												spaceBetween: 30
-										},
-										1024: {
-												slidesPerView: 4,
-												spaceBetween: 40
-										}
-								}
-						});
-				});
-			</script>
+		</div>
 			<?php
 			wp_reset_postdata();
 			return ob_get_clean();

@@ -32,43 +32,10 @@ class Carousel {
 	 * @return void
 	 */
 	private function init_hooks() {
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 99 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		add_filter( 'render_block_generateblocks/grid', array( $this, 'add_custom_attributes_to_grid_block' ), 10, 2 );
 		add_filter( 'render_block_generateblocks/element', array( $this, 'add_custom_attributes_to_element_block' ), 10, 2 );
 		add_action( 'init', array( $this, 'register_custom_attributes' ), 5 );
-	}
-
-	/**
-	 * Enqueue scripts and styles.
-	 *
-	 * @return void
-	 */
-	public function enqueue_scripts() {
-		$dist_dir = WP_DEBUG ? 'carousel/' : 'dist/';
-		
-		wp_enqueue_style(
-			'frontblocks-carousel',
-			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-carousel.css',
-			array(),
-			FRBL_VERSION
-		);
-
-		wp_enqueue_script(
-			'frontblocks-carousel',
-			FRBL_PLUGIN_URL . 'assets/dist/glide.min.js',
-			array(),
-			FRBL_VERSION,
-			true
-		);
-
-		wp_enqueue_script(
-			'frontblocks-carousel-custom',
-			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-carousel.js' : 'frontblocks-carousel-min.js' ),
-			array( 'frontblocks-carousel' ),
-			FRBL_VERSION,
-			true
-		);
 	}
 
 	/**

@@ -53,6 +53,9 @@ class Plugin_Main {
 	private function init() {
 		// Load modules.
 		$this->load_modules();
+
+		// General enqueue scripts.
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 99 );
 	}
 
 	/**
@@ -83,5 +86,37 @@ class Plugin_Main {
 
 		// Testimonials module (includes settings).
 		new Frontend\Testimonials();
+	}
+
+	/**
+	 * Enqueue scripts.
+	 *
+	 * @return void
+	 */
+	public function enqueue_scripts() {
+		$dist_dir = WP_DEBUG ? 'carousel/' : 'dist/';
+		
+		wp_enqueue_style(
+			'frontblocks-carousel',
+			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-carousel.css',
+			array(),
+			FRBL_VERSION
+		);
+
+		wp_enqueue_script(
+			'frontblocks-carousel-custom',
+			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-carousel.js' : 'frontblocks-carousel-min.js' ),
+			array( 'frontblocks-carousel' ),
+			FRBL_VERSION,
+			true
+		);
+
+		wp_enqueue_script(
+			'frontblocks-carousel',
+			FRBL_PLUGIN_URL . 'assets/dist/glide.min.js',
+			array(),
+			FRBL_VERSION,
+			true
+		);
 	}
 }
