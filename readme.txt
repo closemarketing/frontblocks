@@ -1,5 +1,5 @@
 === FrontBlocks for GeneratePress ===
-Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit2sumit
+Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit2sumit, alexcm13
 Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
