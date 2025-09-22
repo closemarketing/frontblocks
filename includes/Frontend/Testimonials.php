@@ -207,47 +207,47 @@ class Testimonials {
 				return '';
 			}
 			?>
-		<div class="frontblocks-carousel frontblocks-testimonials-carousel" data-type="carousel" data-view="4" data-res-view="1" data-buttons="bullets" data-autoplay="0">
-						<?php
-						while ( $query_testimonios->have_posts() ) :
-								$query_testimonios->the_post();
-								$nombre = get_the_title();
-								$texto_resena = get_the_content();
-								$imagen_url = get_the_post_thumbnail_url( get_the_ID(), 'full' );
-								
-								$stars = get_post_meta( get_the_ID(), 'frontblocks_stars', true );
-								
-								$stars = $stars ? intval( $stars ) : 0;
-								$stars_html = '';
+			<div class="frontblocks-carousel frontblocks-testimonials-carousel" data-type="carousel" data-view="4" data-res-view="1" data-buttons="bullets" data-autoplay="6000">
+				<?php
+				while ( $query_testimonios->have_posts() ) :
+						$query_testimonios->the_post();
+						$nombre = get_the_title();
+						$texto_resena = get_the_content();
+						$imagen_url = get_the_post_thumbnail_url( get_the_ID(), 'full' );
+						
+						$stars = get_post_meta( get_the_ID(), 'frontblocks_stars', true );
+						
+						$stars = $stars ? intval( $stars ) : 0;
+						$stars_html = '';
 
-								for ( $i = 1; $i <= 5; $i++ ) {
-										if ( $i <= $stars ) {
-												$stars_html .= '<span class="star filled">★</span>';
-										} else {
-												$stars_html .= '<span class="star">★</span>';
-										}
+						for ( $i = 1; $i <= 5; $i++ ) {
+								if ( $i <= $stars ) {
+										$stars_html .= '<span class="star filled">★</span>';
+								} else {
+										$stars_html .= '<span class="star">★</span>';
 								}
-								?>
-										<div class="testimonial-card">
-														<div class="testimonial-header">
-														<?php if ( $imagen_url ) : ?>
-																		<div class="testimonial-image-container">
-																				<img src="<?php echo esc_url( $imagen_url ); ?>" alt="<?php echo esc_attr( $nombre ); ?>" class="testimonial-image" />
-																</div>
-														<?php endif; ?>
-												</div>
-												<div class="testimonial-content">
-														<h3 class="testimonial-name"><?php echo esc_html( $nombre ); ?></h3>
-														<p class="testimonial-text">"<?php echo esc_html( $texto_resena ); ?>"</p>
-														<div class="stars-container">
-																<?php echo $stars_html; ?>
+						}
+						?>
+								<div class="testimonial-card">
+												<div class="testimonial-header">
+												<?php if ( $imagen_url ) : ?>
+																<div class="testimonial-image-container">
+																		<img src="<?php echo esc_url( $imagen_url ); ?>" alt="<?php echo esc_attr( $nombre ); ?>" class="testimonial-image" />
 														</div>
+												<?php endif; ?>
+										</div>
+										<div class="testimonial-content">
+												<h3 class="testimonial-name"><?php echo esc_html( $nombre ); ?></h3>
+												<p class="testimonial-text">"<?php echo esc_html( $texto_resena ); ?>"</p>
+												<div class="stars-container">
+														<?php echo $stars_html; ?>
 												</div>
 										</div>
-								<?php
-						endwhile;
-						?>
-		</div>
+								</div>
+						<?php
+				endwhile;
+				?>
+			</div>
 			<?php
 			wp_reset_postdata();
 			return ob_get_clean();
