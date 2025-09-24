@@ -86,6 +86,9 @@ class Plugin_Main {
 
 		// Testimonials module (includes settings).
 		new Frontend\Testimonials();
+
+		// Headline module (GenerateBlocks Headline enhancements).
+		new Frontend\Headline();
 	}
 
 	/**
