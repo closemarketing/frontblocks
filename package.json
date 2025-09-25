@@ -31,12 +31,13 @@
   },
   "scripts": {
     "gulp": "gulp compress",
+    "build:headline": "babel assets/headline/frontblocks-headline-option.jsx --out-file assets/headline/frontblocks-headline.js",
     "build:carousel": "babel assets/carousel/frontblocks-advanced-option.jsx --out-file assets/dist/frontblocks-advanced-option.js",
     "build:animations": "babel assets/animations/frontblocks-animation-option.jsx --out-file assets/dist/frontblocks-animation-option.js",
     "build:sticky":  "babel assets/sticky-column/frontblocks-sticky-column-option.jsx --out-file assets/dist/frontblocks-sticky-column-option.js",
     "build:gallery": "babel assets/gallery/frontblocks-gallery-option.jsx --out-file assets/dist/frontblocks-gallery-option.js",
     "build:post": "babel assets/post/frontblocks-insert-post-option.jsx --out-file assets/dist/frontblocks-insert-post-option.js",
-    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run gulp"
+    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:headline && npm run gulp"
   },
   "dependencies": {
     "react": "^19.1.0",

@@ -1,0 +1,40 @@
+.gb-line-effect-vertical,
+.gb-line-effect-horizontal {
+    position: relative;
+    display: block; 
+    width: fit-content; 
+}
+
+.gb-line-effect-vertical {
+    display: flex; 
+    align-items: center;
+    padding-right: 20px;
+}
+
+.gb-line-effect-vertical::after {
+    content: "";
+    position: absolute;
+    top: 50%; 
+    transform: translateY(-50%); 
+    right: 0; 
+    width: 3px;
+    height: 100%;
+    background-color: black; 
+}
+
+.gb-line-effect-horizontal {
+    display: flex;
+    align-items: center;
+    padding-right: 40px;
+}
+
+.gb-line-effect-horizontal::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 50%;
+    transform: translateY(50%);
+    width: 20px;
+    height: 3px;
+    background-color: black; 
+}
