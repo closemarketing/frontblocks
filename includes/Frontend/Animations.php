@@ -88,6 +88,9 @@ class Animations {
 			true
 		);
 
+		// Register script translations.
+		wp_set_script_translations( 'frontblocks-animation-editor', 'frontblocks', FRBL_PLUGIN_PATH . 'languages' );
+
 		// Localize script with custom CSS URL.
 		wp_localize_script(
 			'frontblocks-animation-editor',

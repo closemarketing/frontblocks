@@ -1,0 +1,505 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: FrontBlocks for GeneratePress\n"
+"POT-Creation-Date: 2025-09-24 16:19+0200\n"
+"PO-Revision-Date: 2025-09-24 16:18+0200\n"
+"Last-Translator: David Pérez <david@close.marketing>\n"
+"Language-Team: David Pérez <david@close.marketing>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"X-Generator: Poedit 3.7\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-Flags-xgettext: --add-comments=translators:\n"
+"X-Poedit-WPHeader: frontblocks.php\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: "
+"__;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.min.js\n"
+"X-Poedit-SearchPathExcluded-1: node_modules\n"
+"X-Poedit-SearchPathExcluded-2: tests\n"
+"X-Poedit-SearchPathExcluded-3: vendor\n"
+
+#: assets/dist/frontblocks-advanced-option.js:47
+msgid "Carousel Settings"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:50
+msgid "FrontBlocks Grid Option"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:53
+#: assets/dist/frontblocks-advanced-option.js:104
+#: assets/dist/frontblocks-animation-option.js:25
+msgid "None"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:56
+msgid "Carousel"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:59
+msgid "Slider"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:67
+msgid "This option gives the option to make carousel in your grid block."
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:69
+msgid "Items to view"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:77
+msgid "Responsive to view"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:85
+msgid "Autoplay (seconds)"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:93
+msgid "Rewind"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:101
+msgid "Buttons"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:107
+msgid "Bullets"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:110
+msgid "Arrows"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:119
+msgid "Buttons Position"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:122
+msgid "Side"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:125
+msgid "Bottom"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:134
+msgid "Button Colors"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:142
+msgid "Color button"
+msgstr ""
+
+#: assets/dist/frontblocks-advanced-option.js:150
+msgid "Color background button"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:28
+msgid "Attention Seekers"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:67
+msgid "Back Entrances"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:82
+msgid "Back Exits"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:97
+msgid "Bouncing Entrances"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:115
+msgid "Bouncing Exits"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:133
+msgid "Fading Entrances"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:175
+msgid "Fading Exits"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:217
+msgid "Flippers"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:235
+msgid "Lightspeed"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:250
+msgid "Rotating Entrances"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:268
+msgid "Rotating Exits"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:286
+msgid "Specials"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:301
+msgid "Zooming Entrances"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:319
+msgid "Zooming Exits"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:337
+msgid "Sliding Entrances"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:352
+msgid "Sliding Exits"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:532
+msgid "Animations"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:535
+msgid "Animation Type"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:544
+msgid "Delay (seconds)"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:555
+msgid "Duration (seconds)"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:566
+msgid "Repeat animation"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:574
+msgid "Infinite repeat"
+msgstr ""
+
+#: assets/dist/frontblocks-animation-option.js:591
+msgid "Preview Animation"
+msgstr ""
+
+#: assets/dist/frontblocks-gallery-option.js:26
+msgid "FrontBlocks Gallery Settings"
+msgstr ""
+
+#: assets/dist/frontblocks-gallery-option.js:29
+msgid "Gallery Layout"
+msgstr ""
+
+#: assets/dist/frontblocks-gallery-option.js:32
+msgid "Grid"
+msgstr ""
+
+#: assets/dist/frontblocks-gallery-option.js:35
+msgid "Masonry"
+msgstr ""
+
+#: assets/dist/frontblocks-gallery-option.js:43
+msgid "Choose between grid or masonry layout for your gallery."
+msgstr ""
+
+#: assets/dist/frontblocks-gallery-option.js:45
+msgid "Gutter Size (px)"
+msgstr ""
+
+#: assets/dist/frontblocks-gallery-option.js:55
+msgid "Set the spacing between gallery items."
+msgstr ""
+
+#: assets/dist/frontblocks-gallery-option.js:57
+msgid "Enable Lightbox"
+msgstr ""
+
+#: assets/dist/frontblocks-gallery-option.js:64
+msgid "Enable lightbox functionality for gallery images."
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:73
+msgid "Posts"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:76
+msgid "Pages"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:149
+msgid "Search failed"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:154
+msgid "Search failed. Please try again."
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:211
+msgid "Content will be loaded on the frontend"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:218
+#: assets/dist/frontblocks-insert-post-option.js:268
+msgid "Change Post"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:221
+msgid "Clear Selection"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:223
+msgid "No post selected. Use the sidebar to search and select a post."
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:228
+msgid "Select Post"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:229
+msgid "Insert Post Settings"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:232
+msgid "Post Type"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:242
+msgid "Search Posts"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:245
+msgid "Start typing to search posts..."
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:246
+msgid "Type at least 2 characters to search"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:255
+msgid "Searching..."
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:260
+msgid "Selected Post"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:260
+msgid "Title:"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:260
+msgid "Type:"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:260
+msgid "ID:"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:274
+msgid "Insert Post"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:275
+msgid "Display content from another post or page"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:278
+msgid "post"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:278
+msgid "content"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:278
+msgid "insert"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:278
+msgid "display"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:320
+msgid "Insert Post Integration"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:323
+msgid "Enable Insert Post Grid"
+msgstr ""
+
+#: assets/dist/frontblocks-insert-post-option.js:330
+msgid "Enable insert post functionality for this grid"
+msgstr ""
+
+#: assets/dist/frontblocks-sticky-column-option.js:48
+msgid "No columns found"
+msgstr ""
+
+#: assets/dist/frontblocks-sticky-column-option.js:58
+#: assets/dist/frontblocks-sticky-column-option.js:82
+msgid "Sticky Column"
+msgstr ""
+
+#: assets/dist/frontblocks-sticky-column-option.js:61
+msgid "Enable Sticky Column"
+msgstr ""
+
+#: assets/dist/frontblocks-sticky-column-option.js:68
+msgid "Make a column stick to the top when scrolling"
+msgstr ""
+
+#: assets/dist/frontblocks-sticky-column-option.js:70
+msgid "Sticky Offset (px)"
+msgstr ""
+
+#: assets/dist/frontblocks-sticky-column-option.js:80
+msgid "Distance from top when sticky"
+msgstr ""
+
+#: assets/dist/frontblocks-sticky-column-option.js:90
+msgid "Select which column should be sticky"
+msgstr ""
+
+#: assets/post/frontblocks-insert-post.php:158
+#: includes/Frontend/InsertPost.php:185
+msgid "No post selected"
+msgstr ""
+
+#: assets/post/frontblocks-insert-post.php:164
+#: includes/Frontend/InsertPost.php:191
+msgid "Selected post not found or not published"
+msgstr ""
+
+#: includes/Admin/Settings.php:49 includes/Admin/Settings.php:140
+msgid "Frontblocks Settings"
+msgstr ""
+
+#: includes/Admin/Settings.php:50
+msgid "Frontblocks"
+msgstr ""
+
+#: includes/Admin/Settings.php:76
+msgid "Features"
+msgstr ""
+
+#: includes/Admin/Settings.php:78
+msgid "Enable or disable Frontblocks features."
+msgstr ""
+
+#: includes/Admin/Settings.php:85 includes/Admin/Settings.php:125
+#: includes/Frontend/Testimonials.php:85
+msgid "Enable testimonials"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:96
+msgctxt "Post Type General Name"
+msgid "Testimonials"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:97
+msgctxt "Post Type Singular Name"
+msgid "Testimonial"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:98 includes/Frontend/Testimonials.php:111
+msgid "Testimonials"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:99
+msgid "All Testimonials"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:100
+msgid "Add New Testimonial"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:101
+msgid "Add New"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:102
+msgid "New Testimonial"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:103
+msgid "Edit Testimonial"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:104
+msgid "Update Testimonial"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:105
+msgid "View Testimonial"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:106
+msgid "View Testimonials"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:107
+msgid "Search Testimonial"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:133
+msgid "Rating (Stars)"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:152
+msgid "Select rating:"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:154
+msgid "0 Stars"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:155
+msgid "1 Star"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:156
+msgid "2 Stars"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:157
+msgid "3 Stars"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:158
+msgid "4 Stars"
+msgstr ""
+
+#: includes/Frontend/Testimonials.php:159
+msgid "5 Stars"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "FrontBlocks for GeneratePress"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "https://wordpress.org/plugins/frontblocks/"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "Blocks and helpers that extends GeneratePress blocks."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Closemarketing"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "https://close.marketing"
+msgstr ""

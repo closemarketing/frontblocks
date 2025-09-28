@@ -84,6 +84,9 @@ class Gallery {
 			FRBL_VERSION,
 			true
 		);
+
+		// Register script translations.
+		wp_set_script_translations( 'frontblocks-gallery-option', 'frontblocks', FRBL_PLUGIN_PATH . 'languages' );
 	}
 
 	/**

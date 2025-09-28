@@ -75,6 +75,9 @@ class InsertPost {
 			true
 		);
 
+		// Register script translations.
+		wp_set_script_translations( 'frontblocks-insert-post-option', 'frontblocks', FRBL_PLUGIN_PATH . 'languages' );
+
 		// Localize script with AJAX URL and nonce.
 		wp_localize_script(
 			'frontblocks-insert-post-option',

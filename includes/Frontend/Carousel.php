@@ -51,6 +51,9 @@ class Carousel {
 			FRBL_VERSION,
 			true
 		);
+
+		// Register script translations.
+		wp_set_script_translations( 'frontblocks-advanced-option', 'frontblocks', FRBL_PLUGIN_PATH . 'languages' );
 	}
 
 	/**

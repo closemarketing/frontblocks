@@ -55,7 +55,7 @@ class Plugin_Main {
 		$this->load_modules();
 
 		// General enqueue scripts.
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 99 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 99 );<!--  add_action( 'init', array( $this, 'load_textdomain' ) );
 	}
 
 	/**
@@ -118,5 +118,13 @@ class Plugin_Main {
 			FRBL_VERSION,
 			true
 		);
+	}
+		/**
+	 * Load plugin text domain.
+	 *
+	 * @return void
+	 */
+	public function load_textdomain() {
+		load_plugin_textdomain( 'frontblocks', false, dirname( plugin_basename( FRBL_PLUGIN ) ) . '/languages' );
 	}
 }
