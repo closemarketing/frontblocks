@@ -33,19 +33,19 @@ class Headline {
 	 *
 	 * @return void
 	 */
-   public function register_assets() {
-	wp_register_style( 'frontblocks-headline-styles', FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline.css', array(), FRBL_VERSION );
+	public function register_assets() {
+		wp_register_style( 'frontblocks-headline-styles', FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline.css', array(), FRBL_VERSION );
 
-	$asset_path = FRBL_PLUGIN_PATH . 'assets/headline/frontblocks-headline.asset.php';
+		$asset_path = FRBL_PLUGIN_PATH . 'assets/headline/frontblocks-headline.asset.php';
 
-	if ( file_exists( $asset_path ) ) {
-		$asset_file = include( $asset_path );
-	} else {
-		$asset_file = array( 'dependencies' => array( 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-compose', 'wp-hooks', 'wp-data' ), 'version' => FRBL_VERSION );
+		if ( file_exists( $asset_path ) ) {
+			$asset_file = include $asset_path;
+		} else {
+			$asset_file = array( 'dependencies' => array( 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-compose', 'wp-hooks', 'wp-data' ), 'version' => FRBL_VERSION );
+		}
+
+		wp_register_script( 'frontblocks-headline-editor', FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline.js', $asset_file['dependencies'], $asset_file['version'], true );
 	}
-
-	wp_register_script( 'frontblocks-headline-editor', FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline.js', $asset_file['dependencies'], $asset_file['version'], true );
-   }
 
 	/**
 	 * Encola el script en el editor de bloques.
@@ -56,7 +56,7 @@ class Headline {
 		wp_enqueue_script( 'frontblocks-headline-editor' );
 		wp_enqueue_style( 'frontblocks-headline-styles' );
 	}
-	
+
 	/**
 	 * Encola los estilos en el frontend.
 	 *
@@ -73,7 +73,7 @@ class Headline {
 	 * @param array $attributes Array de atributos actuales de la etiqueta.
 	 * @return array Atributos modificados.
 	 */
-   public function add_line_class_attribute( $attributes ) {
-	return $attributes;
+	public function add_line_class_attribute( $attributes ) {
+		return $attributes;
 	}
 }
