@@ -25,7 +25,7 @@ class Headline {
 		add_action( 'init', array( $this, 'register_assets' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ), 100 );
-		add_filter( 'generateblocks_attr_headline', array( $this, 'add_line_class_attribute' ), 10, 3 );
+		add_filter( 'generateblocks_attr_headline', array( $this, 'add_line_class_attribute' ), 10 );
 	}
 
 	/**
@@ -36,7 +36,7 @@ class Headline {
 	public function register_assets() {
 		wp_register_style( 'frontblocks-headline-styles', FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline.css', array(), FRBL_VERSION );
 
-		$asset_path = FRBL_PLUGIN_PATH . 'assets/headline/frontblocks-headline.asset.php';
+		$asset_path = FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline.asset.php';
 
 		if ( file_exists( $asset_path ) ) {
 			$asset_file = include $asset_path;
