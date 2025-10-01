@@ -23,8 +23,6 @@ class Headline {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_assets' ) );
-		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ), 100 );
 		add_filter( 'generateblocks_attr_headline', array( $this, 'add_line_class_attribute' ), 10 );
 	}
 

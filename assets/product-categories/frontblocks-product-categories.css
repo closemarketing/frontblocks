@@ -1,0 +1,31 @@
+/* Código CSS esencial para la cuadrícula (Grid) */
+
+.frbl-product-categories-grid {
+    /* 1. Habilita el módulo de cuadrícula */
+    display: grid;
+    
+    /* 2. Define el número de columnas usando la variable inyectada por PHP */
+    grid-template-columns: repeat(var(--frbl-grid-columns, 2), 1fr); 
+    
+    /* 3. Espacio entre elementos */
+    gap: 30px; /* Ajusta este valor si quieres más o menos espacio */
+    
+    /* Limpieza visual si el contenedor era originalmente una lista */
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Estilos de los ítems (opcional, pero recomendado) */
+.frbl-product-categories-grid .frbl-category-item {
+    /* Asegura que los ítems ocupan su espacio de columna */
+    width: 100%;
+    text-align: center;
+}
+
+/* Asegura que la imagen sea responsiva dentro de su contenedor */
+.frbl-product-categories-grid .frbl-category-image {
+    width: 100%;
+    height: auto;
+    display: block;
+}
