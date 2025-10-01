@@ -53,15 +53,6 @@ class Headline {
 	}
 
 	/**
-	 * Encola el script en el editor de bloques.
-	 *
-	 * @return void
-	 */
-	public function enqueue_editor_assets() {
-		// Los scripts ya se cargan en register_assets
-	}
-
-	/**
 	 * Mantiene el filtro de atributos de GenerateBlocks, sin lógica de color.
 	 * Se renombra a add_line_class_attribute por claridad.
 	 *
