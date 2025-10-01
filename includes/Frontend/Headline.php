@@ -17,80 +17,66 @@ defined('ABSPATH') || exit;
  *
  * @since 1.1.0
  */
-class Headline
-{
+class Headline {
 
    /**
-    * Class constructor.
+    * Constructor.
     */
    public function __construct() {
-      add_action( 'init', array( $this, 'register_assets' ) );
-      add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
-      add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ), 100 );
-      add_filter( 'generateblocks_attr_headline', array( $this, 'add_line_class_attribute' ), 10, 3 );
+	add_action( 'init', array( $this, 'register_assets' ) );
+	add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
+	add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ), 100 );
+	add_filter( 'generateblocks_attr_headline', array( $this, 'add_line_class_attribute' ), 10, 3 );
    }
 
    /**
-    * Register required scripts and styles.
+    * Registra los scripts y estilos necesarios.
     *
     * @return void
     */
    public function register_assets() {
-      wp_register_style(
-         'frontblocks-headline-styles',
-         FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline.css',
-         array(),
-         FRBL_VERSION
-      );
+	wp_register_style( 'frontblocks-headline-styles', FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline.css', array(), FRBL_VERSION );
 
-      $asset_path = FRBL_PLUGIN_PATH . 'assets/headline/frontblocks-headline.asset.php';
+	$asset_path = FRBL_PLUGIN_PATH . 'assets/headline/frontblocks-headline.asset.php';
 
-      if ( file_exists( $asset_path ) ) {
-         $asset_file = include $asset_path;
-      } else {
-         $asset_file = array(
-            'dependencies' => array( 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-compose', 'wp-hooks', 'wp-data' ),
-            'version'      => FRBL_VERSION,
-         );
-      }
+	if ( file_exists( $asset_path ) ) {
+		$asset_file = include( $asset_path );
+	} else {
+		$asset_file = array( 'dependencies' => array( 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-compose', 'wp-hooks', 'wp-data' ), 'version' => FRBL_VERSION );
+	}
 
-      wp_register_script(
-         'frontblocks-headline-editor',
-         FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline.js',
-         $asset_file['dependencies'],
-         $asset_file['version'],
-         true
-      );
+	wp_register_script( 'frontblocks-headline-editor', FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline.js', $asset_file['dependencies'], $asset_file['version'], true );
    }
 
    /**
-    * Enqueue editor assets.
+    * Encola el script en el editor de bloques.
     *
     * @return void
     */
    public function enqueue_editor_assets() {
-      wp_enqueue_script( 'frontblocks-headline-editor' );
-      wp_enqueue_style( 'frontblocks-headline-styles' );
+	wp_enqueue_script( 'frontblocks-headline-editor' );
+	wp_enqueue_style( 'frontblocks-headline-styles' );
    }
 
    /**
-    * Enqueue frontend styles.
+    * Encola los estilos en el frontend.
     *
     * @return void
     */
    public function enqueue_frontend_styles() {
-      wp_enqueue_style( 'frontblocks-headline-styles' );
+	wp_enqueue_style( 'frontblocks-headline-styles' );
    }
 
    /**
-    * Keeps the GenerateBlocks attribute filter, no color logic. Renamed for clarity.
+    * Mantiene el filtro de atributos de GenerateBlocks, sin lógica de color.
+    * Se renombra a add_line_class_attribute por claridad.
     *
-    * @param array  $attributes       Current tag attributes.
-    * @param string $tag              Tag name.
-    * @param array  $block_attributes Block attributes.
-    * @return array Modified attributes.
+    * @param array $attributes Array de atributos actuales de la etiqueta.
+    * @param string $tag El nombre de la etiqueta.
+    * @param array $block_attributes Los atributos completos del bloque.
+    * @return array Atributos modificados.
     */
    public function add_line_class_attribute( $attributes, $tag, $block_attributes ) {
-      return $attributes;
+	return $attributes;
    }
 }
