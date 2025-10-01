@@ -10,7 +10,7 @@
 
 namespace FrontBlocks\Frontend;
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Headline class.
@@ -18,22 +18,21 @@ defined('ABSPATH') || exit;
  * @since 1.1.0
  */
 class Headline {
-
-   /**
-    * Constructor.
-    */
-   public function __construct() {
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
 	add_action( 'init', array( $this, 'register_assets' ) );
 	add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
 	add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ), 100 );
 	add_filter( 'generateblocks_attr_headline', array( $this, 'add_line_class_attribute' ), 10, 3 );
-   }
+	}
 
    /**
-    * Registra los scripts y estilos necesarios.
-    *
-    * @return void
-    */
+	 * Registra los scripts y estilos necesarios.
+	 *
+	 * @return void
+	 */
    public function register_assets() {
 	wp_register_style( 'frontblocks-headline-styles', FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline.css', array(), FRBL_VERSION );
 
@@ -49,34 +48,32 @@ class Headline {
    }
 
    /**
-    * Encola el script en el editor de bloques.
-    *
-    * @return void
-    */
+	 * Encola el script en el editor de bloques.
+	 *
+	 * @return void
+	 */
    public function enqueue_editor_assets() {
 	wp_enqueue_script( 'frontblocks-headline-editor' );
 	wp_enqueue_style( 'frontblocks-headline-styles' );
    }
 
-   /**
+	/**
     * Encola los estilos en el frontend.
     *
     * @return void
-    */
+	 */
    public function enqueue_frontend_styles() {
 	wp_enqueue_style( 'frontblocks-headline-styles' );
    }
 
-   /**
-    * Mantiene el filtro de atributos de GenerateBlocks, sin lógica de color.
-    * Se renombra a add_line_class_attribute por claridad.
-    *
-    * @param array $attributes Array de atributos actuales de la etiqueta.
-    * @param string $tag El nombre de la etiqueta.
-    * @param array $block_attributes Los atributos completos del bloque.
-    * @return array Atributos modificados.
-    */
-   public function add_line_class_attribute( $attributes, $tag, $block_attributes ) {
+	/**
+	 * Mantiene el filtro de atributos de GenerateBlocks, sin lógica de color.
+	 * Se renombra a add_line_class_attribute por claridad.
+	 *
+	 * @param array $attributes Array de atributos actuales de la etiqueta.
+	 * @return array Atributos modificados.
+	 */
+   public function add_line_class_attribute( $attributes ) {
 	return $attributes;
-   }
+	}
 }
