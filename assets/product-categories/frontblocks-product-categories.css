@@ -1,31 +1,61 @@
-/* Código CSS esencial para la cuadrícula (Grid) */
-
 .frbl-product-categories-grid {
-    /* 1. Habilita el módulo de cuadrícula */
     display: grid;
-    
-    /* 2. Define el número de columnas usando la variable inyectada por PHP */
     grid-template-columns: repeat(var(--frbl-grid-columns, 2), 1fr); 
-    
-    /* 3. Espacio entre elementos */
-    gap: 30px; /* Ajusta este valor si quieres más o menos espacio */
-    
-    /* Limpieza visual si el contenedor era originalmente una lista */
+    gap: 30px; 
     list-style: none;
     margin: 0;
     padding: 0;
 }
 
-/* Estilos de los ítems (opcional, pero recomendado) */
+.frbl-product-categories-grid .frbl-category-link {
+    display: block;
+    
+    background-color: var(--frbl-bg-color, rgba(255, 255, 255, 0.5));
+    border: var(--frbl-border-width, 1px) solid var(--frbl-border-color, #dddddd);
+    color: var(--frbl-text-color, inherit);
+
+    padding-top: 30px; 
+	 padding-right: 30px; 
+	 padding-left: 30px; 
+
+    border-radius: 20px;
+    
+    text-decoration: none;
+    
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.frbl-product-categories-grid .frbl-category-link:hover {
+    background-color: var(--frbl-hover-bg-color, rgba(255, 255, 255, 0.7));
+    border-color: var(--frbl-hover-border-color, #555555);
+}
+
+.frbl-product-categories-grid .frbl-category-link .frbl-category-name {
+    color: var(--frbl-text-color, inherit);
+    transition: color 0.3s ease;
+}
+
+.frbl-product-categories-grid .frbl-category-link:hover .frbl-category-name {
+    color: var(--frbl-hover-text-color, inherit);
+}
+
 .frbl-product-categories-grid .frbl-category-item {
-    /* Asegura que los ítems ocupan su espacio de columna */
-    width: 100%;
     text-align: center;
 }
 
-/* Asegura que la imagen sea responsiva dentro de su contenedor */
+.frbl-product-categories-grid .frbl-category-image-wrap {
+    margin-bottom: 10px;
+    overflow: hidden;
+    border-radius: 4px;
+}
+
 .frbl-product-categories-grid .frbl-category-image {
     width: 100%;
     height: auto;
     display: block;
+    border-radius: 20px;
+}
+
+html :where([style*=border-width]) {
+    border-style: none;
 }

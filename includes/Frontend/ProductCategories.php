@@ -25,7 +25,6 @@ class ProductCategories {
    public function __construct() {
       add_action( 'init', array( $this, 'register_product_categories_block' ) );
       add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
-      
       add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
    }
 
@@ -110,6 +109,34 @@ class ProductCategories {
                   'type'    => 'number',
                   'default' => 2,
                ),
+               'bgColor'    => array(
+                  'type'    => 'string',
+                  'default' => 'rgba(255, 255, 255, 0.5)',
+               ),
+               'borderColor'    => array(
+                  'type'    => 'string',
+                  'default' => '#dddddd',
+               ),
+               'borderWidth'    => array(
+                  'type'    => 'number',
+                  'default' => 1,
+               ),
+               'textColor'    => array(
+                  'type'    => 'string',
+                  'default' => 'inherit',
+               ),
+               'hoverBgColor'    => array(
+                  'type'    => 'string',
+                  'default' => 'rgba(255, 255, 255, 0.7)',
+               ),
+               'hoverBorderColor'    => array(
+                  'type'    => 'string',
+                  'default' => '#555555',
+               ),
+               'hoverTextColor'    => array(
+                  'type'    => 'string',
+                  'default' => 'inherit',
+               ),
             ),
          )
       );
@@ -133,11 +160,26 @@ class ProductCategories {
       
       $columns    = absint( $attributes['columns'] ?? 2 ); 
 
+      $bg_color          = sanitize_text_field( $attributes['bgColor'] ?? 'rgba(255, 255, 255, 0.5)' );
+      $border_color      = sanitize_text_field( $attributes['borderColor'] ?? '#dddddd' );
+      $border_width      = absint( $attributes['borderWidth'] ?? 1 );
+      $text_color        = sanitize_text_field( $attributes['textColor'] ?? 'inherit' );
+      $hover_bg_color    = sanitize_text_field( $attributes['hoverBgColor'] ?? 'rgba(255, 255, 255, 0.7)' );
+      $hover_border_color= sanitize_text_field( $attributes['hoverBorderColor'] ?? '#555555' );
+      $hover_text_color  = sanitize_text_field( $attributes['hoverTextColor'] ?? 'inherit' );
+
+      /**
+       * Lógica para "Mostrar todas"
+       * Si el 'count' es 999 (el valor máximo en el editor),
+       * pasamos 'number' => 0 a get_terms para indicar que no hay límite.
+       */
+      $query_limit = ( $count === 999 ) ? 0 : $count;
+
       $args = array(
          'taxonomy'   => 'product_cat',
          'orderby'    => $orderby,
          'order'      => $order,
-         'number'     => $count,
+         'number'     => $query_limit,
          'hide_empty' => (bool) $hide_empty, 
       );
 
@@ -155,11 +197,20 @@ class ProductCategories {
       if ( ! empty( $attributes['className'] ) ) {
          $wrapper_class .= ' ' . esc_attr( $attributes['className'] );
       }
-      
-      $style_attr = sprintf(
-         'style="--frbl-grid-columns: %d;"',
-         $columns
+
+      $style_vars = sprintf(
+         '--frbl-grid-columns: %d; --frbl-bg-color: %s; --frbl-border-color: %s; --frbl-border-width: %dpx; --frbl-text-color: %s; --frbl-hover-bg-color: %s; --frbl-hover-border-color: %s; --frbl-hover-text-color: %s;',
+         $columns,
+         $bg_color,
+         $border_color,
+         $border_width,
+         $text_color,
+         $hover_bg_color,
+         $hover_border_color,
+         $hover_text_color
       );
+      
+      $style_attr = sprintf( 'style="%s"', $style_vars );
 
       ob_start();
       ?>
