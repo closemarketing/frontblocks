@@ -49,9 +49,9 @@ class Headline {
 					'wp-components',
 					'wp-compose',
 					'wp-hooks',
-					'wp-data'
+					'wp-data',
 				),
-				'version'      => FRBL_VERSION
+				'version'      => FRBL_VERSION,
 			);
 		}
 
