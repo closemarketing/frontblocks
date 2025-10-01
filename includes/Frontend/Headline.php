@@ -21,24 +21,21 @@ class Headline
 {
 
    /**
-    * Constructor.
+    * Class constructor.
     */
-   public function __construct()
-   {
-      add_action('init', array($this, 'register_assets'));
-      add_action('enqueue_block_editor_assets', array($this, 'enqueue_editor_assets'));
-      add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_styles'), 100);
-
+   public function __construct() {
+      add_action( 'init', array( $this, 'register_assets' ) );
+      add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
+      add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ), 100 );
       add_filter( 'generateblocks_attr_headline', array( $this, 'add_line_class_attribute' ), 10, 3 );
    }
 
    /**
-    * Registra los scripts y estilos necesarios.
+    * Register required scripts and styles.
     *
     * @return void
     */
-   public function register_assets()
-   {
+   public function register_assets() {
       wp_register_style(
          'frontblocks-headline-styles',
          FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline.css',
@@ -48,10 +45,13 @@ class Headline
 
       $asset_path = FRBL_PLUGIN_PATH . 'assets/headline/frontblocks-headline.asset.php';
 
-      if (file_exists($asset_path)) {
-         $asset_file = include($asset_path);
+      if ( file_exists( $asset_path ) ) {
+         $asset_file = include $asset_path;
       } else {
-         $asset_file = array('dependencies' => array('wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-compose', 'wp-hooks', 'wp-data'), 'version' => FRBL_VERSION);
+         $asset_file = array(
+            'dependencies' => array( 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-compose', 'wp-hooks', 'wp-data' ),
+            'version'      => FRBL_VERSION,
+         );
       }
 
       wp_register_script(
@@ -64,34 +64,31 @@ class Headline
    }
 
    /**
-    * Encola el script en el editor de bloques.
+    * Enqueue editor assets.
     *
     * @return void
     */
-   public function enqueue_editor_assets()
-   {
-      wp_enqueue_script('frontblocks-headline-editor');
-      wp_enqueue_style('frontblocks-headline-styles');
+   public function enqueue_editor_assets() {
+      wp_enqueue_script( 'frontblocks-headline-editor' );
+      wp_enqueue_style( 'frontblocks-headline-styles' );
    }
 
    /**
-    * Encola los estilos en el frontend.
+    * Enqueue frontend styles.
     *
     * @return void
     */
-   public function enqueue_frontend_styles()
-   {
-      wp_enqueue_style('frontblocks-headline-styles');
+   public function enqueue_frontend_styles() {
+      wp_enqueue_style( 'frontblocks-headline-styles' );
    }
 
    /**
-    * Mantiene el filtro de atributos de GenerateBlocks, sin lógica de color.
-    * Se renombra a add_line_class_attribute por claridad.
+    * Keeps the GenerateBlocks attribute filter, no color logic. Renamed for clarity.
     *
-    * @param array $attributes Array de atributos actuales de la etiqueta.
-    * @param string $tag El nombre de la etiqueta.
-    * @param array $block_attributes Los atributos completos del bloque.
-    * @return array Atributos modificados.
+    * @param array  $attributes       Current tag attributes.
+    * @param string $tag              Tag name.
+    * @param array  $block_attributes Block attributes.
+    * @return array Modified attributes.
     */
    public function add_line_class_attribute( $attributes, $tag, $block_attributes ) {
       return $attributes;
