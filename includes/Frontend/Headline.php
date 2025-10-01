@@ -41,7 +41,18 @@ class Headline {
 		if ( file_exists( $asset_path ) ) {
 			$asset_file = include $asset_path;
 		} else {
-			$asset_file = array( 'dependencies' => array( 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-compose', 'wp-hooks', 'wp-data' ), 'version' => FRBL_VERSION );
+			$asset_file = array(
+				'dependencies' => array(
+					'wp-blocks',
+					'wp-element',
+					'wp-editor',
+					'wp-components',
+					'wp-compose',
+					'wp-hooks',
+					'wp-data'
+				),
+				'version'      => FRBL_VERSION
+			);
 		}
 
 		wp_register_script( 'frontblocks-headline-editor', FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline.js', $asset_file['dependencies'], $asset_file['version'], true );
