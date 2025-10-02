@@ -28,21 +28,21 @@ class ProductCategories {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
 	}
 
-   /**
-	 * Enqueue frontend styles for the grid.
-	 * Usa la constante FRBL_PLUGIN_URL para construir la URL pública correcta.
-	 *
-	 * @return void
-	 */
+	/**
+    * Enqueue frontend styles for the grid.
+    * Usa la constante FRBL_PLUGIN_URL para construir la URL pública correcta.
+    *
+    * @return void
+    */
 	public function enqueue_frontend_styles() {
-   	$style_url = FRBL_PLUGIN_URL . 'assets/product-categories/frontblocks-product-categories.css';
+		$style_url = FRBL_PLUGIN_URL . 'assets/product-categories/frontblocks-product-categories.css';
 
-   	wp_enqueue_style(
-			'frontblocks-product-categories-grid-style',
-			$style_url,
-			array(),
-			FRBL_VERSION 
-		);
+		wp_enqueue_style(
+        'frontblocks-product-categories-grid-style',
+        $style_url,
+        array(),
+        FRBL_VERSION 
+    );
 	}
 
 	/**
@@ -84,77 +84,77 @@ class ProductCategories {
 				'editor_script'   => 'frontblocks-product-categories-option',
 				'render_callback' => array( $this, 'render_product_categories_block' ),
 				'attributes'      => array(
-					'count'           => array(
+					'count'        => array(
 						'type'    => 'number',
 						'default' => 5,
 					),
-					'orderby'         => array(
+					'orderby'      => array(
 						'type'    => 'string',
 						'default' => 'count',
 					),
-               'order'           => array(
-                  'type'    => 'string',
-                  'default' => 'DESC',
-               ),
-               'hideEmpty'       => array(
-                  'type'    => 'boolean',
-                  'default' => false,
-               ),
-               'className'       => array(
-                  'type'    => 'string',
-                  'default' => '',
-               ),
-               'columns'    => array(
-                  'type'    => 'number',
-                  'default' => 2,
-               ),
-               'bgColor'    => array(
-                  'type'    => 'string',
-                  'default' => 'rgba(255, 255, 255, 0.5)',
-               ),
-               'borderColor'    => array(
-                  'type'    => 'string',
-                  'default' => '#dddddd',
-               ),
-               'borderWidth'    => array(
-                  'type'    => 'number',
-                  'default' => 1,
-               ),
-               'borderRadius'   => array(
-                  'type'    => 'number',
-                  'default' => 20,
-               ),
-               'textColor'    => array(
-                  'type'    => 'string',
-                  'default' => 'inherit',
-               ),
-               'hoverBgColor'    => array(
-                  'type'    => 'string',
-                  'default' => 'rgba(255, 255, 255, 0.7)',
-               ),
-               'hoverBorderColor'    => array(
-                  'type'    => 'string',
-                  'default' => '#555555',
-               ),
-               'hoverTextColor'    => array(
-                  'type'    => 'string',
-                  'default' => 'inherit',
-               ),
-            ),
-         )
-      );
-   }
+					'order'        => array(
+						'type'    => 'string',
+						'default' => 'DESC',
+					),
+					'hideEmpty'    => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
+					'className'    => array(
+						'type'    => 'string',
+						'default' => '',
+					),
+					'columns'    => array(
+						'type'    => 'number',
+						'default' => 2,
+					),
+					'bgColor'    => array(
+						'type'    => 'string',
+						'default' => 'rgba(255, 255, 255, 0.5)',
+					),
+					'borderColor'    => array(
+						'type'    => 'string',
+						'default' => '#dddddd',
+					),
+					'borderWidth'    => array(
+						'type'    => 'number',
+						'default' => 1,
+					),
+					'borderRadius'   => array(
+						'type'    => 'number',
+						'default' => 20,
+					),
+					'textColor'    => array(
+						'type'    => 'string',
+						'default' => 'inherit',
+					),
+					'hoverBgColor'    => array(
+						'type'    => 'string',
+						'default' => 'rgba(255, 255, 255, 0.7)',
+					),
+					'hoverBorderColor'    => array(
+						'type'    => 'string',
+						'default' => '#555555',
+					),
+					'hoverTextColor'    => array(
+						'type'    => 'string',
+						'default' => 'inherit',
+					),
+				),
+			)
+		);
+	}
 
-   /**
+	/**
     * Render the Product Categories block on frontend.
     *
     * @param array $attributes Block attributes.
     * @return string HTML output.
     */
-   public function render_product_categories_block( $attributes ) {
-      if ( ! class_exists( 'WooCommerce' ) ) {
-         return '';
-      }
+	public function render_product_categories_block( $attributes ) {
+		if ( ! class_exists( 'WooCommerce' ) ) {
+			return '';
+		}
 
       $count      = absint( $attributes['count'] ?? 5 );
       $orderby    = sanitize_key( $attributes['orderby'] ?? 'count' );
@@ -201,7 +201,6 @@ class ProductCategories {
          $wrapper_class .= ' ' . esc_attr( $attributes['className'] );
       }
       
-      // 🚨 Inyección de todas las variables CSS para los estilos
       $style_vars = sprintf(
          '--frbl-grid-columns: %d; --frbl-bg-color: %s; --frbl-border-color: %s; --frbl-border-width: %dpx; --frbl-text-color: %s; --frbl-hover-bg-color: %s; --frbl-hover-border-color: %s; --frbl-hover-text-color: %s; --frbl-border-radius: %dpx;',
          $columns,
