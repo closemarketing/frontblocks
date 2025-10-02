@@ -224,7 +224,7 @@ class ProductCategories {
 				if ( $thumbnail_id ) {
 					$image_url = wp_get_attachment_image_url( $thumbnail_id, 'woocommerce_thumbnail' );
 				} else {
-					$image_url = function_exists( 'wc_placeholder_img_src' ) ? wc_placeholder_img_src() : plugins_url( 'assets/images/placeholder.png', dirname( dirname( __FILE__ ) ) );
+					$image_url = function_exists( 'wc_placeholder_img_src' ) ? wc_placeholder_img_src() : plugins_url( 'assets/images/placeholder.png', dirname( __DIR__ ) );
 				}
 				$link = esc_url( get_term_link( $category, 'product_cat' ) );
 				?>
