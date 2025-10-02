@@ -178,7 +178,7 @@ class ProductCategories {
 		 */
 		$query_limit = ( 999 === $count ) ? 0 : $count;
 
-		$args = array(
+		$args       = array(
 			'taxonomy'   => 'product_cat',
 			'orderby'    => $orderby,
 			'order'      => $order,
