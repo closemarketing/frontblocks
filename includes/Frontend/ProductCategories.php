@@ -221,8 +221,12 @@ class ProductCategories {
 			<?php
 			foreach ( $categories as $category ) :
 				$thumbnail_id = get_term_meta( $category->term_id, 'thumbnail_id', true );
-				$image_url    = $thumbnail_id ? wp_get_attachment_image_url( $thumbnail_id, 'woocommerce_thumbnail' ) : wc_placeholder_img_src();
-				$link         = esc_url( get_term_link( $category, 'product_cat' ) );
+				if ( $thumbnail_id ) {
+					$image_url = wp_get_attachment_image_url( $thumbnail_id, 'woocommerce_thumbnail' );
+				} else {
+					$image_url = function_exists( 'wc_placeholder_img_src' ) ? wc_placeholder_img_src() : plugins_url( 'assets/images/placeholder.png', dirname( dirname( __FILE__ ) ) );
+				}
+				$link = esc_url( get_term_link( $category, 'product_cat' ) );
 				?>
 				<div class="frbl-category-item frbl-category-<?php echo esc_attr( $category->slug ); ?>">
 					<a href="<?php echo esc_url( $link ); ?>" class="frbl-category-link">
