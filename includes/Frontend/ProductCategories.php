@@ -219,7 +219,7 @@ class ProductCategories {
 			<?php
 			foreach ( $categories as $category ) :
 				$thumbnail_id = get_term_meta( $category->term_id, 'thumbnail_id', true );
-				
+
 				if ( $thumbnail_id ) {
 					$image_url = wp_get_attachment_image_url( $thumbnail_id, 'woocommerce_thumbnail' );
 				} elseif ( function_exists( 'wc_placeholder_img_src' ) ) {
@@ -227,7 +227,7 @@ class ProductCategories {
 				} else {
 					$image_url = 'https://placehold.co/600x400/eeeeee/333333?text=Product+Category';
 				}
-				
+
 				$link = esc_url( get_term_link( $category, 'product_cat' ) );
 				?>
 				<div class="frbl-category-item frbl-category-<?php echo esc_attr( $category->slug ); ?>">
