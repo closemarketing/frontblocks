@@ -160,7 +160,7 @@ class ProductCategories {
 		$orderby    = sanitize_key( $attributes['orderby'] ?? 'count' );
 		$order      = strtoupper( sanitize_key( $attributes['order'] ?? 'DESC' ) );
 		$hide_empty = $attributes['hideEmpty'] ?? false;
-		$columns    = absint( $attributes['columns'] ?? 2 ); 
+		$columns    = absint( $attributes['columns'] ?? 2 );
 
 		$bg_color           = sanitize_text_field( $attributes['bgColor'] ?? 'rgba(255, 255, 255, 0.5)' );
 		$border_color       = sanitize_text_field( $attributes['borderColor'] ?? '#dddddd' );
@@ -186,7 +186,7 @@ class ProductCategories {
 			'hide_empty' => (bool) $hide_empty,
 		);
 		$categories = get_terms( $args );
-		
+
 		if ( is_wp_error( $categories ) || empty( $categories ) ) {
 			if ( current_user_can( 'manage_options' ) ) {
 				$msg = is_wp_error( $categories ) ? $categories->get_error_message() : 'ATENCIÓN: No se encontraron categorías de producto.';
@@ -199,7 +199,7 @@ class ProductCategories {
 		if ( ! empty( $attributes['className'] ) ) {
 			$wrapper_class .= ' ' . esc_attr( $attributes['className'] );
 		}
-		
+
 		$style_vars = sprintf(
 			'--frbl-grid-columns: %d; --frbl-bg-color: %s; --frbl-border-color: %s; --frbl-border-width: %dpx; --frbl-text-color: %s; --frbl-hover-bg-color: %s; --frbl-hover-border-color: %s; --frbl-hover-text-color: %s; --frbl-border-radius: %dpx;',
 			$columns,
@@ -212,7 +212,7 @@ class ProductCategories {
 			$hover_text_color,
 			$border_radius
 		);
-		
+
 		$style_attr = sprintf( 'style="%s"', esc_attr( $style_vars ) );
 
 		ob_start();
@@ -223,7 +223,7 @@ class ProductCategories {
 				$thumbnail_id = get_term_meta( $category->term_id, 'thumbnail_id', true );
 				$image_url    = $thumbnail_id ? wp_get_attachment_image_url( $thumbnail_id, 'woocommerce_thumbnail' ) : wc_placeholder_img_src();
 				$link         = esc_url( get_term_link( $category, 'product_cat' ) );
-			?>
+				?>
 				<div class="frbl-category-item frbl-category-<?php echo esc_attr( $category->slug ); ?>">
 					<a href="<?php echo esc_url( $link ); ?>" class="frbl-category-link">
 						<div class="frbl-category-image-wrap">
