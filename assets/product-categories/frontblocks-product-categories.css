@@ -9,20 +9,20 @@
 
 .frbl-product-categories-grid .frbl-category-link {
     display: block;
-    
+
     background-color: var(--frbl-bg-color, rgba(255, 255, 255, 0.5));
     border: var(--frbl-border-width, 1px) solid var(--frbl-border-color, #dddddd);
     color: var(--frbl-text-color, inherit);
 
-    padding-top: 30px; 
-	 padding-right: 30px; 
-	 padding-left: 30px; 
+    padding-top: 30px;
+    padding-left: 30px;
+	 padding-right: 30px;
 
-    border-radius: 20px;
+    border-radius: var(--frbl-border-radius, 20px);
     
     text-decoration: none;
-    
-    transition: background-color 0.3s ease, border-color 0.3s ease;
+    text-align: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .frbl-product-categories-grid .frbl-category-link:hover {
@@ -39,21 +39,16 @@
     color: var(--frbl-hover-text-color, inherit);
 }
 
-.frbl-product-categories-grid .frbl-category-item {
-    text-align: center;
-}
-
 .frbl-product-categories-grid .frbl-category-image-wrap {
     margin-bottom: 10px;
     overflow: hidden;
-    border-radius: 4px;
+    border-radius: calc(var(--frbl-border-radius, 20px) / 2); 
 }
 
 .frbl-product-categories-grid .frbl-category-image {
     width: 100%;
     height: auto;
     display: block;
-    border-radius: 20px;
 }
 
 html :where([style*=border-width]) {

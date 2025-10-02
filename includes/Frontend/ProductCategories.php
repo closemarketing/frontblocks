@@ -121,6 +121,10 @@ class ProductCategories {
                   'type'    => 'number',
                   'default' => 1,
                ),
+               'borderRadius'   => array(
+                  'type'    => 'number',
+                  'default' => 20,
+               ),
                'textColor'    => array(
                   'type'    => 'string',
                   'default' => 'inherit',
@@ -157,12 +161,12 @@ class ProductCategories {
       $orderby    = sanitize_key( $attributes['orderby'] ?? 'count' );
       $order      = strtoupper( sanitize_key( $attributes['order'] ?? 'DESC' ) );
       $hide_empty = $attributes['hideEmpty'] ?? false;
-      
       $columns    = absint( $attributes['columns'] ?? 2 ); 
 
       $bg_color          = sanitize_text_field( $attributes['bgColor'] ?? 'rgba(255, 255, 255, 0.5)' );
       $border_color      = sanitize_text_field( $attributes['borderColor'] ?? '#dddddd' );
       $border_width      = absint( $attributes['borderWidth'] ?? 1 );
+      $border_radius     = absint( $attributes['borderRadius'] ?? 20 );
       $text_color        = sanitize_text_field( $attributes['textColor'] ?? 'inherit' );
       $hover_bg_color    = sanitize_text_field( $attributes['hoverBgColor'] ?? 'rgba(255, 255, 255, 0.7)' );
       $hover_border_color= sanitize_text_field( $attributes['hoverBorderColor'] ?? '#555555' );
@@ -197,9 +201,10 @@ class ProductCategories {
       if ( ! empty( $attributes['className'] ) ) {
          $wrapper_class .= ' ' . esc_attr( $attributes['className'] );
       }
-
+      
+      // 🚨 Inyección de todas las variables CSS para los estilos
       $style_vars = sprintf(
-         '--frbl-grid-columns: %d; --frbl-bg-color: %s; --frbl-border-color: %s; --frbl-border-width: %dpx; --frbl-text-color: %s; --frbl-hover-bg-color: %s; --frbl-hover-border-color: %s; --frbl-hover-text-color: %s;',
+         '--frbl-grid-columns: %d; --frbl-bg-color: %s; --frbl-border-color: %s; --frbl-border-width: %dpx; --frbl-text-color: %s; --frbl-hover-bg-color: %s; --frbl-hover-border-color: %s; --frbl-hover-text-color: %s; --frbl-border-radius: %dpx;',
          $columns,
          $bg_color,
          $border_color,
@@ -207,7 +212,8 @@ class ProductCategories {
          $text_color,
          $hover_bg_color,
          $hover_border_color,
-         $hover_text_color
+         $hover_text_color,
+         $border_radius,
       );
       
       $style_attr = sprintf( 'style="%s"', $style_vars );

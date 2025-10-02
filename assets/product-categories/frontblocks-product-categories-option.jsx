@@ -1,16 +1,13 @@
 const { registerBlockType } = wp.blocks;
 const { Fragment } = wp.element;
-const { 
-    InspectorControls, 
-    useBlockProps,
-} = wp.blockEditor;
+const { InspectorControls, useBlockProps } = wp.blockEditor;
 const { 
    PanelBody, 
    RangeControl, 
    SelectControl, 
    ToggleControl,
    ColorPicker, 
-   TabPanel 
+   TabPanel,
 } = wp.components;
 const { __ } = wp.i18n;
 
@@ -25,27 +22,38 @@ function ProductCategoriesEdit(props) {
       bgColor,
       borderColor,
       borderWidth,
+      borderRadius,
       textColor,
       hoverBgColor,
       hoverBorderColor,
       hoverTextColor,
-      className 
+      className,
    } = attributes;
 
    const blockProps = useBlockProps({
       className: `frbl-product-categories-block ${className}`
    });
-   
+
    const wrapperStyle = {
       padding: '30px', 
       border: `${borderWidth}px solid ${borderColor}`,
+      borderRadius: `${borderRadius}px`,
       backgroundColor: bgColor,
       textAlign: 'center',
       color: textColor,
-      borderRadius: '20px',
       lineHeight: '1.5em'
    };
-   
+
+   const countHelpText = count === 999 ? 
+      __('Currently set to show ALL categories.', 'frontblocks') : 
+      __('Number of categories shown. Set to 999 to show all.', 'frontblocks');
+
+   const countLabel = count === 999 ? 
+      __('Number of Categories (All)', 'frontblocks') : 
+      __('Number of Categories', 'frontblocks');
+
+   const colorPickerCompactStyle = { maxWidth: '250px' };
+
    return (
       <Fragment>
          <InspectorControls>
@@ -54,13 +62,12 @@ function ProductCategoriesEdit(props) {
                initialOpen={true}
             >
                <RangeControl
-                  label={__('Number of Categories', 'frontblocks')}
+                  label={countLabel}
                   value={count}
                   onChange={(newCount) => setAttributes({ count: newCount })}
                   min={1}
                   max={999}
-                  help={__('Set the slider to 999 to show all available categories.', 'frontblocks')}
-                  renderTooltipContent={(value) => (value === 999 ? __('All', 'frontblocks') : value)}
+                  help={countHelpText}
                />
                
                <RangeControl
@@ -112,6 +119,14 @@ function ProductCategoriesEdit(props) {
                   min={0}
                   max={10}
                />
+
+               <RangeControl
+                  label={__('Border Radius (px)', 'frontblocks')} // 🚨 NUEVO CONTROL
+                  value={borderRadius}
+                  onChange={(value) => setAttributes({ borderRadius: value })}
+                  min={0}
+                  max={50}
+               />
                
                <TabPanel 
                   className="frbl-style-tabs"
@@ -124,8 +139,8 @@ function ProductCategoriesEdit(props) {
                      if (tab.name === 'normal') {
                         return (
                            <Fragment>
-                              <div style={{ maxWidth: '250px', marginTop: '15px' }}>
-                                 <h4>{__('Background Color', 'frontblocks')}</h4>
+                              <h4 style={{marginTop: '15px'}}>{__('Background Color', 'frontblocks')}</h4>
+                              <div style={colorPickerCompactStyle}>
                                  <ColorPicker
                                     color={bgColor}
                                     onChangeComplete={(value) => setAttributes({ bgColor: value.rgb ? `rgba(${value.rgb.r}, ${value.rgb.g}, ${value.rgb.b}, ${value.rgb.a})` : value.hex })}
@@ -133,16 +148,16 @@ function ProductCategoriesEdit(props) {
                                  />
                               </div>
 
-                              <div style={{ maxWidth: '250px', marginTop: '15px' }}>
-                                 <h4>{__('Border Color', 'frontblocks')}</h4>
+                              <h4 style={{marginTop: '15px'}}>{__('Border Color', 'frontblocks')}</h4>
+                              <div style={colorPickerCompactStyle}>
                                  <ColorPicker
                                     color={borderColor}
                                     onChangeComplete={(value) => setAttributes({ borderColor: value.hex })}
                                  />
                               </div>
 
-                              <div style={{ maxWidth: '250px', marginTop: '15px' }}>
-                                 <h4>{__('Text Color', 'frontblocks')}</h4>
+                              <h4 style={{marginTop: '15px'}}>{__('Text Color', 'frontblocks')}</h4>
+                              <div style={colorPickerCompactStyle}>
                                  <ColorPicker
                                     color={textColor}
                                     onChangeComplete={(value) => setAttributes({ textColor: value.hex })}
@@ -154,8 +169,8 @@ function ProductCategoriesEdit(props) {
                      if (tab.name === 'hover') {
                         return (
                            <Fragment>
-                              <div style={{ maxWidth: '250px', marginTop: '15px' }}>
-                                 <h4>{__('Hover Background Color', 'frontblocks')}</h4>
+                              <h4 style={{marginTop: '15px'}}>{__('Hover Background Color', 'frontblocks')}</h4>
+                              <div style={colorPickerCompactStyle}>
                                  <ColorPicker
                                     color={hoverBgColor}
                                     onChangeComplete={(value) => setAttributes({ hoverBgColor: value.rgb ? `rgba(${value.rgb.r}, ${value.rgb.g}, ${value.rgb.b}, ${value.rgb.a})` : value.hex })}
@@ -163,16 +178,16 @@ function ProductCategoriesEdit(props) {
                                  />
                               </div>
 
-                              <div style={{ maxWidth: '250px', marginTop: '15px' }}>
-                                 <h4>{__('Hover Border Color', 'frontblocks')}</h4>
+                              <h4 style={{marginTop: '15px'}}>{__('Hover Border Color', 'frontblocks')}</h4>
+                              <div style={colorPickerCompactStyle}>
                                  <ColorPicker
                                     color={hoverBorderColor}
                                     onChangeComplete={(value) => setAttributes({ hoverBorderColor: value.hex })}
                                  />
                               </div>
 
-                              <div style={{ maxWidth: '250px', marginTop: '15px' }}>
-                                 <h4>{__('Hover Text Color', 'frontblocks')}</h4>
+                              <h4 style={{marginTop: '15px'}}>{__('Hover Text Color', 'frontblocks')}</h4>
+                              <div style={colorPickerCompactStyle}>
                                  <ColorPicker
                                     color={hoverTextColor}
                                     onChangeComplete={(value) => setAttributes({ hoverTextColor: value.hex })}
@@ -218,6 +233,7 @@ registerBlockType('frontblocks/product-categories', {
       bgColor: { type: 'string', default: 'rgba(255, 255, 255, 0.5)' },
       borderColor: { type: 'string', default: '#dddddd' },
       borderWidth: { type: 'number', default: 1 },
+      borderRadius: { type: 'number', default: 20 },
       textColor: { type: 'string', default: 'inherit' },
       hoverBgColor: { type: 'string', default: 'rgba(255, 255, 255, 0.7)' },
       hoverBorderColor: { type: 'string', default: '#555555' },
