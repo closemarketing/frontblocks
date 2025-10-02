@@ -78,74 +78,74 @@ class ProductCategories {
 			return;
 		}
 
-		register_block_type(
-			'frontblocks/product-categories',
-			array(
-				'editor_script'   => 'frontblocks-product-categories-option',
-				'render_callback' => array( $this, 'render_product_categories_block' ),
-				'attributes'      => array(
-					'count'            => array(
-						'type'    => 'number',
-						'default' => 5,
-					),
-					'orderby'          => array(
-						'type'    => 'string',
-						'default' => 'count',
-					),
-					'order'            => array(
-						'type'    => 'string',
-						'default' => 'DESC',
-					),
-					'hideEmpty'        => array(
-						'type'    => 'boolean',
-						'default' => false,
-					),
-					'className'        => array(
-						'type'    => 'string',
-						'default' => '',
-					),
-					'columns'          => array(
-						'type'    => 'number',
-						'default' => 2,
-					),
-					'bgColor'          => array(
-						'type'    => 'string',
-						'default' => 'rgba(255, 255, 255, 0.5)',
-					),
-					'borderColor'      => array(
-						'type'    => 'string',
-						'default' => '#dddddd',
-					),
-					'borderWidth'      => array(
-						'type'    => 'number',
-						'default' => 1,
-					),
-					'borderRadius'     => array(
-						'type'    => 'number',
-						'default' => 20,
-					),
-					'textColor'        => array(
-						'type'    => 'string',
-						'default' => 'inherit',
-					),
-					'hoverBgColor'     => array(
-						'type'    => 'string',
-						'default' => 'rgba(255, 255, 255, 0.7)',
-					),
-					'hoverBorderColor' => array(
-						'type'    => 'string',
-						'default' => '#555555',
-					),
-					'hoverTextColor'   => array(
-						'type'    => 'string',
-						'default' => 'inherit',
-					),
-				),
-			)
-		);
-	}
+      register_block_type(
+         'frontblocks/product-categories',
+         array(
+            'editor_script'   => 'frontblocks-product-categories-option',
+            'render_callback' => array( $this, 'render_product_categories_block' ),
+            'attributes'      => array(
+               'count'            => array(
+                  'type'    => 'number',
+                  'default' => 5,
+               ),
+               'orderby'          => array(
+                  'type'    => 'string',
+                  'default' => 'count',
+               ),
+               'order'            => array(
+                  'type'    => 'string',
+                  'default' => 'DESC',
+               ),
+               'hideEmpty'        => array(
+                  'type'    => 'boolean',
+                  'default' => false,
+               ),
+               'className'        => array(
+                  'type'    => 'string',
+                  'default' => '',
+               ),
+               'columns'          => array(
+                  'type'    => 'number',
+                  'default' => 2,
+               ),
+               'bgColor'          => array(
+                  'type'    => 'string',
+                  'default' => 'rgba(255, 255, 255, 0.5)',
+               ),
+               'borderColor'      => array(
+                  'type'    => 'string',
+                  'default' => '#dddddd',
+               ),
+               'borderWidth'      => array(
+                  'type'    => 'number',
+                  'default' => 1,
+               ),
+               'borderRadius'     => array(
+                  'type'    => 'number',
+                  'default' => 20,
+               ),
+               'textColor'        => array(
+                  'type'    => 'string',
+                  'default' => 'inherit',
+               ),
+               'hoverBgColor'     => array(
+                  'type'    => 'string',
+                  'default' => 'rgba(255, 255, 255, 0.7)',
+               ),
+               'hoverBorderColor' => array(
+                  'type'    => 'string',
+                  'default' => '#555555',
+               ),
+               'hoverTextColor'   => array(
+                  'type'    => 'string',
+                  'default' => 'inherit',
+               ),
+            ),
+         )
+      );
+   }
 
-	/**
+   /**
 	 * Render the Product Categories block on frontend.
 	 *
 	 * @param array $attributes Block attributes.
@@ -156,12 +156,13 @@ class ProductCategories {
 			return '';
 		}
 
-		$count      = absint( $attributes['count'] ?? 5 );
-		$orderby    = sanitize_key( $attributes['orderby'] ?? 'count' );
-		$order      = strtoupper( sanitize_key( $attributes['order'] ?? 'DESC' ) );
-		$hide_empty = $attributes['hideEmpty'] ?? false;
-		$columns    = absint( $attributes['columns'] ?? 2 );
+		$count       = absint( $attributes['count'] ?? 5 );
+		$orderby     = sanitize_key( $attributes['orderby'] ?? 'count' );
+		$order       = strtoupper( sanitize_key( $attributes['order'] ?? 'DESC' ) );
+		$hide_empty  = $attributes['hideEmpty'] ?? false;
+		$columns     = absint( $attributes['columns'] ?? 2 );
 
+		// Obtener y sanitizar los atributos de estilo
 		$bg_color           = sanitize_text_field( $attributes['bgColor'] ?? 'rgba(255, 255, 255, 0.5)' );
 		$border_color       = sanitize_text_field( $attributes['borderColor'] ?? '#dddddd' );
 		$border_width       = absint( $attributes['borderWidth'] ?? 1 );
@@ -213,19 +214,21 @@ class ProductCategories {
 			$border_radius
 		);
 
-		$style_attr = sprintf( 'style="%s"', esc_attr( $style_vars ) );
-
 		ob_start();
 		?>
-		<div class="<?php echo esc_attr( $wrapper_class ); ?>" <?php echo esc_attr( $style_attr ); ?>>
+		<div class="<?php echo esc_attr( $wrapper_class ); ?>" style="<?php echo esc_attr( $style_vars ); ?>">
 			<?php
 			foreach ( $categories as $category ) :
 				$thumbnail_id = get_term_meta( $category->term_id, 'thumbnail_id', true );
+				
 				if ( $thumbnail_id ) {
 					$image_url = wp_get_attachment_image_url( $thumbnail_id, 'woocommerce_thumbnail' );
+				} elseif ( function_exists( 'wc_placeholder_img_src' ) ) {
+					$image_url = wc_placeholder_img_src();
 				} else {
-					$image_url = function_exists( 'wc_placeholder_img_src' ) ? wc_placeholder_img_src() : plugins_url( 'assets/images/placeholder.png', dirname( __DIR__ ) );
+					$image_url = 'https://placehold.co/600x400/eeeeee/333333?text=Product+Category';
 				}
+				
 				$link = esc_url( get_term_link( $category, 'product_cat' ) );
 				?>
 				<div class="frbl-category-item frbl-category-<?php echo esc_attr( $category->slug ); ?>">
@@ -246,7 +249,7 @@ class ProductCategories {
 		</div>
 		<?php
 		return ob_get_clean();
-	}
+   }
 }
 
 new ProductCategories();
