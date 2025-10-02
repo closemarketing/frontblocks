@@ -19,80 +19,79 @@ defined( 'ABSPATH' ) || exit;
  */
 class ProductCategories {
 
-   /**
-    * Constructor.
-    */
-   public function __construct() {
-      add_action( 'init', array( $this, 'register_product_categories_block' ) );
-      add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
-      add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
-   }
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		add_action( 'init', array( $this, 'register_product_categories_block' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
+	}
 
    /**
-    * Enqueue frontend styles for the grid.
-    * Usa la constante FRBL_PLUGIN_URL para construir la URL pública correcta.
-    *
-    * @return void
-    */
-   public function enqueue_frontend_styles() {
-       $style_url = FRBL_PLUGIN_URL . 'assets/product-categories/frontblocks-product-categories.css';
+	 * Enqueue frontend styles for the grid.
+	 * Usa la constante FRBL_PLUGIN_URL para construir la URL pública correcta.
+	 *
+	 * @return void
+	 */
+	public function enqueue_frontend_styles() {
+   	$style_url = FRBL_PLUGIN_URL . 'assets/product-categories/frontblocks-product-categories.css';
 
-       wp_enqueue_style(
-           'frontblocks-product-categories-grid-style',
-           $style_url,
-           array(),
-           FRBL_VERSION 
-       );
-   }
+   	wp_enqueue_style(
+			'frontblocks-product-categories-grid-style',
+			$style_url,
+			array(),
+			FRBL_VERSION 
+		);
+	}
 
+	/**
+	 * Enqueue block editor assets.
+	 *
+	 * @return void
+	 */
+	public function enqueue_block_editor_assets() {
+		wp_enqueue_script(
+			'frontblocks-product-categories-option',
+			FRBL_PLUGIN_URL . 'assets/product-categories/frontblocks-product-categories.js',
+			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-editor', 'wp-api-fetch', 'wp-i18n' ),
+			FRBL_VERSION,
+			true
+		);
 
-   /**
-    * Enqueue block editor assets.
-    *
-    * @return void
-    */
-   public function enqueue_block_editor_assets() {
-      wp_enqueue_script(
-         'frontblocks-product-categories-option',
-         FRBL_PLUGIN_URL . 'assets/product-categories/frontblocks-product-categories.js',
-         array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-editor', 'wp-api-fetch', 'wp-i18n' ),
-         FRBL_VERSION,
-         true
-      );
-      
-      wp_localize_script(
-         'frontblocks-product-categories-option',
-         'frblProductCategories',
-         array(
-            'nonce' => wp_create_nonce( 'wp_rest' ),
-         )
-      );
-   }
+		wp_localize_script(
+			'frontblocks-product-categories-option',
+			'frblProductCategories',
+			array(
+				'nonce' => wp_create_nonce( 'wp_rest' ),
+			)
+		);
+	}
 
-   /**
-    * Register the Product Categories block.
-    *
-    * @return void
-    */
-   public function register_product_categories_block() {
-      if ( ! class_exists( 'WooCommerce' ) ) {
-         return;
-      }
+	/**
+	 * Register the Product Categories block.
+	 *
+	 * @return void
+	 */
+	public function register_product_categories_block() {
+		if ( ! class_exists( 'WooCommerce' ) ) {
+			return;
+		}
 
-      register_block_type(
-         'frontblocks/product-categories',
-         array(
-            'editor_script'   => 'frontblocks-product-categories-option',
-            'render_callback' => array( $this, 'render_product_categories_block' ),
-            'attributes'      => array(
-               'count'           => array(
-                  'type'    => 'number',
-                  'default' => 5,
-               ),
-               'orderby'         => array(
-                  'type'    => 'string',
-                  'default' => 'count',
-               ),
+		register_block_type(
+			'frontblocks/product-categories',
+			array(
+				'editor_script'   => 'frontblocks-product-categories-option',
+				'render_callback' => array( $this, 'render_product_categories_block' ),
+				'attributes'      => array(
+					'count'           => array(
+						'type'    => 'number',
+						'default' => 5,
+					),
+					'orderby'         => array(
+						'type'    => 'string',
+						'default' => 'count',
+					),
                'order'           => array(
                   'type'    => 'string',
                   'default' => 'DESC',
