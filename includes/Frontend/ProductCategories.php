@@ -84,59 +84,59 @@ class ProductCategories {
 				'editor_script'   => 'frontblocks-product-categories-option',
 				'render_callback' => array( $this, 'render_product_categories_block' ),
 				'attributes'      => array(
-					'count'           => array(
+					'count'            => array(
 						'type'    => 'number',
 						'default' => 5,
 					),
-					'orderby'         => array(
+					'orderby'          => array(
 						'type'    => 'string',
 						'default' => 'count',
 					),
-					'order'           => array(
+					'order'            => array(
 						'type'    => 'string',
 						'default' => 'DESC',
 					),
-					'hideEmpty'       => array(
+					'hideEmpty'        => array(
 						'type'    => 'boolean',
 						'default' => false,
 					),
-					'className'       => array(
+					'className'        => array(
 						'type'    => 'string',
 						'default' => '',
 					),
-					'columns'         => array(
+					'columns'          => array(
 						'type'    => 'number',
 						'default' => 2,
 					),
-					'bgColor'         => array(
+					'bgColor'          => array(
 						'type'    => 'string',
 						'default' => 'rgba(255, 255, 255, 0.5)',
 					),
-					'borderColor'     => array(
+					'borderColor'      => array(
 						'type'    => 'string',
 						'default' => '#dddddd',
 					),
-					'borderWidth'     => array(
+					'borderWidth'      => array(
 						'type'    => 'number',
 						'default' => 1,
 					),
-					'borderRadius'    => array(
+					'borderRadius'     => array(
 						'type'    => 'number',
 						'default' => 20,
 					),
-					'textColor'       => array(
+					'textColor'        => array(
 						'type'    => 'string',
 						'default' => 'inherit',
 					),
-					'hoverBgColor'    => array(
+					'hoverBgColor'     => array(
 						'type'    => 'string',
 						'default' => 'rgba(255, 255, 255, 0.7)',
 					),
-					'hoverBorderColor'=> array(
+					'hoverBorderColor' => array(
 						'type'    => 'string',
 						'default' => '#555555',
 					),
-					'hoverTextColor'  => array(
+					'hoverTextColor'   => array(
 						'type'    => 'string',
 						'default' => 'inherit',
 					),
@@ -146,21 +146,21 @@ class ProductCategories {
 	}
 
 	/**
-    * Render the Product Categories block on frontend.
-    *
-    * @param array $attributes Block attributes.
-    * @return string HTML output.
-    */
+	 * Render the Product Categories block on frontend.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return string HTML output.
+	 */
 	public function render_product_categories_block( $attributes ) {
 		if ( ! class_exists( 'WooCommerce' ) ) {
 			return '';
 		}
 
-      $count      = absint( $attributes['count'] ?? 5 );
-      $orderby    = sanitize_key( $attributes['orderby'] ?? 'count' );
-      $order      = strtoupper( sanitize_key( $attributes['order'] ?? 'DESC' ) );
-      $hide_empty = $attributes['hideEmpty'] ?? false;
-      $columns    = absint( $attributes['columns'] ?? 2 ); 
+		$count      = absint( $attributes['count'] ?? 5 );
+		$orderby    = sanitize_key( $attributes['orderby'] ?? 'count' );
+		$order      = strtoupper( sanitize_key( $attributes['order'] ?? 'DESC' ) );
+		$hide_empty = $attributes['hideEmpty'] ?? false;
+		$columns    = absint( $attributes['columns'] ?? 2 ); 
 
 		$bg_color           = sanitize_text_field( $attributes['bgColor'] ?? 'rgba(255, 255, 255, 0.5)' );
 		$border_color       = sanitize_text_field( $attributes['borderColor'] ?? '#dddddd' );
@@ -185,7 +185,6 @@ class ProductCategories {
 			'number'     => $query_limit,
 			'hide_empty' => (bool) $hide_empty,
 		);
-
 		$categories = get_terms( $args );
 		
 		if ( is_wp_error( $categories ) || empty( $categories ) ) {
@@ -228,9 +227,9 @@ class ProductCategories {
 				<div class="frbl-category-item frbl-category-<?php echo esc_attr( $category->slug ); ?>">
 					<a href="<?php echo esc_url( $link ); ?>" class="frbl-category-link">
 						<div class="frbl-category-image-wrap">
-							<img 
-								src="<?php echo esc_url( $image_url ); ?>" 
-								alt="<?php echo esc_attr( $category->name ); ?>" 
+							<img
+								src="<?php echo esc_url( $image_url ); ?>"
+								alt="<?php echo esc_attr( $category->name ); ?>"
 								class="frbl-category-image"
 							/>
 						</div>
