@@ -83,18 +83,26 @@ class Counter {
 		$attrs              = $block['attrs'];
 		$is_counter_active  = isset( $attrs['isCounterActive'] ) && $attrs['isCounterActive'];
 		$animation_duration = isset( $attrs['animationDuration'] ) ? (int) $attrs['animationDuration'] : 2000;
+		$final_number       = isset( $attrs['finalNumber'] ) ? $attrs['finalNumber'] : '';
+		$number_prefix      = isset( $attrs['numberPrefix'] ) ? $attrs['numberPrefix'] : '';
+		$number_suffix      = isset( $attrs['numberSuffix'] ) ? $attrs['numberSuffix'] : '';
 
 		if ( $is_counter_active ) {
 			$class_to_add      = 'frontblocks-counter-active';
 			$target_value_full = '';
 
-			if ( preg_match( '/<[^>]+>([^<]+)<\/[^>]+>/', $block_content, $matches ) ) {
+			if ( ! empty( $final_number ) ) {
+				$target_value_full = $final_number;
+			} elseif ( preg_match( '/<[^>]+>([^<]+)<\/[^>]+>/', $block_content, $matches ) ) {
 				$target_value_full = trim( $matches[1] );
 			} else {
 				return $block_content;
 			}
 
-			$data_attributes = ' data-counter-target="' . esc_attr( $target_value_full ) . '" data-counter-duration="' . $animation_duration . '"';
+			$data_attributes = ' data-counter-target="' . esc_attr( $target_value_full ) . '"' .
+				' data-counter-duration="' . $animation_duration . '"' .
+				' data-counter-prefix="' . esc_attr( $number_prefix ) . '"' .
+				' data-counter-suffix="' . esc_attr( $number_suffix ) . '"';
 
 			$block_content = preg_replace(
 				'/<([a-z0-9]+)(\s[^>]*?)?>/i',

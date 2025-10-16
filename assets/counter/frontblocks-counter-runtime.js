@@ -14,13 +14,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!originalText) return; 
 
         const animationDuration = parseInt(element.getAttribute('data-counter-duration'), 10) || 2000;
+        const customPrefix = element.getAttribute('data-counter-prefix') || '';
+        const customSuffix = element.getAttribute('data-counter-suffix') || '';
 
         element.setAttribute('data-original-text', originalText);
         
-        const prefixMatch = originalText.match(/^(\D*)/);
-        const prefix = prefixMatch ? prefixMatch[1] : '';
+        const prefix = customPrefix || '';
         
-        let numberString = originalText.replace(prefix, ''); 
+        let numberString = originalText;
         
         const numberMatch = numberString.match(/[\d\.,]+/);
         if (!numberMatch) return; 
@@ -32,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let current = 0;
         const interval = 10;
-        const steps = animationDuration / interval; // Usa la duración configurable
+        const steps = animationDuration / interval;
         const stepValue = target / steps;
 
         const timer = setInterval(() => {
@@ -44,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 element.classList.add('count-up-animated'); 
             }
             
-            element.textContent = prefix + Math.floor(current).toLocaleString('es-ES');
+            element.textContent = prefix + Math.floor(current).toLocaleString('en-US') + customSuffix;
         }, interval);
     };
 
@@ -72,10 +73,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const fullTargetText = counter.getAttribute('data-counter-target');
         if (!fullTargetText) return;
 
-        const prefixMatch = fullTargetText.match(/^(\D*)/);
-        const prefix = prefixMatch ? prefixMatch[1] : '';
+        const customPrefix = counter.getAttribute('data-counter-prefix') || '';
+        const customSuffix = counter.getAttribute('data-counter-suffix') || '';
         
-        counter.textContent = prefix + '0';
+        counter.textContent = customPrefix + '0' + customSuffix;
         
         observer.observe(counter);
     });
