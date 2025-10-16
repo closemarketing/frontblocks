@@ -22,16 +22,63 @@ class Counter {
     * Constructor.
     */
    public function __construct() {
-      // 1. Filtro para añadir la clase CSS al bloque en el frontend.
-      add_filter( 'generateblocks_attr_headline', array( $this, 'add_counter_class_attribute' ), 10, 2 );
-      // 2. Encola el script de animación en el footer (frontend).
-      add_action( 'wp_footer', array( $this, 'enqueue_counter_script' ) );
+      // 1. Registro inicial de assets (usa el hook 'init' para wp_register_script)
+      add_action( 'init', array( $this, 'register_assets' ) );
       
-      // 3. Encola los scripts del editor (backend/Gutenberg).
-      // Eliminamos la comprobación if ( is_admin() ) ya que este hook solo se ejecuta en el editor.
-      add_action( 'enqueue_block_editor_assets', array( $this, 'register_editor_assets' ) );
+      // 2. Encola los scripts del editor (backend/Gutenberg).
+      add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
+      
+      // 3. Filtro para añadir la clase CSS al bloque en el frontend.
+      add_filter( 'generateblocks_attr_headline', array( $this, 'add_counter_class_attribute' ), 10, 2 );
+      // 4. Encola el script de animación en el footer (frontend).
+      add_action( 'wp_footer', array( $this, 'enqueue_counter_script' ) );
    }
 
+   /**
+    * Registra los scripts y estilos del editor.
+    *
+    * @return void
+    */
+   public function register_assets() {
+        // Dependencias para el script del editor
+        $dependencies = array(
+            'wp-blocks',
+            'wp-element',
+            'wp-editor',
+            'wp-components',
+            'wp-compose',
+            'wp-hooks',
+            'wp-data',
+        );
+
+        // 1. Registra el script del editor (resultado de npm run build:counter)
+        wp_register_script(
+            'frontblocks-counter-editor',
+            FRBL_PLUGIN_URL . 'assets/counter/frontblocks-counter.js', // El archivo compilado
+            $dependencies,
+            FRBL_VERSION,
+            true // Encola en el footer si se usa wp_enqueue_script
+        );
+
+        // 2. Registra el CSS (para estilos específicos en el editor o la vista previa)
+        wp_register_style( 
+            'frontblocks-counter-styles', 
+            FRBL_PLUGIN_URL . 'assets/counter/frontblocks-counter.css', 
+            array(), 
+            FRBL_VERSION 
+        );
+    }
+
+   /**
+    * Encola los scripts y estilos registrados en el hook 'enqueue_block_editor_assets'.
+    *
+    * @return void
+    */
+   public function enqueue_editor_assets() {
+      wp_enqueue_script( 'frontblocks-counter-editor' );
+      wp_enqueue_style( 'frontblocks-counter-styles' );
+   }
+   
    /**
     * Añade la clase CSS 'count-up-container' al elemento Headline
     * si la opción `isCounterActive` está habilitada en el editor.
@@ -67,39 +114,4 @@ class Counter {
          wp_enqueue_script( $script_handle, $script_path, $script_deps, $script_version, true );
       }
    }
-   
-   /**
-    * Registra los assets (JS y CSS) necesarios para añadir el control
-    * al editor de bloques (Gutenberg).
-    *
-    * @return void
-    */
-   public function register_editor_assets() {
-        $dependencies = array(
-            'wp-blocks',
-            'wp-element',
-            'wp-editor',
-            'wp-components',
-            'wp-compose',
-            'wp-hooks',
-            'wp-data',
-        );
-
-        // Encola el script del editor (resultado de npm run build:counter)
-        wp_enqueue_script(
-            'frontblocks-counter-editor',
-            FRBL_PLUGIN_URL . 'assets/counter/frontblocks-counter.js', // El archivo compilado
-            $dependencies,
-            FRBL_VERSION,
-            true
-        );
-
-        // Encola el CSS (para estilos específicos en el editor o la vista previa)
-        wp_enqueue_style( 
-            'frontblocks-counter-styles', 
-            FRBL_PLUGIN_URL . 'assets/counter/frontblocks-counter.css', 
-            array(), 
-            FRBL_VERSION 
-        );
-    }
 }
