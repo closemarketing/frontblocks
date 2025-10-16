@@ -6,13 +6,16 @@ var InspectorControls = wp.blockEditor.InspectorControls;
 var _wp$components = wp.components,
   PanelBody = _wp$components.PanelBody,
   ToggleControl = _wp$components.ToggleControl;
+// Mantenemos la desestructuración de addFilter por si se usa en otro lugar, 
+// pero usaremos la sintaxis larga para el registro final.
 var addFilter = wp.hooks.addFilter;
-var BLOCK_NAME = 'generateblocks/headline'; // GenerarteBlocks Headline Block
+var BLOCK_NAME = 'generateblocks/text';
 
 /**
  * 1. Añade el nuevo atributo al bloque GenerateBlocks Headline.
+ * Usamos wp.hooks.addFilter para mayor consistencia con el código que funciona.
  */
-addFilter('blocks.registerBlockType', 'frontblocks/add-counter-attribute', function (settings, name) {
+wp.hooks.addFilter('blocks.registerBlockType', 'frontblocks/add-counter-attribute', function (settings, name) {
   if (name === BLOCK_NAME) {
     settings.attributes = Object.assign(settings.attributes, {
       isCounterActive: {
@@ -30,6 +33,8 @@ addFilter('blocks.registerBlockType', 'frontblocks/add-counter-attribute', funct
 var withHeadlineCounterControl = createHigherOrderComponent(function (BlockEdit) {
   return function (props) {
     // Solo aplica a nuestro bloque objetivo
+    // Si el bloque no aparece, confirma que al hacer clic en el titular
+    // la consola devuelve: wp.data.select('core/editor').getSelectedBlock()?.name === 'generateblocks/headline'
     if (props.name !== BLOCK_NAME) {
       return /*#__PURE__*/React.createElement(BlockEdit, props);
     }
@@ -57,4 +62,9 @@ var withHeadlineCounterControl = createHigherOrderComponent(function (BlockEdit)
     }, /*#__PURE__*/React.createElement("small", null, "Aseg\xFArate de que el texto comience con un n\xFAmero (ej., '123', '+500', o '\u20AC100').")))));
   };
 }, 'withHeadlineCounterControl');
-addFilter('editor.BlockEdit', 'frontblocks/headline-counter-control', withHeadlineCounterControl);
+
+/**
+ * 3. Engancha el HOC al editor.
+ * Usamos wp.hooks.addFilter para asegurar que el hook se registre correctamente.
+ */
+wp.hooks.addFilter('editor.BlockEdit', 'frontblocks/headline-counter-control', withHeadlineCounterControl);

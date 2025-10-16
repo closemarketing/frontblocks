@@ -2,14 +2,17 @@ const { createHigherOrderComponent } = wp.compose;
 const { Fragment } = wp.element;
 const { InspectorControls } = wp.blockEditor; 
 const { PanelBody, ToggleControl } = wp.components;
-const { addFilter } = wp.hooks;
+// Mantenemos la desestructuración de addFilter por si se usa en otro lugar, 
+// pero usaremos la sintaxis larga para el registro final.
+const { addFilter } = wp.hooks; 
 
-const BLOCK_NAME = 'generateblocks/headline'; // GenerarteBlocks Headline Block
+const BLOCK_NAME = 'generateblocks/text';
 
 /**
  * 1. Añade el nuevo atributo al bloque GenerateBlocks Headline.
+ * Usamos wp.hooks.addFilter para mayor consistencia con el código que funciona.
  */
-addFilter(
+wp.hooks.addFilter(
     'blocks.registerBlockType',
     'frontblocks/add-counter-attribute',
     ( settings, name ) => {
@@ -31,6 +34,8 @@ addFilter(
 const withHeadlineCounterControl = createHigherOrderComponent( ( BlockEdit ) => {
     return ( props ) => {
         // Solo aplica a nuestro bloque objetivo
+        // Si el bloque no aparece, confirma que al hacer clic en el titular
+        // la consola devuelve: wp.data.select('core/editor').getSelectedBlock()?.name === 'generateblocks/headline'
         if ( props.name !== BLOCK_NAME ) {
             return <BlockEdit { ...props } />;
         }
@@ -66,7 +71,11 @@ const withHeadlineCounterControl = createHigherOrderComponent( ( BlockEdit ) => 
     };
 }, 'withHeadlineCounterControl' );
 
-addFilter(
+/**
+ * 3. Engancha el HOC al editor.
+ * Usamos wp.hooks.addFilter para asegurar que el hook se registre correctamente.
+ */
+wp.hooks.addFilter(
     'editor.BlockEdit',
     'frontblocks/headline-counter-control',
     withHeadlineCounterControl
