@@ -9,6 +9,7 @@
  */
 
 namespace FrontBlocks\Frontend;
+use WP_Block_Type_Registry;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -78,71 +79,75 @@ class ProductCategories {
 			return;
 		}
 
-		register_block_type(
-			'frontblocks/product-categories',
-			array(
-				'editor_script'   => 'frontblocks-product-categories-option',
-				'render_callback' => array( $this, 'render_product_categories_block' ),
-				'attributes'      => array(
-					'count'            => array(
-						'type'    => 'number',
-						'default' => 5,
-					),
-					'orderby'          => array(
-						'type'    => 'string',
-						'default' => 'count',
-					),
-					'order'            => array(
-						'type'    => 'string',
-						'default' => 'DESC',
-					),
-					'hideEmpty'        => array(
-						'type'    => 'boolean',
-						'default' => false,
-					),
-					'className'        => array(
-						'type'    => 'string',
-						'default' => '',
-					),
-					'columns'          => array(
-						'type'    => 'number',
-						'default' => 2,
-					),
-					'bgColor'          => array(
-						'type'    => 'string',
-						'default' => 'rgba(255, 255, 255, 0.5)',
-					),
-					'borderColor'      => array(
-						'type'    => 'string',
-						'default' => '#dddddd',
-					),
-					'borderWidth'      => array(
-						'type'    => 'number',
-						'default' => 1,
-					),
-					'borderRadius'     => array(
-						'type'    => 'number',
-						'default' => 20,
-					),
-					'textColor'        => array(
-						'type'    => 'string',
-						'default' => 'inherit',
-					),
-					'hoverBgColor'     => array(
-						'type'    => 'string',
-						'default' => 'rgba(255, 255, 255, 0.7)',
-					),
-					'hoverBorderColor' => array(
-						'type'    => 'string',
-						'default' => '#555555',
-					),
-					'hoverTextColor'   => array(
-						'type'    => 'string',
-						'default' => 'inherit',
-					),
+		$args = array(
+			'editor_script'   => 'frontblocks-product-categories-option',
+			'render_callback' => array( $this, 'render_product_categories_block' ),
+			'attributes'      => array(
+				'count'            => array(
+					'type'    => 'number',
+					'default' => 5,
 				),
-			)
+				'orderby'          => array(
+					'type'    => 'string',
+					'default' => 'count',
+				),
+				'order'            => array(
+					'type'    => 'string',
+					'default' => 'DESC',
+				),
+				'hideEmpty'        => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+				'className'        => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'columns'          => array(
+					'type'    => 'number',
+					'default' => 2,
+				),
+				'bgColor'          => array(
+					'type'    => 'string',
+					'default' => 'rgba(255, 255, 255, 0.5)',
+				),
+				'borderColor'      => array(
+					'type'    => 'string',
+					'default' => '#dddddd',
+				),
+				'borderWidth'      => array(
+					'type'    => 'number',
+					'default' => 1,
+				),
+				'borderRadius'     => array(
+					'type'    => 'number',
+					'default' => 20,
+				),
+				'textColor'        => array(
+					'type'    => 'string',
+					'default' => 'inherit',
+				),
+				'hoverBgColor'     => array(
+					'type'    => 'string',
+					'default' => 'rgba(255, 255, 255, 0.7)',
+				),
+				'hoverBorderColor' => array(
+					'type'    => 'string',
+					'default' => '#555555',
+				),
+				'hoverTextColor'   => array(
+					'type'    => 'string',
+					'default' => 'inherit',
+				),
+			),
 		);
+
+		if ( ! WP_Block_Type_Registry::get_instance()->is_registered( 'frontblocks/product-categories' ) ) {
+			register_block_type(
+				'frontblocks/product-categories',
+				$args
+			);
+		}
 	}
 
 	/**
