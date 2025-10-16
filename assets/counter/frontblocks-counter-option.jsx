@@ -1,17 +1,10 @@
 const { createHigherOrderComponent } = wp.compose;
 const { Fragment } = wp.element;
 const { InspectorControls } = wp.blockEditor; 
-const { PanelBody, ToggleControl } = wp.components;
-// Mantenemos la desestructuración de addFilter por si se usa en otro lugar, 
-// pero usaremos la sintaxis larga para el registro final.
-const { addFilter } = wp.hooks; 
+const { PanelBody, ToggleControl, TextControl } = wp.components;
 
 const BLOCK_NAME = 'generateblocks/text';
 
-/**
- * 1. Añade el nuevo atributo al bloque GenerateBlocks Headline.
- * Usamos wp.hooks.addFilter para mayor consistencia con el código que funciona.
- */
 wp.hooks.addFilter(
     'blocks.registerBlockType',
     'frontblocks/add-counter-attribute',
@@ -22,26 +15,26 @@ wp.hooks.addFilter(
                     type: 'boolean',
                     default: false,
                 },
+                animationDuration: { 
+                    type: 'number',
+                    default: 2000,
+                },
             } );
         }
         return settings;
     }
 );
 
-/**
- * 2. Componente de Orden Superior (HOC) para añadir el control al editor.
- */
 const withHeadlineCounterControl = createHigherOrderComponent( ( BlockEdit ) => {
     return ( props ) => {
-        // Solo aplica a nuestro bloque objetivo
-        // Si el bloque no aparece, confirma que al hacer clic en el titular
-        // la consola devuelve: wp.data.select('core/editor').getSelectedBlock()?.name === 'generateblocks/headline'
         if ( props.name !== BLOCK_NAME ) {
             return <BlockEdit { ...props } />;
         }
 
         const { attributes, setAttributes } = props;
-        const { isCounterActive } = attributes;
+        const { isCounterActive, animationDuration } = attributes;
+        
+        const durationInSeconds = animationDuration / 1000;
 
         return (
             <Fragment>
@@ -49,20 +42,38 @@ const withHeadlineCounterControl = createHigherOrderComponent( ( BlockEdit ) => 
 
                 <InspectorControls>
                     <PanelBody 
-                        title="Frontblocks - Efecto Contador" 
+                        title="Frontblocks - Counter Effect" 
                         initialOpen={ false }
                     >
                         <ToggleControl
-                            label="Activar Efecto Contador"
+                            label="Activate Counter Effect"
                             help={ isCounterActive ? 
-                                'El número en el titular se animará al hacer scroll.' : 
-                                'Activar para habilitar la animación de conteo.' 
+                                'The number in the headline will animate on scroll.' : 
+                                'Enable to activate counting animation.' 
                             }
                             checked={ isCounterActive }
                             onChange={ ( val ) => setAttributes( { isCounterActive: val } ) }
                         />
+
+                        {isCounterActive && (
+                            <TextControl
+                                label="Animation Duration (seconds)"
+                                value={ durationInSeconds }
+                                onChange={ (val) => {
+                                    const seconds = parseFloat(val);
+
+                                    const milliseconds = isNaN(seconds) ? 2000 : seconds * 1000;
+                                    setAttributes({ animationDuration: milliseconds });
+                                } }
+                                type="number"
+                                min="0.5"
+                                step="0.1"
+                                help="Time in seconds (e.g.: 2 seconds)."
+                            />
+                        )}
+
                         <p style={ { marginTop: '10px', fontSize: '12px', color: '#777' } }>
-                            <small>Asegúrate de que el texto comience con un número (ej., '123', '+500', o '€100').</small>
+                            <small>Make sure the text begins with a number (e.g., '123', '+500', or '€100').</small>
                         </p>
                     </PanelBody>
                 </InspectorControls>
@@ -71,12 +82,9 @@ const withHeadlineCounterControl = createHigherOrderComponent( ( BlockEdit ) => 
     };
 }, 'withHeadlineCounterControl' );
 
-/**
- * 3. Engancha el HOC al editor.
- * Usamos wp.hooks.addFilter para asegurar que el hook se registre correctamente.
- */
 wp.hooks.addFilter(
     'editor.BlockEdit',
     'frontblocks/headline-counter-control',
+
     withHeadlineCounterControl
 );
