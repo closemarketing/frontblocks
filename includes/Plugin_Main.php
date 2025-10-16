@@ -94,7 +94,7 @@ class Plugin_Main {
 		new Frontend\ProductCategories();
 
 		// Counter module (GenerateBlocks Headline counter effect).
-      new Frontend\Counter();
+		new Frontend\Counter();
 	}
 
 	/**
