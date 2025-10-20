@@ -32,7 +32,7 @@ class Gallery {
 	 * @return void
 	 */
 	private function init_hooks() {
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 99 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 10 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		add_filter( 'render_block_core/gallery', array( $this, 'add_custom_attributes_to_gallery_block' ), 10, 2 );
 		add_action( 'init', array( $this, 'register_custom_attributes' ), 5 );
@@ -44,15 +44,16 @@ class Gallery {
 	 * @return void
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_style(
+		// Register scripts and styles.
+		wp_register_style(
 			'frontblocks-gallery',
 			FRBL_PLUGIN_URL . 'assets/gallery/frontblocks-gallery.css',
 			array(),
 			FRBL_VERSION
 		);
 
-		// Enqueue Masonry library.
-		wp_enqueue_script(
+		// Register Masonry library.
+		wp_register_script(
 			'frontblocks-masonry',
 			FRBL_PLUGIN_URL . 'assets/gallery/masonry.min.js',
 			array(),
@@ -60,13 +61,20 @@ class Gallery {
 			true
 		);
 
-		wp_enqueue_script(
+		wp_register_script(
 			'frontblocks-gallery-custom',
 			FRBL_PLUGIN_URL . 'assets/gallery/frontblocks-gallery.js',
 			array( 'frontblocks-masonry' ),
 			FRBL_VERSION,
 			true
 		);
+
+		// Check if we have gallery blocks in the content.
+		if ( is_admin() || has_block( 'core/gallery' ) ) {
+			wp_enqueue_style( 'frontblocks-gallery' );
+			wp_enqueue_script( 'frontblocks-masonry' );
+			wp_enqueue_script( 'frontblocks-gallery-custom' );
+		}
 	}
 
 	/**
@@ -77,7 +85,7 @@ class Gallery {
 	public function enqueue_block_editor_assets() {
 		wp_enqueue_script(
 			'frontblocks-gallery-option',
-			FRBL_PLUGIN_URL . 'assets/dist/frontblocks-gallery-option.js',
+			FRBL_PLUGIN_URL . 'assets/gallery/frontblocks-gallery-option.js',
 			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-edit-post' ),
 			FRBL_VERSION,
 			true
@@ -99,6 +107,13 @@ class Gallery {
 
 		// Use WordPress built-in columns setting.
 		$columns = isset( $attrs['columns'] ) ? (int) $attrs['columns'] : 3;
+
+		// Enqueue scripts when we detect a gallery with custom layout.
+		if ( 'masonry' === $gallery_layout || 'grid' === $gallery_layout ) {
+			wp_enqueue_style( 'frontblocks-gallery' );
+			wp_enqueue_script( 'frontblocks-masonry' );
+			wp_enqueue_script( 'frontblocks-gallery-custom' );
+		}
 
 		// Add data attributes to the figure element if masonry is enabled.
 		if ( 'masonry' === $gallery_layout ) {

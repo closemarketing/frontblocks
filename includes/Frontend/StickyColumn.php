@@ -69,10 +69,10 @@ class StickyColumn {
 	public function enqueue_block_editor_assets() {
 		wp_enqueue_script(
 			'frontblocks-sticky-column-editor',
-			FRBL_PLUGIN_URL . 'assets/sticky-column/frontblocks-sticky-column-option.jsx',
-			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-edit-post' ),
+			FRBL_PLUGIN_URL . 'assets/sticky-column/frontblocks-sticky-column-option.js',
+			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-edit-post', 'wp-i18n', 'wp-hooks', 'wp-block-editor' ),
 			FRBL_VERSION,
-			true
+			false
 		);
 	}
 
