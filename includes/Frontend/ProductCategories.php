@@ -9,6 +9,7 @@
  */
 
 namespace FrontBlocks\Frontend;
+
 use WP_Block_Type_Registry;
 
 defined( 'ABSPATH' ) || exit;
