@@ -13,7 +13,6 @@ var _wp$data = wp.data,
   select = _wp$data.select,
   dispatch = _wp$data.dispatch;
 var __ = wp.i18n.__;
-var BLOCK_NAME = 'generateblocks/text';
 wp.hooks.addFilter('blocks.registerBlockType', 'frontblocks/add-counter-attribute', function (settings, name) {
   if (name === 'generateblocks/text' || name === 'generateblocks/headline') {
     settings.attributes = Object.assign(settings.attributes, {

@@ -55,6 +55,9 @@ Sticky option allows you to make the Grid block stick to the top of the viewport
 **Insert Post Block:**
 Display content from other posts, pages, or custom post types. Search and select any published content to display its title as H2 and full content. Perfect for creating dynamic content sections without duplicating content.
 
+**Counter Block:**
+Display a counter with a start value, end value, and a duration. The counter will increment from the start value to the end value in the duration.
+
 **Testimonials:**
 Display testimonials from other posts, pages, or custom post types. Search and select any published content to display its title as H2 and full content. Perfect for creating dynamic content sections without duplicating content.
 
@@ -73,6 +76,10 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+
+= 1.0.4 =
+*   New: Counter attribute for Headline block.
+
 = 1.0.3 =
 *   Added: Settings page and simple testimonials feature.
 *   Fixed: interaction with Gravity Forms.
