@@ -3,14 +3,13 @@ const { Fragment, useEffect } = wp.element;
 const { InspectorControls } = wp.blockEditor; 
 const { PanelBody, ToggleControl, TextControl } = wp.components;
 const { select, dispatch } = wp.data;
-
-const BLOCK_NAME = 'generateblocks/text';
+const { __ } = wp.i18n;
 
 wp.hooks.addFilter(
     'blocks.registerBlockType',
     'frontblocks/add-counter-attribute',
     ( settings, name ) => {
-        if ( name === BLOCK_NAME ) {
+        if ( name === 'generateblocks/text' || name === 'generateblocks/headline' ) {
             settings.attributes = Object.assign( settings.attributes, {
                 isCounterActive: {
                     type: 'boolean',
@@ -70,14 +69,14 @@ const withHeadlineCounterControl = createHigherOrderComponent( ( BlockEdit ) => 
 
                 <InspectorControls>
                     <PanelBody 
-                        title="Frontblocks - Counter Effect" 
+                        title={ __( 'Frontblocks - Counter Effect', 'frontblocks' ) }
                         initialOpen={ false }
                     >
                         <ToggleControl
-                            label="Activate Counter Effect"
+                            label={ __( 'Activate Counter Effect', 'frontblocks' ) }
                             help={ isCounterActive ? 
-                                'The number in the headline will animate on scroll.' : 
-                                'Enable to activate counting animation.' 
+                                __( 'The number in the headline will animate on scroll.', 'frontblocks' ) : 
+                                __( 'Enable to activate counting animation.', 'frontblocks' )
                             }
                             checked={ isCounterActive }
                             onChange={ ( val ) => setAttributes( { isCounterActive: val } ) }
@@ -86,28 +85,28 @@ const withHeadlineCounterControl = createHigherOrderComponent( ( BlockEdit ) => 
                         {isCounterActive && (
                             <>
                                 <TextControl
-                                    label="Final Number"
+                                    label={ __( 'Final Number', 'frontblocks' ) }
                                     value={ finalNumber }
                                     onChange={ (val) => setAttributes({ finalNumber: val }) }
-                                    help="The number to count up to (e.g.: 100)."
+                                    help={ __( 'The number to count up to (e.g.: 100).', 'frontblocks' ) }
                                 />
 
                                 <TextControl
-                                    label="Number Prefix"
+                                    label={ __( 'Number Prefix', 'frontblocks' ) }
                                     value={ numberPrefix }
                                     onChange={ (val) => setAttributes({ numberPrefix: val }) }
-                                    help="Text to display before the number (e.g.: $, €)."
+                                    help={ __( 'Text to display before the number (e.g.: $, €).', 'frontblocks' ) }
                                 />
 
                                 <TextControl
-                                    label="Number Suffix"
+                                    label={ __( 'Number Suffix', 'frontblocks' ) }
                                     value={ numberSuffix }
                                     onChange={ (val) => setAttributes({ numberSuffix: val }) }
-                                    help="Text to display after the number (e.g.: %, +)."
+                                    help={ __( 'Text to display after the number (e.g.: %, +).', 'frontblocks' ) }
                                 />
 
                                 <TextControl
-                                    label="Animation Duration (seconds)"
+                                    label={ __( 'Animation Duration (seconds)', 'frontblocks' ) }
                                     value={ durationInSeconds }
                                     onChange={ (val) => {
                                         const seconds = parseFloat(val);
@@ -116,13 +115,13 @@ const withHeadlineCounterControl = createHigherOrderComponent( ( BlockEdit ) => 
                                     } }
                                     type="number"
                                     step="0.1"
-                                    help="Time in seconds for the animation."
+                                    help={ __( 'Time in seconds for the animation.', 'frontblocks' ) }
                                 />
                             </>
                         )}
 
                         <p style={ { marginTop: '10px', fontSize: '12px', color: '#777' } }>
-                            <small>Make sure the text begins with a number (e.g., '123', '+500', or '€100').</small>
+                            <small>{ __( "Make sure the text begins with a number (e.g., '123', '+500', or '€100').", 'frontblocks' ) }</small>
                         </p>
                     </PanelBody>
                 </InspectorControls>
