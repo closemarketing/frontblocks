@@ -79,6 +79,7 @@ WordPress installation and then activate the Plugin from Plugins page.
 
 = 1.0.4 =
 *   Added: Add decoration attribute for Headline block.
+*   Added: Product Categories block.
 
 = 1.0.3 =
 *   Added: Settings page and simple testimonials feature.
