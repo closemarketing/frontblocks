@@ -89,6 +89,12 @@ class Plugin_Main {
 
 		// Headline module (GenerateBlocks Headline enhancements).
 		new Frontend\Headline();
+
+		// Product Categories module (WooCommerce).
+		new Frontend\ProductCategories();
+
+		// Counter module (GenerateBlocks Headline counter effect).
+		new Frontend\Counter();
 	}
 
 	/**

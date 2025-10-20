@@ -55,6 +55,9 @@ Sticky option allows you to make the Grid block stick to the top of the viewport
 **Insert Post Block:**
 Display content from other posts, pages, or custom post types. Search and select any published content to display its title as H2 and full content. Perfect for creating dynamic content sections without duplicating content.
 
+**Counter Block:**
+Display a counter with a start value, end value, and a duration. The counter will increment from the start value to the end value in the duration.
+
 **Decoration for Headline block:**
 Add a decorative line to the Headline block. You can choose between a vertical line on the right or a horizontal line on the right.
 
@@ -78,6 +81,7 @@ WordPress installation and then activate the Plugin from Plugins page.
 == Changelog ==
 
 = 1.0.4 =
+*   Added: Counter attribute for Headline block.
 *   Added: Add decoration attribute for Headline block.
 
 = 1.0.3 =

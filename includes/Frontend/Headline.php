@@ -29,7 +29,7 @@ class Headline {
 	}
 
 	/**
-	 * Register assets.
+	 * Register block assets for backend editor.
 	 *
 	 * @return void
 	 */
@@ -59,7 +59,7 @@ class Headline {
 	}
 
 	/**
-	 * Editor assets
+	 * Enqueue block editor assets.
 	 *
 	 * @return void
 	 */
@@ -69,7 +69,7 @@ class Headline {
 	}
 
 	/**
-	 * Enqueue Frontend styles.
+	 * Enqueue frontend styles.
 	 *
 	 * @return void
 	 */
@@ -78,11 +78,10 @@ class Headline {
 	}
 
 	/**
-	 * Add line class attribute.
+	 * Add line class attribute to headline block.
 	 *
-	 * @param array $attributes Attributes values for the block.
-	 *
-	 * @return array
+	 * @param array $attributes Array de atributos actuales de la etiqueta.
+	 * @return array Atributos modificados.
 	 */
 	public function add_line_class_attribute( $attributes ) {
 		return $attributes;

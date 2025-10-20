@@ -36,5 +36,6 @@ if ( file_exists( FRBL_PLUGIN_PATH . 'vendor/autoload.php' ) ) {
 	require_once FRBL_PLUGIN_PATH . 'vendor/autoload.php';
 }
 
+require_once FRBL_PLUGIN_PATH . 'includes/Plugin_Main.php';
 // Initialize the plugin.
 FrontBlocks\Plugin_Main::get_instance();

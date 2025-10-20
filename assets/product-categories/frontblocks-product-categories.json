@@ -1,0 +1,23 @@
+{
+    "name": "frontblocks/product-categories",
+    "title": "Categorías de Producto (WooCommerce)",
+    "description": "Muestra una cuadrícula dinámica con las categorías de productos.",
+    "category": "design",
+    "icon": "grid-view",
+    "keywords": ["woocommerce", "categorias", "productos", "grid"],
+    "supports": {
+        "html": false,
+        "spacing": {
+            "margin": true,
+            "padding": true
+        }
+    },
+    "attributes": {
+        "columns": {
+            "type": "number",
+            "default": 3
+        }
+    },
+    "editorScript": "file:./frontblocks-product-categories.js",
+    "style": "file:./frontblocks-product-categories.css" 
+}
