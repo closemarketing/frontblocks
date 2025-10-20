@@ -46,7 +46,7 @@ class Carousel {
 	public function enqueue_block_editor_assets() {
 		wp_enqueue_script(
 			'frontblocks-advanced-option',
-			FRBL_PLUGIN_URL . 'assets/dist/frontblocks-advanced-option.js',
+			FRBL_PLUGIN_URL . 'assets/carousel/frontblocks-advanced-option.js',
 			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-edit-post' ),
 			FRBL_VERSION,
 			true

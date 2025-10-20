@@ -44,11 +44,9 @@ class Gallery {
 	 * @return void
 	 */
 	public function enqueue_scripts() {
-		$dist_dir = WP_DEBUG ? 'gallery/' : 'dist/';
-
 		wp_enqueue_style(
 			'frontblocks-gallery',
-			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-gallery.css',
+			FRBL_PLUGIN_URL . 'assets/gallery/frontblocks-gallery.css',
 			array(),
 			FRBL_VERSION
 		);
@@ -56,7 +54,7 @@ class Gallery {
 		// Enqueue Masonry library.
 		wp_enqueue_script(
 			'frontblocks-masonry',
-			FRBL_PLUGIN_URL . 'assets/dist/masonry.min.js',
+			FRBL_PLUGIN_URL . 'assets/gallery/masonry.min.js',
 			array(),
 			'4.2.2',
 			true
@@ -64,7 +62,7 @@ class Gallery {
 
 		wp_enqueue_script(
 			'frontblocks-gallery-custom',
-			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-gallery.js' : 'frontblocks-gallery-min.js' ),
+			FRBL_PLUGIN_URL . 'assets/gallery/frontblocks-gallery.js',
 			array( 'frontblocks-masonry' ),
 			FRBL_VERSION,
 			true

@@ -97,18 +97,16 @@ class Plugin_Main {
 	 * @return void
 	 */
 	public function enqueue_scripts() {
-		$dist_dir = WP_DEBUG ? 'carousel/' : 'dist/';
-
 		wp_enqueue_style(
 			'frontblocks-carousel',
-			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-carousel.css',
+			FRBL_PLUGIN_URL . 'assets/carousel/frontblocks-carousel.css',
 			array(),
 			FRBL_VERSION
 		);
 
 		wp_enqueue_script(
 			'frontblocks-carousel-custom',
-			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-carousel.js' : 'frontblocks-carousel-min.js' ),
+			FRBL_PLUGIN_URL . 'assets/carousel/frontblocks-carousel.js',
 			array( 'frontblocks-carousel' ),
 			FRBL_VERSION,
 			true
@@ -116,7 +114,7 @@ class Plugin_Main {
 
 		wp_enqueue_script(
 			'frontblocks-carousel',
-			FRBL_PLUGIN_URL . 'assets/dist/glide.min.js',
+			FRBL_PLUGIN_URL . 'assets/carousel/glide.min.js',
 			array(),
 			FRBL_VERSION,
 			true

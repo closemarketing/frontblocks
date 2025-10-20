@@ -47,11 +47,9 @@ class InsertPost {
 	 * @return void
 	 */
 	public function enqueue_scripts() {
-		$dist_dir = WP_DEBUG ? 'post/' : 'dist/';
-
 		wp_enqueue_style(
 			'frontblocks-insert-post',
-			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-insert-post.css',
+			FRBL_PLUGIN_URL . 'assets/post/frontblocks-insert-post.css',
 			array(),
 			FRBL_VERSION
 		);
@@ -65,11 +63,11 @@ class InsertPost {
 	public function enqueue_block_editor_assets() {
 		// Enqueue jQuery UI for autocomplete.
 		wp_enqueue_script( 'jquery-ui-autocomplete' );
-		wp_enqueue_style( 'jquery-ui', 'https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css', array(), '1.13.2' );
+		wp_enqueue_style( 'jquery-ui', FRBL_PLUGIN_URL . 'assets/post/jquery-ui.css', array(), '1.13.2' );
 
 		wp_enqueue_script(
 			'frontblocks-insert-post-option',
-			FRBL_PLUGIN_URL . 'assets/dist/frontblocks-insert-post-option.js',
+			FRBL_PLUGIN_URL . 'assets/post/frontblocks-insert-post-option.js',
 			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-edit-post', 'wp-api-fetch', 'jquery', 'jquery-ui-autocomplete' ),
 			FRBL_VERSION,
 			true

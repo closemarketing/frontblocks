@@ -55,6 +55,9 @@ Sticky option allows you to make the Grid block stick to the top of the viewport
 **Insert Post Block:**
 Display content from other posts, pages, or custom post types. Search and select any published content to display its title as H2 and full content. Perfect for creating dynamic content sections without duplicating content.
 
+**Decoration for Headline block:**
+Add a decorative line to the Headline block. You can choose between a vertical line on the right or a horizontal line on the right.
+
 **Testimonials:**
 Display testimonials from other posts, pages, or custom post types. Search and select any published content to display its title as H2 and full content. Perfect for creating dynamic content sections without duplicating content.
 
@@ -73,6 +76,10 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+
+= 1.0.4 =
+*   Added: Add decoration attribute for Headline block.
+
 = 1.0.3 =
 *   Added: Settings page and simple testimonials feature.
 *   Fixed: interaction with Gravity Forms.

@@ -6,6 +6,9 @@ var InspectorControls = wp.blockEditor.InspectorControls;
 var _wp$components = wp.components,
   PanelBody = _wp$components.PanelBody,
   SelectControl = _wp$components.SelectControl;
+var _wp$i18n = wp.i18n,
+  __ = _wp$i18n.__,
+  sprintf = _wp$i18n.sprintf;
 var LINE_CLASS_PREFIX = 'gb-line-effect-';
 var BLOCK_NAME = 'generateblocks/text';
 var withHeadlineLineControl = createHigherOrderComponent(function (BlockEdit) {
@@ -42,28 +45,28 @@ var withHeadlineLineControl = createHigherOrderComponent(function (BlockEdit) {
       });
     };
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
-      title: "Frontblocks - Visual Effects",
+      title: __('Frontblocks - Visual Effects', 'frontblocks'),
       initialOpen: false
     }, /*#__PURE__*/React.createElement("p", {
       style: {
         marginTop: 0,
         marginBottom: '10px'
       }
-    }, /*#__PURE__*/React.createElement("small", null, "Frontblocks visual effect settings.")), /*#__PURE__*/React.createElement(SelectControl, {
-      label: "Decorative Line Style",
+    }, /*#__PURE__*/React.createElement("small", null, __('Frontblocks visual effect settings.', 'frontblocks'))), /*#__PURE__*/React.createElement(SelectControl, {
+      label: __('Decorative Line Style', 'frontblocks'),
       value: currentLineStyle,
       options: [{
-        label: 'None',
+        label: __('None', 'frontblocks'),
         value: 'none'
       }, {
-        label: 'Vertical Line (Right)',
+        label: __('Vertical Line (Right)', 'frontblocks'),
         value: 'vertical'
       }, {
-        label: 'Horizontal Line (Bottom)',
+        label: __('Horizontal Line (Right)', 'frontblocks'),
         value: 'horizontal'
       }],
       onChange: setLineStyle,
-      help: currentLineStyle === 'none' ? 'Select a line style to add a decorative element.' : "Current style: ".concat(currentLineStyle.charAt(0).toUpperCase() + currentLineStyle.slice(1), ".")
+      help: currentLineStyle === 'none' ? __('Select a line style to add a decorative element.', 'frontblocks') : sprintf(__('Current style: %s.', 'frontblocks'), currentLineStyle.charAt(0).toUpperCase() + currentLineStyle.slice(1))
     }))));
   };
 }, 'withHeadlineLineControl');
