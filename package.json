@@ -6,7 +6,8 @@
     "@babel/preset-react": "^7.27.1",
     "gulp": "^5.0.0",
     "gulp-clean-css": "^4.3.0",
-    "gulp-minify": "^3.1.0"
+    "gulp-terser": "^2.1.0",
+    "merge-stream": "^2.0.0"
   },
   "babel": {
     "presets": [
@@ -30,13 +31,13 @@
     ]
   },
   "scripts": {
-    "gulp": "gulp compress",
-    "build:carousel": "babel assets/carousel/frontblocks-advanced-option.jsx --out-file assets/dist/frontblocks-advanced-option.js",
-    "build:animations": "babel assets/animations/frontblocks-animation-option.jsx --out-file assets/dist/frontblocks-animation-option.js",
-    "build:sticky":  "babel assets/sticky-column/frontblocks-sticky-column-option.jsx --out-file assets/dist/frontblocks-sticky-column-option.js",
-    "build:gallery": "babel assets/gallery/frontblocks-gallery-option.jsx --out-file assets/dist/frontblocks-gallery-option.js",
-    "build:post": "babel assets/post/frontblocks-insert-post-option.jsx --out-file assets/dist/frontblocks-insert-post-option.js",
-    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run gulp"
+    "build:headline": "babel assets/headline/frontblocks-headline-option.jsx --out-file assets/headline/frontblocks-headline.js",
+    "build:carousel": "babel assets/carousel/frontblocks-advanced-option.jsx --out-file assets/carousel/frontblocks-advanced-option.js",
+    "build:animations": "babel assets/animations/frontblocks-animation-option.jsx --out-file assets/animations/frontblocks-animation-option.js",
+    "build:sticky": "babel assets/sticky-column/frontblocks-sticky-column-option.jsx --out-file assets/sticky-column/frontblocks-sticky-column-option.js",
+    "build:gallery": "babel assets/gallery/frontblocks-gallery-option.jsx --out-file assets/gallery/frontblocks-gallery-option.js",
+    "build:post": "babel assets/insert-post/frontblocks-insert-post-option.jsx --out-file assets/insert-post/frontblocks-insert-post-option.js",
+    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:headline"
   },
   "dependencies": {
     "react": "^19.1.0",

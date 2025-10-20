@@ -44,19 +44,17 @@ class Animations {
 	 * @return void
 	 */
 	public function enqueue_scripts() {
-		$dist_dir = WP_DEBUG ? 'animations/' : 'dist/';
-
 		// Enqueue custom animations CSS.
 		wp_enqueue_style(
 			'frontblocks-animations',
-			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-animations.css',
+			FRBL_PLUGIN_URL . 'assets/animations/frontblocks-animations.css',
 			array(),
 			FRBL_VERSION
 		);
 
 		wp_enqueue_script(
 			'frontblocks-animations-custom',
-			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-animations.js' : 'frontblocks-animations-min.js' ),
+			FRBL_PLUGIN_URL . 'assets/animations/frontblocks-animations.js',
 			array(),
 			FRBL_VERSION,
 			true
@@ -69,12 +67,10 @@ class Animations {
 	 * @return void
 	 */
 	public function enqueue_block_editor_assets() {
-		$dist_dir = WP_DEBUG ? 'animations/' : 'dist/';
-
 		// Enqueue custom animations CSS for editor.
 		wp_enqueue_style(
 			'frontblocks-animations-editor',
-			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-animations.css',
+			FRBL_PLUGIN_URL . 'assets/animations/frontblocks-animations.css',
 			array(),
 			FRBL_VERSION
 		);
@@ -82,7 +78,7 @@ class Animations {
 		// Enqueue custom block editor script.
 		wp_enqueue_script(
 			'frontblocks-animation-editor',
-			FRBL_PLUGIN_URL . 'assets/dist/frontblocks-animation-option.js',
+			FRBL_PLUGIN_URL . 'assets/animations/frontblocks-animation-option.js',
 			array( 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-i18n' ),
 			FRBL_VERSION,
 			true
@@ -93,7 +89,7 @@ class Animations {
 			'frontblocks-animation-editor',
 			'frontblocksAnimationData',
 			array(
-				'customCss' => FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-animations.css',
+				'customCss' => FRBL_PLUGIN_URL . 'assets/animations/frontblocks-animations.css',
 			)
 		);
 	}
