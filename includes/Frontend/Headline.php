@@ -50,14 +50,6 @@ class Headline {
 			true
 		);
 
-		wp_register_script(
-			'frontblocks-headline-editor',
-			FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline.js',
-			$asset_file['dependencies'],
-			$asset_file['version'],
-			true
-		);
-
 		wp_register_style(
 			'frontblocks-headline-styles',
 			FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline.css',
@@ -86,11 +78,10 @@ class Headline {
 	}
 
 	/**
-	 * Add line class attribute.
+	 * Add line class attribute to headline block.
 	 *
-	 * @param array $attributes Attributes values for the block.
-	 *
-	 * @return array
+	 * @param array $attributes Array de atributos actuales de la etiqueta.
+	 * @return array Atributos modificados.
 	 */
 	public function add_line_class_attribute( $attributes ) {
 		return $attributes;
