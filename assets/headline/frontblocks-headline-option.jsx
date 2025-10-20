@@ -2,6 +2,7 @@ const { createHigherOrderComponent } = wp.compose;
 const { Fragment } = wp.element;
 const { InspectorControls } = wp.blockEditor; 
 const { PanelBody, SelectControl } = wp.components;
+const { __, sprintf } = wp.i18n;
 
 const LINE_CLASS_PREFIX = 'gb-line-effect-'; 
 const BLOCK_NAME = 'generateblocks/text'; 
@@ -53,26 +54,29 @@ const withHeadlineLineControl = createHigherOrderComponent( ( BlockEdit ) => {
 
             <InspectorControls>
                <PanelBody 
-                  title="Frontblocks - Visual Effects" 
+                  title={ __( 'Frontblocks - Visual Effects', 'frontblocks' ) }
                   initialOpen={ false }
                >
                   <p style={{ marginTop: 0, marginBottom: '10px' }}>
-                     <small>Frontblocks visual effect settings.</small>
+                     <small>{ __( 'Frontblocks visual effect settings.', 'frontblocks' ) }</small>
                   </p>
                      
                   <SelectControl
-                     label="Decorative Line Style"
+                     label={ __( 'Decorative Line Style', 'frontblocks' ) }
                      value={ currentLineStyle }
                      options={[
-                        { label: 'None', value: 'none' },
-                        { label: 'Vertical Line (Right)', value: 'vertical' },
-                        { label: 'Horizontal Line (Bottom)', value: 'horizontal' },
+                        { label: __( 'None', 'frontblocks' ), value: 'none' },
+                        { label: __( 'Vertical Line (Right)', 'frontblocks' ), value: 'vertical' },
+                        { label: __( 'Horizontal Line (Right)', 'frontblocks' ), value: 'horizontal' },
                      ]}
                      onChange={ setLineStyle }
                      help={ 
                            currentLineStyle === 'none' ? 
-                           'Select a line style to add a decorative element.' : 
-                           `Current style: ${currentLineStyle.charAt(0).toUpperCase() + currentLineStyle.slice(1)}.` 
+                           __( 'Select a line style to add a decorative element.', 'frontblocks' ) : 
+                           sprintf( 
+                              __( 'Current style: %s.', 'frontblocks' ), 
+                              currentLineStyle.charAt(0).toUpperCase() + currentLineStyle.slice(1) 
+                           )
                      }
                   />
                </PanelBody>

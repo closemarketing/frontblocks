@@ -34,8 +34,10 @@ class Headline {
 	 * @return void
 	 */
 	public function register_assets() {
-		$asset_file = array(
-			'dependencies' => array(
+		wp_register_script(
+			'frontblocks-headline-editor',
+			FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline.js',
+			array(
 				'wp-blocks',
 				'wp-element',
 				'wp-editor',
@@ -44,7 +46,8 @@ class Headline {
 				'wp-hooks',
 				'wp-data',
 			),
-			'version'      => FRBL_VERSION,
+			FRBL_VERSION,
+			true
 		);
 
 		wp_register_script(
@@ -83,10 +86,11 @@ class Headline {
 	}
 
 	/**
-	 * Add line class attribute to headline block.
+	 * Add line class attribute.
 	 *
-	 * @param array $attributes Array de atributos actuales de la etiqueta.
-	 * @return array Atributos modificados.
+	 * @param array $attributes Attributes values for the block.
+	 *
+	 * @return array
 	 */
 	public function add_line_class_attribute( $attributes ) {
 		return $attributes;
