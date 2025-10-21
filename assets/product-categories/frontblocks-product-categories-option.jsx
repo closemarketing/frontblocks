@@ -1,5 +1,5 @@
 const { registerBlockType } = wp.blocks;
-const { Fragment } = wp.element;
+const { Fragment, useState, useEffect } = wp.element;
 const { InspectorControls, useBlockProps } = wp.blockEditor;
 const { 
    PanelBody, 
@@ -8,8 +8,10 @@ const {
    ToggleControl,
    ColorPicker, 
    TabPanel,
+   Spinner,
 } = wp.components;
 const { __ } = wp.i18n;
+const apiFetch = wp.apiFetch;
 
 function ProductCategoriesEdit(props) {
    const { attributes, setAttributes } = props;
@@ -30,19 +32,12 @@ function ProductCategoriesEdit(props) {
       className,
    } = attributes;
 
+   const [categories, setCategories] = useState([]);
+   const [isLoading, setIsLoading] = useState(true);
+
    const blockProps = useBlockProps({
       className: `frbl-product-categories-block ${className}`
    });
-
-   const wrapperStyle = {
-      padding: '30px', 
-      border: `${borderWidth}px solid ${borderColor}`,
-      borderRadius: `${borderRadius}px`,
-      backgroundColor: bgColor,
-      textAlign: 'center',
-      color: textColor,
-      lineHeight: '1.5em'
-   };
 
    const countHelpText = count === 999 ? 
       __('Currently set to show ALL categories.', 'frontblocks') : 
@@ -53,6 +48,42 @@ function ProductCategoriesEdit(props) {
       __('Number of Categories', 'frontblocks');
 
    const colorPickerCompactStyle = { maxWidth: '250px' };
+
+   // Load categories from API.
+   useEffect(() => {
+      setIsLoading(true);
+      
+      const queryLimit = count === 999 ? 100 : count;
+      const orderParam = order.toLowerCase();
+      
+      // Build the API path.
+      const apiPath = `/wp/v2/product_cat?per_page=${queryLimit}&orderby=${orderby}&order=${orderParam}&hide_empty=${hideEmpty}&_fields=id,name,slug,count,category_image`;
+      
+      apiFetch({
+         path: apiPath,
+      })
+      .then((data) => {
+         setCategories(data);
+         setIsLoading(false);
+      })
+      .catch((error) => {
+         console.error('FrontBlocks: Error loading categories:', error);
+         setCategories([]);
+         setIsLoading(false);
+      });
+   }, [count, orderby, order, hideEmpty]);
+
+   const styleVars = {
+      '--frbl-grid-columns': columns,
+      '--frbl-bg-color': bgColor,
+      '--frbl-border-color': borderColor,
+      '--frbl-border-width': `${borderWidth}px`,
+      '--frbl-text-color': textColor,
+      '--frbl-hover-bg-color': hoverBgColor,
+      '--frbl-hover-border-color': hoverBorderColor,
+      '--frbl-hover-text-color': hoverTextColor,
+      '--frbl-border-radius': `${borderRadius}px`,
+   };
 
    return (
       <Fragment>
@@ -202,11 +233,42 @@ function ProductCategoriesEdit(props) {
          </InspectorControls>
 
          <div {...blockProps}>
-            <div style={wrapperStyle}>
-               <p style={{ fontWeight: 'bold' }}>{__('Product Categories Grid', 'frontblocks')}</p>
-               <p>{__('Showing', 'frontblocks')} {count === 999 ? __('All', 'frontblocks') : count} {__('categories in', 'frontblocks')} {columns} {__('columns.', 'frontblocks')}</p>
-               <p style={{ color: textColor }}>{__('The background, border, and text colors are previewed here.', 'frontblocks')}</p>
-            </div>
+            {isLoading ? (
+               <div style={{ textAlign: 'center', padding: '40px' }}>
+                  <Spinner />
+                  <p>{__('Loading categories...', 'frontblocks')}</p>
+               </div>
+            ) : categories.length === 0 ? (
+               <div style={{ padding: '20px', border: '2px dashed #ccc', borderRadius: '8px', textAlign: 'center', color: '#666' }}>
+                  <p>{__('No product categories found.', 'frontblocks')}</p>
+                  <p style={{ fontSize: '14px' }}>{__('Make sure WooCommerce is active and you have product categories.', 'frontblocks')}</p>
+               </div>
+            ) : (
+               <div className="frbl-product-categories-grid" style={styleVars}>
+                  {categories.map((category) => {
+                     const imageUrl = category.category_image && category.category_image.src 
+                        ? category.category_image.src 
+                        : 'https://placehold.co/600x400/eeeeee/333333?text=Product+Category';
+                     
+                     return (
+                        <div key={category.id} className={`frbl-category-item frbl-category-${category.slug}`}>
+                           <div className="frbl-category-link">
+                              <div className="frbl-category-image-wrap">
+                                 <img 
+                                    src={imageUrl} 
+                                    alt={category.name}
+                                    className="frbl-category-image"
+                                 />
+                              </div>
+                              <h3 className="frbl-category-name">
+                                 {category.name} ({category.count})
+                              </h3>
+                           </div>
+                        </div>
+                     );
+                  })}
+               </div>
+            )}
          </div>
       </Fragment>
    );
@@ -215,7 +277,7 @@ function ProductCategoriesEdit(props) {
 registerBlockType('frontblocks/product-categories', {
    title: __('Product Categories', 'frontblocks'),
    description: __('Display a list of WooCommerce Product Categories.', 'frontblocks'),
-   category: 'generateblocks', 
+   category: 'woocommerce', 
    icon: 'store', 
    keywords: [
       __('woo', 'frontblocks'),
@@ -227,7 +289,7 @@ registerBlockType('frontblocks/product-categories', {
       count: { type: 'number', default: 5 },
       orderby: { type: 'string', default: 'count' },
       order: { type: 'string', default: 'DESC' },
-      hideEmpty: { type: 'boolean', default: true },
+      hideEmpty: { type: 'boolean', default: false },
       className: { type: 'string', default: '' },
       columns: { type: 'number', default: 2 },
       bgColor: { type: 'string', default: 'rgba(255, 255, 255, 0.5)' },
