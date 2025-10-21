@@ -19,3 +19,6 @@ readme.md
 phpstan.neon.dist
 .phplint.yml
 phpcs.xml.dist
+tests/
+.cursor/
+*.jsx
