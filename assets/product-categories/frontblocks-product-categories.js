@@ -31,6 +31,7 @@ function ProductCategoriesEdit(props) {
     orderby = attributes.orderby,
     order = attributes.order,
     hideEmpty = attributes.hideEmpty,
+    showCount = attributes.showCount,
     columns = attributes.columns,
     bgColor = attributes.bgColor,
     borderColor = attributes.borderColor,
@@ -66,11 +67,9 @@ function ProductCategoriesEdit(props) {
 
     // Build the API path.
     var apiPath = "/wp/v2/product_cat?per_page=".concat(queryLimit, "&orderby=").concat(orderby, "&order=").concat(orderParam, "&hide_empty=").concat(hideEmpty, "&_fields=id,name,slug,count,category_image");
-    console.log('FrontBlocks: Loading categories from:', apiPath);
     apiFetch({
       path: apiPath
     }).then(function (data) {
-      console.log('FrontBlocks: Categories loaded:', data);
       setCategories(data);
       setIsLoading(false);
     }).catch(function (error) {
@@ -159,6 +158,15 @@ function ProductCategoriesEdit(props) {
         hideEmpty: newHideEmpty
       });
     }
+  }), /*#__PURE__*/React.createElement(ToggleControl, {
+    label: __('Show Product Count', 'frontblocks'),
+    checked: showCount,
+    onChange: function onChange(newShowCount) {
+      return setAttributes({
+        showCount: newShowCount
+      });
+    },
+    help: __('Display the number of products in each category.', 'frontblocks')
   })), /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Card Style Settings', 'frontblocks'),
     initialOpen: false
@@ -316,7 +324,7 @@ function ProductCategoriesEdit(props) {
       className: "frbl-category-image"
     })), /*#__PURE__*/React.createElement("h3", {
       className: "frbl-category-name"
-    }, category.name, " (", category.count, ")")));
+    }, category.name, showCount && " (".concat(category.count, ")"))));
   }))));
 }
 registerBlockType('frontblocks/product-categories', {
@@ -341,6 +349,10 @@ registerBlockType('frontblocks/product-categories', {
     hideEmpty: {
       type: 'boolean',
       default: false
+    },
+    showCount: {
+      type: 'boolean',
+      default: true
     },
     className: {
       type: 'string',

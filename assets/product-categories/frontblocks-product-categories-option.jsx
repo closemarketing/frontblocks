@@ -19,7 +19,8 @@ function ProductCategoriesEdit(props) {
       count, 
       orderby, 
       order, 
-      hideEmpty, 
+      hideEmpty,
+      showCount,
       columns,
       bgColor,
       borderColor,
@@ -136,6 +137,13 @@ function ProductCategoriesEdit(props) {
                   label={__('Hide Empty Categories', 'frontblocks')}
                   checked={hideEmpty}
                   onChange={(newHideEmpty) => setAttributes({ hideEmpty: newHideEmpty })}
+               />
+
+               <ToggleControl
+                  label={__('Show Product Count', 'frontblocks')}
+                  checked={showCount}
+                  onChange={(newShowCount) => setAttributes({ showCount: newShowCount })}
+                  help={__('Display the number of products in each category.', 'frontblocks')}
                />
             </PanelBody>
 
@@ -261,7 +269,7 @@ function ProductCategoriesEdit(props) {
                                  />
                               </div>
                               <h3 className="frbl-category-name">
-                                 {category.name} ({category.count})
+                                 {category.name}{showCount && ` (${category.count})`}
                               </h3>
                            </div>
                         </div>
@@ -290,6 +298,7 @@ registerBlockType('frontblocks/product-categories', {
       orderby: { type: 'string', default: 'count' },
       order: { type: 'string', default: 'DESC' },
       hideEmpty: { type: 'boolean', default: false },
+      showCount: { type: 'boolean', default: true },
       className: { type: 'string', default: '' },
       columns: { type: 'number', default: 2 },
       bgColor: { type: 'string', default: 'rgba(255, 255, 255, 0.5)' },

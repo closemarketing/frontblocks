@@ -175,6 +175,10 @@ class ProductCategories {
 					'type'    => 'boolean',
 					'default' => false,
 				),
+				'showCount'        => array(
+					'type'    => 'boolean',
+					'default' => true,
+				),
 				'className'        => array(
 					'type'    => 'string',
 					'default' => '',
@@ -241,6 +245,7 @@ class ProductCategories {
 		$orderby    = sanitize_key( $attributes['orderby'] ?? 'count' );
 		$order      = strtoupper( sanitize_key( $attributes['order'] ?? 'DESC' ) );
 		$hide_empty = $attributes['hideEmpty'] ?? false;
+		$show_count = $attributes['showCount'] ?? true;
 		$columns    = absint( $attributes['columns'] ?? 2 );
 
 		$bg_color           = sanitize_text_field( $attributes['bgColor'] ?? 'rgba(255, 255, 255, 0.5)' );
@@ -321,7 +326,7 @@ class ProductCategories {
 							/>
 						</div>
 						<h3 class="frbl-category-name">
-							<?php echo esc_html( $category->name ); ?> (<?php echo esc_html( $category->count ); ?>)
+							<?php echo esc_html( $category->name ); ?><?php echo $show_count ? ' (' . esc_html( $category->count ) . ')' : ''; ?>
 						</h3>
 					</a>
 				</div>
