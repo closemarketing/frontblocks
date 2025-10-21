@@ -92,6 +92,9 @@ class Plugin_Main {
 
 		// Product Categories module (WooCommerce).
 		new Frontend\ProductCategories();
+
+		// Counter module (GenerateBlocks Headline counter effect).
+		new Frontend\Counter();
 	}
 
 	/**
