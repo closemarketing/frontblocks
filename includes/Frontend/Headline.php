@@ -57,9 +57,8 @@ class Headline {
 			FRBL_VERSION
 		);
 	}
-
 	/**
-	 * Enqueue block editor assets.
+	 * Editor assets
 	 *
 	 * @return void
 	 */
@@ -78,10 +77,12 @@ class Headline {
 	}
 
 	/**
+	 * Add line class attribute.
+	 *
+	 * @param array $attributes Attributes values for the block.
 	 * Add line class attribute to headline block.
 	 *
-	 * @param array $attributes Array de atributos actuales de la etiqueta.
-	 * @return array Atributos modificados.
+	 * @return array
 	 */
 	public function add_line_class_attribute( $attributes ) {
 		return $attributes;

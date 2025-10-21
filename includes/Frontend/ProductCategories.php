@@ -37,14 +37,16 @@ class ProductCategories {
 	 * @return void
 	 */
 	public function enqueue_frontend_styles() {
-		$style_url = FRBL_PLUGIN_URL . 'assets/product-categories/frontblocks-product-categories.css';
-
-		wp_enqueue_style(
+		wp_register_style(
 			'frontblocks-product-categories-grid-style',
-			$style_url,
+			FRBL_PLUGIN_URL . 'assets/product-categories/frontblocks-product-categories.css',
 			array(),
 			FRBL_VERSION
 		);
+
+		if ( is_admin() || has_block( 'frontblocks/product-categories' ) ) {
+			wp_enqueue_style( 'frontblocks-product-categories-grid-style' );
+		}
 	}
 
 	/**
