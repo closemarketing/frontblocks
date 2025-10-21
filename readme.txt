@@ -4,8 +4,8 @@ Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 6.8
-Stable tag: 1.0.3
-Version: 1.0.3
+Stable tag: 1.0.4
+Version: 1.0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,6 +58,9 @@ Display content from other posts, pages, or custom post types. Search and select
 **Decoration for Headline block:**
 Add a decorative line to the Headline block. You can choose between a vertical line on the right or a horizontal line on the right.
 
+**Product Categories block:**
+Display product categories from WooCommerce. You can choose the number of categories to display, the order by, and the order. You can also choose to hide empty categories. You can also choose the columns to display the categories. You can also choose the background color, border color, border width, border radius, text color, hover background color, hover border color, and hover text color.
+
 **Testimonials:**
 Display testimonials from other posts, pages, or custom post types. Search and select any published content to display its title as H2 and full content. Perfect for creating dynamic content sections without duplicating content.
 
@@ -80,6 +83,8 @@ WordPress installation and then activate the Plugin from Plugins page.
 = 1.0.4 =
 *   Added: Add decoration attribute for Headline block.
 *   Added: Product Categories block.
+*   Added: Options to the Product Categories block.
+*   Added: Counter effect for Headline block.
 
 = 1.0.3 =
 *   Added: Settings page and simple testimonials feature.
