@@ -85,6 +85,8 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+= 1.0.5 =
+*   Added: Show a preview of the product categories in Gutenberg editor.
 
 = 1.0.4 =
 *   Added: Product Categories block.
