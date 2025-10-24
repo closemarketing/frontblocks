@@ -39,6 +39,15 @@ class Plugin_Main {
 	}
 
 	/**
+	 * Check if FrontBlocks PRO is active.
+	 *
+	 * @return bool
+	 */
+	public static function is_pro_active() {
+		return defined( 'FRBLP_PRO_ACTIVE' ) && FRBLP_PRO_ACTIVE;
+	}
+
+	/**
 	 * Constructor.
 	 */
 	private function __construct() {
