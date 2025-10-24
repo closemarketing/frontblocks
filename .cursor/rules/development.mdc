@@ -17,6 +17,9 @@ Format code
 - Use tabs for indentations.
 - Space to align equals in same group of variable definitions.
 - Always write code and comments in English.
+- PHP inline comments must start with capital letter and end with period character.
+- PHP inline comments should be concise.
+- Don't comment every line, just a group of lines of code.
 
 PHP/WordPress
 - Use PHP 7.4+ features when appropriate (e.g., typed properties, arrow functions).
@@ -27,8 +30,6 @@ PHP/WordPress
 - Use WordPress's built-in functions for data validation and sanitization.
 - Use prepare() statements for secure database queries.
 - Use Yoda conditions ALWAYS.
-- PHP inline comments must start with capital letter and end with period character.
-- PHP inline comments should be concise.
 
 JavaScript
 - Don't use jQuery. Better Vanilla JavaScript.

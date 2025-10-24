@@ -25,9 +25,74 @@ class ProductCategories {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'init', array( $this, 'register_product_categories_block' ) );
+		add_action( 'init', array( $this, 'register_product_categories_block' ), 20 );
+		add_action( 'init', array( $this, 'enable_rest_api_for_product_cat' ), 20 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
+		add_action( 'rest_api_init', array( $this, 'register_rest_fields' ) );
+	}
+
+	/**
+	 * Enable REST API for product_cat taxonomy.
+	 *
+	 * @return void
+	 */
+	public function enable_rest_api_for_product_cat() {
+		global $wp_taxonomies;
+
+		if ( isset( $wp_taxonomies['product_cat'] ) ) {
+			$wp_taxonomies['product_cat']->show_in_rest          = true;
+			$wp_taxonomies['product_cat']->rest_base             = 'product_cat';
+			$wp_taxonomies['product_cat']->rest_controller_class = 'WP_REST_Terms_Controller';
+		}
+	}
+
+	/**
+	 * Register custom REST API fields for product_cat taxonomy.
+	 *
+	 * @return void
+	 */
+	public function register_rest_fields() {
+		register_rest_field(
+			'product_cat',
+			'category_image',
+			array(
+				'get_callback' => array( $this, 'get_category_image' ),
+				'schema'       => array(
+					'description' => __( 'Category thumbnail image.', 'frontblocks' ),
+					'type'        => 'object',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Get category image for REST API.
+	 *
+	 * @param array $term_data Category term data.
+	 * @return array|null Image data.
+	 */
+	public function get_category_image( $term_data ) {
+		$thumbnail_id = get_term_meta( $term_data['id'], 'thumbnail_id', true );
+
+		if ( $thumbnail_id ) {
+			$image_url = wp_get_attachment_image_url( $thumbnail_id, 'woocommerce_thumbnail' );
+			if ( $image_url ) {
+				return array(
+					'src' => $image_url,
+					'id'  => $thumbnail_id,
+				);
+			}
+		}
+
+		if ( function_exists( 'wc_placeholder_img_src' ) ) {
+			return array(
+				'src' => wc_placeholder_img_src(),
+				'id'  => 0,
+			);
+		}
+
+		return null;
 	}
 
 	/**
@@ -55,6 +120,14 @@ class ProductCategories {
 	 * @return void
 	 */
 	public function enqueue_block_editor_assets() {
+		// Enqueue styles for editor.
+		wp_enqueue_style(
+			'frontblocks-product-categories-grid-style',
+			FRBL_PLUGIN_URL . 'assets/product-categories/frontblocks-product-categories.css',
+			array(),
+			FRBL_VERSION
+		);
+
 		wp_enqueue_script(
 			'frontblocks-product-categories-option',
 			FRBL_PLUGIN_URL . 'assets/product-categories/frontblocks-product-categories.js',
@@ -101,6 +174,10 @@ class ProductCategories {
 				'hideEmpty'        => array(
 					'type'    => 'boolean',
 					'default' => false,
+				),
+				'showCount'        => array(
+					'type'    => 'boolean',
+					'default' => true,
 				),
 				'className'        => array(
 					'type'    => 'string',
@@ -168,6 +245,7 @@ class ProductCategories {
 		$orderby    = sanitize_key( $attributes['orderby'] ?? 'count' );
 		$order      = strtoupper( sanitize_key( $attributes['order'] ?? 'DESC' ) );
 		$hide_empty = $attributes['hideEmpty'] ?? false;
+		$show_count = $attributes['showCount'] ?? true;
 		$columns    = absint( $attributes['columns'] ?? 2 );
 
 		$bg_color           = sanitize_text_field( $attributes['bgColor'] ?? 'rgba(255, 255, 255, 0.5)' );
@@ -248,7 +326,7 @@ class ProductCategories {
 							/>
 						</div>
 						<h3 class="frbl-category-name">
-							<?php echo esc_html( $category->name ); ?> (<?php echo esc_html( $category->count ); ?>)
+							<?php echo esc_html( $category->name ); ?><?php echo $show_count ? ' (' . esc_html( $category->count ) . ')' : ''; ?>
 						</h3>
 					</a>
 				</div>
