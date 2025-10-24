@@ -72,6 +72,11 @@ Display testimonials from other posts, pages, or custom post types. Search and s
 
 Shortcode: [frontblocks_testimonials_carousel]
 
+**WooCommerce Features:**
+Included features for WooCommerce FrontBlocks PRO:
+
+More information in the [FrontBlocks PRO](https://close.technology/wordpress-plugins/front-blocks-pro/?ref=WordPressPlugin) page.
+
 Others Plugins:
 - [Closemarketing Plugins](https://profiles.wordpress.org/closemarketing/#content-plugins)
 
@@ -87,6 +92,9 @@ WordPress installation and then activate the Plugin from Plugins page.
 == Changelog ==
 = 1.0.5 =
 *   Added: Show a preview of the product categories in Gutenberg editor.
+
+= 1.0.5 =
+*   Added: FrontBlocks PRO compatibility.
 
 = 1.0.4 =
 *   Added: Product Categories block.

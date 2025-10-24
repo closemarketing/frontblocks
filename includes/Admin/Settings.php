@@ -87,6 +87,58 @@ class Settings {
 			$this->page_slug,
 			'frontblocks_section_features'
 		);
+
+		if ( ! frbl_is_pro_active() ) {
+			add_settings_section(
+				'frontblocks_section_woocommerce_features',
+				__( 'WooCommerce Features', 'frontblocks' ),
+				function () {
+					echo '<p>' . esc_html__( 'WooCommerce FrontBlocks PRO is a premium plugin that adds more features to WooCommerce FrontBlocks. Customize your WooCommerce store with more features.', 'frontblocks' ) . '</p>';
+					echo '<p><a href="https://close.technology/wordpress-plugins/front-blocks-pro/?ref=WordPressPlugin" target="_blank" class="button button-secondary">' . esc_html__( 'Buy WooCommerce FrontBlocks PRO', 'frontblocks' ) . '</a></p>';
+				},
+				$this->page_slug
+			);
+		}
+
+		do_action( 'frontblocks_register_settings' );
+	}
+
+	/**
+	 * Render settings page.
+	 *
+	 * @return void
+	 */
+	public function render_page() {
+		if ( ! current_user_can( 'edit_theme_options' ) ) {
+			return;
+		}
+		?>
+		<div class="wrap">
+			<h1><?php echo esc_html__( 'Frontblocks Settings', 'frontblocks' ); ?></h1>
+
+			<form method="post" action="options.php" style="margin-top:20px;">
+				<?php
+				settings_fields( 'frontblocks_settings' );
+				do_settings_sections( $this->page_slug );
+				submit_button();
+				?>
+			</form>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render checkbox field for enable testimonials.
+	 *
+	 * @return void
+	 */
+	public function field_enable_testimonials() {
+		$options = get_option( 'frontblocks_settings', array() );
+		$enabled = (bool) ( $options[ $this->option_enable_testimonials ] ?? false );
+		echo '<label for="' . esc_attr( $this->option_enable_testimonials ) . '">';
+		echo '<input type="checkbox" id="' . esc_attr( $this->option_enable_testimonials ) . '" name="frontblocks_settings[' . esc_attr( $this->option_enable_testimonials ) . ']" value="1" ' . checked( true, $enabled, false ) . ' /> ';
+		echo esc_html__( 'Enable testimonials', 'frontblocks' );
+		echo '</label>';
 	}
 
 	/**
@@ -110,44 +162,5 @@ class Settings {
 		}
 
 		return $sanitized;
-	}
-
-	/**
-	 * Render checkbox field for enable testimonials.
-	 *
-	 * @return void
-	 */
-	public function field_enable_testimonials() {
-		$options = get_option( 'frontblocks_settings', array() );
-		$enabled = (bool) ( $options[ $this->option_enable_testimonials ] ?? false );
-		echo '<label for="' . esc_attr( $this->option_enable_testimonials ) . '">';
-		echo '<input type="checkbox" id="' . esc_attr( $this->option_enable_testimonials ) . '" name="frontblocks_settings[' . esc_attr( $this->option_enable_testimonials ) . ']" value="1" ' . checked( true, $enabled, false ) . ' /> ';
-		echo esc_html__( 'Enable testimonials', 'frontblocks' );
-		echo '</label>';
-	}
-
-	/**
-	 * Render settings page.
-	 *
-	 * @return void
-	 */
-	public function render_page() {
-		if ( ! current_user_can( 'edit_theme_options' ) ) {
-			return;
-		}
-		?>
-		<div class="wrap">
-				<h1><?php echo esc_html__( 'Frontblocks Settings', 'frontblocks' ); ?></h1>
-			</div>
-
-			<form method="post" action="options.php" style="margin-top:20px;">
-				<?php
-				settings_fields( 'frontblocks_settings' );
-				do_settings_sections( $this->page_slug );
-				submit_button();
-				?>
-			</form>
-		</div>
-		<?php
 	}
 }
