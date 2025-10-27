@@ -1,15 +1,8 @@
-/**
- * Reading Time Block - Editor Options (JSX)
- *
- * @package FrontBlocks
- */
-
-const { __ } = wp.i18n;
 const { registerBlockType } = wp.blocks;
-const { Fragment } = wp.element;
-const { InspectorControls, useBlockProps } = wp.blockEditor;
+const { Fragment, useState, useEffect } = wp.element;
+const { InspectorControls, useBlockProps, ColorPalette } = wp.blockEditor;
 const { PanelBody, ToggleControl, TextControl, RangeControl, SelectControl } = wp.components;
-const { ColorPalette } = wp.blockEditor;
+const { __ } = wp.i18n;
 const { useSelect } = wp.data;
 
 /**
@@ -19,8 +12,9 @@ const { useSelect } = wp.data;
  * @return {number} Reading time in minutes.
  */
 function calculateReadingTime(content) {
-	if (!content) {
-		return 1;
+	// Ensure content is a string.
+	if (!content || typeof content !== 'string') {
+		return 5;
 	}
 
 	// Strip HTML tags.
@@ -58,23 +52,33 @@ function ReadingTimeEdit(props) {
 		borderRadius,
 	} = attributes;
 
+	const [readingTime, setReadingTime] = useState(5);
+
 	const blockProps = useBlockProps();
 
-	// Get current post content.
-	const postContent = useSelect((select) => {
-		const currentPostId = postId || select('core/editor').getCurrentPostId();
-		const post = select('core').getEditedEntityRecord('postType', 'post', currentPostId);
-		return post ? post.content : '';
+	// Get current post content and calculate reading time.
+	useEffect(() => {
+		try {
+			// Try to get the post content from the editor.
+			const postContent = wp.data.select('core/editor')?.getEditedPostContent?.();
+			
+			if (postContent && typeof postContent === 'string') {
+				const calculatedTime = calculateReadingTime(postContent);
+				setReadingTime(calculatedTime);
+			} else {
+				setReadingTime(5);
+			}
+		} catch (error) {
+			// If there's any error, just use default value.
+			setReadingTime(5);
+		}
 	}, [postId]);
-
-	const readingTime = calculateReadingTime(postContent);
 
 	const styleVars = {
 		'--frbl-text-color': textColor,
 		'--frbl-bg-color': backgroundColor,
 		'--frbl-font-size': `${fontSize}px`,
 		'--frbl-icon-color': iconColor,
-		'--frbl-alignment': alignment,
 		'--frbl-padding': `${padding}px`,
 		'--frbl-border-radius': `${borderRadius}px`,
 	};
@@ -85,6 +89,8 @@ function ReadingTimeEdit(props) {
 			<polyline points="12 6 12 12 16 14"></polyline>
 		</svg>
 	);
+
+	const wrapperClass = `frbl-reading-time-wrapper align-${alignment}`;
 
 	return (
 		<Fragment>
@@ -176,15 +182,17 @@ function ReadingTimeEdit(props) {
 			</InspectorControls>
 
 			<div {...blockProps}>
-				<div className="frbl-reading-time" style={styleVars}>
-					{showIcon && (
-						<span className="frbl-reading-time-icon">{iconSvg}</span>
-					)}
-					<span className="frbl-reading-time-text">
-						{prefix && `${prefix} `}
-						{readingTime}
-						{suffix && ` ${suffix}`}
-					</span>
+				<div className={wrapperClass}>
+					<div className="frbl-reading-time" style={styleVars}>
+						{showIcon && (
+							<span className="frbl-reading-time-icon">{iconSvg}</span>
+						)}
+						<span className="frbl-reading-time-text">
+							{prefix && `${prefix} `}
+							{readingTime}
+							{suffix && ` ${suffix}`}
+						</span>
+					</div>
 				</div>
 			</div>
 		</Fragment>

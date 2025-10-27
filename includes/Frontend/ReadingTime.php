@@ -28,7 +28,7 @@ class ReadingTime {
 		add_action( 'init', array( $this, 'register_reading_time_block' ), 20 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
-		add_shortcode( 'reading_time', array( $this, 'reading_time_shortcode' ) );
+		add_shortcode( 'frontblocks_reading_time', array( $this, 'reading_time_shortcode' ) );
 	}
 
 	/**
@@ -96,10 +96,31 @@ class ReadingTime {
 			FRBL_VERSION
 		);
 
+		// Register React if not already registered.
+		if ( ! wp_script_is( 'react', 'registered' ) ) {
+			wp_register_script(
+				'react',
+				'https://unpkg.com/react@18/umd/react.production.min.js',
+				array(),
+				'18.0.0',
+				true
+			);
+		}
+
+		if ( ! wp_script_is( 'react-dom', 'registered' ) ) {
+			wp_register_script(
+				'react-dom',
+				'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
+				array( 'react' ),
+				'18.0.0',
+				true
+			);
+		}
+
 		wp_enqueue_script(
 			'frontblocks-reading-time-option',
 			FRBL_PLUGIN_URL . 'assets/reading-time/frontblocks-reading-time.js',
-			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-editor', 'wp-i18n' ),
+			array( 'react', 'react-dom', 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-editor', 'wp-block-editor', 'wp-compose', 'wp-i18n' ),
 			FRBL_VERSION,
 			true
 		);
@@ -213,18 +234,17 @@ class ReadingTime {
 		$padding         = absint( $attributes['padding'] ?? 10 );
 		$border_radius   = absint( $attributes['borderRadius'] ?? 5 );
 
-		$wrapper_class = 'frbl-reading-time';
+		$wrapper_class = 'frbl-reading-time-wrapper align-' . esc_attr( $alignment );
 		if ( ! empty( $attributes['className'] ) ) {
 			$wrapper_class .= ' ' . esc_attr( $attributes['className'] );
 		}
 
 		$style_vars = sprintf(
-			'--frbl-text-color: %s; --frbl-bg-color: %s; --frbl-font-size: %dpx; --frbl-icon-color: %s; --frbl-alignment: %s; --frbl-padding: %dpx; --frbl-border-radius: %dpx;',
+			'--frbl-text-color: %s; --frbl-bg-color: %s; --frbl-font-size: %dpx; --frbl-icon-color: %s; --frbl-padding: %dpx; --frbl-border-radius: %dpx;',
 			$text_color,
 			$bg_color,
 			$font_size,
 			$icon_color,
-			$alignment,
 			$padding,
 			$border_radius
 		);
@@ -233,21 +253,23 @@ class ReadingTime {
 
 		ob_start();
 		?>
-		<div class="<?php echo esc_attr( $wrapper_class ); ?>" style="<?php echo esc_attr( $style_vars ); ?>">
-			<?php if ( $show_icon ) : ?>
-				<span class="frbl-reading-time-icon"><?php echo $icon_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-			<?php endif; ?>
-			<span class="frbl-reading-time-text">
-				<?php
-				if ( $prefix ) {
-					echo esc_html( $prefix ) . ' ';
-				}
-				echo esc_html( $reading_time );
-				if ( $suffix ) {
-					echo ' ' . esc_html( $suffix );
-				}
-				?>
-			</span>
+		<div class="<?php echo esc_attr( $wrapper_class ); ?>">
+			<div class="frbl-reading-time" style="<?php echo esc_attr( $style_vars ); ?>">
+				<?php if ( $show_icon ) : ?>
+					<span class="frbl-reading-time-icon"><?php echo $icon_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+				<?php endif; ?>
+				<span class="frbl-reading-time-text">
+					<?php
+					if ( $prefix ) {
+						echo esc_html( $prefix ) . ' ';
+					}
+					echo esc_html( $reading_time );
+					if ( $suffix ) {
+						echo ' ' . esc_html( $suffix );
+					}
+					?>
+				</span>
+			</div>
 		</div>
 		<?php
 		return ob_get_clean();
@@ -255,7 +277,7 @@ class ReadingTime {
 
 	/**
 	 * Shortcode for reading time.
-	 * Usage: [reading_time] or [reading_time post_id="123" prefix="This blog takes" suffix="minutes to read"]
+	 * Usage: [frontblocks_reading_time] or [frontblocks_reading_time post_id="123" prefix="This blog takes" suffix="minutes to read"]
 	 *
 	 * @param array $atts Shortcode attributes.
 	 * @return string HTML output.
@@ -276,7 +298,7 @@ class ReadingTime {
 				'border_radius'=> 5,
 			),
 			$atts,
-			'reading_time'
+			'frontblocks_reading_time'
 		);
 
 		$attributes = array(

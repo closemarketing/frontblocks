@@ -4,6 +4,23 @@
  * @package FrontBlocks
  */
 
+.frbl-reading-time-wrapper {
+	display: block;
+	width: 100%;
+}
+
+.frbl-reading-time-wrapper.align-left {
+	text-align: left;
+}
+
+.frbl-reading-time-wrapper.align-center {
+	text-align: center;
+}
+
+.frbl-reading-time-wrapper.align-right {
+	text-align: right;
+}
+
 .frbl-reading-time {
 	display: inline-flex;
 	align-items: center;
@@ -13,18 +30,7 @@
 	color: var(--frbl-text-color, inherit);
 	font-size: var(--frbl-font-size, 16px);
 	border-radius: var(--frbl-border-radius, 5px);
-	text-align: var(--frbl-alignment, left);
-	width: fit-content;
 	transition: all 0.3s ease;
-}
-
-.frbl-reading-time.center {
-	margin-left: auto;
-	margin-right: auto;
-}
-
-.frbl-reading-time.right {
-	margin-left: auto;
 }
 
 .frbl-reading-time-icon {
@@ -49,7 +55,7 @@
 }
 
 /* Editor specific styles */
-.editor-styles-wrapper .frbl-reading-time {
+.editor-styles-wrapper .frbl-reading-time-wrapper {
 	margin-top: 0;
 	margin-bottom: 0;
 }
@@ -64,30 +70,6 @@
 /* Hover effects (optional) */
 .frbl-reading-time:hover {
 	opacity: 0.85;
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-	.frbl-reading-time {
-		/* Inherit colors from parent unless explicitly set */
-	}
-}
-
-/* Alignment utility classes */
-.frbl-reading-time[style*="--frbl-alignment: center"] {
-	margin-left: auto;
-	margin-right: auto;
-	justify-content: center;
-}
-
-.frbl-reading-time[style*="--frbl-alignment: right"] {
-	margin-left: auto;
-	justify-content: flex-end;
-}
-
-.frbl-reading-time[style*="--frbl-alignment: left"] {
-	margin-right: auto;
-	justify-content: flex-start;
 }
 
 /* Print styles */
