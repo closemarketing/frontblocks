@@ -2,7 +2,7 @@
 
 // Add custom controls to the Gallery block
 const { addFilter } = wp.hooks;
-const { Fragment } = wp.element;
+const { Fragment, useEffect } = wp.element;
 const { InspectorControls } = wp.blockEditor;
 const { 
   SelectControl, 
@@ -11,6 +11,7 @@ const {
   RangeControl 
 } = wp.components;
 const { __ } = wp.i18n;
+const { createHigherOrderComponent } = wp.compose;
 
 function addCustomGalleryPanel(BlockEdit) {
   return function (props) {
@@ -23,6 +24,26 @@ function addCustomGalleryPanel(BlockEdit) {
       frblGutterSize = 20,
       frblEnableLightbox = false
     } = props.attributes;
+
+    // Apply dynamic styles in the editor.
+    useEffect(() => {
+      const blockElement = document.querySelector(`[data-block="${props.clientId}"] .wp-block-gallery`);
+      
+      if (blockElement) {
+        // Remove previous layout classes.
+        blockElement.classList.remove('frontblocks-gallery-grid', 'frontblocks-gallery-masonry');
+        
+        // Add current layout class.
+        if (frblGalleryLayout === 'masonry') {
+          blockElement.classList.add('frontblocks-gallery-masonry');
+        } else {
+          blockElement.classList.add('frontblocks-gallery-grid');
+        }
+        
+        // Set gutter size as CSS variable.
+        blockElement.style.setProperty('--frontblocks-gutter', frblGutterSize + 'px');
+      }
+    }, [frblGalleryLayout, frblGutterSize, props.clientId]);
 
     return (
       <Fragment>

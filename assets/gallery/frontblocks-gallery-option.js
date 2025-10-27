@@ -2,7 +2,9 @@
 
 // Add custom controls to the Gallery block
 var addFilter = wp.hooks.addFilter;
-var Fragment = wp.element.Fragment;
+var _wp$element = wp.element,
+  Fragment = _wp$element.Fragment,
+  useEffect = _wp$element.useEffect;
 var InspectorControls = wp.blockEditor.InspectorControls;
 var _wp$components = wp.components,
   SelectControl = _wp$components.SelectControl,
@@ -10,6 +12,7 @@ var _wp$components = wp.components,
   ToggleControl = _wp$components.ToggleControl,
   RangeControl = _wp$components.RangeControl;
 var __ = wp.i18n.__;
+var createHigherOrderComponent = wp.compose.createHigherOrderComponent;
 function addCustomGalleryPanel(BlockEdit) {
   return function (props) {
     if (props.name !== 'core/gallery') {
@@ -22,6 +25,25 @@ function addCustomGalleryPanel(BlockEdit) {
       frblGutterSize = _props$attributes$frb2 === void 0 ? 20 : _props$attributes$frb2,
       _props$attributes$frb3 = _props$attributes.frblEnableLightbox,
       frblEnableLightbox = _props$attributes$frb3 === void 0 ? false : _props$attributes$frb3;
+
+    // Apply dynamic styles in the editor.
+    useEffect(function () {
+      var blockElement = document.querySelector("[data-block=\"".concat(props.clientId, "\"] .wp-block-gallery"));
+      if (blockElement) {
+        // Remove previous layout classes.
+        blockElement.classList.remove('frontblocks-gallery-grid', 'frontblocks-gallery-masonry');
+
+        // Add current layout class.
+        if (frblGalleryLayout === 'masonry') {
+          blockElement.classList.add('frontblocks-gallery-masonry');
+        } else {
+          blockElement.classList.add('frontblocks-gallery-grid');
+        }
+
+        // Set gutter size as CSS variable.
+        blockElement.style.setProperty('--frontblocks-gutter', frblGutterSize + 'px');
+      }
+    }, [frblGalleryLayout, frblGutterSize, props.clientId]);
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
       title: __('FrontBlocks Gallery Settings', 'frontblocks'),
       initialOpen: true
