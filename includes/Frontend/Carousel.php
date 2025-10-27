@@ -61,17 +61,17 @@ class Carousel {
 	 * @return string
 	 */
 	public function add_custom_attributes_to_grid_block( $block_content, $block ) {
-		$attrs               = $block['attrs'] ?? array();
-		$custom_option       = isset( $attrs['frblGridOption'] ) ? sanitize_text_field( $attrs['frblGridOption'] ) : '';
-		$items_to_view       = isset( $attrs['frblItemsToView'] ) ? (int) $attrs['frblItemsToView'] : 4;
-		$responsive_to_view  = isset( $attrs['frblResponsiveToView'] ) ? (int) $attrs['frblResponsiveToView'] : 1;
-		$autoplay            = isset( $attrs['frblAutoplay'] ) ? ( (int) $attrs['frblAutoplay'] * 1000 ) : '';
-		$rewind              = isset( $attrs['frblRewind'] ) ? (bool) $attrs['frblRewind'] : true;
-		$buttons             = isset( $attrs['frblButtons'] ) ? sanitize_text_field( $attrs['frblButtons'] ) : 'arrows';
-		$button_color        = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
-		$button_bg_color     = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
-		$buttons_position    = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
-		$disable_on_desktop  = isset( $attrs['frblDisableOnDesktop'] ) ? (bool) $attrs['frblDisableOnDesktop'] : false;
+		$attrs              = $block['attrs'] ?? array();
+		$custom_option      = isset( $attrs['frblGridOption'] ) ? sanitize_text_field( $attrs['frblGridOption'] ) : '';
+		$items_to_view      = isset( $attrs['frblItemsToView'] ) ? (int) $attrs['frblItemsToView'] : 4;
+		$responsive_to_view = isset( $attrs['frblResponsiveToView'] ) ? (int) $attrs['frblResponsiveToView'] : 1;
+		$autoplay           = isset( $attrs['frblAutoplay'] ) ? ( (int) $attrs['frblAutoplay'] * 1000 ) : '';
+		$rewind             = isset( $attrs['frblRewind'] ) ? (bool) $attrs['frblRewind'] : true;
+		$buttons            = isset( $attrs['frblButtons'] ) ? sanitize_text_field( $attrs['frblButtons'] ) : 'arrows';
+		$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
+		$button_bg_color    = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
+		$buttons_position   = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
+		$disable_on_desktop = isset( $attrs['frblDisableOnDesktop'] ) ? (bool) $attrs['frblDisableOnDesktop'] : false;
 
 		// Add data attributes to the wrapper div if carousel is enabled.
 		if ( 'carousel' === $custom_option || 'slider' === $custom_option ) {
@@ -122,16 +122,16 @@ class Carousel {
 			return $block_content;
 		}
 
-		$custom_option       = isset( $attrs['frblGridOption'] ) ? sanitize_text_field( $attrs['frblGridOption'] ) : '';
-		$items_to_view       = isset( $attrs['frblItemsToView'] ) ? (int) $attrs['frblItemsToView'] : 4;
-		$responsive_to_view  = isset( $attrs['frblResponsiveToView'] ) ? (int) $attrs['frblResponsiveToView'] : 1;
-		$autoplay            = isset( $attrs['frblAutoplay'] ) ? ( (int) $attrs['frblAutoplay'] * 1000 ) : '';
-		$rewind              = isset( $attrs['frblRewind'] ) ? (bool) $attrs['frblRewind'] : true;
-		$buttons             = isset( $attrs['frblButtons'] ) ? sanitize_text_field( $attrs['frblButtons'] ) : 'arrows';
-		$button_color        = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
-		$button_bg_color     = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
-		$buttons_position    = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
-		$disable_on_desktop  = isset( $attrs['frblDisableOnDesktop'] ) ? (bool) $attrs['frblDisableOnDesktop'] : false;
+		$custom_option      = isset( $attrs['frblGridOption'] ) ? sanitize_text_field( $attrs['frblGridOption'] ) : '';
+		$items_to_view      = isset( $attrs['frblItemsToView'] ) ? (int) $attrs['frblItemsToView'] : 4;
+		$responsive_to_view = isset( $attrs['frblResponsiveToView'] ) ? (int) $attrs['frblResponsiveToView'] : 1;
+		$autoplay           = isset( $attrs['frblAutoplay'] ) ? ( (int) $attrs['frblAutoplay'] * 1000 ) : '';
+		$rewind             = isset( $attrs['frblRewind'] ) ? (bool) $attrs['frblRewind'] : true;
+		$buttons            = isset( $attrs['frblButtons'] ) ? sanitize_text_field( $attrs['frblButtons'] ) : 'arrows';
+		$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
+		$button_bg_color    = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
+		$buttons_position   = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
+		$disable_on_desktop = isset( $attrs['frblDisableOnDesktop'] ) ? (bool) $attrs['frblDisableOnDesktop'] : false;
 
 		// Add data attributes to the wrapper div if carousel is enabled.
 		if ( 'carousel' === $custom_option || 'slider' === $custom_option ) {
@@ -228,16 +228,16 @@ class Carousel {
 			'type'    => 'string',
 			'default' => '',
 		);
-	$block_args['attributes']['frblButtonsPosition']  = array(
-		'type'    => 'string',
-		'default' => 'side',
-	);
-	$block_args['attributes']['frblDisableOnDesktop'] = array(
-		'type'    => 'boolean',
-		'default' => false,
-	);
+		$block_args['attributes']['frblButtonsPosition']  = array(
+			'type'    => 'string',
+			'default' => 'side',
+		);
+		$block_args['attributes']['frblDisableOnDesktop'] = array(
+			'type'    => 'boolean',
+			'default' => false,
+		);
 
-	return $block_args;
+		return $block_args;
 	}
 
 	/**
