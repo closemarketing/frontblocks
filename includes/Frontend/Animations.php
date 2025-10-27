@@ -84,6 +84,12 @@ class Animations {
 			true
 		);
 
+		// Set script translations for JavaScript.
+		wp_set_script_translations(
+			'frontblocks-animation-editor',
+			'frontblocks'
+		);
+
 		// Localize script with custom CSS URL.
 		wp_localize_script(
 			'frontblocks-animation-editor',

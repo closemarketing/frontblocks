@@ -51,6 +51,12 @@ class Carousel {
 			FRBL_VERSION,
 			true
 		);
+
+		// Set script translations for JavaScript.
+		wp_set_script_translations(
+			'frontblocks-advanced-option',
+			'frontblocks'
+		);
 	}
 
 	/**
@@ -64,6 +70,8 @@ class Carousel {
 		$attrs              = $block['attrs'] ?? array();
 		$custom_option      = isset( $attrs['frblGridOption'] ) ? sanitize_text_field( $attrs['frblGridOption'] ) : '';
 		$items_to_view      = isset( $attrs['frblItemsToView'] ) ? (int) $attrs['frblItemsToView'] : 4;
+		$laptop_to_view     = isset( $attrs['frblLaptopToView'] ) ? (int) $attrs['frblLaptopToView'] : 3;
+		$tablet_to_view     = isset( $attrs['frblTabletToView'] ) ? (int) $attrs['frblTabletToView'] : 2;
 		$responsive_to_view = isset( $attrs['frblResponsiveToView'] ) ? (int) $attrs['frblResponsiveToView'] : 1;
 		$autoplay           = isset( $attrs['frblAutoplay'] ) ? ( (int) $attrs['frblAutoplay'] * 1000 ) : '';
 		$rewind             = isset( $attrs['frblRewind'] ) ? (bool) $attrs['frblRewind'] : true;
@@ -85,7 +93,9 @@ class Carousel {
 				'<div$1class="$2 frontblocks-carousel"$3' .
 					' data-type="' . esc_attr( $custom_option ) . '"' .
 					' data-view="' . esc_attr( $items_to_view ) . '"' .
-					' data-res-view="' . esc_attr( $responsive_to_view ) . '"' .
+					' data-laptop-view="' . esc_attr( $laptop_to_view ) . '"' .
+					' data-tablet-view="' . esc_attr( $tablet_to_view ) . '"' .
+					' data-mobile-view="' . esc_attr( $responsive_to_view ) . '"' .
 					' data-autoplay="' . esc_attr( $autoplay ) . '"' .
 					' data-buttons="' . esc_attr( $buttons ) . '"' .
 					' data-buttons-color="' . esc_attr( $button_color ) . '"' .
@@ -122,6 +132,8 @@ class Carousel {
 
 		$custom_option      = isset( $attrs['frblGridOption'] ) ? sanitize_text_field( $attrs['frblGridOption'] ) : '';
 		$items_to_view      = isset( $attrs['frblItemsToView'] ) ? (int) $attrs['frblItemsToView'] : 4;
+		$laptop_to_view     = isset( $attrs['frblLaptopToView'] ) ? (int) $attrs['frblLaptopToView'] : 3;
+		$tablet_to_view     = isset( $attrs['frblTabletToView'] ) ? (int) $attrs['frblTabletToView'] : 2;
 		$responsive_to_view = isset( $attrs['frblResponsiveToView'] ) ? (int) $attrs['frblResponsiveToView'] : 1;
 		$autoplay           = isset( $attrs['frblAutoplay'] ) ? ( (int) $attrs['frblAutoplay'] * 1000 ) : '';
 		$rewind             = isset( $attrs['frblRewind'] ) ? (bool) $attrs['frblRewind'] : true;
@@ -143,7 +155,9 @@ class Carousel {
 				'<div$1class="$2 frontblocks-carousel"$3' .
 					' data-type="' . esc_attr( $custom_option ) . '"' .
 					' data-view="' . esc_attr( $items_to_view ) . '"' .
-					' data-res-view="' . esc_attr( $responsive_to_view ) . '"' .
+					' data-laptop-view="' . esc_attr( $laptop_to_view ) . '"' .
+					' data-tablet-view="' . esc_attr( $tablet_to_view ) . '"' .
+					' data-mobile-view="' . esc_attr( $responsive_to_view ) . '"' .
 					' data-autoplay="' . esc_attr( $autoplay ) . '"' .
 					' data-buttons="' . esc_attr( $buttons ) . '"' .
 					' data-buttons-color="' . esc_attr( $button_color ) . '"' .
@@ -199,6 +213,14 @@ class Carousel {
 		$block_args['attributes']['frblItemsToView']      = array(
 			'type'    => 'string',
 			'default' => '4',
+		);
+		$block_args['attributes']['frblLaptopToView']     = array(
+			'type'    => 'string',
+			'default' => '3',
+		);
+		$block_args['attributes']['frblTabletToView']     = array(
+			'type'    => 'string',
+			'default' => '2',
 		);
 		$block_args['attributes']['frblResponsiveToView'] = array(
 			'type'    => 'string',
@@ -258,6 +280,14 @@ class Carousel {
 						frblItemsToView: {
 							type: 'string',
 							default: '4'
+						},
+						frblLaptopToView: {
+							type: 'string',
+							default: '3'
+						},
+						frblTabletToView: {
+							type: 'string',
+							default: '2'
 						},
 						frblResponsiveToView: {
 							type: 'string',

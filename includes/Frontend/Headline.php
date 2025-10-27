@@ -64,6 +64,13 @@ class Headline {
 	 */
 	public function enqueue_editor_assets() {
 		wp_enqueue_script( 'frontblocks-headline-editor' );
+
+		// Set script translations for JavaScript.
+		wp_set_script_translations(
+			'frontblocks-headline-editor',
+			'frontblocks'
+		);
+
 		wp_enqueue_style( 'frontblocks-headline-styles' );
 	}
 

@@ -90,7 +90,6 @@ class Gallery {
 			FRBL_VERSION,
 			true
 		);
-
 		// Enqueue gallery styles in editor for live preview.
 		wp_enqueue_style(
 			'frontblocks-gallery',
