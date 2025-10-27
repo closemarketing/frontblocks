@@ -65,6 +65,13 @@ class Counter {
 	 */
 	public function enqueue_editor_assets() {
 		wp_enqueue_script( 'frontblocks-counter-editor' );
+
+		// Set script translations for JavaScript.
+		wp_set_script_translations(
+			'frontblocks-counter-editor',
+			'frontblocks'
+		);
+
 		wp_enqueue_style( 'frontblocks-counter-styles' );
 	}
 
