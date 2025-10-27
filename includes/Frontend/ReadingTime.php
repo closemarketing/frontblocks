@@ -52,8 +52,8 @@ class ReadingTime {
 		if ( ! $reading_time ) {
 			// Calculate reading time.
 			$post_content = get_post_field( 'post_content', $post_id );
-			$word_count   = str_word_count( strip_tags( $post_content ) );
-			
+			$word_count   = str_word_count( wp_strip_all_tags( $post_content ) );
+
 			// Average reading speed: 225 words per minute.
 			$reading_time = ceil( $word_count / 225 );
 
@@ -144,51 +144,51 @@ class ReadingTime {
 			'editor_script'   => 'frontblocks-reading-time-option',
 			'render_callback' => array( $this, 'render_reading_time_block' ),
 			'attributes'      => array(
-				'postId'           => array(
+				'postId'          => array(
 					'type'    => 'number',
 					'default' => 0,
 				),
-				'showIcon'         => array(
+				'showIcon'        => array(
 					'type'    => 'boolean',
 					'default' => true,
 				),
-				'prefix'           => array(
+				'prefix'          => array(
 					'type'    => 'string',
 					'default' => '',
 				),
-				'suffix'           => array(
+				'suffix'          => array(
 					'type'    => 'string',
 					'default' => 'min',
 				),
-				'className'        => array(
+				'className'       => array(
 					'type'    => 'string',
 					'default' => '',
 				),
-				'textColor'        => array(
+				'textColor'       => array(
 					'type'    => 'string',
 					'default' => 'inherit',
 				),
-				'backgroundColor'  => array(
+				'backgroundColor' => array(
 					'type'    => 'string',
 					'default' => 'transparent',
 				),
-				'fontSize'         => array(
+				'fontSize'        => array(
 					'type'    => 'number',
 					'default' => 16,
 				),
-				'iconColor'        => array(
+				'iconColor'       => array(
 					'type'    => 'string',
 					'default' => 'currentColor',
 				),
-				'alignment'        => array(
+				'alignment'       => array(
 					'type'    => 'string',
 					'default' => 'left',
 				),
-				'padding'          => array(
+				'padding'         => array(
 					'type'    => 'number',
 					'default' => 10,
 				),
-				'borderRadius'     => array(
+				'borderRadius'    => array(
 					'type'    => 'number',
 					'default' => 5,
 				),
@@ -222,17 +222,17 @@ class ReadingTime {
 		}
 
 		$reading_time = $this->calculate_reading_time( $post_id );
-		
-		$show_icon       = $attributes['showIcon'] ?? true;
-		$prefix          = sanitize_text_field( $attributes['prefix'] ?? '' );
-		$suffix          = sanitize_text_field( $attributes['suffix'] ?? 'min' );
-		$text_color      = sanitize_text_field( $attributes['textColor'] ?? 'inherit' );
-		$bg_color        = sanitize_text_field( $attributes['backgroundColor'] ?? 'transparent' );
-		$font_size       = absint( $attributes['fontSize'] ?? 16 );
-		$icon_color      = sanitize_text_field( $attributes['iconColor'] ?? 'currentColor' );
-		$alignment       = sanitize_text_field( $attributes['alignment'] ?? 'left' );
-		$padding         = absint( $attributes['padding'] ?? 10 );
-		$border_radius   = absint( $attributes['borderRadius'] ?? 5 );
+
+		$show_icon     = $attributes['showIcon'] ?? true;
+		$prefix        = sanitize_text_field( $attributes['prefix'] ?? '' );
+		$suffix        = sanitize_text_field( $attributes['suffix'] ?? 'min' );
+		$text_color    = sanitize_text_field( $attributes['textColor'] ?? 'inherit' );
+		$bg_color      = sanitize_text_field( $attributes['backgroundColor'] ?? 'transparent' );
+		$font_size     = absint( $attributes['fontSize'] ?? 16 );
+		$icon_color    = sanitize_text_field( $attributes['iconColor'] ?? 'currentColor' );
+		$alignment     = sanitize_text_field( $attributes['alignment'] ?? 'left' );
+		$padding       = absint( $attributes['padding'] ?? 10 );
+		$border_radius = absint( $attributes['borderRadius'] ?? 5 );
 
 		$wrapper_class = 'frbl-reading-time-wrapper align-' . esc_attr( $alignment );
 		if ( ! empty( $attributes['className'] ) ) {
@@ -285,17 +285,17 @@ class ReadingTime {
 	public function reading_time_shortcode( $atts ) {
 		$atts = shortcode_atts(
 			array(
-				'post_id'      => 0,
-				'show_icon'    => 'yes',
-				'prefix'       => '',
-				'suffix'       => 'min',
-				'text_color'   => 'inherit',
-				'bg_color'     => 'transparent',
-				'font_size'    => 16,
-				'icon_color'   => 'currentColor',
-				'alignment'    => 'left',
-				'padding'      => 10,
-				'border_radius'=> 5,
+				'post_id'       => 0,
+				'show_icon'     => 'yes',
+				'prefix'        => '',
+				'suffix'        => 'min',
+				'text_color'    => 'inherit',
+				'bg_color'      => 'transparent',
+				'font_size'     => 16,
+				'icon_color'    => 'currentColor',
+				'alignment'     => 'left',
+				'padding'       => 10,
+				'border_radius' => 5,
 			),
 			$atts,
 			'frontblocks_reading_time'
