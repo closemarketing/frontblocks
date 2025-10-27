@@ -72,8 +72,15 @@ Display testimonials from other posts, pages, or custom post types. Search and s
 
 Shortcode: [frontblocks_testimonials_carousel]
 
+**Reading Time block:**
+Display the reading time of a post. You can choose the number of words per minute to calculate the reading time.
+Shortcode: [frontblocks_reading_time]
+
 **WooCommerce Features:**
-Included features for WooCommerce FrontBlocks PRO:
+Included features for WooCommerce FrontBlocks PRO.
+
+**FrontBlocks PRO:**
+FrontBlocks PRO is a premium plugin that extends the functionality of FrontBlocks. It includes additional features and improvements over the free version.
 
 More information in the [FrontBlocks PRO](https://close.technology/wordpress-plugins/front-blocks-pro/?ref=WordPressPlugin) page.
 
@@ -92,9 +99,10 @@ WordPress installation and then activate the Plugin from Plugins page.
 == Changelog ==
 = 1.0.5 =
 *   Added: Show a preview of the product categories in Gutenberg editor.
-
-= 1.0.5 =
+*   Added: New block for reading time of a post.
 *   Added: FrontBlocks PRO compatibility.
+*   Added: Carousel/Slider: Add item to view in laptop and mobile.
+*   Fixed: translations in block options.
 
 = 1.0.4 =
 *   Added: Product Categories block.
