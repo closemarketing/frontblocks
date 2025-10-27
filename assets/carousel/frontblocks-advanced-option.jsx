@@ -20,17 +20,18 @@ function addCustomCarouselPanel(BlockEdit) {
 			}
 		}
 
-		const {
-				frblGridOption = 'none',
-				frblItemsToView = '4',
-				frblResponsiveToView = '1',
-				frblAutoplay = '',
-				frblButtons = 'arrows',
-				frblRewind = true,
-				frblButtonColor,
-				frblButtonBgColor,
-				frblButtonsPosition = 'side',
-		} = props.attributes;
+	const {
+			frblGridOption = 'none',
+			frblItemsToView = '4',
+			frblResponsiveToView = '1',
+			frblAutoplay = '',
+			frblButtons = 'arrows',
+			frblRewind = true,
+			frblButtonColor,
+			frblButtonBgColor,
+			frblButtonsPosition = 'side',
+			frblDisableOnDesktop = false,
+	} = props.attributes;
 
 		return (
 			<Fragment>
@@ -40,21 +41,27 @@ function addCustomCarouselPanel(BlockEdit) {
 						title={__('Carousel Settings', 'frontblocks')}
 						initialOpen={true}
 					>
-						<SelectControl
-							label={__('FrontBlocks Grid Option', 'frontblocks')}
-							value={frblGridOption}
-							options={[
-								{ label: __('None', 'frontblocks'), value: 'none' },
-								{ label: __('Carousel', 'frontblocks'), value: 'carousel' },
-								{ label: __('Slider', 'frontblocks'), value: 'slider' }
-							]}
-							onChange={(value) => {
-								props.setAttributes({ frblGridOption: value });
-							}}
-							help={__('This option gives the option to make carousel in your grid block.', 'frontblocks')}
-						/>
-						{frblGridOption !== 'none' && (
-							<>
+					<SelectControl
+						label={__('FrontBlocks Grid Option', 'frontblocks')}
+						value={frblGridOption}
+						options={[
+							{ label: __('None', 'frontblocks'), value: 'none' },
+							{ label: __('Carousel', 'frontblocks'), value: 'carousel' },
+							{ label: __('Slider', 'frontblocks'), value: 'slider' }
+						]}
+						onChange={(value) => {
+							props.setAttributes({ frblGridOption: value });
+						}}
+						help={__('This option gives the option to make carousel in your grid block.', 'frontblocks')}
+					/>
+					{frblGridOption !== 'none' && (
+						<>
+							<ToggleControl
+								label={__('Disable on Desktop', 'frontblocks')}
+								checked={frblDisableOnDesktop}
+								onChange={(value) => props.setAttributes({ frblDisableOnDesktop: value })}
+								help={__('If enabled, carousel/slider will only work on mobile devices.', 'frontblocks')}
+							/>
 								<TextControl
 									label={__('Items to view', 'frontblocks')}
 									value={frblItemsToView}
