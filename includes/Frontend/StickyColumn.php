@@ -74,7 +74,7 @@ class StickyColumn {
 			FRBL_VERSION,
 			false
 		);
-		
+
 		// Set script translations for JavaScript.
 		wp_set_script_translations(
 			'frontblocks-sticky-column-editor',
