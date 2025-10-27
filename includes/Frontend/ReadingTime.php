@@ -211,7 +211,7 @@ class ReadingTime {
 	 */
 	public function render_reading_time_block( $attributes ) {
 		$post_id = absint( $attributes['postId'] ?? 0 );
-		
+
 		// If no post ID specified, use current post.
 		if ( 0 === $post_id ) {
 			$post_id = get_the_ID();
