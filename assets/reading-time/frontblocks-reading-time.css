@@ -1,0 +1,99 @@
+/**
+ * Reading Time Block Styles
+ *
+ * @package FrontBlocks
+ */
+
+.frbl-reading-time {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: var(--frbl-padding, 10px);
+	background-color: var(--frbl-bg-color, transparent);
+	color: var(--frbl-text-color, inherit);
+	font-size: var(--frbl-font-size, 16px);
+	border-radius: var(--frbl-border-radius, 5px);
+	text-align: var(--frbl-alignment, left);
+	width: fit-content;
+	transition: all 0.3s ease;
+}
+
+.frbl-reading-time.center {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.frbl-reading-time.right {
+	margin-left: auto;
+}
+
+.frbl-reading-time-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--frbl-icon-color, currentColor);
+	line-height: 1;
+	flex-shrink: 0;
+}
+
+.frbl-reading-time-icon svg {
+	width: 1em;
+	height: 1em;
+	display: block;
+}
+
+.frbl-reading-time-text {
+	line-height: 1.4;
+	font-weight: 400;
+	white-space: nowrap;
+}
+
+/* Editor specific styles */
+.editor-styles-wrapper .frbl-reading-time {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+	.frbl-reading-time {
+		font-size: calc(var(--frbl-font-size, 16px) * 0.9);
+	}
+}
+
+/* Hover effects (optional) */
+.frbl-reading-time:hover {
+	opacity: 0.85;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+	.frbl-reading-time {
+		/* Inherit colors from parent unless explicitly set */
+	}
+}
+
+/* Alignment utility classes */
+.frbl-reading-time[style*="--frbl-alignment: center"] {
+	margin-left: auto;
+	margin-right: auto;
+	justify-content: center;
+}
+
+.frbl-reading-time[style*="--frbl-alignment: right"] {
+	margin-left: auto;
+	justify-content: flex-end;
+}
+
+.frbl-reading-time[style*="--frbl-alignment: left"] {
+	margin-right: auto;
+	justify-content: flex-start;
+}
+
+/* Print styles */
+@media print {
+	.frbl-reading-time {
+		page-break-inside: avoid;
+	}
+}
+
