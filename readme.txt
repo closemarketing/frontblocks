@@ -102,6 +102,7 @@ WordPress installation and then activate the Plugin from Plugins page.
 *   Added: New block for reading time of a post.
 *   Added: FrontBlocks PRO compatibility.
 *   Added: Carousel/Slider: Add item to view in laptop and mobile.
+*   Added: Carousel/Slider: Add option to deactivate Carousel/Slider in Desktop.
 *   Fixed: translations in block options.
 
 = 1.0.4 =
