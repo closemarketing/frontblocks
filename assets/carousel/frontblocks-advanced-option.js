@@ -67,16 +67,7 @@ function addCustomCarouselPanel(BlockEdit) {
         });
       },
       help: __('This option gives the option to make carousel in your grid block.', 'frontblocks')
-    }), frblGridOption !== 'none' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(ToggleControl, {
-      label: __('Disable on Desktop', 'frontblocks'),
-      checked: frblDisableOnDesktop,
-      onChange: function onChange(value) {
-        return props.setAttributes({
-          frblDisableOnDesktop: value
-        });
-      },
-      help: __('If enabled, carousel/slider will only work on mobile devices.', 'frontblocks')
-    }), /*#__PURE__*/React.createElement(TextControl, {
+    }), frblGridOption !== 'none' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(TextControl, {
       label: __('Items to view', 'frontblocks'),
       value: frblItemsToView,
       onChange: function onChange(value) {
@@ -160,6 +151,15 @@ function addCustomCarouselPanel(BlockEdit) {
         },
         label: __('Color background button', 'frontblocks')
       }]
+    }), /*#__PURE__*/React.createElement(ToggleControl, {
+      label: __('Disable on Desktop', 'frontblocks'),
+      checked: frblDisableOnDesktop,
+      onChange: function onChange(value) {
+        return props.setAttributes({
+          frblDisableOnDesktop: value
+        });
+      },
+      help: __('If enabled, carousel/slider will only work on mobile devices.', 'frontblocks')
     })))));
   };
 }
