@@ -42,10 +42,13 @@ class Testimonials {
 
 		// Frontend hooks.
 		add_action( 'init', array( $this, 'register_cpt_testimonials' ) );
+		add_action( 'init', array( $this, 'register_meta_fields' ) );
 		add_action( 'add_meta_boxes', array( $this, 'add_metabox_stars' ) );
 		add_action( 'save_post', array( $this, 'save_metabox_stars' ) );
 		add_shortcode( 'frontblocks_testimonials_carousel', array( $this, 'testimonials_shortcode' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
+		add_action( 'init', array( $this, 'register_testimonials_block' ) );
 	}
 
 	/**
@@ -60,6 +63,147 @@ class Testimonials {
 				array(),
 				FRBL_VERSION
 			);
+	}
+
+	/**
+	 * Enqueue block editor assets.
+	 *
+	 * @return void
+	 */
+	public function enqueue_block_editor_assets() {
+		wp_enqueue_script(
+			'frontblocks-testimonials-block',
+			FRBL_PLUGIN_URL . 'assets/testimonials/frontblocks-testimonials-block.js',
+			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-block-editor', 'wp-i18n', 'wp-server-side-render' ),
+			FRBL_VERSION,
+			true
+		);
+
+		wp_enqueue_style(
+			'frontblocks-testimonials-editor',
+			FRBL_PLUGIN_URL . 'assets/testimonials/frontblocks-testimonials.css',
+			array(),
+			FRBL_VERSION
+		);
+	}
+
+	/**
+	 * Register the Testimonials Carousel block.
+	 *
+	 * @return void
+	 */
+	public function register_testimonials_block() {
+		register_block_type(
+			'frontblocks/testimonials-carousel',
+			array(
+				'editor_script'   => 'frontblocks-testimonials-block',
+				'render_callback' => array( $this, 'render_testimonials_block' ),
+				'attributes'      => array(
+					'postsCount'      => array(
+						'type'    => 'number',
+						'default' => -1,
+					),
+					'orderBy'         => array(
+						'type'    => 'string',
+						'default' => 'date',
+					),
+					'order'           => array(
+						'type'    => 'string',
+						'default' => 'DESC',
+					),
+					'layoutType'      => array(
+						'type'    => 'string',
+						'default' => 'carousel',
+					),
+					'imagePosition'   => array(
+						'type'    => 'string',
+						'default' => 'top',
+					),
+					'showStars'       => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+					'showImage'       => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+					'slidesPerView'   => array(
+						'type'    => 'number',
+						'default' => 3,
+					),
+					'autoplay'        => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+					'autoplayDelay'   => array(
+						'type'    => 'number',
+						'default' => 6000,
+					),
+					'showNavigation'  => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+					'showPagination'  => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+					'starsPosition'   => array(
+						'type'    => 'string',
+						'default' => 'below-text',
+					),
+				'contentOrder'    => array(
+					'type'    => 'string',
+					'default' => 'image-name-text-stars',
+				),
+				'nameAlign'       => array(
+					'type'    => 'string',
+					'default' => 'center',
+				),
+				'textAlign'       => array(
+					'type'    => 'string',
+					'default' => 'center',
+				),
+				'starsAlign'      => array(
+					'type'    => 'string',
+					'default' => 'center',
+				),
+				'imageAlign'      => array(
+					'type'    => 'string',
+					'default' => 'center',
+				),
+				// FrontBlocks animation attributes.
+				'frblAnimation'   => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'frblAnimationDelay' => array(
+					'type'    => 'number',
+					'default' => 0,
+				),
+				'frblAnimationDuration' => array(
+					'type'    => 'number',
+					'default' => 1,
+				),
+				'frblAnimationRepeat' => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+				'frblAnimationInfinite' => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+				// GenerateBlocks condition attributes.
+				'gbBlockCondition' => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'gbBlockConditionInvert' => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+			),
+		)
+	);
 	}
 
 	/**
@@ -84,6 +228,35 @@ class Testimonials {
 		echo '<input type="checkbox" id="' . esc_attr( $this->option_enable_testimonials ) . '" name="frontblocks_settings[' . esc_attr( $this->option_enable_testimonials ) . ']" value="1" ' . checked( true, $enabled, false ) . ' /> ';
 		echo esc_html__( 'Enable testimonials', 'frontblocks' );
 		echo '</label>';
+	}
+
+	/**
+	 * Register meta fields for REST API.
+	 *
+	 * @return void
+	 */
+	public function register_meta_fields() {
+		register_post_meta(
+			'fbrl_testimonial',
+			'frontblocks_stars',
+			array(
+				'type'         => 'integer',
+				'single'       => true,
+				'show_in_rest' => true,
+				'default'      => 0,
+			)
+		);
+		
+		register_post_meta(
+			'testimonios',
+			'_estrellas_valor',
+			array(
+				'type'         => 'integer',
+				'single'       => true,
+				'show_in_rest' => true,
+				'default'      => 0,
+			)
+		);
 	}
 
 	/**
@@ -117,6 +290,7 @@ class Testimonials {
 			'menu_position' => 5,
 			'menu_icon'     => 'dashicons-testimonial',
 			'can_export'    => true,
+			'show_in_rest'  => true,
 		);
 
 		register_post_type( 'fbrl_testimonial', $args );
@@ -217,16 +391,16 @@ class Testimonials {
 
 						$stars = get_post_meta( get_the_ID(), 'frontblocks_stars', true );
 
-						$stars      = $stars ? intval( $stars ) : 0;
-						$stars_html = '';
+					$stars      = $stars ? intval( $stars ) : 0;
+					$stars_html = '';
 
-					for ( $i = 1; $i <= 5; $i++ ) {
-						if ( $i <= $stars ) {
-								$stars_html .= '<span class="star filled">★</span>';
-						} else {
-								$stars_html .= '<span class="star">★</span>';
-						}
+				for ( $i = 1; $i <= 5; $i++ ) {
+					if ( $i <= $stars ) {
+							$stars_html .= '<span class="star filled">★</span>';
+					} else {
+							$stars_html .= '<span class="star">☆</span>';
 					}
+				}
 					?>
 								<div class="testimonial-card">
 												<div class="testimonial-header">
@@ -251,5 +425,152 @@ class Testimonials {
 			<?php
 			wp_reset_postdata();
 			return ob_get_clean();
+	}
+
+	/**
+	 * Render testimonials block.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return string Block HTML.
+	 */
+	public function render_testimonials_block( $attributes ) {
+		wp_enqueue_style( 'frontblocks-testimonials-style' );
+
+		// Extract attributes with defaults.
+		$posts_count     = isset( $attributes['postsCount'] ) ? (int) $attributes['postsCount'] : -1;
+		$order_by        = isset( $attributes['orderBy'] ) ? sanitize_text_field( $attributes['orderBy'] ) : 'date';
+		$order           = isset( $attributes['order'] ) ? sanitize_text_field( $attributes['order'] ) : 'DESC';
+		$layout_type     = isset( $attributes['layoutType'] ) ? sanitize_text_field( $attributes['layoutType'] ) : 'carousel';
+		$image_position  = isset( $attributes['imagePosition'] ) ? sanitize_text_field( $attributes['imagePosition'] ) : 'top';
+		$show_stars      = isset( $attributes['showStars'] ) ? (bool) $attributes['showStars'] : true;
+		$show_image      = isset( $attributes['showImage'] ) ? (bool) $attributes['showImage'] : true;
+		$slides_per_view = isset( $attributes['slidesPerView'] ) ? (int) $attributes['slidesPerView'] : 3;
+		$autoplay        = isset( $attributes['autoplay'] ) ? (bool) $attributes['autoplay'] : true;
+		$autoplay_delay  = isset( $attributes['autoplayDelay'] ) ? (int) $attributes['autoplayDelay'] : 6000;
+		$show_navigation = isset( $attributes['showNavigation'] ) ? (bool) $attributes['showNavigation'] : true;
+		$show_pagination = isset( $attributes['showPagination'] ) ? (bool) $attributes['showPagination'] : true;
+		$stars_position  = isset( $attributes['starsPosition'] ) ? sanitize_text_field( $attributes['starsPosition'] ) : 'below-text';
+		$content_order   = isset( $attributes['contentOrder'] ) ? sanitize_text_field( $attributes['contentOrder'] ) : 'image-name-text-stars';
+		$name_align      = isset( $attributes['nameAlign'] ) ? sanitize_text_field( $attributes['nameAlign'] ) : 'center';
+		$text_align      = isset( $attributes['textAlign'] ) ? sanitize_text_field( $attributes['textAlign'] ) : 'center';
+		$stars_align     = isset( $attributes['starsAlign'] ) ? sanitize_text_field( $attributes['starsAlign'] ) : 'center';
+		$image_align     = isset( $attributes['imageAlign'] ) ? sanitize_text_field( $attributes['imageAlign'] ) : 'center';
+
+		// Query testimonials - try both CPTs.
+		$post_types = array( 'testimonios', 'fbrl_testimonial' );
+		
+		$args = array(
+			'post_type'      => $post_types,
+			'posts_per_page' => $posts_count,
+			'orderby'        => $order_by,
+			'order'          => $order,
+			'post_status'    => 'publish',
+		);
+
+		$query = new \WP_Query( $args );
+
+		if ( ! $query->have_posts() ) {
+			return '';
+		}
+
+		ob_start();
+
+		// Build carousel data attributes.
+		$carousel_attrs = '';
+		if ( 'carousel' === $layout_type ) {
+			$carousel_attrs = sprintf(
+				'data-type="carousel" data-view="%d" data-res-view="1" data-buttons="%s" data-autoplay="%s"',
+				esc_attr( $slides_per_view ),
+				$show_pagination ? 'bullets' : 'false',
+				$autoplay ? esc_attr( $autoplay_delay ) : 'false'
+			);
+		}
+
+		$wrapper_class = 'frontblocks-testimonials-block';
+		$wrapper_class .= ' layout-' . esc_attr( $layout_type );
+		$wrapper_class .= ' image-' . esc_attr( $image_position );
+		$wrapper_class .= ' content-order-' . esc_attr( $content_order );
+		$wrapper_class .= ' name-align-' . esc_attr( $name_align );
+		$wrapper_class .= ' text-align-' . esc_attr( $text_align );
+		$wrapper_class .= ' stars-align-' . esc_attr( $stars_align );
+		$wrapper_class .= ' image-align-' . esc_attr( $image_align );
+
+		if ( 'carousel' === $layout_type ) {
+			$wrapper_class .= ' frontblocks-carousel';
+		}
+		?>
+		<div class="<?php echo esc_attr( $wrapper_class ); ?>" <?php echo $carousel_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+			<?php
+			while ( $query->have_posts() ) :
+				$query->the_post();
+				$nombre       = get_the_title();
+				$texto_resena = get_the_content();
+				$imagen_url   = get_the_post_thumbnail_url( get_the_ID(), 'medium' );
+				
+				// Try both meta fields for star rating.
+				$stars_value = get_post_meta( get_the_ID(), '_estrellas_valor', true );
+				if ( ! $stars_value ) {
+					$stars_value = get_post_meta( get_the_ID(), 'frontblocks_stars', true );
+				}
+				$stars_value = $stars_value ? intval( $stars_value ) : 0;
+
+				// Generate stars HTML.
+				$stars_html = '';
+				if ( $show_stars ) {
+					$stars_html .= '<div class="testimonial-stars stars-' . esc_attr( $stars_position ) . '">';
+					for ( $i = 1; $i <= 5; $i++ ) {
+						if ( $i <= $stars_value ) {
+							$stars_html .= '<span class="star filled">★</span>';
+						} else {
+							$stars_html .= '<span class="star">☆</span>';
+						}
+					}
+					$stars_html .= '</div>';
+				}
+
+				// Generate image HTML.
+				$image_html = '';
+				if ( $show_image && $imagen_url ) {
+					$image_html = sprintf(
+						'<div class="testimonial-image"><img src="%s" alt="%s" /></div>',
+						esc_url( $imagen_url ),
+						esc_attr( $nombre )
+					);
+				}
+
+				// Generate content parts.
+				$name_html = '<h3 class="testimonial-name">' . esc_html( $nombre ) . '</h3>';
+				$text_html = '<div class="testimonial-text">"' . esc_html( $texto_resena ) . '"</div>';
+
+				// Build content based on order.
+				$content_parts = array(
+					'image' => $image_html,
+					'name'  => $name_html,
+					'text'  => $text_html,
+					'stars' => $stars_html,
+				);
+
+				// Parse content order.
+				$order_array = explode( '-', $content_order );
+				?>
+				<div class="testimonial-card">
+					<div class="testimonial-content">
+						<?php
+						foreach ( $order_array as $part ) {
+							if ( isset( $content_parts[ $part ] ) ) {
+								echo $content_parts[ $part ]; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							}
+						}
+						?>
+					</div>
+				</div>
+				<?php
+			endwhile;
+			?>
+		</div>
+		<?php
+
+		wp_reset_postdata();
+		return ob_get_clean();
 	}
 }

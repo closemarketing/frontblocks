@@ -44,6 +44,33 @@ class Carousel {
 	 * @return void
 	 */
 	public function enqueue_block_editor_assets() {
+		// Enqueue Glide CSS for editor.
+		wp_enqueue_style(
+			'frontblocks-carousel-editor',
+			FRBL_PLUGIN_URL . 'assets/carousel/frontblocks-carousel.css',
+			array(),
+			FRBL_VERSION
+		);
+
+		// Enqueue Glide library for editor.
+		wp_enqueue_script(
+			'frontblocks-glide',
+			FRBL_PLUGIN_URL . 'assets/carousel/glide.min.js',
+			array(),
+			FRBL_VERSION,
+			true
+		);
+
+		// Enqueue carousel editor initialization.
+		wp_enqueue_script(
+			'frontblocks-carousel-editor',
+			FRBL_PLUGIN_URL . 'assets/carousel/frontblocks-carousel-editor.js',
+			array( 'frontblocks-glide', 'wp-data', 'wp-blocks' ),
+			FRBL_VERSION,
+			true
+		);
+
+		// Enqueue advanced options panel.
 		wp_enqueue_script(
 			'frontblocks-advanced-option',
 			FRBL_PLUGIN_URL . 'assets/carousel/frontblocks-advanced-option.js',
