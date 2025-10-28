@@ -92,6 +92,7 @@ WordPress installation and then activate the Plugin from Plugins page.
 == Changelog ==
 = 1.0.5 =
 *   Added: Show a preview of the product categories in Gutenberg editor.
+*   Fixed: Change bullets logic count up to 10 items.
 
 = 1.0.5 =
 *   Added: FrontBlocks PRO compatibility.
