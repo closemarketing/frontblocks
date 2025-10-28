@@ -82,7 +82,7 @@ Included features for WooCommerce FrontBlocks PRO.
 **FrontBlocks PRO:**
 FrontBlocks PRO is a premium plugin that extends the functionality of FrontBlocks. It includes additional features and improvements over the free version.
 
-More information in the [FrontBlocks PRO](https://close.technology/wordpress-plugins/front-blocks-pro/?ref=WordPressPlugin) page.
+More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-plugins/frontblocks-pro/?ref=WordPressPlugin) page.
 
 Others Plugins:
 - [Closemarketing Plugins](https://profiles.wordpress.org/closemarketing/#content-plugins)
