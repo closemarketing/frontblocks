@@ -3,6 +3,15 @@ window.addEventListener('load', function (event) {
 
     if (carouselItem.length > 0) {
         carouselItem.forEach((item) => {
+            // Check if carousel should be disabled on desktop.
+            const disableOnDesktop = item.getAttribute('data-disable-on-desktop') === 'true';
+            const isDesktop = window.innerWidth >= 768;
+
+            // Skip initialization if disabled on desktop and current viewport is desktop.
+            if (disableOnDesktop && isDesktop) {
+                return;
+            }
+
             // First Parent.
             const parent = item.parentNode;
             const wrapper = document.createElement('div');
@@ -24,9 +33,11 @@ window.addEventListener('load', function (event) {
             // Options
             const carouselType = item.getAttribute('data-type') ? item.getAttribute('data-type') : 'carousel';
             const carouselbuttons = item.getAttribute('data-buttons') ? item.getAttribute('data-buttons') : 'bullets';
-            const carouselView = item.getAttribute('data-view') ? item.getAttribute('data-view') : 4;
+            const carouselView = item.getAttribute('data-view') ? parseInt(item.getAttribute('data-view')) : 4;
+            const carouselLaptopView = item.getAttribute('data-laptop-view') ? parseInt(item.getAttribute('data-laptop-view')) : 3;
+            const carouselTabletView = item.getAttribute('data-tablet-view') ? parseInt(item.getAttribute('data-tablet-view')) : 2;
+            const carouselMobileView = item.getAttribute('data-mobile-view') ? parseInt(item.getAttribute('data-mobile-view')) : 1;
             const carouselAutoplay = item.getAttribute('data-autoplay') ? item.getAttribute('data-autoplay') : 0;
-            const carouselResView = item.getAttribute('data-res-view') ? item.getAttribute('data-res-view') : 1;
             const carouselRewind = item.getAttribute('data-rewind') ? item.getAttribute('data-rewind') : false;
             const carouselbuttonsColor = item.getAttribute('data-buttons-color') ? item.getAttribute('data-buttons-color') : 'black';
             const carouselbuttonsBackgroundColor = item.getAttribute('data-buttons-background-color') ? item.getAttribute('data-buttons-background-color') : 'transparent';
@@ -103,15 +114,15 @@ window.addEventListener('load', function (event) {
                 gap: 20,
                 rewind: carouselRewind,
                 breakpoints: {
-                    430: {
-                        perView: carouselResView
-                    },
-                    600: {
-                        perView: carouselResView
-                    },
                     768: {
-                        perView: carouselResView
+                        perView: carouselMobileView
                     },
+                    1024: {
+                        perView: carouselTabletView
+                    },
+                    1440: {
+                        perView: carouselLaptopView
+                    }
                 }
             });
 
