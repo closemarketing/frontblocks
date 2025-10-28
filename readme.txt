@@ -97,8 +97,10 @@ WordPress installation and then activate the Plugin from Plugins page.
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+
 = 1.0.5 =
 *   Added: Show a preview of the product categories in Gutenberg editor.
+*   Fixed: Change bullets logic count up to 10 items.
 *   Added: New block for reading time of a post.
 *   Added: FrontBlocks PRO compatibility.
 *   Added: Carousel/Slider: Add item to view in laptop and mobile.

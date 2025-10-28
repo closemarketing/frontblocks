@@ -50,9 +50,9 @@ window.addEventListener('load', function (event) {
                 child.classList.add('glide__slide');
             }
 
-            // Don't show bullets on responsive and more than 6 items.
+            // Don't show bullets on responsive and more than 10 items.
             let showBullets = false;
-            if (window.screen.availWidth < 768 && item.children.length < 6) {
+            if (window.screen.availWidth < 768 && item.children.length <= 10) {
                 showBullets = true;
             } else if (window.screen.availWidth > 768) {
                 showBullets = true;
