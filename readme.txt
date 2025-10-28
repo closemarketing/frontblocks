@@ -4,8 +4,8 @@ Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 6.8
-Stable tag: 1.0.4
-Version: 1.0.4
+Stable tag: 1.1.0
+Version: 1.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -98,7 +98,7 @@ WordPress installation and then activate the Plugin from Plugins page.
 
 == Changelog ==
 
-= 1.0.5 =
+= 1.1.0 =
 *   Added: FrontBlocks PRO compatibility.
 *   Added: Show a preview of the product categories in Gutenberg editor.
 *   Fixed: Change bullets logic count up to 10 items.
