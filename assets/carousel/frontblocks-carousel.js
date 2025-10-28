@@ -3,6 +3,15 @@ window.addEventListener('load', function (event) {
 
     if (carouselItem.length > 0) {
         carouselItem.forEach((item) => {
+            // Check if carousel should be disabled on desktop.
+            const disableOnDesktop = item.getAttribute('data-disable-on-desktop') === 'true';
+            const isDesktop = window.innerWidth >= 768;
+
+            // Skip initialization if disabled on desktop and current viewport is desktop.
+            if (disableOnDesktop && isDesktop) {
+                return;
+            }
+
             // First Parent.
             const parent = item.parentNode;
             const wrapper = document.createElement('div');

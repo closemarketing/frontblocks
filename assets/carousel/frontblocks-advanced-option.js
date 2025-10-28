@@ -45,8 +45,10 @@ function addCustomCarouselPanel(BlockEdit) {
       frblRewind = _props$attributes$frb8 === void 0 ? true : _props$attributes$frb8,
       frblButtonColor = _props$attributes.frblButtonColor,
       frblButtonBgColor = _props$attributes.frblButtonBgColor,
-      _props$attributes$frb9 = _props$attributes.frblButtonsPosition,
-      frblButtonsPosition = _props$attributes$frb9 === void 0 ? 'side' : _props$attributes$frb9;
+      _props$attributes$frb7 = _props$attributes.frblButtonsPosition,
+      frblButtonsPosition = _props$attributes$frb7 === void 0 ? 'side' : _props$attributes$frb7,
+      _props$attributes$frb8 = _props$attributes.frblDisableOnDesktop,
+      frblDisableOnDesktop = _props$attributes$frb8 === void 0 ? false : _props$attributes$frb8;
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
       title: __('Carousel Settings', 'frontblocks'),
       initialOpen: true
@@ -173,6 +175,15 @@ function addCustomCarouselPanel(BlockEdit) {
         },
         label: __('Color background button', 'frontblocks')
       }]
+    }), /*#__PURE__*/React.createElement(ToggleControl, {
+      label: __('Disable on Desktop', 'frontblocks'),
+      checked: frblDisableOnDesktop,
+      onChange: function onChange(value) {
+        return props.setAttributes({
+          frblDisableOnDesktop: value
+        });
+      },
+      help: __('If enabled, carousel/slider will only work on mobile devices.', 'frontblocks')
     })))));
   };
 }

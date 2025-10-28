@@ -79,6 +79,7 @@ class Carousel {
 		$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
 		$button_bg_color    = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
 		$buttons_position   = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
+		$disable_on_desktop = isset( $attrs['frblDisableOnDesktop'] ) ? (bool) $attrs['frblDisableOnDesktop'] : false;
 
 		// Add data attributes to the wrapper div if carousel is enabled.
 		if ( 'carousel' === $custom_option || 'slider' === $custom_option ) {
@@ -101,6 +102,7 @@ class Carousel {
 					' data-buttons-color="' . esc_attr( $button_color ) . '"' .
 					' data-buttons-background-color="' . esc_attr( $button_bg_color ) . '"' .
 					' data-buttons-position="' . esc_attr( $buttons_position ) . '"' .
+					' data-disable-on-desktop="' . esc_attr( $disable_on_desktop ? 'true' : 'false' ) . '"' .
 					$attributes .
 					'>',
 				$block_content,
@@ -141,6 +143,7 @@ class Carousel {
 		$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
 		$button_bg_color    = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
 		$buttons_position   = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
+		$disable_on_desktop = isset( $attrs['frblDisableOnDesktop'] ) ? (bool) $attrs['frblDisableOnDesktop'] : false;
 
 		// Add data attributes to the wrapper div if carousel is enabled.
 		if ( 'carousel' === $custom_option || 'slider' === $custom_option ) {
@@ -163,6 +166,7 @@ class Carousel {
 					' data-buttons-color="' . esc_attr( $button_color ) . '"' .
 					' data-buttons-background-color="' . esc_attr( $button_bg_color ) . '"' .
 					' data-buttons-position="' . esc_attr( $buttons_position ) . '"' .
+					' data-disable-on-desktop="' . esc_attr( $disable_on_desktop ? 'true' : 'false' ) . '"' .
 					$attributes .
 					'>',
 				$block_content,
@@ -250,6 +254,10 @@ class Carousel {
 			'type'    => 'string',
 			'default' => 'side',
 		);
+		$block_args['attributes']['frblDisableOnDesktop'] = array(
+			'type'    => 'boolean',
+			'default' => false,
+		);
 
 		return $block_args;
 	}
@@ -313,16 +321,20 @@ class Carousel {
 							type: 'string',
 							default: ''
 						},
-						frblRewind: {
-							type: 'boolean',
-							default: true
-						}
-					};
+					frblRewind: {
+						type: 'boolean',
+						default: true
+					},
+					frblDisableOnDesktop: {
+						type: 'boolean',
+						default: false
+					}
+				};
 
-					return settings;
-				}
-			);
-			"
+				return settings;
+			}
+		);
+		"
 		);
 	}
 }
