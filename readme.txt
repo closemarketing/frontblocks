@@ -98,11 +98,12 @@ WordPress installation and then activate the Plugin from Plugins page.
 
 == Changelog ==
 = 1.0.5 =
+*   Added: FrontBlocks PRO compatibility.
 *   Added: Show a preview of the product categories in Gutenberg editor.
 *   Added: New block for reading time of a post.
-*   Added: FrontBlocks PRO compatibility.
 *   Added: Carousel/Slider: Add item to view in laptop and mobile.
 *   Added: Carousel/Slider: Add option to deactivate Carousel/Slider in Desktop.
+*   Fixed: Mansonry effect upgraded in Gallery.
 *   Fixed: translations in block options.
 
 = 1.0.4 =
