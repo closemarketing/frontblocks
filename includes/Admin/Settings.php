@@ -94,7 +94,7 @@ class Settings {
 				__( 'WooCommerce Features', 'frontblocks' ),
 				function () {
 					echo '<p>' . esc_html__( 'WooCommerce FrontBlocks PRO is a premium plugin that adds more features to WooCommerce FrontBlocks. Customize your WooCommerce store with more features.', 'frontblocks' ) . '</p>';
-					echo '<p><a href="https://close.technology/wordpress-plugins/frontblocks-pro/?ref=WordPressPlugin" target="_blank" class="button button-secondary">' . esc_html__( 'Buy WooCommerce FrontBlocks PRO', 'frontblocks' ) . '</a></p>';
+					echo '<p><a href="https://close.technology/en/wordpress-plugins/frontblocks-pro/?ref=WordPressPlugin" target="_blank" class="button button-secondary">' . esc_html__( 'Buy WooCommerce FrontBlocks PRO', 'frontblocks' ) . '</a></p>';
 				},
 				$this->page_slug
 			);
