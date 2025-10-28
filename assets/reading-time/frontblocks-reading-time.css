@@ -1,0 +1,81 @@
+/**
+ * Reading Time Block Styles
+ *
+ * @package FrontBlocks
+ */
+
+.frbl-reading-time-wrapper {
+	display: block;
+	width: 100%;
+}
+
+.frbl-reading-time-wrapper.align-left {
+	text-align: left;
+}
+
+.frbl-reading-time-wrapper.align-center {
+	text-align: center;
+}
+
+.frbl-reading-time-wrapper.align-right {
+	text-align: right;
+}
+
+.frbl-reading-time {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: var(--frbl-padding, 10px);
+	background-color: var(--frbl-bg-color, transparent);
+	color: var(--frbl-text-color, inherit);
+	font-size: var(--frbl-font-size, 16px);
+	border-radius: var(--frbl-border-radius, 5px);
+	transition: all 0.3s ease;
+}
+
+.frbl-reading-time-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--frbl-icon-color, currentColor);
+	line-height: 1;
+	flex-shrink: 0;
+}
+
+.frbl-reading-time-icon svg {
+	width: 1em;
+	height: 1em;
+	display: block;
+}
+
+.frbl-reading-time-text {
+	line-height: 1.4;
+	font-weight: 400;
+	white-space: nowrap;
+}
+
+/* Editor specific styles */
+.editor-styles-wrapper .frbl-reading-time-wrapper {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+	.frbl-reading-time {
+		font-size: calc(var(--frbl-font-size, 16px) * 0.9);
+	}
+}
+
+/* Hover effects (optional) */
+.frbl-reading-time:hover {
+	opacity: 0.85;
+}
+
+/* Print styles */
+@media print {
+	.frbl-reading-time {
+		page-break-inside: avoid;
+	}
+}
+

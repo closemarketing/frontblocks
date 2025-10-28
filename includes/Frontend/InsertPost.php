@@ -73,6 +73,12 @@ class InsertPost {
 			true
 		);
 
+		// Set script translations for JavaScript.
+		wp_set_script_translations(
+			'frontblocks-insert-post-option',
+			'frontblocks'
+		);
+
 		// Localize script with AJAX URL and nonce.
 		wp_localize_script(
 			'frontblocks-insert-post-option',
