@@ -86,7 +86,7 @@ class Gallery {
 		wp_enqueue_script(
 			'frontblocks-gallery-option',
 			FRBL_PLUGIN_URL . 'assets/gallery/frontblocks-gallery-option.js',
-			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-edit-post' ),
+			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-edit-post', 'wp-i18n', 'wp-block-editor', 'wp-compose' ),
 			FRBL_VERSION,
 			true
 		);
@@ -95,6 +95,14 @@ class Gallery {
 		wp_set_script_translations(
 			'frontblocks-gallery-option',
 			'frontblocks'
+		);
+
+		// Enqueue gallery styles in editor for live preview.
+		wp_enqueue_style(
+			'frontblocks-gallery',
+			FRBL_PLUGIN_URL . 'assets/gallery/frontblocks-gallery.css',
+			array(),
+			FRBL_VERSION
 		);
 	}
 

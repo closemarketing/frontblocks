@@ -1,11 +1,24 @@
-window.addEventListener('load', function() {
+// Initialize on DOM ready for faster loading.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFrontBlocksGallery);
+} else {
+    // DOM is already ready.
     initFrontBlocksGallery();
-});
+}
 
 function initFrontBlocksGallery() {
-    initMasonryGalleries();
-    initGridGalleries();
-    initLightbox();
+    // Wait for images to load before initializing layouts.
+    if (document.readyState === 'complete') {
+        initMasonryGalleries();
+        initGridGalleries();
+        initLightbox();
+    } else {
+        window.addEventListener('load', function() {
+            initMasonryGalleries();
+            initGridGalleries();
+            initLightbox();
+        });
+    }
 }
 
 function initMasonryGalleries() {
