@@ -32,52 +32,9 @@ class Carousel {
 	 * @return void
 	 */
 	private function init_hooks() {
-		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		add_filter( 'render_block_generateblocks/grid', array( $this, 'add_custom_attributes_to_grid_block' ), 10, 2 );
 		add_filter( 'render_block_generateblocks/element', array( $this, 'add_custom_attributes_to_element_block' ), 10, 2 );
 		add_action( 'init', array( $this, 'register_custom_attributes' ), 5 );
-	}
-
-	/**
-	 * Enqueue block editor assets.
-	 *
-	 * @return void
-	 */
-	public function enqueue_block_editor_assets() {
-		// Enqueue Glide CSS for editor.
-		wp_enqueue_style(
-			'frontblocks-carousel-editor',
-			FRBL_PLUGIN_URL . 'assets/carousel/frontblocks-carousel.css',
-			array(),
-			FRBL_VERSION
-		);
-
-		// Enqueue Glide library for editor.
-		wp_enqueue_script(
-			'frontblocks-glide',
-			FRBL_PLUGIN_URL . 'assets/carousel/glide.min.js',
-			array(),
-			FRBL_VERSION,
-			true
-		);
-
-		// Enqueue carousel editor initialization.
-		wp_enqueue_script(
-			'frontblocks-carousel-editor',
-			FRBL_PLUGIN_URL . 'assets/carousel/frontblocks-carousel-editor.js',
-			array( 'frontblocks-glide', 'wp-data', 'wp-blocks' ),
-			FRBL_VERSION,
-			true
-		);
-
-		// Enqueue advanced options panel.
-		wp_enqueue_script(
-			'frontblocks-advanced-option',
-			FRBL_PLUGIN_URL . 'assets/carousel/frontblocks-advanced-option.js',
-			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-edit-post' ),
-			FRBL_VERSION,
-			true
-		);
 	}
 
 	/**
