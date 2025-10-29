@@ -9,6 +9,9 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - Native Gallery
 - Sticky Columns
 - Insert Post
+- Counter Block
+- Reading Time Block
+- Product Categories Block
 
 
 ## Release
