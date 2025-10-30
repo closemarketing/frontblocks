@@ -39,15 +39,6 @@ class Plugin_Main {
 	}
 
 	/**
-	 * Check if FrontBlocks PRO is active.
-	 *
-	 * @return bool
-	 */
-	public static function is_pro_active() {
-		return defined( 'FRBLP_PRO_ACTIVE' ) && FRBLP_PRO_ACTIVE;
-	}
-
-	/**
 	 * Constructor.
 	 */
 	private function __construct() {
@@ -104,9 +95,6 @@ class Plugin_Main {
 
 		// Counter module (GenerateBlocks Headline counter effect).
 		new Frontend\Counter();
-
-		// Reading Time module.
-		new Frontend\ReadingTime();
 	}
 
 	/**
@@ -115,16 +103,18 @@ class Plugin_Main {
 	 * @return void
 	 */
 	public function enqueue_scripts() {
+		$dist_dir = WP_DEBUG ? 'carousel/' : 'dist/';
+
 		wp_enqueue_style(
 			'frontblocks-carousel',
-			FRBL_PLUGIN_URL . 'assets/carousel/frontblocks-carousel.css',
+			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'frontblocks-carousel.css',
 			array(),
 			FRBL_VERSION
 		);
 
 		wp_enqueue_script(
 			'frontblocks-carousel-custom',
-			FRBL_PLUGIN_URL . 'assets/carousel/frontblocks-carousel.js',
+			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . ( WP_DEBUG ? 'frontblocks-carousel.js' : 'frontblocks-carousel-min.js' ),
 			array( 'frontblocks-carousel' ),
 			FRBL_VERSION,
 			true
@@ -132,7 +122,7 @@ class Plugin_Main {
 
 		wp_enqueue_script(
 			'frontblocks-carousel',
-			FRBL_PLUGIN_URL . 'assets/carousel/glide.min.js',
+			FRBL_PLUGIN_URL . 'assets/dist/glide.min.js',
 			array(),
 			FRBL_VERSION,
 			true
