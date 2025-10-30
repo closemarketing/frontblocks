@@ -74,6 +74,13 @@ class Settings {
 	private $option_add_share_buttons = 'add_share_buttons';
 
 	/**
+	 * Option key for deactivate product tabs (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_deactivate_product_tabs = 'deactivate_product_tabs';
+
+	/**
 	 * Page slug.
 	 *
 	 * @var string
@@ -292,6 +299,14 @@ class Settings {
 			$this->option_add_share_buttons,
 			__( 'Add Share Buttons in Product Page', 'frontblocks' ),
 			array( $this, 'field_add_share_buttons' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
+		add_settings_field(
+			$this->option_deactivate_product_tabs,
+			__( 'Deactivate Product Tabs', 'frontblocks' ),
+			array( $this, 'field_deactivate_product_tabs' ),
 			$this->page_slug,
 			'frontblocks_section_woocommerce_features'
 		);
@@ -794,6 +809,49 @@ class Settings {
 	}
 
 	/**
+	 * Render Deactivate Product Tabs field.
+	 *
+	 * @return void
+	 */
+	public function field_deactivate_product_tabs() {
+		$options     = get_option( 'frontblocks_settings', array() );
+		$enabled     = (bool) ( $options[ $this->option_deactivate_product_tabs ] ?? false );
+		$is_pro      = frbl_is_pro_active();
+		$disabled    = ! $is_pro ? 'disabled' : '';
+		$opacity_cls = ! $is_pro ? 'tw-opacity-50' : '';
+		?>
+		<div class="tw-flex tw-items-center tw-justify-between <?php echo esc_attr( $opacity_cls ); ?>">
+			<div class="tw-flex-grow tw-pr-4">
+				<div class="tw-flex tw-items-center tw-gap-2">
+					<p class="tw-text-sm tw-text-gray-500">
+						<?php echo esc_html__( 'Remove all product tabs (Description, Additional Information, Reviews) from single product pages.', 'frontblocks' ); ?>
+					</p>
+					<?php if ( ! $is_pro ) : ?>
+						<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-badge" 
+							target="_blank" 
+							rel="noopener noreferrer"
+							class="tw-inline-flex tw-items-center tw-px-3 tw-py-1 tw-ml-2 tw-rounded tw-text-xs tw-font-semibold tw-bg-primary-100 tw-text-primary-700 hover:tw-bg-primary-200 tw-transition-colors tw-no-underline"
+							title="<?php echo esc_attr__( 'Upgrade to FrontBlocks PRO', 'frontblocks' ); ?>">
+							PRO
+						</a>
+					<?php endif; ?>
+				</div>
+			</div>
+			<label class="frbl-toggle">
+				<input type="checkbox" 
+					id="<?php echo esc_attr( $this->option_deactivate_product_tabs ); ?>" 
+					name="frontblocks_settings[<?php echo esc_attr( $this->option_deactivate_product_tabs ); ?>]" 
+					value="1" 
+					<?php checked( true, $enabled ); ?>
+					<?php echo esc_attr( $disabled ); ?>
+				/>
+				<span></span>
+			</label>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Sanitize settings array.
 	 *
 	 * @param array $value Raw value.
@@ -806,7 +864,7 @@ class Settings {
 
 		$sanitized = array();
 		foreach ( $value as $key => $val ) {
-			if ( $this->option_enable_testimonials === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key ) {
+			if ( $this->option_enable_testimonials === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key ) {
 				$sanitized[ $key ] = (bool) $val;
 			} else {
 				$sanitized[ $key ] = sanitize_text_field( $val );
