@@ -1,0 +1,60 @@
+---
+description: FrontBlocks Naming Conventions
+globs:
+alwaysApply: true
+---
+
+# FrontBlocks Naming Conventions
+
+## Brand Name Capitalization
+
+Always write "FrontBlocks" with proper capitalization:
+- ✅ Correct: `FrontBlocks`
+- ❌ Incorrect: `frontblocks`, `Frontblocks`, `FRONTBLOCKS`, `front-blocks`
+
+### When to use proper capitalization:
+- In code comments and documentation
+- In user-facing messages and strings
+- In class names (when not following WordPress naming conventions)
+- In readme files and documentation
+- In variable names where appropriate
+
+### Exceptions:
+- File names and directory names: Use lowercase `frontblocks` (e.g., `frontblocks.php`)
+- Text domains: Use lowercase with hyphens `frontblocks`
+- Function prefixes: Follow WordPress conventions with lowercase `frontblocks_` or `fb_`
+- CSS classes: Use lowercase with hyphens `frontblocks-` prefix
+- Database table names and option names: Use lowercase
+
+### Examples:
+
+```php
+// Correct - Plugin header comment
+/**
+ * Plugin Name: FrontBlocks
+ * Description: Essential blocks for WordPress
+ */
+
+// Correct - User-facing messages
+__( 'FrontBlocks is active', 'frontblocks' );
+
+// Correct - Code comments
+// Initialize FrontBlocks features.
+
+// Correct - Class names (modern PHP)
+namespace FrontBlocks;
+
+// Correct - File names (WordPress conventions)
+// File: frontblocks.php
+
+// Correct - Function names (WordPress conventions)
+function frontblocks_init() {
+	// FrontBlocks initialization.
+}
+
+// Correct - Text domain
+load_plugin_textdomain( 'frontblocks' );
+```
+
+## Summary
+When referring to the brand or product name in human-readable contexts, always use **FrontBlocks** with capital F and B. For technical identifiers (files, functions, text domains), follow WordPress naming conventions with lowercase.
