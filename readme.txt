@@ -87,6 +87,7 @@ Features:
 - Enable Simple prices for variable products.
 - Block added after buttom.
 - Product description behavior.
+- Disable zoom in Product Image.
 
 More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-plugins/frontblocks-pro/?utm_source=WordPressORGReadme&utm_medium=link&utm_campaign=frontblocks) page.
 
