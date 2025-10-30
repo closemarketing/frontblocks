@@ -22,3 +22,6 @@ phpcs.xml.dist
 tests/
 .cursor/
 *.jsx
+docs/
+tailwind.config.js
+postcss.config.js

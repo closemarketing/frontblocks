@@ -4,10 +4,14 @@
     "@babel/core": "^7.27.4",
     "@babel/preset-env": "^7.27.2",
     "@babel/preset-react": "^7.27.1",
+    "autoprefixer": "^10.4.20",
     "gulp": "^5.0.0",
     "gulp-clean-css": "^4.3.0",
     "gulp-terser": "^2.1.0",
-    "merge-stream": "^2.0.0"
+    "merge-stream": "^2.0.0",
+    "postcss": "^8.4.49",
+    "postcss-cli": "^11.0.0",
+    "tailwindcss": "^3.4.15"
   },
   "babel": {
     "presets": [
@@ -39,7 +43,9 @@
     "build:post": "babel assets/insert-post/frontblocks-insert-post-option.jsx --out-file assets/insert-post/frontblocks-insert-post-option.js",
     "build:product-categories": "babel assets/product-categories/frontblocks-product-categories-option.jsx --out-file assets/product-categories/frontblocks-product-categories.js",
     "build:reading-time": "babel assets/reading-time/frontblocks-reading-time-option.jsx --out-file assets/reading-time/frontblocks-reading-time.js",
-    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:headline && npm run build:product-categories && npm run build:reading-time"
+    "build:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css",
+    "watch:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css --watch",
+    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:headline && npm run build:product-categories && npm run build:reading-time && npm run build:css"
   },
   "dependencies": {
     "react": "^19.1.0",

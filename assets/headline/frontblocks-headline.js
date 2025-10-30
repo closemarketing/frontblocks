@@ -45,14 +45,14 @@ var withHeadlineLineControl = createHigherOrderComponent(function (BlockEdit) {
       });
     };
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
-      title: __('Frontblocks - Visual Effects', 'frontblocks'),
+      title: __('FrontBlocks - Visual Effects', 'frontblocks'),
       initialOpen: false
     }, /*#__PURE__*/React.createElement("p", {
       style: {
         marginTop: 0,
         marginBottom: '10px'
       }
-    }, /*#__PURE__*/React.createElement("small", null, __('Frontblocks visual effect settings.', 'frontblocks'))), /*#__PURE__*/React.createElement(SelectControl, {
+    }, /*#__PURE__*/React.createElement("small", null, __('FrontBlocks visual effect settings.', 'frontblocks'))), /*#__PURE__*/React.createElement(SelectControl, {
       label: __('Decorative Line Style', 'frontblocks'),
       value: currentLineStyle,
       options: [{
