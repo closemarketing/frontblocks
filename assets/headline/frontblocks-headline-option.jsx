@@ -54,11 +54,11 @@ const withHeadlineLineControl = createHigherOrderComponent( ( BlockEdit ) => {
 
             <InspectorControls>
                <PanelBody 
-                  title={ __( 'Frontblocks - Visual Effects', 'frontblocks' ) }
+                  title={ __( 'FrontBlocks - Visual Effects', 'frontblocks' ) }
                   initialOpen={ false }
                >
                   <p style={{ marginTop: 0, marginBottom: '10px' }}>
-                     <small>{ __( 'Frontblocks visual effect settings.', 'frontblocks' ) }</small>
+                     <small>{ __( 'FrontBlocks visual effect settings.', 'frontblocks' ) }</small>
                   </p>
                      
                   <SelectControl

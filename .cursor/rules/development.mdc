@@ -20,6 +20,7 @@ Format code
 - PHP inline comments must start with capital letter and end with period character.
 - PHP inline comments should be concise.
 - Don't comment every line, just a group of lines of code.
+- Move all documentation to /docs.
 
 PHP/WordPress
 - Use PHP 7.4+ features when appropriate (e.g., typed properties, arrow functions).
@@ -43,6 +44,9 @@ WordPress Best Practices
 - Implement proper theme functions using functions.php.
 - Use WordPress's built-in user roles and capabilities system.
 - Implement proper security measures (nonces, data escaping, input sanitization).
+
+Plugin
+- When you create a new feature update in readme.txt `== n.e.x.t ==` and add feature in readme.md. Link all documentation from /docs to readme.md.
 
 Key Conventions
 1. Follow WordPress's plugin API for extending functionality.

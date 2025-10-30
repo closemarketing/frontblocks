@@ -69,7 +69,7 @@ const withHeadlineCounterControl = createHigherOrderComponent( ( BlockEdit ) => 
 
                 <InspectorControls>
                     <PanelBody 
-                        title={ __( 'Frontblocks - Counter Effect', 'frontblocks' ) }
+                        title={ __( 'FrontBlocks - Counter Effect', 'frontblocks' ) }
                         initialOpen={ false }
                     >
                         <ToggleControl

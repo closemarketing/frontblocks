@@ -1,0 +1,186 @@
+/**
+ * FrontBlocks Admin Settings Styles
+ *
+ * @package    FrontBlocks
+ * @author     Closemarketing
+ * @copyright  2025 Closemarketing
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom WordPress Admin overrides */
+.frbl-settings-wrapper {
+	margin-left: -20px;
+	margin-top: -10px;
+	padding-top: 40px;
+}
+
+.frbl-settings-wrapper * {
+	box-sizing: border-box;
+}
+
+/* Custom toggle switch component */
+.frbl-toggle {
+	position: relative;
+	display: inline-flex;
+	height: 1.75rem;
+	width: 3.25rem;
+	flex-shrink: 0;
+	cursor: pointer;
+	border-radius: 9999px;
+	border: 2px solid transparent;
+	transition-property: color, background-color, border-color;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	transition-duration: 200ms;
+	background-color: #d1d5db;
+}
+
+.frbl-toggle:hover {
+	background-color: #9ca3af;
+}
+
+.frbl-toggle:focus-within {
+	outline: 2px solid transparent;
+	outline-offset: 2px;
+	box-shadow: 0 0 0 3px rgba(104, 125, 249, 0.3);
+}
+
+.frbl-toggle input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border-width: 0;
+}
+
+/* Toggle background when checked */
+.frbl-toggle:has(input:checked) {
+	background-color: #687df9;
+}
+
+.frbl-toggle:has(input:checked):hover {
+	background-color: #5565ed;
+}
+
+/* Toggle dot/knob - always white */
+.frbl-toggle span {
+	pointer-events: none;
+	display: inline-block;
+	height: 1.25rem;
+	width: 1.25rem;
+	border-radius: 9999px;
+	background-color: #ffffff;
+	box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+	transform: translateX(0.125rem);
+	transition-property: transform;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	transition-duration: 200ms;
+	position: relative;
+	top: 0.125rem;
+}
+
+/* Move the knob when checked - keep it white */
+.frbl-toggle input:checked + span {
+	transform: translateX(1.5rem);
+	background-color: #ffffff;
+}
+
+/* Disabled state */
+.frbl-toggle:has(input:disabled) {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.frbl-toggle:has(input:disabled):hover {
+	background-color: #d1d5db;
+}
+
+/* Custom checkbox styling */
+.frbl-checkbox {
+	height: 1.25rem;
+	width: 1.25rem;
+	border-radius: 0.25rem;
+	border-color: #d1d5db;
+	color: #687df9;
+	transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	transition-duration: 150ms;
+	cursor: pointer;
+}
+
+.frbl-checkbox:focus {
+	outline: 2px solid transparent;
+	outline-offset: 2px;
+	box-shadow: 0 0 0 3px rgba(104, 125, 249, 0.3);
+}
+
+/* Success message styling */
+.frbl-notice-success {
+	border-radius: 0.5rem;
+	background-color: #f0fdf4;
+	border-left-width: 4px;
+	border-color: #4ade80;
+	padding: 1rem;
+	margin-bottom: 1.5rem;
+}
+
+.frbl-notice-success p {
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	color: #15803d;
+}
+
+/* Info badge */
+.frbl-info-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.125rem 0.625rem;
+	border-radius: 9999px;
+	font-size: 0.75rem;
+	line-height: 1rem;
+	font-weight: 500;
+	background-color: #f3f4f6;
+	color: #1f2937;
+}
+
+/* Card hover effect */
+.frbl-card:hover {
+	box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+	transition-property: box-shadow;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	transition-duration: 200ms;
+}
+
+/* Smooth animations */
+@keyframes slideIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.frbl-animate-slide-in {
+	animation: slideIn 0.3s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+	.frbl-settings-wrapper {
+		margin-left: 0;
+	}
+	
+	.frbl-settings-wrapper .tw-flex.tw-items-center.tw-justify-between {
+		@apply tw-flex-col tw-items-start tw-space-y-4;
+	}
+}
+

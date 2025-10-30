@@ -67,7 +67,7 @@ var withHeadlineCounterControl = createHigherOrderComponent(function (BlockEdit)
       }
     }, [isCounterActive, finalNumber, numberPrefix, numberSuffix, clientId]);
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
-      title: __('Frontblocks - Counter Effect', 'frontblocks'),
+      title: __('FrontBlocks - Counter Effect', 'frontblocks'),
       initialOpen: false
     }, /*#__PURE__*/React.createElement(ToggleControl, {
       label: __('Activate Counter Effect', 'frontblocks'),
