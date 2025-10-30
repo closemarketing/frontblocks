@@ -46,6 +46,20 @@ class Settings {
 	private $option_enable_after_add_to_cart = 'enable_after_add_to_cart';
 
 	/**
+	 * Option key for deactivate short description (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_deactivate_short_description = 'deactivate_short_description';
+
+	/**
+	 * Option key for move content to short description (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_move_content_to_short_description = 'move_content_to_short_description';
+
+	/**
 	 * Page slug.
 	 *
 	 * @var string
@@ -78,6 +92,80 @@ class Settings {
 			FRBL_PLUGIN_URL . 'assets/admin/settings.css',
 			array(),
 			FRBL_VERSION
+		);
+
+		// Enqueue custom JS for mutual exclusion of description options.
+		wp_add_inline_script(
+			'jquery',
+			"
+			document.addEventListener('DOMContentLoaded', function() {
+				const deactivateCheckbox = document.getElementById('deactivate_short_description');
+				const moveContentCheckbox = document.getElementById('move_content_to_short_description');
+				
+				if (!deactivateCheckbox || !moveContentCheckbox) return;
+				
+				function updateMutualExclusion() {
+					const deactivateWrapper = deactivateCheckbox.closest('.tw-flex');
+					const moveContentWrapper = moveContentCheckbox.closest('.tw-flex');
+					
+					if (deactivateCheckbox.checked) {
+						moveContentCheckbox.disabled = true;
+						if (moveContentWrapper) {
+							moveContentWrapper.style.opacity = '0.5';
+							moveContentWrapper.style.filter = 'grayscale(100%)';
+							const toggle = moveContentWrapper.querySelector('.frbl-toggle');
+							if (toggle) {
+								toggle.style.borderColor = '#ef4444';
+								toggle.style.opacity = '0.7';
+							}
+						}
+					} else {
+						const isProActive = " . ( frbl_is_pro_active() ? 'true' : 'false' ) . ";
+						moveContentCheckbox.disabled = !isProActive;
+						if (moveContentWrapper) {
+							moveContentWrapper.style.opacity = isProActive ? '1' : '0.5';
+							moveContentWrapper.style.filter = '';
+							const toggle = moveContentWrapper.querySelector('.frbl-toggle');
+							if (toggle) {
+								toggle.style.borderColor = '';
+								toggle.style.opacity = '';
+							}
+						}
+					}
+					
+					if (moveContentCheckbox.checked) {
+						deactivateCheckbox.disabled = true;
+						if (deactivateWrapper) {
+							deactivateWrapper.style.opacity = '0.5';
+							deactivateWrapper.style.filter = 'grayscale(100%)';
+							const toggle = deactivateWrapper.querySelector('.frbl-toggle');
+							if (toggle) {
+								toggle.style.borderColor = '#ef4444';
+								toggle.style.opacity = '0.7';
+							}
+						}
+					} else {
+						const isProActive = " . ( frbl_is_pro_active() ? 'true' : 'false' ) . ";
+						deactivateCheckbox.disabled = !isProActive;
+						if (deactivateWrapper) {
+							deactivateWrapper.style.opacity = isProActive ? '1' : '0.5';
+							deactivateWrapper.style.filter = '';
+							const toggle = deactivateWrapper.querySelector('.frbl-toggle');
+							if (toggle) {
+								toggle.style.borderColor = '';
+								toggle.style.opacity = '';
+							}
+						}
+					}
+				}
+				
+				deactivateCheckbox.addEventListener('change', updateMutualExclusion);
+				moveContentCheckbox.addEventListener('change', updateMutualExclusion);
+				
+				// Initial state.
+				updateMutualExclusion();
+			});
+			"
 		);
 	}
 
@@ -158,6 +246,22 @@ class Settings {
 			$this->option_enable_after_add_to_cart,
 			__( 'Enable After Add to Cart Block', 'frontblocks' ),
 			array( $this, 'field_enable_after_add_to_cart' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
+		add_settings_field(
+			$this->option_deactivate_short_description,
+			__( 'Deactivate Short Description', 'frontblocks' ),
+			array( $this, 'field_deactivate_short_description' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
+		add_settings_field(
+			$this->option_move_content_to_short_description,
+			__( 'Move Content to Short Description', 'frontblocks' ),
+			array( $this, 'field_move_content_to_short_description' ),
 			$this->page_slug,
 			'frontblocks_section_woocommerce_features'
 		);
@@ -488,6 +592,92 @@ class Settings {
 	}
 
 	/**
+	 * Render Deactivate Short Description field.
+	 *
+	 * @return void
+	 */
+	public function field_deactivate_short_description() {
+		$options     = get_option( 'frontblocks_settings', array() );
+		$enabled     = (bool) ( $options[ $this->option_deactivate_short_description ] ?? false );
+		$is_pro      = frbl_is_pro_active();
+		$disabled    = ! $is_pro ? 'disabled' : '';
+		$opacity_cls = ! $is_pro ? 'tw-opacity-50' : '';
+		?>
+		<div class="tw-flex tw-items-center tw-justify-between <?php echo esc_attr( $opacity_cls ); ?>">
+			<div class="tw-flex-grow tw-pr-4">
+				<div class="tw-flex tw-items-center tw-gap-2">
+					<p class="tw-text-sm tw-text-gray-500">
+						<?php echo esc_html__( 'Remove the short description from product pages.', 'frontblocks' ); ?>
+					</p>
+					<?php if ( ! $is_pro ) : ?>
+						<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-badge" 
+							target="_blank" 
+							rel="noopener noreferrer"
+							class="tw-inline-flex tw-items-center tw-px-3 tw-py-1 tw-ml-2 tw-rounded tw-text-xs tw-font-semibold tw-bg-primary-100 tw-text-primary-700 hover:tw-bg-primary-200 tw-transition-colors tw-no-underline"
+							title="<?php echo esc_attr__( 'Upgrade to FrontBlocks PRO', 'frontblocks' ); ?>">
+							PRO
+						</a>
+					<?php endif; ?>
+				</div>
+			</div>
+			<label class="frbl-toggle">
+				<input type="checkbox" 
+					id="<?php echo esc_attr( $this->option_deactivate_short_description ); ?>" 
+					name="frontblocks_settings[<?php echo esc_attr( $this->option_deactivate_short_description ); ?>]" 
+					value="1" 
+					<?php checked( true, $enabled ); ?>
+					<?php echo esc_attr( $disabled ); ?>
+				/>
+				<span></span>
+			</label>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render Move Content to Short Description field.
+	 *
+	 * @return void
+	 */
+	public function field_move_content_to_short_description() {
+		$options     = get_option( 'frontblocks_settings', array() );
+		$enabled     = (bool) ( $options[ $this->option_move_content_to_short_description ] ?? false );
+		$is_pro      = frbl_is_pro_active();
+		$disabled    = ! $is_pro ? 'disabled' : '';
+		$opacity_cls = ! $is_pro ? 'tw-opacity-50' : '';
+		?>
+		<div class="tw-flex tw-items-center tw-justify-between <?php echo esc_attr( $opacity_cls ); ?>">
+			<div class="tw-flex-grow tw-pr-4">
+				<div class="tw-flex tw-items-center tw-gap-2">
+					<p class="tw-text-sm tw-text-gray-500">
+						<?php echo esc_html__( 'Display the main product content in place of the short description and remove the description tab.', 'frontblocks' ); ?>
+					</p>
+					<?php if ( ! $is_pro ) : ?>
+						<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-badge" 
+							target="_blank" 
+							rel="noopener noreferrer"
+							class="tw-inline-flex tw-items-center tw-px-3 tw-py-1 tw-ml-2 tw-rounded tw-text-xs tw-font-semibold tw-bg-primary-100 tw-text-primary-700 hover:tw-bg-primary-200 tw-transition-colors tw-no-underline"
+							title="<?php echo esc_attr__( 'Upgrade to FrontBlocks PRO', 'frontblocks' ); ?>">
+							PRO
+						</a>
+					<?php endif; ?>
+				</div>
+			</div>
+			<label class="frbl-toggle">
+				<input type="checkbox" 
+					id="<?php echo esc_attr( $this->option_move_content_to_short_description ); ?>" 
+					name="frontblocks_settings[<?php echo esc_attr( $this->option_move_content_to_short_description ); ?>]" 
+					value="1" 
+					<?php checked( true, $enabled ); ?>
+					<?php echo esc_attr( $disabled ); ?>
+				/>
+				<span></span>
+			</label>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Sanitize settings array.
 	 *
 	 * @param array $value Raw value.
@@ -500,10 +690,26 @@ class Settings {
 
 		$sanitized = array();
 		foreach ( $value as $key => $val ) {
-			if ( $this->option_enable_testimonials === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key ) {
+			if ( $this->option_enable_testimonials === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key ) {
 				$sanitized[ $key ] = (bool) $val;
 			} else {
 				$sanitized[ $key ] = sanitize_text_field( $val );
+			}
+		}
+
+		// Ensure mutual exclusion: if both description options are enabled, keep only the last one changed.
+		if ( ! empty( $sanitized[ $this->option_deactivate_short_description ] ) && ! empty( $sanitized[ $this->option_move_content_to_short_description ] ) ) {
+			// Get current saved values to determine which one was just changed.
+			$current_options    = get_option( 'frontblocks_settings', array() );
+			$current_deactivate = ! empty( $current_options[ $this->option_deactivate_short_description ] );
+			$current_move       = ! empty( $current_options[ $this->option_move_content_to_short_description ] );
+
+			// If deactivate was already on, turn it off (move is the new one).
+			if ( $current_deactivate ) {
+				$sanitized[ $this->option_deactivate_short_description ] = false;
+			} else {
+				// Otherwise turn off move (deactivate is the new one).
+				$sanitized[ $this->option_move_content_to_short_description ] = false;
 			}
 		}
 
