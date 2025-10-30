@@ -82,10 +82,10 @@ Included features for WooCommerce FrontBlocks PRO.
 **FrontBlocks PRO:**
 FrontBlocks PRO is a premium plugin that extends the functionality of FrontBlocks. It includes additional features and improvements over the free version.
 
-More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-plugins/frontblocks-pro/?ref=WordPressPlugin) page.
+Features:
+- Enable Gutenberg in product editor.
 
-Others Plugins:
-- [Closemarketing Plugins](https://profiles.wordpress.org/closemarketing/#content-plugins)
+More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-plugins/frontblocks-pro/?utm_source=WordPressORGReadme&utm_medium=link&utm_campaign=frontblocks) page.
 
 == Installation ==
 
