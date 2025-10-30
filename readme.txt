@@ -98,6 +98,9 @@ WordPress installation and then activate the Plugin from Plugins page.
 
 == Changelog ==
 
+== n.e.x.t ==
+*   Improved: Settings page.
+
 = 1.1.0 =
 *   Added: FrontBlocks PRO compatibility.
 *   Added: Show a preview of the product categories in Gutenberg editor.

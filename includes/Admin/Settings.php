@@ -25,6 +25,13 @@ class Settings {
 	private $option_enable_testimonials = 'enable_testimonials';
 
 	/**
+	 * Option key for Gutenberg in products (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_enable_gutenberg = 'enable_gutenberg';
+
+	/**
 	 * Page slug.
 	 *
 	 * @var string
@@ -109,17 +116,21 @@ class Settings {
 			'frontblocks_section_features'
 		);
 
-		if ( ! frbl_is_pro_active() ) {
-			add_settings_section(
-				'frontblocks_section_woocommerce_features',
-				__( 'WooCommerce Features', 'frontblocks' ),
-				function () {
-					echo '<p>' . esc_html__( 'WooCommerce FrontBlocks PRO is a premium plugin that adds more features to WooCommerce FrontBlocks. Customize your WooCommerce store with more features.', 'frontblocks' ) . '</p>';
-					echo '<p><a href="https://close.technology/en/wordpress-plugins/frontblocks-pro/?ref=WordPressPlugin" target="_blank" class="button button-secondary">' . esc_html__( 'Buy WooCommerce FrontBlocks PRO', 'frontblocks' ) . '</a></p>';
-				},
-				$this->page_slug
-			);
-		}
+		// PRO Features section.
+		add_settings_section(
+			'frontblocks_section_woocommerce_features',
+			__( 'PRO Features', 'frontblocks' ),
+			array( $this, 'section_pro_features_callback' ),
+			$this->page_slug
+		);
+
+		add_settings_field(
+			$this->option_enable_gutenberg,
+			__( 'Enable Gutenberg in Products', 'frontblocks' ),
+			array( $this, 'field_enable_gutenberg' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
 
 		do_action( 'frontblocks_register_settings' );
 	}
@@ -262,6 +273,34 @@ class Settings {
 	}
 
 	/**
+	 * PRO Features section description.
+	 *
+	 * @return void
+	 */
+	public function section_pro_features_callback() {
+		if ( ! frbl_is_pro_active() ) {
+			echo '<div class="tw-bg-blue-50 tw-border-l-4 tw-border-blue-400 tw-p-4 tw-mb-4">';
+			echo '<div class="tw-flex">';
+			echo '<div class="tw-flex-shrink-0">';
+			echo '<svg class="tw-h-5 tw-w-5 tw-text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>';
+			echo '</div>';
+			echo '<div class="tw-ml-3">';
+			echo '<p class="tw-text-sm tw-text-blue-700">';
+			printf(
+				/* translators: %s: FrontBlocks PRO link */
+				esc_html__( 'These features require %s. Upgrade to unlock advanced functionality.', 'frontblocks' ),
+				'<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings" target="_blank" class="tw-font-medium tw-underline">FrontBlocks PRO</a>'
+			);
+			echo '</p>';
+			echo '</div>';
+			echo '</div>';
+			echo '</div>';
+		} else {
+			echo '<p>' . esc_html__( 'Advanced features for WooCommerce and more.', 'frontblocks' ) . '</p>';
+		}
+	}
+
+	/**
 	 * Render toggle field for enable testimonials.
 	 *
 	 * @return void
@@ -290,6 +329,49 @@ class Settings {
 	}
 
 	/**
+	 * Render toggle field for enable Gutenberg in products (PRO).
+	 *
+	 * @return void
+	 */
+	public function field_enable_gutenberg() {
+		$options     = get_option( 'frontblocks_settings', array() );
+		$enabled     = (bool) ( $options[ $this->option_enable_gutenberg ] ?? false );
+		$is_pro      = frbl_is_pro_active();
+		$disabled    = ! $is_pro ? 'disabled' : '';
+		$opacity_cls = ! $is_pro ? 'tw-opacity-50' : '';
+		?>
+		<div class="tw-flex tw-items-center tw-justify-between <?php echo esc_attr( $opacity_cls ); ?>">
+			<div class="tw-flex-grow tw-pr-4">
+				<div class="tw-flex tw-items-center tw-gap-2">
+					<p class="tw-text-sm tw-text-gray-500">
+						<?php echo esc_html__( 'Use the Gutenberg block editor for WooCommerce products.', 'frontblocks' ); ?>
+					</p>
+					<?php if ( ! $is_pro ) : ?>
+						<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-badge" 
+							target="_blank" 
+							rel="noopener noreferrer"
+							class="tw-inline-flex tw-items-center tw-px-3 tw-py-1 tw-ml-2 tw-rounded tw-text-xs tw-font-semibold tw-bg-primary-100 tw-text-primary-700 hover:tw-bg-primary-200 tw-transition-colors tw-no-underline"
+							title="<?php echo esc_attr__( 'Upgrade to FrontBlocks PRO', 'frontblocks' ); ?>">
+							PRO
+						</a>
+					<?php endif; ?>
+				</div>
+			</div>
+			<label class="frbl-toggle">
+				<input type="checkbox" 
+					id="<?php echo esc_attr( $this->option_enable_gutenberg ); ?>" 
+					name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_gutenberg ); ?>]" 
+					value="1" 
+					<?php checked( true, $enabled ); ?>
+					<?php echo esc_attr( $disabled ); ?>
+				/>
+				<span></span>
+			</label>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Sanitize settings array.
 	 *
 	 * @param array $value Raw value.
@@ -302,7 +384,7 @@ class Settings {
 
 		$sanitized = array();
 		foreach ( $value as $key => $val ) {
-			if ( $this->option_enable_testimonials === $key ) {
+			if ( $this->option_enable_testimonials === $key || $this->option_enable_gutenberg === $key ) {
 				$sanitized[ $key ] = (bool) $val;
 			} else {
 				$sanitized[ $key ] = sanitize_text_field( $val );
