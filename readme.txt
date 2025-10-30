@@ -85,6 +85,7 @@ FrontBlocks PRO is a premium plugin that extends the functionality of FrontBlock
 Features:
 - Enable Gutenberg in product editor.
 - Enable Simple prices for variable products.
+- Block added after buttom.
 
 More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-plugins/frontblocks-pro/?utm_source=WordPressORGReadme&utm_medium=link&utm_campaign=frontblocks) page.
 

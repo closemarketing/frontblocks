@@ -48,3 +48,17 @@ FrontBlocks\Plugin_Main::get_instance();
 function frbl_is_pro_active() {
 	return defined( 'FRBLP_PRO_ACTIVE' ) && FRBLP_PRO_ACTIVE;
 }
+
+/**
+ * Check if After Add to Cart Block is enabled.
+ *
+ * @return bool True if enabled.
+ */
+function frbl_is_after_add_to_cart_enabled() {
+	if ( ! frbl_is_pro_active() ) {
+		return false;
+	}
+
+	$options = get_option( 'frontblocks_settings', array() );
+	return (bool) ( $options['enable_after_add_to_cart'] ?? false );
+}
