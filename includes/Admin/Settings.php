@@ -46,8 +46,8 @@ class Settings {
 	 */
 	public function register_menu() {
 		add_theme_page(
-			__( 'Frontblocks Settings', 'frontblocks' ),
-			__( 'Frontblocks', 'frontblocks' ),
+			__( 'FrontBlocks Settings', 'frontblocks' ),
+			__( 'FrontBlocks', 'frontblocks' ),
 			'edit_theme_options',
 			$this->page_slug,
 			array( $this, 'render_page' )
@@ -75,7 +75,7 @@ class Settings {
 			'frontblocks_section_features',
 			__( 'Features', 'frontblocks' ),
 			function () {
-				echo '<p>' . esc_html__( 'Enable or disable Frontblocks features.', 'frontblocks' ) . '</p>';
+				echo '<p>' . esc_html__( 'Enable or disable FrontBlocks features.', 'frontblocks' ) . '</p>';
 			},
 			$this->page_slug
 		);
@@ -114,7 +114,7 @@ class Settings {
 		}
 		?>
 		<div class="wrap">
-			<h1><?php echo esc_html__( 'Frontblocks Settings', 'frontblocks' ); ?></h1>
+			<h1><?php echo esc_html__( 'FrontBlocks Settings', 'frontblocks' ); ?></h1>
 
 			<form method="post" action="options.php" style="margin-top:20px;">
 				<?php
