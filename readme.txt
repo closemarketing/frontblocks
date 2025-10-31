@@ -87,6 +87,7 @@ Extract the ZIP file and simply copy its contents into the wp-content/plugins/ d
 
 == 1.2.0 ==
 *   Improved: Settings page.
+*   Added: Toggle to disable animations on mobile.
 *   PRO: Deactivate Product Tabs setting.
 *   PRO: Share buttons.
 *   PRO: Zoom disable in Product Image.

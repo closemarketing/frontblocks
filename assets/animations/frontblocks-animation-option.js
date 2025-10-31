@@ -408,7 +408,9 @@ function addAnimationControls(BlockEdit) {
       _props$attributes$frb4 = _props$attributes.frblAnimationRepeat,
       frblAnimationRepeat = _props$attributes$frb4 === void 0 ? false : _props$attributes$frb4,
       _props$attributes$frb5 = _props$attributes.frblAnimationInfinite,
-      frblAnimationInfinite = _props$attributes$frb5 === void 0 ? false : _props$attributes$frb5;
+      frblAnimationInfinite = _props$attributes$frb5 === void 0 ? false : _props$attributes$frb5,
+      _props$attributes$frb6 = _props$attributes.frblDisableAnimationMobile,
+      frblDisableAnimationMobile = _props$attributes$frb6 === void 0 ? false : _props$attributes$frb6;
 
     // Create flattened options for the SelectControl
     var flattenedOptions = createFlattenedOptions();
@@ -578,6 +580,15 @@ function addAnimationControls(BlockEdit) {
           frblAnimationInfinite: value
         });
       }
+    }), /*#__PURE__*/React.createElement(ToggleControl, {
+      label: __('Disable on mobile', 'frontblocks'),
+      help: __('Disable animation on mobile devices', 'frontblocks'),
+      checked: frblDisableAnimationMobile,
+      onChange: function onChange(value) {
+        return props.setAttributes({
+          frblDisableAnimationMobile: value
+        });
+      }
     }), /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: '16px'
@@ -601,10 +612,18 @@ addFilter('blocks.getSaveContent.extraProps', 'frontblocks/apply-animations', fu
     frblAnimationDelay = attributes.frblAnimationDelay,
     frblAnimationDuration = attributes.frblAnimationDuration,
     frblAnimationRepeat = attributes.frblAnimationRepeat,
-    frblAnimationInfinite = attributes.frblAnimationInfinite;
+    frblAnimationInfinite = attributes.frblAnimationInfinite,
+    _attributes$frblDisab = attributes.frblDisableAnimationMobile,
+    frblDisableAnimationMobile = _attributes$frblDisab === void 0 ? false : _attributes$frblDisab;
   if (frblAnimation) {
     // Add animate.css base class and the specific animation
-    props.className = props.className ? "".concat(props.className, " animate__animated animate__").concat(frblAnimation) : "animate__animated animate__".concat(frblAnimation);
+    var animationClasses = "animate__animated animate__".concat(frblAnimation);
+
+    // Add class to disable animation on mobile if enabled
+    if (frblDisableAnimationMobile) {
+      animationClasses += ' frbl-no-mobile-animation';
+    }
+    props.className = props.className ? "".concat(props.className, " ").concat(animationClasses) : animationClasses;
 
     // Add style attribute if needed
     if (!props.style) {
