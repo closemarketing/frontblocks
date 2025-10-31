@@ -233,6 +233,7 @@ function addAnimationControls(BlockEdit) {
             frblAnimationDuration = 1,
             frblAnimationRepeat = false,
             frblAnimationInfinite = false,
+            frblDisableAnimationMobile = false,
         } = props.attributes;
         
         // Create flattened options for the SelectControl
@@ -400,6 +401,13 @@ function addAnimationControls(BlockEdit) {
                                     />
                                 )}
                                 
+                                <ToggleControl
+                                    label={__('Disable on mobile', 'frontblocks')}
+                                    help={__('Disable animation on mobile devices', 'frontblocks')}
+                                    checked={frblDisableAnimationMobile}
+                                    onChange={(value) => props.setAttributes({ frblDisableAnimationMobile: value })}
+                                />
+                                
                                 <div style={{ marginTop: '16px' }}>
                                     <Button
                                         isPrimary
@@ -435,14 +443,22 @@ addFilter(
             frblAnimationDelay,
             frblAnimationDuration,
             frblAnimationRepeat,
-            frblAnimationInfinite
+            frblAnimationInfinite,
+            frblDisableAnimationMobile = false,
         } = attributes;
 
         if (frblAnimation) {
             // Add animate.css base class and the specific animation
+            let animationClasses = `animate__animated animate__${frblAnimation}`;
+            
+            // Add class to disable animation on mobile if enabled
+            if (frblDisableAnimationMobile) {
+                animationClasses += ' frbl-no-mobile-animation';
+            }
+            
             props.className = props.className ? 
-                `${props.className} animate__animated animate__${frblAnimation}` : 
-                `animate__animated animate__${frblAnimation}`;
+                `${props.className} ${animationClasses}` : 
+                animationClasses;
             
             // Add style attribute if needed
             if (!props.style) {

@@ -103,8 +103,8 @@ WordPress installation and then activate the Plugin from Plugins page.
 
 == Changelog ==
 
-== n.e.x.t ==
-*   Improved: Settings page.
+= 1.1.1 =
+*   Added: Toggle to disable animations on mobile.
 
 = 1.1.0 =
 *   Added: FrontBlocks PRO compatibility.

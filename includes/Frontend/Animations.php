@@ -152,6 +152,10 @@ class Animations {
 							frblAnimationInfinite: {
 								type: 'boolean',
 								default: false
+							},
+							frblDisableAnimationMobile: {
+								type: 'boolean',
+								default: false
 							}
 						};
 					} catch( error ) {
@@ -194,6 +198,8 @@ class Animations {
 		$properties['repeat']          = $repeat;
 		$infinite_repeat               = isset( $attrs['frblAnimationInfinite'] ) ? $attrs['frblAnimationInfinite'] : false;
 		$properties['infinite_repeat'] = $infinite_repeat;
+		$disable_mobile                = isset( $attrs['frblDisableAnimationMobile'] ) ? $attrs['frblDisableAnimationMobile'] : false;
+		$properties['disable_mobile']  = $disable_mobile;
 
 		// Build style attributes.
 		$style_attr = '';
@@ -221,6 +227,10 @@ class Animations {
 				$ending         = $matches[4] ?? '';
 
 				$classes = 'animate__animated animate__' . esc_attr( $properties['animation'] );
+
+				if ( $properties['disable_mobile'] ) {
+					$classes .= ' frbl-no-mobile-animation';
+				}
 
 				// Add classes to existing class attribute or create new one.
 				if ( strpos( $beginning . $ending, 'class="' ) !== false ) {
