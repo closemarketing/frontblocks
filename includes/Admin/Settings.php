@@ -81,6 +81,20 @@ class Settings {
 	private $option_deactivate_product_tabs = 'deactivate_product_tabs';
 
 	/**
+	 * Option key for license key (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_license_key = 'license_key';
+
+	/**
+	 * Option key for product ID (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_product_id = 'product_id';
+
+	/**
 	 * Page slug.
 	 *
 	 * @var string
@@ -311,6 +325,24 @@ class Settings {
 			'frontblocks_section_woocommerce_features'
 		);
 
+		// License section (only if PRO is active).
+		if ( frbl_is_pro_active() ) {
+			add_settings_section(
+				'frontblocks_section_license',
+				__( 'License', 'frontblocks' ),
+				array( $this, 'section_license_callback' ),
+				$this->page_slug
+			);
+
+			add_settings_field(
+				$this->option_license_key,
+				__( 'License Information', 'frontblocks' ),
+				array( $this, 'field_license_key' ),
+				$this->page_slug,
+				'frontblocks_section_license'
+			);
+		}
+
 		do_action( 'frontblocks_register_settings' );
 	}
 
@@ -474,6 +506,23 @@ class Settings {
 			echo '</div>';
 			echo '</div>';
 			echo '</div>';
+		} elseif ( ! $this->is_license_valid() ) {
+			echo '<div class="tw-bg-yellow-50 tw-border-l-4 tw-border-yellow-400 tw-p-4 tw-mb-4">';
+			echo '<div class="tw-flex">';
+			echo '<div class="tw-flex-shrink-0">';
+			echo '<svg class="tw-h-5 tw-w-5 tw-text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>';
+			echo '</div>';
+			echo '<div class="tw-ml-3">';
+			echo '<p class="tw-text-sm tw-text-yellow-700">';
+			printf(
+				/* translators: %s: License section link */
+				esc_html__( 'License is not activated. Please activate your license in the %s section below to enable these features.', 'frontblocks' ),
+				'<a href="#frontblocks_section_license" class="tw-font-medium tw-underline">' . esc_html__( 'License', 'frontblocks' ) . '</a>'
+			);
+			echo '</p>';
+			echo '</div>';
+			echo '</div>';
+			echo '</div>';
 		} else {
 			echo '<p>' . esc_html__( 'Advanced features for WooCommerce and more.', 'frontblocks' ) . '</p>';
 		}
@@ -513,41 +562,10 @@ class Settings {
 	 * @return void
 	 */
 	public function field_enable_gutenberg() {
-		$options     = get_option( 'frontblocks_settings', array() );
-		$enabled     = (bool) ( $options[ $this->option_enable_gutenberg ] ?? false );
-		$is_pro      = frbl_is_pro_active();
-		$disabled    = ! $is_pro ? 'disabled' : '';
-		$opacity_cls = ! $is_pro ? 'tw-opacity-50' : '';
-		?>
-		<div class="tw-flex tw-items-center tw-justify-between <?php echo esc_attr( $opacity_cls ); ?>">
-			<div class="tw-flex-grow tw-pr-4">
-				<div class="tw-flex tw-items-center tw-gap-2">
-					<p class="tw-text-sm tw-text-gray-500">
-						<?php echo esc_html__( 'Use the Gutenberg block editor for WooCommerce products.', 'frontblocks' ); ?>
-					</p>
-					<?php if ( ! $is_pro ) : ?>
-						<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-badge" 
-							target="_blank" 
-							rel="noopener noreferrer"
-							class="tw-inline-flex tw-items-center tw-px-3 tw-py-1 tw-ml-2 tw-rounded tw-text-xs tw-font-semibold tw-bg-primary-100 tw-text-primary-700 hover:tw-bg-primary-200 tw-transition-colors tw-no-underline"
-							title="<?php echo esc_attr__( 'Upgrade to FrontBlocks PRO', 'frontblocks' ); ?>">
-							PRO
-						</a>
-					<?php endif; ?>
-				</div>
-			</div>
-			<label class="frbl-toggle">
-				<input type="checkbox" 
-					id="<?php echo esc_attr( $this->option_enable_gutenberg ); ?>" 
-					name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_gutenberg ); ?>]" 
-					value="1" 
-					<?php checked( true, $enabled ); ?>
-					<?php echo esc_attr( $disabled ); ?>
-				/>
-				<span></span>
-			</label>
-		</div>
-		<?php
+		$this->render_pro_toggle(
+			$this->option_enable_gutenberg,
+			__( 'Use the Gutenberg block editor for WooCommerce products.', 'frontblocks' )
+		);
 	}
 
 	/**
@@ -556,41 +574,10 @@ class Settings {
 	 * @return void
 	 */
 	public function field_enable_simple_prices_variable_products() {
-		$options     = get_option( 'frontblocks_settings', array() );
-		$enabled     = (bool) ( $options[ $this->option_enable_simple_prices_variable_products ] ?? false );
-		$is_pro      = frbl_is_pro_active();
-		$disabled    = ! $is_pro ? 'disabled' : '';
-		$opacity_cls = ! $is_pro ? 'tw-opacity-50' : '';
-		?>
-		<div class="tw-flex tw-items-center tw-justify-between <?php echo esc_attr( $opacity_cls ); ?>">
-			<div class="tw-flex-grow tw-pr-4">
-				<div class="tw-flex tw-items-center tw-gap-2">
-					<p class="tw-text-sm tw-text-gray-500">
-						<?php echo esc_html__( 'Replaces the price range with "From" + minimum price on variable products.', 'frontblocks' ); ?>
-					</p>
-					<?php if ( ! $is_pro ) : ?>
-						<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-badge" 
-							target="_blank" 
-							rel="noopener noreferrer"
-							class="tw-inline-flex tw-items-center tw-px-3 tw-py-1 tw-ml-2 tw-rounded tw-text-xs tw-font-semibold tw-bg-primary-100 tw-text-primary-700 hover:tw-bg-primary-200 tw-transition-colors tw-no-underline"
-							title="<?php echo esc_attr__( 'Upgrade to FrontBlocks PRO', 'frontblocks' ); ?>">
-							PRO
-						</a>
-					<?php endif; ?>
-				</div>
-			</div>
-			<label class="frbl-toggle">
-				<input type="checkbox" 
-					id="<?php echo esc_attr( $this->option_enable_simple_prices_variable_products ); ?>" 
-					name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_simple_prices_variable_products ); ?>]" 
-					value="1" 
-					<?php checked( true, $enabled ); ?>
-					<?php echo esc_attr( $disabled ); ?>
-				/>
-				<span></span>
-			</label>
-		</div>
-		<?php
+		$this->render_pro_toggle(
+			$this->option_enable_simple_prices_variable_products,
+			__( 'Replaces the price range with "From" + minimum price on variable products.', 'frontblocks' )
+		);
 	}
 
 	/**
@@ -599,41 +586,10 @@ class Settings {
 	 * @return void
 	 */
 	public function field_enable_after_add_to_cart() {
-		$options     = get_option( 'frontblocks_settings', array() );
-		$enabled     = (bool) ( $options[ $this->option_enable_after_add_to_cart ] ?? false );
-		$is_pro      = frbl_is_pro_active();
-		$disabled    = ! $is_pro ? 'disabled' : '';
-		$opacity_cls = ! $is_pro ? 'tw-opacity-50' : '';
-		?>
-		<div class="tw-flex tw-items-center tw-justify-between <?php echo esc_attr( $opacity_cls ); ?>">
-			<div class="tw-flex-grow tw-pr-4">
-				<div class="tw-flex tw-items-center tw-gap-2">
-					<p class="tw-text-sm tw-text-gray-500">
-						<?php echo esc_html__( 'Display custom content after the Add to Cart button on WooCommerce product pages.', 'frontblocks' ); ?>
-					</p>
-					<?php if ( ! $is_pro ) : ?>
-						<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-badge" 
-							target="_blank" 
-							rel="noopener noreferrer"
-							class="tw-inline-flex tw-items-center tw-px-3 tw-py-1 tw-ml-2 tw-rounded tw-text-xs tw-font-semibold tw-bg-primary-100 tw-text-primary-700 hover:tw-bg-primary-200 tw-transition-colors tw-no-underline"
-							title="<?php echo esc_attr__( 'Upgrade to FrontBlocks PRO', 'frontblocks' ); ?>">
-							PRO
-						</a>
-					<?php endif; ?>
-				</div>
-			</div>
-			<label class="frbl-toggle">
-				<input type="checkbox" 
-					id="<?php echo esc_attr( $this->option_enable_after_add_to_cart ); ?>" 
-					name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_after_add_to_cart ); ?>]" 
-					value="1" 
-					<?php checked( true, $enabled ); ?>
-					<?php echo esc_attr( $disabled ); ?>
-				/>
-				<span></span>
-			</label>
-		</div>
-		<?php
+		$this->render_pro_toggle(
+			$this->option_enable_after_add_to_cart,
+			__( 'Display custom content after the Add to Cart button on WooCommerce product pages.', 'frontblocks' )
+		);
 	}
 
 	/**
@@ -642,41 +598,10 @@ class Settings {
 	 * @return void
 	 */
 	public function field_deactivate_short_description() {
-		$options     = get_option( 'frontblocks_settings', array() );
-		$enabled     = (bool) ( $options[ $this->option_deactivate_short_description ] ?? false );
-		$is_pro      = frbl_is_pro_active();
-		$disabled    = ! $is_pro ? 'disabled' : '';
-		$opacity_cls = ! $is_pro ? 'tw-opacity-50' : '';
-		?>
-		<div class="tw-flex tw-items-center tw-justify-between <?php echo esc_attr( $opacity_cls ); ?>">
-			<div class="tw-flex-grow tw-pr-4">
-				<div class="tw-flex tw-items-center tw-gap-2">
-					<p class="tw-text-sm tw-text-gray-500">
-						<?php echo esc_html__( 'Remove the short description from product pages.', 'frontblocks' ); ?>
-					</p>
-					<?php if ( ! $is_pro ) : ?>
-						<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-badge" 
-							target="_blank" 
-							rel="noopener noreferrer"
-							class="tw-inline-flex tw-items-center tw-px-3 tw-py-1 tw-ml-2 tw-rounded tw-text-xs tw-font-semibold tw-bg-primary-100 tw-text-primary-700 hover:tw-bg-primary-200 tw-transition-colors tw-no-underline"
-							title="<?php echo esc_attr__( 'Upgrade to FrontBlocks PRO', 'frontblocks' ); ?>">
-							PRO
-						</a>
-					<?php endif; ?>
-				</div>
-			</div>
-			<label class="frbl-toggle">
-				<input type="checkbox" 
-					id="<?php echo esc_attr( $this->option_deactivate_short_description ); ?>" 
-					name="frontblocks_settings[<?php echo esc_attr( $this->option_deactivate_short_description ); ?>]" 
-					value="1" 
-					<?php checked( true, $enabled ); ?>
-					<?php echo esc_attr( $disabled ); ?>
-				/>
-				<span></span>
-			</label>
-		</div>
-		<?php
+		$this->render_pro_toggle(
+			$this->option_deactivate_short_description,
+			__( 'Remove the short description from product pages.', 'frontblocks' )
+		);
 	}
 
 	/**
@@ -685,41 +610,10 @@ class Settings {
 	 * @return void
 	 */
 	public function field_move_content_to_short_description() {
-		$options     = get_option( 'frontblocks_settings', array() );
-		$enabled     = (bool) ( $options[ $this->option_move_content_to_short_description ] ?? false );
-		$is_pro      = frbl_is_pro_active();
-		$disabled    = ! $is_pro ? 'disabled' : '';
-		$opacity_cls = ! $is_pro ? 'tw-opacity-50' : '';
-		?>
-		<div class="tw-flex tw-items-center tw-justify-between <?php echo esc_attr( $opacity_cls ); ?>">
-			<div class="tw-flex-grow tw-pr-4">
-				<div class="tw-flex tw-items-center tw-gap-2">
-					<p class="tw-text-sm tw-text-gray-500">
-						<?php echo esc_html__( 'Display the main product content in place of the short description and remove the description tab.', 'frontblocks' ); ?>
-					</p>
-					<?php if ( ! $is_pro ) : ?>
-						<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-badge" 
-							target="_blank" 
-							rel="noopener noreferrer"
-							class="tw-inline-flex tw-items-center tw-px-3 tw-py-1 tw-ml-2 tw-rounded tw-text-xs tw-font-semibold tw-bg-primary-100 tw-text-primary-700 hover:tw-bg-primary-200 tw-transition-colors tw-no-underline"
-							title="<?php echo esc_attr__( 'Upgrade to FrontBlocks PRO', 'frontblocks' ); ?>">
-							PRO
-						</a>
-					<?php endif; ?>
-				</div>
-			</div>
-			<label class="frbl-toggle">
-				<input type="checkbox" 
-					id="<?php echo esc_attr( $this->option_move_content_to_short_description ); ?>" 
-					name="frontblocks_settings[<?php echo esc_attr( $this->option_move_content_to_short_description ); ?>]" 
-					value="1" 
-					<?php checked( true, $enabled ); ?>
-					<?php echo esc_attr( $disabled ); ?>
-				/>
-				<span></span>
-			</label>
-		</div>
-		<?php
+		$this->render_pro_toggle(
+			$this->option_move_content_to_short_description,
+			__( 'Display the main product content in place of the short description and remove the description tab.', 'frontblocks' )
+		);
 	}
 
 	/**
@@ -728,41 +622,10 @@ class Settings {
 	 * @return void
 	 */
 	public function field_disable_zoom_images() {
-		$options     = get_option( 'frontblocks_settings', array() );
-		$enabled     = (bool) ( $options[ $this->option_disable_zoom_images ] ?? false );
-		$is_pro      = frbl_is_pro_active();
-		$disabled    = ! $is_pro ? 'disabled' : '';
-		$opacity_cls = ! $is_pro ? 'tw-opacity-50' : '';
-		?>
-		<div class="tw-flex tw-items-center tw-justify-between <?php echo esc_attr( $opacity_cls ); ?>">
-			<div class="tw-flex-grow tw-pr-4">
-				<div class="tw-flex tw-items-center tw-gap-2">
-					<p class="tw-text-sm tw-text-gray-500">
-						<?php echo esc_html__( 'Disable the zoom effect on WooCommerce product images.', 'frontblocks' ); ?>
-					</p>
-					<?php if ( ! $is_pro ) : ?>
-						<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-badge" 
-							target="_blank" 
-							rel="noopener noreferrer"
-							class="tw-inline-flex tw-items-center tw-px-3 tw-py-1 tw-ml-2 tw-rounded tw-text-xs tw-font-semibold tw-bg-primary-100 tw-text-primary-700 hover:tw-bg-primary-200 tw-transition-colors tw-no-underline"
-							title="<?php echo esc_attr__( 'Upgrade to FrontBlocks PRO', 'frontblocks' ); ?>">
-							PRO
-						</a>
-					<?php endif; ?>
-				</div>
-			</div>
-			<label class="frbl-toggle">
-				<input type="checkbox" 
-					id="<?php echo esc_attr( $this->option_disable_zoom_images ); ?>" 
-					name="frontblocks_settings[<?php echo esc_attr( $this->option_disable_zoom_images ); ?>]" 
-					value="1" 
-					<?php checked( true, $enabled ); ?>
-					<?php echo esc_attr( $disabled ); ?>
-				/>
-				<span></span>
-			</label>
-		</div>
-		<?php
+		$this->render_pro_toggle(
+			$this->option_disable_zoom_images,
+			__( 'Disable the zoom effect on WooCommerce product images.', 'frontblocks' )
+		);
 	}
 
 	/**
@@ -771,41 +634,10 @@ class Settings {
 	 * @return void
 	 */
 	public function field_add_share_buttons() {
-		$options     = get_option( 'frontblocks_settings', array() );
-		$enabled     = (bool) ( $options[ $this->option_add_share_buttons ] ?? false );
-		$is_pro      = frbl_is_pro_active();
-		$disabled    = ! $is_pro ? 'disabled' : '';
-		$opacity_cls = ! $is_pro ? 'tw-opacity-50' : '';
-		?>
-		<div class="tw-flex tw-items-center tw-justify-between <?php echo esc_attr( $opacity_cls ); ?>">
-			<div class="tw-flex-grow tw-pr-4">
-				<div class="tw-flex tw-items-center tw-gap-2">
-					<p class="tw-text-sm tw-text-gray-500">
-						<?php echo esc_html__( 'Add social share buttons (Facebook, Twitter, WhatsApp, Email) at the end of product meta section.', 'frontblocks' ); ?>
-					</p>
-					<?php if ( ! $is_pro ) : ?>
-						<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-badge" 
-							target="_blank" 
-							rel="noopener noreferrer"
-							class="tw-inline-flex tw-items-center tw-px-3 tw-py-1 tw-ml-2 tw-rounded tw-text-xs tw-font-semibold tw-bg-primary-100 tw-text-primary-700 hover:tw-bg-primary-200 tw-transition-colors tw-no-underline"
-							title="<?php echo esc_attr__( 'Upgrade to FrontBlocks PRO', 'frontblocks' ); ?>">
-							PRO
-						</a>
-					<?php endif; ?>
-				</div>
-			</div>
-			<label class="frbl-toggle">
-				<input type="checkbox" 
-					id="<?php echo esc_attr( $this->option_add_share_buttons ); ?>" 
-					name="frontblocks_settings[<?php echo esc_attr( $this->option_add_share_buttons ); ?>]" 
-					value="1" 
-					<?php checked( true, $enabled ); ?>
-					<?php echo esc_attr( $disabled ); ?>
-				/>
-				<span></span>
-			</label>
-		</div>
-		<?php
+		$this->render_pro_toggle(
+			$this->option_add_share_buttons,
+			__( 'Add social share buttons (Facebook, Twitter, WhatsApp, Email) at the end of product meta section.', 'frontblocks' )
+		);
 	}
 
 	/**
@@ -814,19 +646,214 @@ class Settings {
 	 * @return void
 	 */
 	public function field_deactivate_product_tabs() {
+		$this->render_pro_toggle(
+			$this->option_deactivate_product_tabs,
+			__( 'Remove all product tabs (Description, Additional Information, Reviews) from single product pages.', 'frontblocks' )
+		);
+	}
+
+	/**
+	 * License section description.
+	 *
+	 * @return void
+	 */
+	public function section_license_callback() {
+		echo '<p>' . esc_html__( 'Manage your FrontBlocks PRO license.', 'frontblocks' ) . '</p>';
+	}
+
+	/**
+	 * Render license key field.
+	 *
+	 * @return void
+	 */
+	public function field_license_key() {
+		$options      = get_option( 'frontblocks_settings', array() );
+		$license_key  = sanitize_text_field( $options[ $this->option_license_key ] ?? '' );
+		$product_id   = sanitize_text_field( $options[ $this->option_product_id ] ?? '' );
+		$license_data = $this->get_license_status( $license_key, $product_id );
+		?>
+		<div class="tw-space-y-4">
+			<!-- License Key Field -->
+			<div>
+				<input type="text" 
+					id="<?php echo esc_attr( $this->option_license_key ); ?>" 
+					name="frontblocks_settings[<?php echo esc_attr( $this->option_license_key ); ?>]" 
+					value="<?php echo esc_attr( $license_key ); ?>"
+					placeholder="<?php echo esc_attr__( 'Enter your license key', 'frontblocks' ); ?>"
+					class="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
+				/>
+			</div>
+
+			<!-- Product ID Field -->
+			<div>
+				<label for="<?php echo esc_attr( $this->option_product_id ); ?>" class="tw-block tw-text-sm tw-font-medium tw-text-gray-900 tw-mb-2">
+					<?php echo esc_html__( 'Product ID', 'frontblocks' ); ?>
+				</label>
+				<input type="text" 
+					id="<?php echo esc_attr( $this->option_product_id ); ?>" 
+					name="frontblocks_settings[<?php echo esc_attr( $this->option_product_id ); ?>]" 
+					value="<?php echo esc_attr( $product_id ); ?>"
+					placeholder="<?php echo esc_attr__( 'Enter your product ID', 'frontblocks' ); ?>"
+					class="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
+				/>
+				<p class="tw-mt-1 tw-text-xs tw-text-gray-500">
+					<?php echo esc_html__( 'You can find your product ID in your purchase confirmation email.', 'frontblocks' ); ?>
+				</p>
+			</div>
+
+			<!-- License Status Field (Read-only) -->
+			<div>
+				<label class="tw-block tw-text-sm tw-font-medium tw-text-gray-900 tw-mb-2">
+					<?php echo esc_html__( 'License Status', 'frontblocks' ); ?>
+				</label>
+				<?php
+				$status_text  = '';
+				$status_class = '';
+				$status_icon  = '';
+
+				switch ( $license_data['status'] ) {
+					case 'valid':
+						$status_text  = __( 'Active', 'frontblocks' );
+						$status_class = 'tw-bg-green-100 tw-text-green-800 tw-border-green-300';
+						$status_icon  = '<svg class="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>';
+						break;
+					case 'expired':
+						$status_text  = __( 'Expired', 'frontblocks' );
+						$status_class = 'tw-bg-red-100 tw-text-red-800 tw-border-red-300';
+						$status_icon  = '<svg class="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>';
+						break;
+					default:
+						$status_text  = __( 'Not Activated', 'frontblocks' );
+						$status_class = 'tw-bg-yellow-100 tw-text-yellow-800 tw-border-yellow-300';
+						$status_icon  = '<svg class="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>';
+						break;
+				}
+				?>
+				<div class="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-3 tw-border tw-rounded-lg <?php echo esc_attr( $status_class ); ?>">
+					<span class="tw-flex-shrink-0">
+						<?php echo $status_icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					</span>
+					<span class="tw-font-semibold tw-text-base">
+						<?php echo esc_html( $status_text ); ?>
+					</span>
+					<?php if ( ! empty( $license_data['expires'] ) && 'valid' === $license_data['status'] ) : ?>
+						<span class="tw-ml-auto tw-text-sm">
+							<?php
+							printf(
+								/* translators: %s: expiration date */
+								esc_html__( 'Expires: %s', 'frontblocks' ),
+								esc_html( $license_data['expires'] )
+							);
+							?>
+						</span>
+					<?php endif; ?>
+				</div>
+			</div>
+
+			<!-- Help Text -->
+			<?php if ( empty( $license_key ) && empty( $product_id ) ) : ?>
+				<div class="tw-p-4 tw-rounded-lg tw-bg-gray-50 tw-border tw-border-gray-200">
+					<p class="tw-text-sm tw-text-gray-600">
+						<?php
+						printf(
+							/* translators: %s: purchase link */
+							esc_html__( 'Don\'t have a license? %s to get started.', 'frontblocks' ),
+							'<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-license" target="_blank" rel="noopener noreferrer" class="tw-text-primary-500 hover:tw-text-primary-600 tw-font-medium">' . esc_html__( 'Purchase FrontBlocks PRO', 'frontblocks' ) . '</a>'
+						);
+						?>
+					</p>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( 'expired' === $license_data['status'] ) : ?>
+				<div class="tw-p-3 tw-rounded-lg tw-bg-red-50 tw-border tw-border-red-200">
+					<p class="tw-text-sm tw-text-red-700">
+						<?php
+						printf(
+							/* translators: %s: renewal link */
+							esc_html__( 'Your license has expired. %s to continue receiving updates and support.', 'frontblocks' ),
+							'<a href="https://close.technology/my-account/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=renew-license" target="_blank" rel="noopener noreferrer" class="tw-font-medium tw-underline hover:tw-no-underline">' . esc_html__( 'Renew your license', 'frontblocks' ) . '</a>'
+						);
+						?>
+					</p>
+				</div>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Get license status and data.
+	 *
+	 * @param string $license_key License key.
+	 * @param string $product_id  Product ID.
+	 * @return array License data (status, expires, etc).
+	 */
+	private function get_license_status( $license_key, $product_id = '' ) {
+		$default_data = array(
+			'status'  => 'invalid',
+			'expires' => '',
+			'message' => '',
+		);
+
+		if ( empty( $license_key ) ) {
+			return $default_data;
+		}
+
+		// Check if license validation is available from PRO plugin.
+		if ( function_exists( 'frblp_validate_license' ) ) {
+			return frblp_validate_license( $license_key, $product_id );
+		}
+
+		// Placeholder validation - to be implemented in PRO.
+		$cache_key   = 'frontblocks_license_data_' . md5( $license_key . $product_id );
+		$stored_data = get_transient( $cache_key );
+		if ( false !== $stored_data && is_array( $stored_data ) ) {
+			return wp_parse_args( $stored_data, $default_data );
+		}
+
+		return $default_data;
+	}
+
+	/**
+	 * Check if license is valid.
+	 *
+	 * @return bool True if license is valid.
+	 */
+	private function is_license_valid() {
+		if ( ! frbl_is_pro_active() ) {
+			return false;
+		}
+
+		$options      = get_option( 'frontblocks_settings', array() );
+		$license_key  = sanitize_text_field( $options[ $this->option_license_key ] ?? '' );
+		$product_id   = sanitize_text_field( $options[ $this->option_product_id ] ?? '' );
+		$license_data = $this->get_license_status( $license_key, $product_id );
+
+		return 'valid' === $license_data['status'];
+	}
+
+	/**
+	 * Helper method to render PRO toggle fields.
+	 *
+	 * @param string $option_key  Option key.
+	 * @param string $description Field description.
+	 * @return void
+	 */
+	private function render_pro_toggle( $option_key, $description ) {
 		$options     = get_option( 'frontblocks_settings', array() );
-		$enabled     = (bool) ( $options[ $this->option_deactivate_product_tabs ] ?? false );
-		$is_pro      = frbl_is_pro_active();
-		$disabled    = ! $is_pro ? 'disabled' : '';
-		$opacity_cls = ! $is_pro ? 'tw-opacity-50' : '';
+		$enabled     = (bool) ( $options[ $option_key ] ?? false );
+		$is_enabled  = $this->is_license_valid();
+		$disabled    = ! $is_enabled ? 'disabled' : '';
+		$opacity_cls = ! $is_enabled ? 'tw-opacity-50' : '';
 		?>
 		<div class="tw-flex tw-items-center tw-justify-between <?php echo esc_attr( $opacity_cls ); ?>">
 			<div class="tw-flex-grow tw-pr-4">
 				<div class="tw-flex tw-items-center tw-gap-2">
 					<p class="tw-text-sm tw-text-gray-500">
-						<?php echo esc_html__( 'Remove all product tabs (Description, Additional Information, Reviews) from single product pages.', 'frontblocks' ); ?>
+						<?php echo esc_html( $description ); ?>
 					</p>
-					<?php if ( ! $is_pro ) : ?>
+					<?php if ( ! $is_enabled ) : ?>
 						<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-badge" 
 							target="_blank" 
 							rel="noopener noreferrer"
@@ -839,8 +866,8 @@ class Settings {
 			</div>
 			<label class="frbl-toggle">
 				<input type="checkbox" 
-					id="<?php echo esc_attr( $this->option_deactivate_product_tabs ); ?>" 
-					name="frontblocks_settings[<?php echo esc_attr( $this->option_deactivate_product_tabs ); ?>]" 
+					id="<?php echo esc_attr( $option_key ); ?>" 
+					name="frontblocks_settings[<?php echo esc_attr( $option_key ); ?>]" 
 					value="1" 
 					<?php checked( true, $enabled ); ?>
 					<?php echo esc_attr( $disabled ); ?>
@@ -866,6 +893,8 @@ class Settings {
 		foreach ( $value as $key => $val ) {
 			if ( $this->option_enable_testimonials === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key ) {
 				$sanitized[ $key ] = (bool) $val;
+			} elseif ( $this->option_license_key === $key || $this->option_product_id === $key ) {
+				$sanitized[ $key ] = sanitize_text_field( $val );
 			} else {
 				$sanitized[ $key ] = sanitize_text_field( $val );
 			}
