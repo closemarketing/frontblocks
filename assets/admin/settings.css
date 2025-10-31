@@ -523,8 +523,20 @@ video {
 .frbl-settings-wrapper .tw-mb-2 {
   margin-bottom: 0.5rem;
 }
+.frbl-settings-wrapper .tw-mb-4 {
+  margin-bottom: 1rem;
+}
 .frbl-settings-wrapper .tw-mb-8 {
   margin-bottom: 2rem;
+}
+.frbl-settings-wrapper .tw-ml-2 {
+  margin-left: 0.5rem;
+}
+.frbl-settings-wrapper .tw-ml-3 {
+  margin-left: 0.75rem;
+}
+.frbl-settings-wrapper .tw-ml-auto {
+  margin-left: auto;
 }
 .frbl-settings-wrapper .tw-mr-2 {
   margin-right: 0.5rem;
@@ -559,11 +571,11 @@ video {
 .frbl-settings-wrapper .tw-max-w-5xl {
   max-width: 64rem;
 }
+.frbl-settings-wrapper .tw-flex-shrink-0 {
+  flex-shrink: 0;
+}
 .frbl-settings-wrapper .tw-flex-grow {
   flex-grow: 1;
-}
-.frbl-settings-wrapper .tw-cursor-pointer {
-  cursor: pointer;
 }
 .frbl-settings-wrapper .tw-items-start {
   align-items: flex-start;
@@ -574,10 +586,21 @@ video {
 .frbl-settings-wrapper .tw-justify-between {
   justify-content: space-between;
 }
+.frbl-settings-wrapper .tw-gap-2 {
+  gap: 0.5rem;
+}
+.frbl-settings-wrapper .tw-gap-3 {
+  gap: 0.75rem;
+}
 .frbl-settings-wrapper :is(.tw-space-x-2 > :not([hidden]) ~ :not([hidden])) {
   --tw-space-x-reverse: 0;
   margin-right: calc(0.5rem * var(--tw-space-x-reverse));
   margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
+}
+.frbl-settings-wrapper :is(.tw-space-y-4 > :not([hidden]) ~ :not([hidden])) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1rem * var(--tw-space-y-reverse));
 }
 .frbl-settings-wrapper :is(.tw-space-y-6 > :not([hidden]) ~ :not([hidden])) {
   --tw-space-y-reverse: 0;
@@ -586,6 +609,9 @@ video {
 }
 .frbl-settings-wrapper .tw-overflow-hidden {
   overflow: hidden;
+}
+.frbl-settings-wrapper .tw-rounded {
+  border-radius: 0.25rem;
 }
 .frbl-settings-wrapper .tw-rounded-full {
   border-radius: 9999px;
@@ -599,19 +625,58 @@ video {
 .frbl-settings-wrapper .tw-border-b {
   border-bottom-width: 1px;
 }
+.frbl-settings-wrapper .tw-border-l-4 {
+  border-left-width: 4px;
+}
 .frbl-settings-wrapper .tw-border-t {
   border-top-width: 1px;
+}
+.frbl-settings-wrapper .tw-border-blue-400 {
+  --tw-border-opacity: 1;
+  border-color: rgb(96 165 250 / var(--tw-border-opacity, 1));
 }
 .frbl-settings-wrapper .tw-border-gray-200 {
   --tw-border-opacity: 1;
   border-color: rgb(229 231 235 / var(--tw-border-opacity, 1));
 }
+.frbl-settings-wrapper .tw-border-gray-300 {
+  --tw-border-opacity: 1;
+  border-color: rgb(209 213 219 / var(--tw-border-opacity, 1));
+}
+.frbl-settings-wrapper .tw-border-green-300 {
+  --tw-border-opacity: 1;
+  border-color: rgb(134 239 172 / var(--tw-border-opacity, 1));
+}
+.frbl-settings-wrapper .tw-border-red-200 {
+  --tw-border-opacity: 1;
+  border-color: rgb(254 202 202 / var(--tw-border-opacity, 1));
+}
+.frbl-settings-wrapper .tw-border-red-300 {
+  --tw-border-opacity: 1;
+  border-color: rgb(252 165 165 / var(--tw-border-opacity, 1));
+}
 .frbl-settings-wrapper .tw-border-transparent {
   border-color: transparent;
+}
+.frbl-settings-wrapper .tw-border-yellow-300 {
+  --tw-border-opacity: 1;
+  border-color: rgb(253 224 71 / var(--tw-border-opacity, 1));
+}
+.frbl-settings-wrapper .tw-border-yellow-400 {
+  --tw-border-opacity: 1;
+  border-color: rgb(250 204 21 / var(--tw-border-opacity, 1));
+}
+.frbl-settings-wrapper .tw-bg-blue-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(239 246 255 / var(--tw-bg-opacity, 1));
 }
 .frbl-settings-wrapper .tw-bg-gray-50 {
   --tw-bg-opacity: 1;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1));
+}
+.frbl-settings-wrapper .tw-bg-green-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(220 252 231 / var(--tw-bg-opacity, 1));
 }
 .frbl-settings-wrapper .tw-bg-primary-100 {
   --tw-bg-opacity: 1;
@@ -621,9 +686,25 @@ video {
   --tw-bg-opacity: 1;
   background-color: rgb(104 125 249 / var(--tw-bg-opacity, 1));
 }
+.frbl-settings-wrapper .tw-bg-red-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 226 226 / var(--tw-bg-opacity, 1));
+}
+.frbl-settings-wrapper .tw-bg-red-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 242 242 / var(--tw-bg-opacity, 1));
+}
 .frbl-settings-wrapper .tw-bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+}
+.frbl-settings-wrapper .tw-bg-yellow-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 249 195 / var(--tw-bg-opacity, 1));
+}
+.frbl-settings-wrapper .tw-bg-yellow-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 252 232 / var(--tw-bg-opacity, 1));
 }
 .frbl-settings-wrapper .tw-bg-gradient-to-r {
   background-image: linear-gradient(to right, var(--tw-gradient-stops));
@@ -635,6 +716,12 @@ video {
 }
 .frbl-settings-wrapper .tw-to-white {
   --tw-gradient-to: #fff var(--tw-gradient-to-position);
+}
+.frbl-settings-wrapper .tw-p-3 {
+  padding: 0.75rem;
+}
+.frbl-settings-wrapper .tw-p-4 {
+  padding: 1rem;
 }
 .frbl-settings-wrapper .tw-px-3 {
   padding-left: 0.75rem;
@@ -664,6 +751,9 @@ video {
   padding-top: 2rem;
   padding-bottom: 2rem;
 }
+.frbl-settings-wrapper .tw-pr-4 {
+  padding-right: 1rem;
+}
 .frbl-settings-wrapper .tw-pt-6 {
   padding-top: 1.5rem;
 }
@@ -686,6 +776,10 @@ video {
   font-size: 1.25rem;
   line-height: 1.75rem;
 }
+.frbl-settings-wrapper .tw-text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
 .frbl-settings-wrapper .tw-font-bold {
   font-weight: 700;
 }
@@ -695,6 +789,14 @@ video {
 .frbl-settings-wrapper .tw-font-semibold {
   font-weight: 600;
 }
+.frbl-settings-wrapper .tw-text-blue-400 {
+  --tw-text-opacity: 1;
+  color: rgb(96 165 250 / var(--tw-text-opacity, 1));
+}
+.frbl-settings-wrapper .tw-text-blue-700 {
+  --tw-text-opacity: 1;
+  color: rgb(29 78 216 / var(--tw-text-opacity, 1));
+}
 .frbl-settings-wrapper .tw-text-gray-500 {
   --tw-text-opacity: 1;
   color: rgb(107 114 128 / var(--tw-text-opacity, 1));
@@ -703,13 +805,17 @@ video {
   --tw-text-opacity: 1;
   color: rgb(75 85 99 / var(--tw-text-opacity, 1));
 }
-.frbl-settings-wrapper .tw-text-gray-700 {
+.frbl-settings-wrapper .tw-text-gray-800 {
   --tw-text-opacity: 1;
-  color: rgb(55 65 81 / var(--tw-text-opacity, 1));
+  color: rgb(31 41 55 / var(--tw-text-opacity, 1));
 }
 .frbl-settings-wrapper .tw-text-gray-900 {
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity, 1));
+}
+.frbl-settings-wrapper .tw-text-green-800 {
+  --tw-text-opacity: 1;
+  color: rgb(22 101 52 / var(--tw-text-opacity, 1));
 }
 .frbl-settings-wrapper .tw-text-primary-500 {
   --tw-text-opacity: 1;
@@ -719,9 +825,38 @@ video {
   --tw-text-opacity: 1;
   color: rgb(70 81 217 / var(--tw-text-opacity, 1));
 }
+.frbl-settings-wrapper .tw-text-red-700 {
+  --tw-text-opacity: 1;
+  color: rgb(185 28 28 / var(--tw-text-opacity, 1));
+}
+.frbl-settings-wrapper .tw-text-red-800 {
+  --tw-text-opacity: 1;
+  color: rgb(153 27 27 / var(--tw-text-opacity, 1));
+}
 .frbl-settings-wrapper .tw-text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+.frbl-settings-wrapper .tw-text-yellow-400 {
+  --tw-text-opacity: 1;
+  color: rgb(250 204 21 / var(--tw-text-opacity, 1));
+}
+.frbl-settings-wrapper .tw-text-yellow-700 {
+  --tw-text-opacity: 1;
+  color: rgb(161 98 7 / var(--tw-text-opacity, 1));
+}
+.frbl-settings-wrapper .tw-text-yellow-800 {
+  --tw-text-opacity: 1;
+  color: rgb(133 77 14 / var(--tw-text-opacity, 1));
+}
+.frbl-settings-wrapper .tw-underline {
+  text-decoration-line: underline;
+}
+.frbl-settings-wrapper .tw-no-underline {
+  text-decoration-line: none;
+}
+.frbl-settings-wrapper .tw-opacity-50 {
+  opacity: 0.5;
 }
 .frbl-settings-wrapper .tw-shadow-sm {
   --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -917,6 +1052,10 @@ video {
     margin-bottom: calc(1rem * var(--tw-space-y-reverse));
   }
 }
+.frbl-settings-wrapper .hover\:tw-bg-primary-200:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(205 208 251 / var(--tw-bg-opacity, 1));
+}
 .frbl-settings-wrapper .hover\:tw-bg-primary-600:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(85 101 237 / var(--tw-bg-opacity, 1));
@@ -924,6 +1063,9 @@ video {
 .frbl-settings-wrapper .hover\:tw-text-primary-600:hover {
   --tw-text-opacity: 1;
   color: rgb(85 101 237 / var(--tw-text-opacity, 1));
+}
+.frbl-settings-wrapper .hover\:tw-no-underline:hover {
+  text-decoration-line: none;
 }
 .frbl-settings-wrapper .focus\:tw-outline-none:focus {
   outline: 2px solid transparent;
