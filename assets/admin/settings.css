@@ -1098,3 +1098,20 @@ video {
   }
 }
 
+/* Custom styles for license fields */
+.frbl-settings-wrapper .tw-text-base:not(button) {
+	font-size: 1rem;
+	line-height: 1.5rem;
+	width: 100%;
+}
+
+.frbl-settings-wrapper .tw-flex {
+	display: flex;
+	column-gap: 20px;
+}
+
+/* Submit button width */
+.frbl-settings-wrapper .tw-w-1\/2 {
+	width: 50%;
+}
+

@@ -455,7 +455,7 @@ class Settings {
 						<div class="tw-text-sm tw-text-gray-500">
 							<?php echo esc_html__( 'Changes will be applied immediately after saving.', 'frontblocks' ); ?>
 						</div>
-						<button type="submit" class="tw-inline-flex tw-items-center tw-px-6 tw-py-3 tw-border tw-border-transparent tw-text-base tw-font-medium tw-rounded-lg tw-shadow-sm tw-text-white tw-bg-primary-500 hover:tw-bg-primary-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-primary-500 tw-transition-colors tw-duration-200">
+						<button type="submit" class="tw-inline-flex tw-items-center tw-px-4 tw-py-3 tw-border tw-border-transparent tw-text-base tw-font-medium tw-rounded-lg tw-shadow-sm tw-text-white tw-bg-primary-500 hover:tw-bg-primary-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-primary-500 tw-transition-colors tw-duration-200">
 							<svg class="tw-w-5 tw-h-5 tw-mr-2 tw--ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
 							</svg>
@@ -729,33 +729,36 @@ class Settings {
 		$product_id  = get_option( $this->option_product_id );
 		?>
 		<div class="tw-space-y-4">
-			<!-- License Key Field -->
-			<div>
-				<input type="text" 
-					id="<?php echo esc_attr( $this->option_license_key ); ?>" 
-					name="<?php echo esc_attr( $this->option_license_key ); ?>" 
-					value="<?php echo esc_attr( $license_key ); ?>"
-					placeholder="<?php echo esc_attr__( 'Enter your license key', 'frontblocks' ); ?>"
-					class="tw-block tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
-				/>
+			<!-- License Key and Product ID Fields in a row -->
+			<div class="tw-flex tw-w-full">
+				<!-- License Key Field - 66.6% (2/3) -->
+				<div style="flex: 4 1 0%;">
+					<input type="text" 
+						id="<?php echo esc_attr( $this->option_license_key ); ?>" 
+						name="<?php echo esc_attr( $this->option_license_key ); ?>" 
+						value="<?php echo esc_attr( $license_key ); ?>"
+						placeholder="<?php echo esc_attr__( 'Enter your license key', 'frontblocks' ); ?>"
+						class="tw-block tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
+					/>
+				</div>
+
+				<!-- Product ID Field - 33.3% (1/3) -->
+				<div style="flex: 1 1 0%;">
+					<input type="text" 
+						id="<?php echo esc_attr( $this->option_product_id ); ?>" 
+						name="<?php echo esc_attr( $this->option_product_id ); ?>" 
+						value="<?php echo esc_attr( $product_id ); ?>"
+						placeholder="<?php echo esc_attr__( 'Product ID', 'frontblocks' ); ?>"
+						title="<?php echo esc_attr__( 'Product ID - You can find this in your purchase confirmation email.', 'frontblocks' ); ?>"
+						class="tw-block tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
+					/>
+				</div>
 			</div>
 
-			<!-- Product ID Field -->
-			<div>
-				<label for="<?php echo esc_attr( $this->option_product_id ); ?>" class="tw-block tw-text-sm tw-font-medium tw-text-gray-900 tw-mb-2">
-					<?php echo esc_html__( 'Product ID', 'frontblocks' ); ?>
-				</label>
-				<input type="text" 
-					id="<?php echo esc_attr( $this->option_product_id ); ?>" 
-					name="<?php echo esc_attr( $this->option_product_id ); ?>" 
-					value="<?php echo esc_attr( $product_id ); ?>"
-					placeholder="<?php echo esc_attr__( 'Enter your product ID', 'frontblocks' ); ?>"
-					class="tw-block tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
-				/>
-				<p class="tw-mt-1 tw-text-xs tw-text-gray-500">
-					<?php echo esc_html__( 'You can find your product ID in your purchase confirmation email.', 'frontblocks' ); ?>
-				</p>
-			</div>
+			<!-- Help Text for Product ID -->
+			<p class="tw-text-xs tw-text-gray-500 tw-mt-1">
+				<?php echo esc_html__( 'Enter your license key and product ID. You can find both in your purchase confirmation email.', 'frontblocks' ); ?>
+			</p>
 
 			<!-- License Status Field (Read-only) -->
 			<div>
