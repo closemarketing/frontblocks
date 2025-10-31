@@ -81,20 +81,6 @@ class Settings {
 	private $option_deactivate_product_tabs = 'deactivate_product_tabs';
 
 	/**
-	 * Option key for license key (PRO).
-	 *
-	 * @var string
-	 */
-	private $option_license_key = 'license_key';
-
-	/**
-	 * Option key for product ID (PRO).
-	 *
-	 * @var string
-	 */
-	private $option_product_id = 'product_id';
-
-	/**
 	 * Page slug.
 	 *
 	 * @var string
@@ -102,9 +88,36 @@ class Settings {
 	private $page_slug = 'frontblocks-settings';
 
 	/**
+	 * Is license valid.
+	 *
+	 * @var bool
+	 */
+	private $is_license_valid = false;
+
+	/**
+	 * Option key for license key.
+	 *
+	 * @var string
+	 */
+	private $option_license_key;
+
+	/**
+	 * Option key for product ID.
+	 *
+	 * @var string
+	 */
+	private $option_product_id;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
+		global $frontblocks_pro_license;
+		$this->is_license_valid = ! empty( $frontblocks_pro_license ) && $frontblocks_pro_license->get_api_key_status( true );
+
+		$this->option_license_key = ! empty( $frontblocks_pro_license ) ? $frontblocks_pro_license->get_option_key( 'apikey' ) : '';
+		$this->option_product_id  = ! empty( $frontblocks_pro_license ) ? $frontblocks_pro_license->get_option_key( 'product_id' ) : '';
+
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
@@ -144,7 +157,7 @@ class Settings {
 					const moveContentWrapper = moveContentCheckbox.closest('.tw-flex');
 					
 					// Check if license is valid (not just PRO active).
-					const isLicenseValid = " . ( $this->is_license_valid() ? 'true' : 'false' ) . ";
+					const isLicenseValid = " . ( $this->is_license_valid ? 'true' : 'false' ) . ";
 					
 					if (deactivateCheckbox.checked) {
 						moveContentCheckbox.disabled = true;
@@ -226,6 +239,7 @@ class Settings {
 	 * @return void
 	 */
 	public function register_settings() {
+		global $frontblocks_pro_license;
 		register_setting(
 			'frontblocks_settings',
 			'frontblocks_settings',
@@ -327,7 +341,7 @@ class Settings {
 		);
 
 		// License section (only if PRO is active).
-		if ( frbl_is_pro_active() ) {
+		if ( frbl_is_pro_active() && ! empty( $frontblocks_pro_license ) ) {
 			add_settings_section(
 				'frontblocks_section_license',
 				__( 'License', 'frontblocks' ),
@@ -336,7 +350,7 @@ class Settings {
 			);
 
 			add_settings_field(
-				$this->option_license_key,
+				$frontblocks_pro_license->get_option_key( 'apikey' ),
 				__( 'License Information', 'frontblocks' ),
 				array( $this, 'field_license_key' ),
 				$this->page_slug,
@@ -490,6 +504,7 @@ class Settings {
 	 * @return void
 	 */
 	public function section_pro_features_callback() {
+		global $frontblocks_pro_license;
 		if ( ! frbl_is_pro_active() ) {
 			echo '<div class="tw-bg-blue-50 tw-border-l-4 tw-border-blue-400 tw-p-4 tw-mb-4">';
 			echo '<div class="tw-flex">';
@@ -507,7 +522,7 @@ class Settings {
 			echo '</div>';
 			echo '</div>';
 			echo '</div>';
-		} elseif ( ! $this->is_license_valid() ) {
+		} elseif ( ! $this->is_license_valid ) {
 			echo '<div class="tw-bg-yellow-50 tw-border-l-4 tw-border-yellow-400 tw-p-4 tw-mb-4">';
 			echo '<div class="tw-flex">';
 			echo '<div class="tw-flex-shrink-0">';
@@ -668,20 +683,19 @@ class Settings {
 	 * @return void
 	 */
 	public function field_license_key() {
-		$options      = get_option( 'frontblocks_settings', array() );
-		$license_key  = sanitize_text_field( $options[ $this->option_license_key ] ?? '' );
-		$product_id   = sanitize_text_field( $options[ $this->option_product_id ] ?? '' );
-		$license_data = $this->get_license_status( $license_key, $product_id );
+		global $frontblocks_pro_license;
+		$license_key = get_option( $this->option_license_key );
+		$product_id  = get_option( $this->option_product_id );
 		?>
 		<div class="tw-space-y-4">
 			<!-- License Key Field -->
 			<div>
 				<input type="text" 
 					id="<?php echo esc_attr( $this->option_license_key ); ?>" 
-					name="frontblocks_settings[<?php echo esc_attr( $this->option_license_key ); ?>]" 
+					name="<?php echo esc_attr( $this->option_license_key ); ?>" 
 					value="<?php echo esc_attr( $license_key ); ?>"
 					placeholder="<?php echo esc_attr__( 'Enter your license key', 'frontblocks' ); ?>"
-					class="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
+					class="tw-block tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
 				/>
 			</div>
 
@@ -692,10 +706,10 @@ class Settings {
 				</label>
 				<input type="text" 
 					id="<?php echo esc_attr( $this->option_product_id ); ?>" 
-					name="frontblocks_settings[<?php echo esc_attr( $this->option_product_id ); ?>]" 
+					name="<?php echo esc_attr( $this->option_product_id ); ?>" 
 					value="<?php echo esc_attr( $product_id ); ?>"
 					placeholder="<?php echo esc_attr__( 'Enter your product ID', 'frontblocks' ); ?>"
-					class="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
+					class="tw-block tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
 				/>
 				<p class="tw-mt-1 tw-text-xs tw-text-gray-500">
 					<?php echo esc_html__( 'You can find your product ID in your purchase confirmation email.', 'frontblocks' ); ?>
@@ -711,9 +725,12 @@ class Settings {
 				$status_text  = '';
 				$status_class = '';
 				$status_icon  = '';
+				global $frontblocks_pro_license;
+				$license_data   = $frontblocks_pro_license->license_key_status( true );
+				$license_status = empty( $license_data ) ? 'not_activated' : $license_data['status_check'];
 
-				switch ( $license_data['status'] ) {
-					case 'valid':
+				switch ( $license_status ) {
+					case 'active':
 						$status_text  = __( 'Active', 'frontblocks' );
 						$status_class = 'tw-bg-green-100 tw-text-green-800 tw-border-green-300';
 						$status_icon  = '<svg class="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>';
@@ -766,7 +783,7 @@ class Settings {
 				</div>
 			<?php endif; ?>
 
-			<?php if ( 'expired' === $license_data['status'] ) : ?>
+			<?php if ( 'expired' === $license_status ) : ?>
 				<div class="tw-p-3 tw-rounded-lg tw-bg-red-50 tw-border tw-border-red-200">
 					<p class="tw-text-sm tw-text-red-700">
 						<?php
@@ -784,57 +801,6 @@ class Settings {
 	}
 
 	/**
-	 * Get license status and data.
-	 *
-	 * @param string $license_key License key.
-	 * @param string $product_id  Product ID.
-	 * @return array License data (status, expires, etc).
-	 */
-	private function get_license_status( $license_key, $product_id = '' ) {
-		$default_data = array(
-			'status'  => 'invalid',
-			'expires' => '',
-			'message' => '',
-		);
-
-		if ( empty( $license_key ) ) {
-			return $default_data;
-		}
-
-		// Check if license validation is available from PRO plugin.
-		if ( function_exists( 'frblp_validate_license' ) ) {
-			return frblp_validate_license( $license_key, $product_id );
-		}
-
-		// Placeholder validation - to be implemented in PRO.
-		$cache_key   = 'frontblocks_license_data_' . md5( $license_key . $product_id );
-		$stored_data = get_transient( $cache_key );
-		if ( false !== $stored_data && is_array( $stored_data ) ) {
-			return wp_parse_args( $stored_data, $default_data );
-		}
-
-		return $default_data;
-	}
-
-	/**
-	 * Check if license is valid.
-	 *
-	 * @return bool True if license is valid.
-	 */
-	private function is_license_valid() {
-		if ( ! frbl_is_pro_active() ) {
-			return false;
-		}
-
-		$options      = get_option( 'frontblocks_settings', array() );
-		$license_key  = sanitize_text_field( $options[ $this->option_license_key ] ?? '' );
-		$product_id   = sanitize_text_field( $options[ $this->option_product_id ] ?? '' );
-		$license_data = $this->get_license_status( $license_key, $product_id );
-
-		return 'valid' === $license_data['status'];
-	}
-
-	/**
 	 * Helper method to render PRO toggle fields.
 	 *
 	 * @param string $option_key  Option key.
@@ -844,7 +810,7 @@ class Settings {
 	private function render_pro_toggle( $option_key, $description ) {
 		$options     = get_option( 'frontblocks_settings', array() );
 		$enabled     = (bool) ( $options[ $option_key ] ?? false );
-		$is_enabled  = $this->is_license_valid();
+		$is_enabled  = $this->is_license_valid;
 		$disabled    = ! $is_enabled ? 'disabled' : '';
 		$opacity_cls = ! $is_enabled ? 'tw-opacity-50' : '';
 		?>
@@ -886,6 +852,14 @@ class Settings {
 	 * @return array
 	 */
 	public function sanitize_settings( $value ) {
+		// Nonce verification.
+		$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'frontblocks_settings-options' ) ) {
+			add_settings_error( 'frontblocks_settings', 'frontblocks_settings_nonce', esc_html__( 'Security check failed. Please try again.', 'frontblocks' ), 'error' );
+
+			return get_option( 'frontblocks_settings', array() );
+		}
+
 		if ( ! is_array( $value ) ) {
 			return array();
 		}
@@ -894,10 +868,6 @@ class Settings {
 		foreach ( $value as $key => $val ) {
 			if ( $this->option_enable_testimonials === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key ) {
 				$sanitized[ $key ] = (bool) $val;
-			} elseif ( $this->option_license_key === $key || $this->option_product_id === $key ) {
-				$sanitized[ $key ] = sanitize_text_field( $val );
-			} else {
-				$sanitized[ $key ] = sanitize_text_field( $val );
 			}
 		}
 
@@ -914,6 +884,18 @@ class Settings {
 			} else {
 				// Otherwise turn off move (deactivate is the new one).
 				$sanitized[ $this->option_move_content_to_short_description ] = false;
+			}
+		}
+
+		// Save license key and product id.
+		global $frontblocks_pro_license;
+		if ( ! empty( $frontblocks_pro_license ) ) {
+			$result = $frontblocks_pro_license->sanitize_fields_license( $_POST );
+
+			if ( 'ok' === $result['status'] ) {
+				add_settings_error( 'frontblocks_settings', 'frontblocks_settings_license', $result['message'], 'updated' );
+			} else {
+				add_settings_error( 'frontblocks_settings', 'frontblocks_settings_license', $result['message'], 'error' );
 			}
 		}
 
