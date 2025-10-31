@@ -143,6 +143,9 @@ class Settings {
 					const deactivateWrapper = deactivateCheckbox.closest('.tw-flex');
 					const moveContentWrapper = moveContentCheckbox.closest('.tw-flex');
 					
+					// Check if license is valid (not just PRO active).
+					const isLicenseValid = " . ( $this->is_license_valid() ? 'true' : 'false' ) . ";
+					
 					if (deactivateCheckbox.checked) {
 						moveContentCheckbox.disabled = true;
 						if (moveContentWrapper) {
@@ -155,10 +158,9 @@ class Settings {
 							}
 						}
 					} else {
-						const isProActive = " . ( frbl_is_pro_active() ? 'true' : 'false' ) . ";
-						moveContentCheckbox.disabled = !isProActive;
+						moveContentCheckbox.disabled = !isLicenseValid;
 						if (moveContentWrapper) {
-							moveContentWrapper.style.opacity = isProActive ? '1' : '0.5';
+							moveContentWrapper.style.opacity = isLicenseValid ? '1' : '0.5';
 							moveContentWrapper.style.filter = '';
 							const toggle = moveContentWrapper.querySelector('.frbl-toggle');
 							if (toggle) {
@@ -180,10 +182,9 @@ class Settings {
 							}
 						}
 					} else {
-						const isProActive = " . ( frbl_is_pro_active() ? 'true' : 'false' ) . ";
-						deactivateCheckbox.disabled = !isProActive;
+						deactivateCheckbox.disabled = !isLicenseValid;
 						if (deactivateWrapper) {
-							deactivateWrapper.style.opacity = isProActive ? '1' : '0.5';
+							deactivateWrapper.style.opacity = isLicenseValid ? '1' : '0.5';
 							deactivateWrapper.style.filter = '';
 							const toggle = deactivateWrapper.querySelector('.frbl-toggle');
 							if (toggle) {
