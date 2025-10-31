@@ -4,76 +4,58 @@ Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 6.8
-Stable tag: 1.1.0
-Version: 1.1.0
+Stable tag: 1.2.0
+Version: 1.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Extends GeneratePress with carousel, slider, animations, sticky column, and insert post functionality.
+This plugin extends the functionality of GeneratePress by adding a carousel, slider, animations, sticky columns and the ability to insert posts.
 
 == Description ==
 
 **Carousel/Slider for GenerateBlocks Grid**
-We have added options to the Gutenberg blocks that allow you to create a carousel or slider with the blocks you want.
+We have added options to Gutenberg blocks that enable you to create a carousel or slider using your preferred blocks.
 
-To start using the Carousel, go to the grid block and select the "Carousel" or "Slider" option in the "FrontBlocks Grid Option" section.
+To start using the carousel, go to the grid block and select the 'Carousel' or 'Slider' option in the 'FrontBlocks Grid Options' section.
 
-Attributes for the Carousel/Slider:
-- Autoplay - automatically change the slides after a certain time in seconds.
-- View - number of items to show in the carousel/slider.
-- Responsive View - number of items to show in the carousel/slider in responsive view.
-- Buttons - type of buttons to show in the carousel/slider (bullets, arrows, none).
-- Buttons Color - color of the buttons.
-- Buttons Background Color - background color of the buttons (can be transparent).
+Carousel/Slider attributes:
+- Autoplay: automatically changes the slides after a certain amount of time (in seconds).
+- View: the number of items to display in the carousel/slider.
+Responsive view: the number of items to show in the carousel/slider in responsive view.
+- Buttons: the type of buttons to display in the carousel/slider (bullets, arrows or none).
+- Button colour: colour of the buttons.
+- Button background colour: background colour of the buttons (can be transparent).
 
-**Enhanced WordPress Native Gallery**
-We have added options to the native WordPress gallery that allow you to create a different layout as Grid or Masonry, and also make click to carousel with the images.
+**Enhanced WordPress native gallery**
+We have added options to the native WordPress gallery that allow you to create a different layout, such as grid or masonry, and also enable you to create a carousel with images that can be clicked on.
 
 **Animations for Blocks**
-You can add animations to the blocks you want. To do this, go to the block settings and select the "FrontBlocks Animation Option" section. There you will find a list of animations that you can apply to the block.
+You can add animations to the blocks you want. To do this, go to the block settings and select the 'FrontBlocks Animation Option' section. There you will find a list of animations that you can apply to the block.
 
-Animations are based on [Animate.css](https://animate.style/).
-
-- Attention seekers: bounce, flash, pulse, rubberBand, shakeX, shakeY, headShake, swing, tada, wobble, jello, heartBeat
-- Back entrances: backInDown, backInLeft, backInRight, backInUp
-- Back exits: backOutDown, backOutLeft, backOutRight, backOutUp
-- Bouncing entrances: bounceIn, bounceInDown, bounceInLeft, bounceInRight, bounceInUp
-- Bouncing exits: bounceOut, bounceOutDown, bounceOutLeft, bounceOutRight, bounceOutUp
-- Fading entrances: fadeIn, fadeInDown, fadeInDownBig, fadeInLeft, fadeInLeftBig, fadeInRight, fadeInRightBig, fadeInUp, fadeInUpBig, fadeInTopLeft, fadeInTopRight, fadeInBottomLeft, fadeInBottomRight
-- Fading exits: fadeOut, fadeOutDown, fadeOutDownBig, fadeOutLeft, fadeOutLeftBig, fadeOutRight, fadeOutRightBig, fadeOutUp, fadeOutUpBig, fadeOutTopLeft, fadeOutTopRight, fadeOutBottomRight, fadeOutBottomLeft
-- Flippers: flip, flipInX, flipInY, flipOutX, flipOutY, Lightspeed, lightSpeedInRight, lightSpeedInLeft, lightSpeedOutRight, lightSpeedOutLeft
-- Rotating entrances: rotateIn, rotateInDownLeft, rotateInDownRight, rotateInUpLeft, rotateInUpRight
-- Rotating exits: rotateOut, rotateOutDownLeft, rotateOutDownRight, rotateOutUpLeft, rotateOutUpRight
-- Specials: hinge, jackInTheBox, rollIn, rollOut
-- Zooming entrances: zoomIn, zoomInDown, zoomInLeft, zoomInRight, zoomInUp
-- Zooming exits: zoomOut, zoomOutDown zoomOutLeft, zoomOutRight, zoomOutUp
-- Sliding entrances: slideInDown, slideInLeft, slideInRight, slideInUp, Sliding, exits slideOutDown, slideOutLeft, slideOutRight, slideOutUp
+The animations are based on [Animate.css](https://animate.style/): Attention seekers, Back entrances, Back exits, Bouncing entrances, Bouncing exits, Fading entrances, Fading exits, Flippers, Rotating entrances, Rotating exits, Specials, Zooming entrances, Zooming exits, and Sliding entrances.
 
 **Sticky option for Grid block:**
-Sticky option allows you to make the Grid block stick to the top of the viewport when scrolling down. To use this feature, you will have the option in Grid block settings to enable the "Sticky" option. When enabled, the Grid block will remain fixed at the top of the viewport as you scroll down the page.
+The sticky option allows you to make the grid block stick to the top of the viewport when scrolling down. To use this feature, enable the "Sticky" option in the Grid block settings. When enabled, the grid block will remain fixed at the top of the viewport as you scroll down the page.
 
 **Insert Post Block:**
-Display content from other posts, pages, or custom post types. Search and select any published content to display its title as H2 and full content. Perfect for creating dynamic content sections without duplicating content.
+Display content from other posts, pages or custom post types. Search and select any published content to display its title as an H2 heading and its full content. This is perfect for creating dynamic content sections without duplicating content.
 
 **Decoration for Headline block:**
-Add a decorative line to the Headline block. You can choose between a vertical line on the right or a horizontal line on the right.
+Add a decorative line to the Headline Block. You can choose between a vertical or horizontal line on the right.
 
 **Product Categories block:**
-Display product categories from WooCommerce. You can choose the number of categories to display, the order by, and the order. You can also choose to hide empty categories. You can also choose the columns to display the categories. You can also choose the background color, border color, border width, border radius, text color, hover background color, hover border color, and hover text color.
+Display product categories from WooCommerce. Choose the number of categories to display, the order by and the order. You can also choose to hide empty categories. You can also select the number of columns in which to display the categories. You can also customise the background colour, border colour, border width, border radius, text colour, hover background colour, hover border colour and hover text colour.
 
 **Counter Block:**
-Display a counter with a start value, end value, and a duration. The counter will increment from the start value to the end value in the duration.
-
-**Decoration for Headline block:**
-Add a decorative line to the Headline block. You can choose between a vertical line on the right or a horizontal line on the right.
+Display a counter with a start value, end value and duration. The counter will increment from the start value to the end value within the specified time frame.
 
 **Testimonials:**
-Display testimonials from other posts, pages, or custom post types. Search and select any published content to display its title as H2 and full content. Perfect for creating dynamic content sections without duplicating content.
+Display testimonials from other posts, pages or custom post types. Search and select any published content to display its title as an H2 heading and its full content. This is perfect for creating dynamic content sections without duplicating content.
 
 Shortcode: [frontblocks_testimonials_carousel]
 
 **Reading Time block:**
-Display the reading time of a post. You can choose the number of words per minute to calculate the reading time.
+Display the reading time of a post. You can choose the number of words per minute to use for the calculation.
 Shortcode: [frontblocks_reading_time]
 
 **WooCommerce Features:**
@@ -83,19 +65,19 @@ Included features for WooCommerce FrontBlocks PRO.
 FrontBlocks PRO is a premium plugin that extends the functionality of FrontBlocks. It includes additional features and improvements over the free version.
 
 Features:
-- Enable Gutenberg in product editor.
-- Enable Simple prices for variable products.
-- Block added after buttom.
-- Product description behavior.
-- Disable zoom in Product Image.
+- Enable Gutenberg in the product editor.
+- Enable simple prices for variable products.
+- Block added after button.
+- Product description behaviour.
+- Disable zoom on product image.
 - Share buttons.
+- Disable tabs on the product page.
 
 More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-plugins/frontblocks-pro/?utm_source=WordPressORGReadme&utm_medium=link&utm_campaign=frontblocks) page.
 
 == Installation ==
 
-Extract the zip file and just drop the contents in the wp-content/plugins/ directory of your
-WordPress installation and then activate the Plugin from Plugins page.
+Extract the ZIP file and simply copy its contents into the wp-content/plugins/ directory of your WordPress installation. Then activate the plugin from the Plugins page.
 
 
 == Developers ==
@@ -103,8 +85,15 @@ WordPress installation and then activate the Plugin from Plugins page.
 
 == Changelog ==
 
-= 1.1.1 =
+== 1.2.0 ==
+*   Improved: Settings page.
 *   Added: Toggle to disable animations on mobile.
+*   PRO: Deactivate Product Tabs setting.
+*   PRO: Share buttons.
+*   PRO: Zoom disable in Product Image.
+*   PRO: Product description behavior.
+*   PRO: Block after buttom.
+*   PRO: Simple Prices for variable products.
 
 = 1.1.0 =
 *   Added: FrontBlocks PRO compatibility.
