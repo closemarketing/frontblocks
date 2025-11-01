@@ -4,8 +4,8 @@ Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 6.8
-Stable tag: 1.2.0
-Version: 1.2.0
+Stable tag: 1.2.1
+Version: 1.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -84,6 +84,9 @@ Extract the ZIP file and simply copy its contents into the wp-content/plugins/ d
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+
+== 1.2.1 ==
+*   Fixed: Carousel/Slider not working correctly.
 
 == 1.2.0 ==
 *   Improved: Settings page.
