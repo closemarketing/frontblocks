@@ -122,7 +122,7 @@ class Plugin_Main {
 
 		wp_enqueue_script(
 			'frontblocks-carousel',
-			FRBL_PLUGIN_URL . 'assets/dist/glide.min.js',
+			FRBL_PLUGIN_URL . 'assets/' . $dist_dir . 'glide.min.js',
 			array(),
 			FRBL_VERSION,
 			true
