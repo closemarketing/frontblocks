@@ -58,6 +58,9 @@ Shortcode: [frontblocks_testimonials_carousel]
 Display the reading time of a post. You can choose the number of words per minute to use for the calculation.
 Shortcode: [frontblocks_reading_time]
 
+**Back Button:**
+Display a floating back button in the bottom left corner that allows users to navigate to the previous page. Enable it from the FrontBlocks settings page.
+
 **WooCommerce Features:**
 Included features for WooCommerce FrontBlocks PRO.
 
@@ -84,6 +87,9 @@ Extract the ZIP file and simply copy its contents into the wp-content/plugins/ d
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+
+== n.e.x.t ==
+*   Added: Back Button feature with floating button to navigate to previous page.
 
 == 1.2.1 ==
 *   Fixed: Carousel/Slider not working correctly.

@@ -98,6 +98,9 @@ class Plugin_Main {
 
 		// Reading Time module.
 		new Frontend\ReadingTime();
+
+		// Back Button module.
+		new Frontend\BackButton();
 	}
 
 	/**
