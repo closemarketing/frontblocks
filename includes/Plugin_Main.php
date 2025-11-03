@@ -95,6 +95,9 @@ class Plugin_Main {
 
 		// Counter module (GenerateBlocks Headline counter effect).
 		new Frontend\Counter();
+
+		// Reading Time module.
+		new Frontend\ReadingTime();
 	}
 
 	/**
