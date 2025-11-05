@@ -75,6 +75,7 @@ Features:
 - Disable zoom on product image.
 - Share buttons.
 - Disable tabs on the product page.
+- Horizontal product form layout (price, quantity, and add to cart button in one row).
 
 More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-plugins/frontblocks-pro/?utm_source=WordPressORGReadme&utm_medium=link&utm_campaign=frontblocks) page.
 
@@ -90,6 +91,7 @@ Extract the ZIP file and simply copy its contents into the wp-content/plugins/ d
 
 == n.e.x.t ==
 *   Added: Back Button feature with floating button to navigate to previous page.
+*   PRO: Horizontal Product Form Layout - Align price, quantity, and add to cart button in one row.
 
 == 1.2.1 ==
 *   Fixed: Carousel/Slider not working correctly.

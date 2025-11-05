@@ -88,6 +88,13 @@ class Settings {
 	private $option_deactivate_product_tabs = 'deactivate_product_tabs';
 
 	/**
+	 * Option key for horizontal product form layout (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_horizontal_product_form = 'horizontal_product_form';
+
+	/**
 	 * Page slug.
 	 *
 	 * @var string
@@ -348,6 +355,14 @@ class Settings {
 			$this->option_deactivate_product_tabs,
 			__( 'Deactivate Product Tabs', 'frontblocks' ),
 			array( $this, 'field_deactivate_product_tabs' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
+		add_settings_field(
+			$this->option_horizontal_product_form,
+			__( 'Horizontal Product Form Layout', 'frontblocks' ),
+			array( $this, 'field_horizontal_product_form' ),
 			$this->page_slug,
 			'frontblocks_section_woocommerce_features'
 		);
@@ -753,6 +768,18 @@ class Settings {
 	}
 
 	/**
+	 * Render Horizontal Product Form Layout field.
+	 *
+	 * @return void
+	 */
+	public function field_horizontal_product_form() {
+		$this->render_pro_toggle(
+			$this->option_horizontal_product_form,
+			__( 'Align price, quantity selector, and add to cart button horizontally in a single row on product pages.', 'frontblocks' )
+		);
+	}
+
+	/**
 	 * License section description.
 	 *
 	 * @return void
@@ -953,7 +980,8 @@ class Settings {
 
 		$sanitized = array();
 		foreach ( $value as $key => $val ) {
-			if ( $this->option_enable_testimonials === $key || $this->option_enable_back_button === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key ) {
+
+			if ( $this->option_enable_testimonials === $key || $this->option_enable_back_button === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key || $this->option_horizontal_product_form === $key ) {
 				$sanitized[ $key ] = (bool) $val;
 			}
 		}
