@@ -30,8 +30,8 @@ class Settings {
 	 * @var string
 	 */
 	private $option_enable_reading_progress = 'enable_reading_progress';
-  
-  /**
+
+	/**
 	 * Option key for back button feature.
 	 *
 	 * @var string
@@ -286,21 +286,21 @@ class Settings {
 			'frontblocks_section_features'
 		);
 
-	add_settings_field(
-		$this->option_enable_reading_progress,
-		__( 'Enable reading progress bar', 'frontblocks' ),
-		array( $this, 'field_enable_reading_progress' ),
-		$this->page_slug,
-		'frontblocks_section_features'
-	);
+		add_settings_field(
+			$this->option_enable_reading_progress,
+			__( 'Enable reading progress bar', 'frontblocks' ),
+			array( $this, 'field_enable_reading_progress' ),
+			$this->page_slug,
+			'frontblocks_section_features'
+		);
 
-	add_settings_field(
-		$this->option_enable_back_button,
-		__( 'Enable Back Button', 'frontblocks' ),
-		array( $this, 'field_enable_back_button' ),
-		$this->page_slug,
-		'frontblocks_section_features'
-	);
+		add_settings_field(
+			$this->option_enable_back_button,
+			__( 'Enable Back Button', 'frontblocks' ),
+			array( $this, 'field_enable_back_button' ),
+			$this->page_slug,
+			'frontblocks_section_features'
+		);
 
 		// PRO Features section.
 		add_settings_section(

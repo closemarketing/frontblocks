@@ -101,7 +101,7 @@ class Plugin_Main {
 
 		// Reading Progress Bar module.
 		new Frontend\ReadingProgress();
-    
+
 		// Back Button module.
 		new Frontend\BackButton();
 	}
