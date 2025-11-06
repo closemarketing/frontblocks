@@ -286,19 +286,21 @@ class Settings {
 			'frontblocks_section_features'
 		);
 
-		add_settings_field(
-			$this->option_enable_reading_progress,
-			__( 'Enable reading progress bar', 'frontblocks' ),
-			array( $this, 'field_enable_reading_progress' ),
-    );
-    
-    add_settings_field(
-			$this->option_enable_back_button,
-			__( 'Enable Back Button', 'frontblocks' ),
-			array( $this, 'field_enable_back_button' ),
-			$this->page_slug,
-			'frontblocks_section_features'
-		);
+	add_settings_field(
+		$this->option_enable_reading_progress,
+		__( 'Enable reading progress bar', 'frontblocks' ),
+		array( $this, 'field_enable_reading_progress' ),
+		$this->page_slug,
+		'frontblocks_section_features'
+	);
+
+	add_settings_field(
+		$this->option_enable_back_button,
+		__( 'Enable Back Button', 'frontblocks' ),
+		array( $this, 'field_enable_back_button' ),
+		$this->page_slug,
+		'frontblocks_section_features'
+	);
 
 		// PRO Features section.
 		add_settings_section(
@@ -657,60 +659,61 @@ class Settings {
 	}
 
 	/**
- * Render toggle field for enable reading progress bar.
- *
- * @return void
- */
-public function field_enable_reading_progress() {
-	$options = get_option( 'frontblocks_settings', array() );
-	$enabled = (bool) ( $options[ $this->option_enable_reading_progress ] ?? false );
-	?>
-	<div class="tw-flex tw-items-center tw-justify-between">
-		<div class="tw-flex-grow">
-			<p class="tw-mt-1 tw-text-sm tw-text-gray-500">
-				<?php echo esc_html__( 'Display a vertical progress bar on the right side of posts that fills as you read.', 'frontblocks' ); ?>
-			</p>
+	 * Render toggle field for enable reading progress bar.
+	 *
+	 * @return void
+	 */
+	public function field_enable_reading_progress() {
+		$options = get_option( 'frontblocks_settings', array() );
+		$enabled = (bool) ( $options[ $this->option_enable_reading_progress ] ?? false );
+		?>
+		<div class="tw-flex tw-items-center tw-justify-between">
+			<div class="tw-flex-grow">
+				<p class="tw-mt-1 tw-text-sm tw-text-gray-500">
+					<?php echo esc_html__( 'Display a vertical progress bar on the right side of posts that fills as you read.', 'frontblocks' ); ?>
+				</p>
+			</div>
+			<label class="frbl-toggle">
+				<input type="checkbox"
+					id="<?php echo esc_attr( $this->option_enable_reading_progress ); ?>"
+					name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_reading_progress ); ?>]"
+					value="1"
+					<?php checked( true, $enabled ); ?>
+				/>
+				<span></span>
+			</label>
 		</div>
-		<label class="frbl-toggle">
-			<input type="checkbox" 
-				id="<?php echo esc_attr( $this->option_enable_reading_progress ); ?>" 
-				name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_reading_progress ); ?>]" 
-				value="1" 
-				<?php checked( true, $enabled ); ?>
-			/>
-			<span></span>
-		</label>
-	</div>
-	<?php
-}
+		<?php
+	}
 
-/**
- * Render toggle field for enable back button.
- *
- * @return void
- */
-public function field_enable_back_button() {
-	$options = get_option( 'frontblocks_settings', array() );
-	$enabled = (bool) ( $options[ $this->option_enable_back_button ] ?? false );
-	?>
-	<div class="tw-flex tw-items-center tw-justify-between">
-		<div class="tw-flex-grow">
-			<p class="tw-mt-1 tw-text-sm tw-text-gray-500">
-				<?php echo esc_html__( 'Display a floating back button in the bottom left corner to navigate to the previous page.', 'frontblocks' ); ?>
-			</p>
+	/**
+	 * Render toggle field for enable back button.
+	 *
+	 * @return void
+	 */
+	public function field_enable_back_button() {
+		$options = get_option( 'frontblocks_settings', array() );
+		$enabled = (bool) ( $options[ $this->option_enable_back_button ] ?? false );
+		?>
+		<div class="tw-flex tw-items-center tw-justify-between">
+			<div class="tw-flex-grow">
+				<p class="tw-mt-1 tw-text-sm tw-text-gray-500">
+					<?php echo esc_html__( 'Display a floating back button in the bottom left corner to navigate to the previous page.', 'frontblocks' ); ?>
+				</p>
+			</div>
+			<label class="frbl-toggle">
+				<input type="checkbox" 
+					id="<?php echo esc_attr( $this->option_enable_back_button ); ?>" 
+					name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_back_button ); ?>]" 
+					value="1" 
+					<?php checked( true, $enabled ); ?>
+				/>
+				<span></span>
+			</label>
 		</div>
-		<label class="frbl-toggle">
-			<input type="checkbox" 
-				id="<?php echo esc_attr( $this->option_enable_back_button ); ?>" 
-				name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_back_button ); ?>]" 
-				value="1" 
-				<?php checked( true, $enabled ); ?>
-			/>
-			<span></span>
-		</label>
-	</div>
-	<?php
-}
+		<?php
+	}
+
 	/**
 	 * Render toggle field for enable Gutenberg in products (PRO).
 	 *
