@@ -13,6 +13,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - Reading Time Block
 - Reading Progress Bar
 - Product Categories Block
+- Back Button
 
 
 ## Release

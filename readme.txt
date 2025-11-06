@@ -61,6 +61,9 @@ Shortcode: [frontblocks_reading_time]
 **Reading Progress Bar:**
 Display a vertical progress bar on the right side of posts that fills up as users scroll through the content. The progress bar uses your website's primary color and provides a visual indicator of reading progress. This feature can be enabled/disabled from the FrontBlocks settings page in the WordPress admin.
 
+**Back Button:**
+Display a floating back button in the bottom left corner that allows users to navigate to the previous page. Enable it from the FrontBlocks settings page.
+
 **WooCommerce Features:**
 Included features for WooCommerce FrontBlocks PRO.
 
@@ -91,6 +94,7 @@ Extract the ZIP file and simply copy its contents into the wp-content/plugins/ d
 
 == n.e.x.t ==
 *   Added: Reading Progress Bar - Display a visual progress indicator on the right side of posts as users scroll through content.
+*   Added: Back Button feature with floating button to navigate to previous page.
 *   PRO: Horizontal Product Form Layout - Align price, quantity, and add to cart button in one row.
 
 == 1.2.1 ==
