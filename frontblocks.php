@@ -67,3 +67,17 @@ function frbl_is_after_add_to_cart_enabled() {
 	$options = get_option( 'frontblocks_settings', array() );
 	return (bool) ( $options['enable_after_add_to_cart'] ?? false );
 }
+
+/**
+ * Check if Horizontal Product Form is enabled.
+ *
+ * @return bool True if enabled.
+ */
+function frbl_is_horizontal_product_form_enabled() {
+	if ( ! frbl_is_pro_active() ) {
+		return false;
+	}
+
+	$options = get_option( 'frontblocks_settings', array() );
+	return (bool) ( $options['horizontal_product_form'] ?? false );
+}
