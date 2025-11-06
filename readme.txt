@@ -58,6 +58,9 @@ Shortcode: [frontblocks_testimonials_carousel]
 Display the reading time of a post. You can choose the number of words per minute to use for the calculation.
 Shortcode: [frontblocks_reading_time]
 
+**Reading Progress Bar:**
+Display a vertical progress bar on the right side of posts that fills up as users scroll through the content. The progress bar uses your website's primary color and provides a visual indicator of reading progress. This feature can be enabled/disabled from the FrontBlocks settings page in the WordPress admin.
+
 **WooCommerce Features:**
 Included features for WooCommerce FrontBlocks PRO.
 
@@ -84,6 +87,9 @@ Extract the ZIP file and simply copy its contents into the wp-content/plugins/ d
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+
+== n.e.x.t ==
+*   Added: Reading Progress Bar - Display a visual progress indicator on the right side of posts as users scroll through content.
 
 == 1.2.1 ==
 *   Fixed: Carousel/Slider not working correctly.

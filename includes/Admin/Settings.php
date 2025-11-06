@@ -25,6 +25,13 @@ class Settings {
 	private $option_enable_testimonials = 'enable_testimonials';
 
 	/**
+	 * Option key for reading progress bar feature.
+	 *
+	 * @var string
+	 */
+	private $option_enable_reading_progress = 'enable_reading_progress';
+
+	/**
 	 * Option key for Gutenberg in products (PRO).
 	 *
 	 * @var string
@@ -261,6 +268,14 @@ class Settings {
 			$this->option_enable_testimonials,
 			__( 'Enable testimonials', 'frontblocks' ),
 			array( $this, 'field_enable_testimonials' ),
+			$this->page_slug,
+			'frontblocks_section_features'
+		);
+
+		add_settings_field(
+			$this->option_enable_reading_progress,
+			__( 'Enable reading progress bar', 'frontblocks' ),
+			array( $this, 'field_enable_reading_progress' ),
 			$this->page_slug,
 			'frontblocks_section_features'
 		);
@@ -614,6 +629,34 @@ class Settings {
 	}
 
 	/**
+	 * Render toggle field for enable reading progress bar.
+	 *
+	 * @return void
+	 */
+	public function field_enable_reading_progress() {
+		$options = get_option( 'frontblocks_settings', array() );
+		$enabled = (bool) ( $options[ $this->option_enable_reading_progress ] ?? false );
+		?>
+		<div class="tw-flex tw-items-center tw-justify-between">
+			<div class="tw-flex-grow">
+				<p class="tw-mt-1 tw-text-sm tw-text-gray-500">
+					<?php echo esc_html__( 'Display a vertical progress bar on the right side of posts that fills as you read.', 'frontblocks' ); ?>
+				</p>
+			</div>
+			<label class="frbl-toggle">
+				<input type="checkbox" 
+					id="<?php echo esc_attr( $this->option_enable_reading_progress ); ?>" 
+					name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_reading_progress ); ?>]" 
+					value="1" 
+					<?php checked( true, $enabled ); ?>
+				/>
+				<span></span>
+			</label>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Render toggle field for enable Gutenberg in products (PRO).
 	 *
 	 * @return void
@@ -910,7 +953,7 @@ class Settings {
 
 		$sanitized = array();
 		foreach ( $value as $key => $val ) {
-			if ( $this->option_enable_testimonials === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key ) {
+			if ( $this->option_enable_testimonials === $key || $this->option_enable_reading_progress === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key ) {
 				$sanitized[ $key ] = (bool) $val;
 			}
 		}
