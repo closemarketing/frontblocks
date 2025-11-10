@@ -244,7 +244,7 @@ class ShapeAnimations {
 		$stroke_color = isset( $svg_styles['color'] ) ? $svg_styles['color'] : '';
 
 		// Build inline styles.
-		$inline_styles = 'width: ' . ( ! empty( $width ) ? esc_attr( $width ) : '100%' ) . ';';
+		$inline_styles  = 'width: ' . ( ! empty( $width ) ? esc_attr( $width ) : '100%' ) . ';';
 		$inline_styles .= 'height: ' . ( ! empty( $height ) ? esc_attr( $height ) : '100%' ) . ';';
 		if ( ! empty( $fill_color ) ) {
 			$inline_styles .= '--lottie-color: ' . esc_attr( $fill_color ) . ';';
@@ -254,7 +254,7 @@ class ShapeAnimations {
 		$lottie_json_encoded = htmlspecialchars( wp_json_encode( $json_data ), ENT_QUOTES, 'UTF-8' );
 
 		// Create Lottie container.
-		$lottie_container = '<div ';
+		$lottie_container  = '<div ';
 		$lottie_container .= 'id="' . esc_attr( $unique_id ) . '" ';
 		$lottie_container .= 'class="frbl-lottie-animation" ';
 		$lottie_container .= 'data-lottie-json="' . $lottie_json_encoded . '" ';
@@ -287,7 +287,7 @@ class ShapeAnimations {
 					$new_class = 'frbl-has-lottie-animation';
 				}
 
-				$result = '<' . $tag . ' ' . $beginning;
+				$result  = '<' . $tag . ' ' . $beginning;
 				$result .= ' class="' . $new_class . '"';
 				$result .= $ending . '>';
 
@@ -305,15 +305,15 @@ class ShapeAnimations {
 	 *
 	 * @param string $block_content Original block content.
 	 * @param array  $json_data JSON data with SVG and animation.
-	 * @param array  $attrs Block attributes.
+	 * @param array  $attrs Block attributes (unused, kept for consistent signature).
 	 * @return string Modified block content.
 	 */
-	private function render_css_animation( $block_content, $json_data, $attrs ) {
+	private function render_css_animation( $block_content, $json_data, $attrs ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		// Extract SVG and animation data.
-		$custom_svg        = isset( $json_data['svg'] ) ? $json_data['svg'] : '';
-		$animation_data    = isset( $json_data['animation'] ) ? $json_data['animation'] : array();
-		$animation_name    = isset( $animation_data['name'] ) ? sanitize_key( $animation_data['name'] ) : 'customAnimation';
-		$animation_trigger = isset( $animation_data['trigger'] ) ? sanitize_text_field( $animation_data['trigger'] ) : 'load';
+		$custom_svg          = isset( $json_data['svg'] ) ? $json_data['svg'] : '';
+		$animation_data      = isset( $json_data['animation'] ) ? $json_data['animation'] : array();
+		$animation_name      = isset( $animation_data['name'] ) ? sanitize_key( $animation_data['name'] ) : 'customAnimation';
+		$animation_trigger   = isset( $animation_data['trigger'] ) ? sanitize_text_field( $animation_data['trigger'] ) : 'load';
 		$animation_keyframes = isset( $animation_data['keyframes'] ) ? $animation_data['keyframes'] : '';
 		$animation_duration  = isset( $animation_data['duration'] ) ? sanitize_text_field( $animation_data['duration'] ) : '1s';
 		$animation_delay     = isset( $animation_data['delay'] ) ? sanitize_text_field( $animation_data['delay'] ) : '0s';
@@ -325,7 +325,7 @@ class ShapeAnimations {
 		// Inject custom keyframes and SVG.
 		if ( ! empty( $animation_keyframes ) ) {
 			// Add inline style with keyframes.
-			$inline_style = '<style>';
+			$inline_style  = '<style>';
 			$inline_style .= esc_html( $animation_keyframes );
 			$inline_style .= ' .frbl-custom-svg-animation.' . esc_attr( $unique_id ) . ' { ';
 			$inline_style .= 'animation-name: ' . esc_attr( $animation_name ) . '; ';
@@ -351,7 +351,7 @@ class ShapeAnimations {
 		if ( ! empty( $custom_svg ) ) {
 			// Sanitize SVG.
 			$custom_svg = wp_kses( $custom_svg, $this->get_svg_allowed_tags() );
-			
+
 			// Replace the SVG content in the block.
 			$block_content = preg_replace(
 				'/<svg[^>]*>.*?<\/svg>/is',
@@ -361,7 +361,7 @@ class ShapeAnimations {
 		}
 
 		// Add custom animation class.
-		$animation_class = 'frbl-custom-svg-animation ' . $unique_id;
+		$animation_class  = 'frbl-custom-svg-animation ' . $unique_id;
 		$animation_class .= ' frbl-shape-trigger-' . esc_attr( $animation_trigger );
 
 		// Add class to the wrapper.
@@ -385,7 +385,7 @@ class ShapeAnimations {
 				$data_attrs .= ' data-shape-trigger="' . esc_attr( $animation_trigger ) . '"';
 
 				// Build the opening tag.
-				$result = '<' . $tag . ' ' . $beginning;
+				$result  = '<' . $tag . ' ' . $beginning;
 				$result .= ' class="' . $new_class . '"';
 				$result .= $data_attrs;
 				$result .= $ending . '>';
@@ -417,80 +417,79 @@ class ShapeAnimations {
 				'role'        => array(),
 			),
 			'path'     => array(
-				'd'           => array(),
-				'fill'        => array(),
-				'stroke'      => array(),
+				'd'            => array(),
+				'fill'         => array(),
+				'stroke'       => array(),
 				'stroke-width' => array(),
-				'class'       => array(),
+				'class'        => array(),
 			),
 			'circle'   => array(
-				'cx'          => array(),
-				'cy'          => array(),
-				'r'           => array(),
-				'fill'        => array(),
-				'stroke'      => array(),
+				'cx'           => array(),
+				'cy'           => array(),
+				'r'            => array(),
+				'fill'         => array(),
+				'stroke'       => array(),
 				'stroke-width' => array(),
-				'class'       => array(),
+				'class'        => array(),
 			),
 			'rect'     => array(
-				'x'           => array(),
-				'y'           => array(),
-				'width'       => array(),
-				'height'      => array(),
-				'fill'        => array(),
-				'stroke'      => array(),
+				'x'            => array(),
+				'y'            => array(),
+				'width'        => array(),
+				'height'       => array(),
+				'fill'         => array(),
+				'stroke'       => array(),
 				'stroke-width' => array(),
-				'rx'          => array(),
-				'ry'          => array(),
-				'class'       => array(),
+				'rx'           => array(),
+				'ry'           => array(),
+				'class'        => array(),
 			),
 			'line'     => array(
-				'x1'          => array(),
-				'y1'          => array(),
-				'x2'          => array(),
-				'y2'          => array(),
-				'stroke'      => array(),
+				'x1'           => array(),
+				'y1'           => array(),
+				'x2'           => array(),
+				'y2'           => array(),
+				'stroke'       => array(),
 				'stroke-width' => array(),
-				'class'       => array(),
+				'class'        => array(),
 			),
 			'polygon'  => array(
-				'points'      => array(),
-				'fill'        => array(),
-				'stroke'      => array(),
+				'points'       => array(),
+				'fill'         => array(),
+				'stroke'       => array(),
 				'stroke-width' => array(),
-				'class'       => array(),
+				'class'        => array(),
 			),
 			'polyline' => array(
-				'points'      => array(),
-				'fill'        => array(),
-				'stroke'      => array(),
+				'points'       => array(),
+				'fill'         => array(),
+				'stroke'       => array(),
 				'stroke-width' => array(),
-				'class'       => array(),
+				'class'        => array(),
 			),
 			'ellipse'  => array(
-				'cx'          => array(),
-				'cy'          => array(),
-				'rx'          => array(),
-				'ry'          => array(),
-				'fill'        => array(),
-				'stroke'      => array(),
+				'cx'           => array(),
+				'cy'           => array(),
+				'rx'           => array(),
+				'ry'           => array(),
+				'fill'         => array(),
+				'stroke'       => array(),
 				'stroke-width' => array(),
-				'class'       => array(),
+				'class'        => array(),
 			),
 			'g'        => array(
-				'fill'        => array(),
-				'class'       => array(),
-				'transform'   => array(),
+				'fill'      => array(),
+				'class'     => array(),
+				'transform' => array(),
 			),
 			'defs'     => array(),
 			'clippath' => array(
-				'id'          => array(),
+				'id' => array(),
 			),
 			'use'      => array(
-				'xlink:href'  => array(),
-				'href'        => array(),
+				'xlink:href' => array(),
+				'href'       => array(),
 			),
 		);
 	}
 }
-
