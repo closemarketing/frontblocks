@@ -84,15 +84,6 @@ class GravityFormsInline {
 			false
 		);
 
-		// Pass settings to JavaScript.
-		wp_localize_script(
-			'frontblocks-gf-inline-editor-js',
-			'frontblocksGfInline',
-			array(
-				'isEnabled' => frbl_is_gf_inline_enabled(),
-			)
-		);
-
 		// Set script translations for JavaScript.
 		wp_set_script_translations(
 			'frontblocks-gf-inline-editor-js',

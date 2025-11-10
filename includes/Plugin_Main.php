@@ -105,10 +105,8 @@ class Plugin_Main {
 		// Back Button module.
 		new Frontend\BackButton();
 
-		// Gravity Forms Inline Layout module (only if enabled in settings).
-		if ( frbl_is_gf_inline_enabled() ) {
-			new Frontend\GravityFormsInline();
-		}
+		// Gravity Forms Inline Layout module.
+		new Frontend\GravityFormsInline();
 	}
 
 	/**

@@ -35,14 +35,6 @@
                     return el(BlockEdit, props);
                 }
 
-                // Check if the feature is enabled in settings.
-                const isFeatureEnabled = typeof frontblocksGfInline !== 'undefined' && frontblocksGfInline.isEnabled;
-                
-                // If feature is not enabled, don't show the controls.
-                if (!isFeatureEnabled) {
-                    return el(BlockEdit, props);
-                }
-
                 // Check if a form is selected.
                 const { attributes, setAttributes } = props;
                 const {
@@ -64,7 +56,7 @@
                         el(
                             PanelBody,
                             {
-                                title: __('FrontBlocks Inline Layout', 'frontblocks'),
+                                title: __('FrontBlocks From GravityForms', 'frontblocks'),
                                 initialOpen: false
                             },
                             el(ToggleControl, {

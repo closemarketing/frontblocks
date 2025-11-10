@@ -14,27 +14,18 @@ The Gravity Forms Inline Layout feature allows you to display form fields and su
 
 ## How to Use
 
-### Step 1: Enable the Feature in Settings
-
-1. Go to **Appearance > FrontBlocks** in your WordPress admin
-2. In the **Features** section, find **"Gravity Forms Inline Layout"**
-3. Toggle it **ON**
-4. Click **Save Settings**
-
-### Step 2: Add a Gravity Forms Block
+### Step 1: Add a Gravity Forms Block
 
 1. In the WordPress block editor, add a **Gravity Forms** block
 2. Select the form you want to display from the form selector
 
-### Step 3: Enable Inline Layout
+### Step 2: Enable Inline Layout
 
 1. With the Gravity Forms block selected, look in the right sidebar (Block settings)
-2. Find the **"FrontBlocks Inline Layout"** panel
+2. Find the **"FrontBlocks Gravity Form Options"** panel
 3. Toggle **"Enable Inline Layout"** to ON
 
-**Note**: If you don't see the "FrontBlocks Inline Layout" panel, make sure you've enabled the feature in Settings (Step 1).
-
-### Step 4: Customize (Optional)
+### Step 3: Customize (Optional)
 
 1. Adjust the **"Gap between elements"** slider to set the spacing between fields and button
 2. The preview will update in real-time in the editor
@@ -120,9 +111,9 @@ Works in all modern browsers:
 ### The inline layout option doesn't appear
 
 **Solution**: Make sure you have:
-1. **Enabled the feature in FrontBlocks Settings** (Appearance > FrontBlocks > Features > Gravity Forms Inline Layout)
-2. Selected a form from the Gravity Forms block selector
-3. The option only appears after a form is selected
+1. Selected a form from the Gravity Forms block selector
+2. The option only appears after a form is selected
+3. Refresh the editor page (Ctrl/Cmd + Shift + R) to clear any cached scripts
 
 ### Block shows error "This block has encountered an error"
 

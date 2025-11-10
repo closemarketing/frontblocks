@@ -68,9 +68,8 @@ Display a floating back button in the bottom left corner that allows users to na
 Display Gravity Forms with fields and buttons on the same line. Perfect for newsletter signup forms (email + subscribe button) or search forms (input + search button). 
 
 To use this feature:
-1. Enable it in Appearance > FrontBlocks > Features
-2. Select a form in the Gravity Forms block
-3. Find the "FrontBlocks Inline Layout" option in the block settings where you can:
+1. Select a form in the Gravity Forms block
+2. Find the "FrontBlocks Gravity Form Options" panel in the block settings where you can:
    - Enable inline layout with a simple toggle
    - Adjust the gap between elements (0-50px)
    - Responsive design: automatically stacks on mobile devices
