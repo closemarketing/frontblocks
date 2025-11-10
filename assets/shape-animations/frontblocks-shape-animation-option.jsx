@@ -266,7 +266,7 @@
 								// Create Lottie preview container.
 								lottieContainer = document.createElement('div');
 								lottieContainer.className = 'frbl-lottie-preview';
-								lottieContainer.style.cssText = 'position: relative; width: 100%; height: 100%; pointer-events: none; opacity: 0; transition: opacity 0.1s ease-in;';
+								lottieContainer.style.cssText = 'position: relative; width: 100%; height: 100%; pointer-events: none;';
 									
 									// Replace content with Lottie container.
 									shapeElement.appendChild(lottieContainer);
@@ -293,11 +293,6 @@
 								// Set color BEFORE creating animation.
 								if (svgStyles.fill) {
 									lottieContainer.style.setProperty('--lottie-color', svgStyles.fill);
-									
-									// Clear any existing interval.
-									if (colorIntervalRef.current) {
-										clearInterval(colorIntervalRef.current);
-									}
 								}
 
 								// Create Lottie animation.
@@ -317,29 +312,24 @@
 								lottieInstanceRef.current = animation;
 
 								// Apply color IMMEDIATELY after creating animation.
-								if (svgStyles.fill) {
-									applyColorToLottie(lottieContainer, svgStyles.fill);
-								}
+								applyColorToLottie(lottieContainer, svgStyles.fill);
 
 								// Apply color immediately after SVG is added to DOM.
-								if (svgStyles.fill) {
-									// Apply color as soon as the SVG is rendered.
-									animation.addEventListener('DOMLoaded', function() {
-										applyColorToLottie(lottieContainer, svgStyles.fill);
-									});
-									
-									// Apply color on EVERY SINGLE FRAME (most aggressive approach).
-									animation.addEventListener('enterFrame', function() {
-										applyColorToLottie(lottieContainer, svgStyles.fill);
-									});
-									
-									// Also apply immediately via multiple attempts for instant coverage.
-									setTimeout(function() { applyColorToLottie(lottieContainer, svgStyles.fill); }, 0);
-									setTimeout(function() { applyColorToLottie(lottieContainer, svgStyles.fill); }, 10);
-									setTimeout(function() { applyColorToLottie(lottieContainer, svgStyles.fill); }, 20);
-									setTimeout(function() { applyColorToLottie(lottieContainer, svgStyles.fill); }, 50);
-									setTimeout(function() { applyColorToLottie(lottieContainer, svgStyles.fill); }, 100);
-								}
+								animation.addEventListener('DOMLoaded', function() {
+									applyColorToLottie(lottieContainer, svgStyles.fill);
+								});
+
+								// Apply color on EVERY SINGLE FRAME (most aggressive approach).
+								animation.addEventListener('enterFrame', function() {
+									applyColorToLottie(lottieContainer, svgStyles.fill);
+								});
+
+								// Apply color multiple times immediately for instant coverage.
+								setTimeout(function() { applyColorToLottie(lottieContainer, svgStyles.fill); }, 0);
+								setTimeout(function() { applyColorToLottie(lottieContainer, svgStyles.fill); }, 10);
+								setTimeout(function() { applyColorToLottie(lottieContainer, svgStyles.fill); }, 20);
+								setTimeout(function() { applyColorToLottie(lottieContainer, svgStyles.fill); }, 50);
+								setTimeout(function() { applyColorToLottie(lottieContainer, svgStyles.fill); }, 100);
 							}
 						}, 300);
 					}
@@ -364,7 +354,10 @@
 	 * Apply color to Lottie animation SVG elements - AGGRESSIVELY.
 	 */
 	function applyColorToLottie(container, color) {
-		if (!container || !color) return;
+		if (!container) return;
+
+		// If no color provided, return early.
+		if (!color) return;
 
 		// Set CSS variable.
 		container.style.setProperty('--lottie-color', color);
@@ -401,9 +394,6 @@
 		if (svg) {
 			svg.style.setProperty('fill', color, 'important');
 		}
-
-		// Mark container as visible after color is applied.
-		container.style.opacity = '1';
 	}
 
 	addFilter(

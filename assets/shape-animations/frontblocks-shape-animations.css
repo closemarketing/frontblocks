@@ -68,8 +68,9 @@
 	position: relative;
 	width: 100%;
 	height: 100%;
-	opacity: 0;
-	transition: opacity 0.1s ease-in;
+	min-width: 48px;
+	min-height: 48px;
+	opacity: 1 !important;
 }
 
 /* Wrapper for blocks with Lottie */
