@@ -25,6 +25,20 @@ class Settings {
 	private $option_enable_testimonials = 'enable_testimonials';
 
 	/**
+	 * Option key for reading progress bar feature.
+	 *
+	 * @var string
+	 */
+	private $option_enable_reading_progress = 'enable_reading_progress';
+
+	/**
+	 * Option key for back button feature.
+	 *
+	 * @var string
+	 */
+	private $option_enable_back_button = 'enable_back_button';
+
+	/**
 	 * Option key for Gravity Forms inline layout.
 	 *
 	 * @var string
@@ -86,6 +100,13 @@ class Settings {
 	 * @var string
 	 */
 	private $option_deactivate_product_tabs = 'deactivate_product_tabs';
+
+	/**
+	 * Option key for horizontal product form layout (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_horizontal_product_form = 'horizontal_product_form';
 
 	/**
 	 * Page slug.
@@ -273,6 +294,22 @@ class Settings {
 		);
 
 		add_settings_field(
+			$this->option_enable_reading_progress,
+			__( 'Enable reading progress bar', 'frontblocks' ),
+			array( $this, 'field_enable_reading_progress' ),
+			$this->page_slug,
+			'frontblocks_section_features'
+		);
+
+		add_settings_field(
+			$this->option_enable_back_button,
+			__( 'Enable Back Button', 'frontblocks' ),
+			array( $this, 'field_enable_back_button' ),
+			$this->page_slug,
+			'frontblocks_section_features'
+		);
+
+		add_settings_field(
 			$this->option_enable_gf_inline,
 			__( 'Gravity Forms Inline Layout', 'frontblocks' ),
 			array( $this, 'field_enable_gf_inline' ),
@@ -348,6 +385,14 @@ class Settings {
 			$this->option_deactivate_product_tabs,
 			__( 'Deactivate Product Tabs', 'frontblocks' ),
 			array( $this, 'field_deactivate_product_tabs' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
+		add_settings_field(
+			$this->option_horizontal_product_form,
+			__( 'Horizontal Product Form Layout', 'frontblocks' ),
+			array( $this, 'field_horizontal_product_form' ),
 			$this->page_slug,
 			'frontblocks_section_woocommerce_features'
 		);
@@ -629,6 +674,62 @@ class Settings {
 	}
 
 	/**
+	 * Render toggle field for enable reading progress bar.
+	 *
+	 * @return void
+	 */
+	public function field_enable_reading_progress() {
+		$options = get_option( 'frontblocks_settings', array() );
+		$enabled = (bool) ( $options[ $this->option_enable_reading_progress ] ?? false );
+		?>
+		<div class="tw-flex tw-items-center tw-justify-between">
+			<div class="tw-flex-grow">
+				<p class="tw-mt-1 tw-text-sm tw-text-gray-500">
+					<?php echo esc_html__( 'Display a vertical progress bar on the right side of posts that fills as you read.', 'frontblocks' ); ?>
+				</p>
+			</div>
+			<label class="frbl-toggle">
+				<input type="checkbox"
+					id="<?php echo esc_attr( $this->option_enable_reading_progress ); ?>"
+					name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_reading_progress ); ?>]"
+					value="1"
+					<?php checked( true, $enabled ); ?>
+				/>
+				<span></span>
+			</label>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render toggle field for enable back button.
+	 *
+	 * @return void
+	 */
+	public function field_enable_back_button() {
+		$options = get_option( 'frontblocks_settings', array() );
+		$enabled = (bool) ( $options[ $this->option_enable_back_button ] ?? false );
+		?>
+		<div class="tw-flex tw-items-center tw-justify-between">
+			<div class="tw-flex-grow">
+				<p class="tw-mt-1 tw-text-sm tw-text-gray-500">
+					<?php echo esc_html__( 'Display a floating back button in the bottom left corner to navigate to the previous page.', 'frontblocks' ); ?>
+				</p>
+			</div>
+			<label class="frbl-toggle">
+				<input type="checkbox" 
+					id="<?php echo esc_attr( $this->option_enable_back_button ); ?>" 
+					name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_back_button ); ?>]" 
+					value="1" 
+					<?php checked( true, $enabled ); ?>
+				/>
+				<span></span>
+			</label>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Render toggle field for Gravity Forms inline layout.
 	 *
 	 * @return void
@@ -749,6 +850,18 @@ class Settings {
 		$this->render_pro_toggle(
 			$this->option_deactivate_product_tabs,
 			__( 'Remove all product tabs (Description, Additional Information, Reviews) from single product pages.', 'frontblocks' )
+		);
+	}
+
+	/**
+	 * Render Horizontal Product Form Layout field.
+	 *
+	 * @return void
+	 */
+	public function field_horizontal_product_form() {
+		$this->render_pro_toggle(
+			$this->option_horizontal_product_form,
+			__( 'Align price, quantity selector, and add to cart button horizontally in a single row on product pages.', 'frontblocks' )
 		);
 	}
 
@@ -953,7 +1066,7 @@ class Settings {
 
 		$sanitized = array();
 		foreach ( $value as $key => $val ) {
-			if ( $this->option_enable_testimonials === $key || $this->option_enable_gf_inline === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key ) {
+			if ( $this->option_enable_testimonials === $key || $this->option_enable_reading_progress === $key || $this->option_enable_back_button === $key || $this->option_enable_gf_inline === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key || $this->option_horizontal_product_form === $key ) {
 				$sanitized[ $key ] = (bool) $val;
 			}
 		}

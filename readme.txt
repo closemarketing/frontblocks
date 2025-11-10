@@ -58,6 +58,12 @@ Shortcode: [frontblocks_testimonials_carousel]
 Display the reading time of a post. You can choose the number of words per minute to use for the calculation.
 Shortcode: [frontblocks_reading_time]
 
+**Reading Progress Bar:**
+Display a vertical progress bar on the right side of posts that fills up as users scroll through the content. The progress bar uses your website's primary color and provides a visual indicator of reading progress. This feature can be enabled/disabled from the FrontBlocks settings page in the WordPress admin.
+
+**Back Button:**
+Display a floating back button in the bottom left corner that allows users to navigate to the previous page. Enable it from the FrontBlocks settings page.
+
 **Gravity Forms Inline Layout:**
 Display Gravity Forms with fields and buttons on the same line. Perfect for newsletter signup forms (email + subscribe button) or search forms (input + search button). 
 
@@ -85,6 +91,7 @@ Features:
 - Disable zoom on product image.
 - Share buttons.
 - Disable tabs on the product page.
+- Horizontal product form layout (price, quantity, and add to cart button in one row).
 
 More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-plugins/frontblocks-pro/?utm_source=WordPressORGReadme&utm_medium=link&utm_campaign=frontblocks) page.
 
@@ -103,6 +110,9 @@ Extract the ZIP file and simply copy its contents into the wp-content/plugins/ d
 *   Added: Gap control for inline form elements (0-50px).
 *   Added: Responsive design support - automatically stacks on mobile.
 *   Fixed: REST API validation errors with custom block attributes.
+*   Added: Reading Progress Bar - Display a visual progress indicator on the right side of posts as users scroll through content.
+*   Added: Back Button feature with floating button to navigate to previous page.
+*   PRO: Horizontal Product Form Layout - Align price, quantity, and add to cart button in one row.
 
 == 1.2.1 ==
 *   Fixed: Carousel/Slider not working correctly.

@@ -11,8 +11,10 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - Insert Post
 - Counter Block
 - Reading Time Block
+- Reading Progress Bar
 - Product Categories Block
 - Gravity Forms Inline Layout
+- Back Button
 
 
 ## Release
