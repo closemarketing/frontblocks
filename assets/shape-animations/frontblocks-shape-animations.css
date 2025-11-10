@@ -1,0 +1,133 @@
+/**
+ * FrontBlocks Custom SVG Animations
+ * Base styles for custom SVG animations via JSON
+ */
+
+/* Base animation class */
+.frbl-custom-svg-animation {
+	display: inline-block;
+	animation-fill-mode: both;
+	animation-timing-function: ease-in-out;
+}
+
+/* Hover trigger: pause animation until hover */
+.frbl-custom-svg-animation.frbl-shape-trigger-hover {
+	animation-play-state: paused;
+}
+
+.frbl-custom-svg-animation.frbl-shape-trigger-hover:hover {
+	animation-play-state: running;
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+	.frbl-custom-svg-animation,
+	.frbl-custom-svg-animation:hover {
+		animation: none !important;
+		transition: none !important;
+	}
+}
+
+/* Editor preview support */
+.block-editor-block-list__block .frbl-custom-svg-animation.frbl-shape-trigger-load {
+	animation-play-state: running;
+}
+
+/* Show hover state in editor for better UX */
+.block-editor-block-list__block.is-selected .frbl-custom-svg-animation.frbl-shape-trigger-hover {
+	opacity: 0.9;
+}
+
+/* Ensure SVG inherits size from parent */
+.frbl-custom-svg-animation svg {
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+
+/* ========================================
+   LOTTIE ANIMATIONS
+   ======================================== */
+
+/* Lottie animation container */
+.frbl-lottie-animation {
+	display: block;
+	position: relative;
+	opacity: 0;
+	transition: opacity 0.1s ease-in;
+}
+
+/* Show Lottie after color is applied */
+.frbl-lottie-animation.frbl-color-applied {
+	opacity: 1;
+}
+
+/* Lottie preview in editor */
+.frbl-lottie-preview {
+	display: block;
+	position: relative;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	transition: opacity 0.1s ease-in;
+}
+
+/* Wrapper for blocks with Lottie */
+.frbl-has-lottie-animation {
+	display: inline-block;
+}
+
+/* Hide original Shape SVG when Lottie is active (frontend) */
+.frbl-has-lottie-animation .gb-shape > svg {
+	display: none !important;
+}
+
+/* Hide original Shape SVG when Lottie preview is active (editor) */
+.block-editor-block-list__block .gb-shape:has(.frbl-lottie-preview) > svg {
+	display: none !important;
+}
+
+/* Ensure Lottie SVG scales properly and inherits size */
+.frbl-lottie-animation svg,
+.frbl-lottie-preview svg {
+	width: 100% !important;
+	height: 100% !important;
+	max-width: 100%;
+	max-height: 100%;
+}
+
+/* Color inheritance for Lottie - Base rule (will be overridden by JS for better control) */
+.frbl-lottie-animation path[fill]:not([fill="none"]),
+.frbl-lottie-animation ellipse[fill]:not([fill="none"]),
+.frbl-lottie-animation circle[fill]:not([fill="none"]),
+.frbl-lottie-animation rect[fill]:not([fill="none"]),
+.frbl-lottie-animation polygon[fill]:not([fill="none"]),
+.frbl-lottie-animation polyline[fill]:not([fill="none"]),
+.frbl-lottie-preview path[fill]:not([fill="none"]),
+.frbl-lottie-preview ellipse[fill]:not([fill="none"]),
+.frbl-lottie-preview circle[fill]:not([fill="none"]),
+.frbl-lottie-preview rect[fill]:not([fill="none"]),
+.frbl-lottie-preview polygon[fill]:not([fill="none"]),
+.frbl-lottie-preview polyline[fill]:not([fill="none"]) {
+	fill: var(--lottie-color, currentColor) !important;
+}
+
+/* Editor preview support for Lottie */
+.block-editor-block-list__block .frbl-lottie-animation {
+	pointer-events: auto;
+}
+
+/* Respect user's motion preferences for Lottie */
+@media (prefers-reduced-motion: reduce) {
+	.frbl-lottie-animation {
+		display: none;
+	}
+	
+	/* Show a fallback or warning */
+	.frbl-has-lottie-animation::before {
+		content: "Animation disabled (motion preferences)";
+		font-size: 12px;
+		color: #666;
+		display: block;
+	}
+}

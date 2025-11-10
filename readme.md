@@ -14,6 +14,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - Reading Progress Bar
 - Product Categories Block
 - Back Button
+- Custom SVG Animations
 
 
 ## Release

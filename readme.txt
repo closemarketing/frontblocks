@@ -64,6 +64,9 @@ Display a vertical progress bar on the right side of posts that fills up as user
 **Back Button:**
 Display a floating back button in the bottom left corner that allows users to navigate to the previous page. Enable it from the FrontBlocks settings page.
 
+**Custom SVG Animations:**
+Add animated graphics to GenerateBlocks Shape blocks via JSON. Supports two formats that are automatically detected: **Lottie/Bodymovin** (paste JSON from After Effects or LottieFiles.com) and **Custom CSS** (SVG + @keyframes). Includes lottie-web library, real-time validation, format detection, and example templates. All animations are performance-optimized and respect user motion preferences.
+
 **WooCommerce Features:**
 Included features for WooCommerce FrontBlocks PRO.
 
@@ -93,6 +96,8 @@ Extract the ZIP file and simply copy its contents into the wp-content/plugins/ d
 == Changelog ==
 
 == n.e.x.t ==
+*   Added: Custom Animations for Shapes - Full Lottie/Bodymovin support + custom CSS animations via JSON. Auto-detects format.
+*   Added: Lottie-web library integration for After Effects animations.
 *   Added: Reading Progress Bar - Display a visual progress indicator on the right side of posts as users scroll through content.
 *   Added: Back Button feature with floating button to navigate to previous page.
 *   PRO: Horizontal Product Form Layout - Align price, quantity, and add to cart button in one row.
