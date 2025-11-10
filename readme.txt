@@ -58,6 +58,19 @@ Shortcode: [frontblocks_testimonials_carousel]
 Display the reading time of a post. You can choose the number of words per minute to use for the calculation.
 Shortcode: [frontblocks_reading_time]
 
+**Gravity Forms Inline Layout:**
+Display Gravity Forms with fields and buttons on the same line. Perfect for newsletter signup forms (email + subscribe button) or search forms (input + search button). 
+
+To use this feature:
+1. Enable it in Appearance > FrontBlocks > Features
+2. Select a form in the Gravity Forms block
+3. Find the "FrontBlocks Inline Layout" option in the block settings where you can:
+   - Enable inline layout with a simple toggle
+   - Adjust the gap between elements (0-50px)
+   - Responsive design: automatically stacks on mobile devices
+
+This feature eliminates the need for custom CSS to achieve inline form layouts.
+
 **WooCommerce Features:**
 Included features for WooCommerce FrontBlocks PRO.
 
@@ -84,6 +97,12 @@ Extract the ZIP file and simply copy its contents into the wp-content/plugins/ d
 [Official Repository Github](https://github.com/closemarketing/frontblocks)
 
 == Changelog ==
+
+== n.e.x.t ==
+*   Added: Gravity Forms Inline Layout option for displaying fields and buttons on the same line.
+*   Added: Gap control for inline form elements (0-50px).
+*   Added: Responsive design support - automatically stacks on mobile.
+*   Fixed: REST API validation errors with custom block attributes.
 
 == 1.2.1 ==
 *   Fixed: Carousel/Slider not working correctly.

@@ -98,6 +98,11 @@ class Plugin_Main {
 
 		// Reading Time module.
 		new Frontend\ReadingTime();
+
+		// Gravity Forms Inline Layout module (only if enabled in settings).
+		if ( frbl_is_gf_inline_enabled() ) {
+			new Frontend\GravityFormsInline();
+		}
 	}
 
 	/**

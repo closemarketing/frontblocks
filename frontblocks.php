@@ -67,3 +67,13 @@ function frbl_is_after_add_to_cart_enabled() {
 	$options = get_option( 'frontblocks_settings', array() );
 	return (bool) ( $options['enable_after_add_to_cart'] ?? false );
 }
+
+/**
+ * Check if Gravity Forms Inline Layout is enabled.
+ *
+ * @return bool True if enabled.
+ */
+function frbl_is_gf_inline_enabled() {
+	$options = get_option( 'frontblocks_settings', array() );
+	return (bool) ( $options['enable_gf_inline'] ?? false );
+}
