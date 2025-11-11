@@ -1162,31 +1162,6 @@ video {
 	z-index: 10;
 }
 
-/* Active Badge (for always-active features) */
-.frbl-active-badge {
-	position: absolute;
-	top: 0.75rem;
-	right: 0.75rem;
-	background: #10b981;
-	color: #ffffff;
-	border-radius: 50%;
-	width: 1.75rem;
-	height: 1.75rem;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
-	z-index: 10;
-}
-
-.frbl-active-badge .tw-w-4 {
-	width: 1rem;
-}
-
-.frbl-active-badge .tw-h-4 {
-	height: 1rem;
-}
-
 /* Feature Card Content */
 .frbl-feature-content {
 	display: flex;
@@ -1267,6 +1242,11 @@ video {
 .frbl-feature-card.frbl-feature-active .frbl-feature-info {
 	flex-direction: column;
 	align-items: flex-start;
+}
+
+/* Active cards don't have toggle, so don't use space-between */
+.frbl-feature-card.frbl-feature-active .frbl-feature-content {
+	justify-content: flex-start;
 }
 
 /* Feature Toggle */
