@@ -271,9 +271,17 @@ class Settings {
 			)
 		);
 
+		// Always Active Blocks section.
+		add_settings_section(
+			'frontblocks_section_active_blocks',
+			__( 'Active Blocks & Features', 'frontblocks' ),
+			array( $this, 'section_active_blocks_callback' ),
+			$this->page_slug
+		);
+
 		add_settings_section(
 			'frontblocks_section_features',
-			__( 'Features', 'frontblocks' ),
+			__( 'Optional Features', 'frontblocks' ),
 			array( $this, 'section_features_callback' ),
 			$this->page_slug
 		);
@@ -525,20 +533,40 @@ class Settings {
 	}
 
 	/**
-	 * Section features callback.
+	 * Active Blocks section callback.
+	 *
+	 * @return void
+	 */
+	private function section_active_blocks_callback() {
+		?>
+		<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
+			<?php echo esc_html__( 'These blocks and features are always active and available in the block editor.', 'frontblocks' ); ?>
+		</p>
+		<div class="frbl-features-grid">
+			<?php
+			UI::show_info_card( 'animations', __( 'Animations', 'frontblocks' ), __( 'Add animations to any block using Animate.css', 'frontblocks' ) );
+			UI::show_info_card( 'carousel', __( 'Carousel/Slider', 'frontblocks' ), __( 'Transform any Grid block into a carousel or slider', 'frontblocks' ) );
+			UI::show_info_card( 'gallery', __( 'Native Gallery', 'frontblocks' ), __( 'Enhanced gallery block with carousel and masonry options', 'frontblocks' ) );
+			UI::show_info_card( 'sticky', __( 'Sticky Columns', 'frontblocks' ), __( 'Make Grid blocks sticky when scrolling', 'frontblocks' ) );
+			UI::show_info_card( 'insert_post', __( 'Insert Post Block', 'frontblocks' ), __( 'Display content from other posts, pages or custom post types', 'frontblocks' ) );
+			UI::show_info_card( 'counter', __( 'Counter Block', 'frontblocks' ), __( 'Display animated counters with start and end values', 'frontblocks' ) );
+			UI::show_info_card( 'reading_time', __( 'Reading Time Block', 'frontblocks' ), __( 'Show estimated reading time for posts', 'frontblocks' ) );
+			UI::show_info_card( 'product_categories', __( 'Product Categories Block', 'frontblocks' ), __( 'Display WooCommerce product categories', 'frontblocks' ) );
+			?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Features section callback.
 	 *
 	 * @return void
 	 */
 	private function section_features_callback() {
-		echo '<p>' . esc_html__( 'Visual enhancements for your website.', 'frontblocks' ) . '</p>';
 		?>
-		<div class="frbl-features-grid">
-			<?php
-			UI::show_feature( 'animations' );
-			UI::show_feature( 'animations' );
-			UI::show_feature( 'animations' );
-			?>
-		</div>
+		<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
+			<?php echo esc_html__( 'Enable or disable these optional features as needed.', 'frontblocks' ); ?>
+		</p>
 		<?php
 	}
 
@@ -551,12 +579,33 @@ class Settings {
 	private function render_settings_section( $section ) {
 		global $wp_settings_fields;
 
-		if ( ! isset( $wp_settings_fields[ $this->page_slug ][ $section['id'] ] ) ) {
+		$has_fields = isset( $wp_settings_fields[ $this->page_slug ][ $section['id'] ] );
+
+		// Si no hay campos Y no hay callback, no renderizar nada.
+		if ( ! $has_fields && ! $section['callback'] ) {
 			return;
 		}
 
+		// Check if this is a section with callback only (like active_blocks).
+		$is_callback_only = ! $has_fields && $section['callback'];
+
 		// Check if this is the license section - render it full width.
 		$is_license_section = 'frontblocks_section_license' === $section['id'];
+
+		if ( $is_callback_only ) {
+			// Render section with only callback (no fields).
+			?>
+			<div class="frbl-section-wrapper">
+				<div class="frbl-section-header">
+					<h2 class="tw-text-2xl tw-font-bold tw-text-gray-900 tw-mb-0">
+						<?php echo esc_html( $section['title'] ); ?>
+					</h2>
+				</div>
+				<?php call_user_func( $section['callback'], $section ); ?>
+			</div>
+			<?php
+			return;
+		}
 
 		if ( $is_license_section ) {
 			// Render license section as a full-width card.
@@ -589,7 +638,7 @@ class Settings {
 			<div class="frbl-section-wrapper">
 				<!-- Section Header -->
 				<div class="frbl-section-header">
-					<h2 class="tw-text-2xl tw-font-bold tw-text-gray-900 tw-mb-2">
+					<h2 class="tw-text-2xl tw-font-bold tw-text-gray-900 tw-mb-0">
 						<?php echo esc_html( $section['title'] ); ?>
 					</h2>
 					<?php
@@ -773,7 +822,11 @@ class Settings {
 			echo '</div>';
 			echo '</div>';
 		} else {
-			echo '<p>' . esc_html__( 'Advanced features for WooCommerce and more.', 'frontblocks' ) . '</p>';
+			?>
+			<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
+				<?php echo esc_html__( 'Advanced features for WooCommerce and more.', 'frontblocks' ); ?>
+			</p>
+			<?php
 		}
 	}
 
