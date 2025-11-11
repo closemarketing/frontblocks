@@ -12,6 +12,8 @@ namespace FrontBlocks\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
+use FrontBlocks\Admin\UI;
+
 /**
  * Settings class
  */
@@ -272,9 +274,7 @@ class Settings {
 		add_settings_section(
 			'frontblocks_section_features',
 			__( 'Features', 'frontblocks' ),
-			function () {
-				echo '<p>' . esc_html__( 'Visual enhancements for your website.', 'frontblocks' ) . '</p>';
-			},
+			array( $this, 'section_features_callback' ),
 			$this->page_slug
 		);
 
@@ -305,8 +305,8 @@ class Settings {
 		// PRO Features section.
 		add_settings_section(
 			'frontblocks_section_woocommerce_features',
-			__( 'PRO Features', 'frontblocks' ),
-			array( $this, 'section_pro_features_callback' ),
+			__( 'WooCommerce Features', 'frontblocks' ),
+			array( $this, 'section_woo_features_callback' ),
 			$this->page_slug
 		);
 
@@ -525,6 +525,24 @@ class Settings {
 	}
 
 	/**
+	 * Section features callback.
+	 *
+	 * @return void
+	 */
+	private function section_features_callback() {
+		echo '<p>' . esc_html__( 'Visual enhancements for your website.', 'frontblocks' ) . '</p>';
+		?>
+		<div class="frbl-features-grid">
+			<?php
+			UI::show_feature( 'animations' );
+			UI::show_feature( 'animations' );
+			UI::show_feature( 'animations' );
+			?>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Render a single settings section as a card.
 	 *
 	 * @param array $section Section data.
@@ -718,7 +736,7 @@ class Settings {
 	 *
 	 * @return void
 	 */
-	public function section_pro_features_callback() {
+	public function section_woo_features_callback() {
 		global $frontblocks_pro_license;
 		if ( ! frbl_is_pro_active() ) {
 			echo '<div class="tw-bg-blue-50 tw-border-l-4 tw-border-blue-400 tw-p-4 tw-mb-4">';
