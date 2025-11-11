@@ -114,6 +114,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 *   Added: Reading Progress Bar - Display a visual progress indicator on the right side of posts as users scroll through content.
 *   Added: Back Button feature with floating button to navigate to previous page.
 *   PRO: Horizontal Product Form Layout - Align price, quantity, and add to cart button in one row.
+*   Added: Remove box shadow in Carrusel bullets.
 
 == 1.2.1 ==
 *   Fixed: Carousel/Slider not working correctly.
