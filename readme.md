@@ -15,6 +15,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - Product Categories Block
 - Gravity Forms Inline Layout
 - Back Button
+- Custom SVG Animations
 
 
 ## Release

@@ -64,6 +64,9 @@ Display a vertical progress bar on the right side of posts that fills up as user
 **Back Button:**
 Display a floating back button in the bottom left corner that allows users to navigate to the previous page. Enable it from the FrontBlocks settings page.
 
+**Custom SVG Animations:**
+Add animated graphics to GenerateBlocks Shape blocks via JSON. Supports two formats that are automatically detected: **Lottie/Bodymovin** (paste JSON from After Effects or LottieFiles.com) and **Custom CSS** (SVG + @keyframes). Includes lottie-web library, real-time validation, format detection, and example templates. All animations are performance-optimized and respect user motion preferences.
+
 **Gravity Forms Inline Layout:**
 Display Gravity Forms with fields and buttons on the same line. Perfect for newsletter signup forms (email + subscribe button) or search forms (input + search button). 
 
@@ -96,15 +99,14 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Installation ==
 
-Extract the ZIP file and simply copy its contents into the wp-content/plugins/ directory of your WordPress installation. Then activate the plugin from the Plugins page.
-
-
-== Developers ==
-[Official Repository Github](https://github.com/closemarketing/frontblocks)
+1. Go to Plugins > Add New > Search for "FrontBlocks" > Install and Activate.
+2. Go to Settings > FrontBlocks > Features and enable the features you want to use.
 
 == Changelog ==
 
 == 1.2.2 ==
+*   Added: Custom Animations for Shapes - Full Lottie/Bodymovin support + custom CSS animations via JSON. Auto-detects format.
+*   Added: Lottie-web library integration for After Effects animations.
 *   Added: Gravity Forms Inline Layout option for displaying fields and buttons on the same line.
 *   Added: Gap control for inline form elements (0-50px).
 *   Added: Responsive design support - automatically stacks on mobile.
