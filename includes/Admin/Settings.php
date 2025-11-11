@@ -141,6 +141,7 @@ class Settings {
 
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		add_action( 'admin_init', array( $this, 'deactivate_pro_features_on_invalid_license' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
 	}
 
@@ -234,6 +235,51 @@ class Settings {
 			});
 			"
 		);
+	}
+
+	/**
+	 * Deactivate PRO features if license is not valid.
+	 *
+	 * This method runs on admin_init and automatically deactivates
+	 * all PRO features when the license becomes invalid or expires.
+	 *
+	 * @return void
+	 */
+	public function deactivate_pro_features_on_invalid_license() {
+		// Only run if license is not valid.
+		if ( $this->is_license_valid ) {
+			return;
+		}
+
+		// Get current settings.
+		$options = get_option( 'frontblocks_settings', array() );
+
+		// List of PRO features to deactivate.
+		$pro_features = array(
+			$this->option_enable_gutenberg,
+			$this->option_enable_simple_prices_variable_products,
+			$this->option_enable_after_add_to_cart,
+			$this->option_deactivate_short_description,
+			$this->option_move_content_to_short_description,
+			$this->option_disable_zoom_images,
+			$this->option_add_share_buttons,
+			$this->option_deactivate_product_tabs,
+			$this->option_horizontal_product_form,
+		);
+
+		// Check if any PRO feature is currently enabled.
+		$has_enabled_pro_features = false;
+		foreach ( $pro_features as $feature ) {
+			if ( ! empty( $options[ $feature ] ) ) {
+				$has_enabled_pro_features = true;
+				$options[ $feature ]      = false;
+			}
+		}
+
+		// If any PRO feature was enabled, update the options.
+		if ( $has_enabled_pro_features ) {
+			update_option( 'frontblocks_settings', $options );
+		}
 	}
 
 	/**
@@ -1022,10 +1068,29 @@ class Settings {
 		}
 
 		$sanitized = array();
+
+		// List of PRO features that require a valid license.
+		$pro_features = array(
+			$this->option_enable_gutenberg,
+			$this->option_enable_simple_prices_variable_products,
+			$this->option_enable_after_add_to_cart,
+			$this->option_deactivate_short_description,
+			$this->option_move_content_to_short_description,
+			$this->option_disable_zoom_images,
+			$this->option_add_share_buttons,
+			$this->option_deactivate_product_tabs,
+			$this->option_horizontal_product_form,
+		);
+
 		foreach ( $value as $key => $val ) {
 
 			if ( $this->option_enable_testimonials === $key || $this->option_enable_reading_progress === $key || $this->option_enable_back_button === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key || $this->option_horizontal_product_form === $key ) {
-				$sanitized[ $key ] = (bool) $val;
+				// If it's a PRO feature and license is not valid, force it to false.
+				if ( in_array( $key, $pro_features, true ) && ! $this->is_license_valid ) {
+					$sanitized[ $key ] = false;
+				} else {
+					$sanitized[ $key ] = (bool) $val;
+				}
 			}
 		}
 

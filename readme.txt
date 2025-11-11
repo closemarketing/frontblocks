@@ -96,6 +96,7 @@ Extract the ZIP file and simply copy its contents into the wp-content/plugins/ d
 *   Added: Reading Progress Bar - Display a visual progress indicator on the right side of posts as users scroll through content.
 *   Added: Back Button feature with floating button to navigate to previous page.
 *   PRO: Horizontal Product Form Layout - Align price, quantity, and add to cart button in one row.
+*   Improved: PRO features are now automatically disabled when license is deactivated or expires to prevent unauthorized use.
 
 == 1.2.1 ==
 *   Fixed: Carousel/Slider not working correctly.
