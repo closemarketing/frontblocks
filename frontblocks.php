@@ -46,6 +46,32 @@ add_action(
 );
 
 /**
+ * Redirect to settings page on plugin activation.
+ */
+function frbl_plugin_activation_redirect() {
+	// Bail if activating from network or bulk activation.
+	if ( is_network_admin() || isset( $_GET['activate-multi'] ) ) {
+		return;
+	}
+
+	// Redirect to settings page.
+	if ( get_option( 'frbl_activation_redirect', false ) ) {
+		delete_option( 'frbl_activation_redirect' );
+		wp_safe_redirect( admin_url( 'themes.php?page=frontblocks-settings' ) );
+		exit;
+	}
+}
+add_action( 'admin_init', 'frbl_plugin_activation_redirect' );
+
+/**
+ * Set redirect flag on plugin activation.
+ */
+function frbl_set_activation_redirect() {
+	add_option( 'frbl_activation_redirect', true );
+}
+register_activation_hook( __FILE__, 'frbl_set_activation_redirect' );
+
+/**
  * Check if FrontBlocks PRO is active.
  *
  * @return bool
