@@ -3,9 +3,9 @@ Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit
 Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
-Tested up to: 6.8
-Stable tag: 1.2.1
-Version: 1.2.1
+Tested up to: 6.9
+Stable tag: 1.2.2
+Version: 1.2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -104,7 +104,7 @@ Extract the ZIP file and simply copy its contents into the wp-content/plugins/ d
 
 == Changelog ==
 
-== n.e.x.t ==
+== 1.2.2 ==
 *   Added: Gravity Forms Inline Layout option for displaying fields and buttons on the same line.
 *   Added: Gap control for inline form elements (0-50px).
 *   Added: Responsive design support - automatically stacks on mobile.
