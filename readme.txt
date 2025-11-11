@@ -3,9 +3,9 @@ Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit
 Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
-Tested up to: 6.8
-Stable tag: 1.2.1
-Version: 1.2.1
+Tested up to: 6.9
+Stable tag: 1.2.2
+Version: 1.2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -67,6 +67,18 @@ Display a floating back button in the bottom left corner that allows users to na
 **Custom SVG Animations:**
 Add animated graphics to GenerateBlocks Shape blocks via JSON. Supports two formats that are automatically detected: **Lottie/Bodymovin** (paste JSON from After Effects or LottieFiles.com) and **Custom CSS** (SVG + @keyframes). Includes lottie-web library, real-time validation, format detection, and example templates. All animations are performance-optimized and respect user motion preferences.
 
+**Gravity Forms Inline Layout:**
+Display Gravity Forms with fields and buttons on the same line. Perfect for newsletter signup forms (email + subscribe button) or search forms (input + search button). 
+
+To use this feature:
+1. Select a form in the Gravity Forms block
+2. Find the "FrontBlocks Gravity Form Options" panel in the block settings where you can:
+   - Enable inline layout with a simple toggle
+   - Adjust the gap between elements (0-50px)
+   - Responsive design: automatically stacks on mobile devices
+
+This feature eliminates the need for custom CSS to achieve inline form layouts.
+
 **WooCommerce Features:**
 Included features for WooCommerce FrontBlocks PRO.
 
@@ -95,9 +107,13 @@ Extract the ZIP file and simply copy its contents into the wp-content/plugins/ d
 
 == Changelog ==
 
-== n.e.x.t ==
+== 1.2.2 ==
 *   Added: Custom Animations for Shapes - Full Lottie/Bodymovin support + custom CSS animations via JSON. Auto-detects format.
 *   Added: Lottie-web library integration for After Effects animations.
+*   Added: Gravity Forms Inline Layout option for displaying fields and buttons on the same line.
+*   Added: Gap control for inline form elements (0-50px).
+*   Added: Responsive design support - automatically stacks on mobile.
+*   Fixed: REST API validation errors with custom block attributes.
 *   Added: Reading Progress Bar - Display a visual progress indicator on the right side of posts as users scroll through content.
 *   Added: Back Button feature with floating button to navigate to previous page.
 *   PRO: Horizontal Product Form Layout - Align price, quantity, and add to cart button in one row.

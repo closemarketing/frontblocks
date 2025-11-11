@@ -47,6 +47,10 @@
     "build:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css",
     "watch:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css --watch",
     "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:headline && npm run build:product-categories && npm run build:reading-time && npm run build:shape-animations && npm run build:css"
+    "build:gf-inline": "babel assets/gravityforms-inline/frontblocks-gf-inline-option.jsx --out-file assets/gravityforms-inline/frontblocks-gf-inline-option.js",
+    "build:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css",
+    "watch:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css --watch",
+    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:headline && npm run build:product-categories && npm run build:reading-time && npm run build:gf-inline && npm run build:css"
   },
   "dependencies": {
     "react": "^19.1.0",

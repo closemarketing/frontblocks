@@ -107,6 +107,9 @@ class Plugin_Main {
 
 		// Shape Animations module (for GenerateBlocks Shape block).
 		new Frontend\ShapeAnimations();
+
+		// Gravity Forms Inline Layout module.
+		new Frontend\GravityFormsInline();
 	}
 
 	/**
