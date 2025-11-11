@@ -1115,3 +1115,152 @@ video {
 	width: 50%;
 }
 
+/* Features Grid Layout */
+.frbl-section-wrapper {
+	margin-bottom: 3rem;
+}
+
+.frbl-section-header {
+	margin-bottom: 1.5rem;
+}
+
+.frbl-features-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+	gap: 1.25rem;
+}
+
+/* Feature Card Styles */
+.frbl-feature-card {
+	position: relative;
+	background: #ffffff;
+	border: 1px solid #e5e7eb;
+	border-radius: 12px;
+	padding: 1.5rem;
+	transition: all 0.2s ease;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	min-height: 80px;
+}
+
+.frbl-feature-card:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+	transform: translateY(-2px);
+	border-color: #687df9;
+}
+
+/* PRO Badge */
+.frbl-pro-badge {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background: linear-gradient(135deg, #ec4899 0%, #f97316 100%);
+	color: #ffffff;
+	font-size: 0.625rem;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	padding: 0.25rem 0.75rem;
+	border-radius: 0 0 12px 0;
+	box-shadow: 0 2px 4px rgba(236, 72, 153, 0.3);
+	z-index: 10;
+}
+
+/* Feature Card Content */
+.frbl-feature-content {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	min-height: 3rem;
+}
+
+/* Feature Icon */
+.frbl-feature-icon {
+	flex-shrink: 0;
+	width: 2.5rem;
+	height: 2.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+	border-radius: 10px;
+	color: #687df9;
+	transition: all 0.2s ease;
+}
+
+.frbl-feature-card:hover .frbl-feature-icon {
+	background: linear-gradient(135deg, #e0e3fc 0%, #d0d4fb 100%);
+	transform: scale(1.05);
+}
+
+.frbl-feature-icon svg {
+	width: 1.5rem;
+	height: 1.5rem;
+	stroke-width: 2;
+}
+
+/* Feature Info */
+.frbl-feature-info {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+}
+
+.frbl-feature-title {
+	font-size: 0.9375rem;
+	font-weight: 600;
+	color: #1f2937;
+	margin: 0;
+	line-height: 1.5;
+}
+
+/* Feature Toggle */
+.frbl-feature-toggle {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+}
+
+/* PRO Card Styles */
+.frbl-feature-card.frbl-feature-pro {
+	background: linear-gradient(135deg, #ffffff 0%, #fef3f2 100%);
+	border-color: #fee2e2;
+}
+
+.frbl-feature-card.frbl-feature-pro:hover {
+	border-color: #ec4899;
+}
+
+.frbl-feature-card.frbl-feature-pro .frbl-feature-icon {
+	background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+	color: #ec4899;
+}
+
+.frbl-feature-card.frbl-feature-pro:hover .frbl-feature-icon {
+	background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+}
+
+/* Disabled state for PRO features without license */
+.frbl-feature-card.frbl-feature-pro .frbl-toggle:has(input:disabled) {
+	opacity: 0.6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+	.frbl-features-grid {
+		grid-template-columns: 1fr;
+	}
+	
+	.frbl-feature-card {
+		padding: 1.25rem;
+	}
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+	.frbl-features-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+

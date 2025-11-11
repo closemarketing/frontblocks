@@ -93,6 +93,11 @@ Extract the ZIP file and simply copy its contents into the wp-content/plugins/ d
 == Changelog ==
 
 == n.e.x.t ==
+*   Improved: Complete redesign of the Settings page with modern card-based layout.
+*   Improved: Each feature now displays in its own card with icon, title, and toggle switch.
+*   Improved: PRO features show distinctive badge in the top-left corner.
+*   Improved: Responsive grid layout that adapts to mobile, tablet, and desktop screens.
+*   Improved: License section displays as full-width card for better visibility.
 *   Added: Reading Progress Bar - Display a visual progress indicator on the right side of posts as users scroll through content.
 *   Added: Back Button feature with floating button to navigate to previous page.
 *   PRO: Horizontal Product Form Layout - Align price, quantity, and add to cart button in one row.

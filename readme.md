@@ -14,6 +14,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - Reading Progress Bar
 - Product Categories Block
 - Back Button
+- Modern Settings Page with Card-based Layout
 
 
 ## Release
