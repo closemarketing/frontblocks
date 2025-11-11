@@ -99,11 +99,8 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Installation ==
 
-Extract the ZIP file and simply copy its contents into the wp-content/plugins/ directory of your WordPress installation. Then activate the plugin from the Plugins page.
-
-
-== Developers ==
-[Official Repository Github](https://github.com/closemarketing/frontblocks)
+1. Go to Plugins > Add New > Search for "FrontBlocks" > Install and Activate.
+2. Go to Settings > FrontBlocks > Features and enable the features you want to use.
 
 == Changelog ==
 
