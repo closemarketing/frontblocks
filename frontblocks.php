@@ -50,6 +50,7 @@ add_action(
  */
 function frbl_plugin_activation_redirect() {
 	// Bail if activating from network or bulk activation.
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Checking WordPress activation parameter, not processing form data.
 	if ( is_network_admin() || isset( $_GET['activate-multi'] ) ) {
 		return;
 	}
