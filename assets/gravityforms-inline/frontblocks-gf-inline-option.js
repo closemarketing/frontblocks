@@ -53,7 +53,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       // Only show options if a form is selected.
       var showInlineOptions = formId && formId > 0;
       return el('div', {}, el(BlockEdit, props), showInlineOptions && el(InspectorControls, {}, el(PanelBody, {
-        title: __('FrontBlocks From GravityForms', 'frontblocks'),
+        title: __('FrontBlocks for GravityForms', 'frontblocks'),
         initialOpen: false
       }, el(ToggleControl, {
         label: __('Enable Inline Layout', 'frontblocks'),

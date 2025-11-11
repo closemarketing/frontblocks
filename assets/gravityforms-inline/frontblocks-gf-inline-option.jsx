@@ -56,7 +56,7 @@
                         el(
                             PanelBody,
                             {
-                                title: __('FrontBlocks From GravityForms', 'frontblocks'),
+                                title: __('FrontBlocks for GravityForms', 'frontblocks'),
                                 initialOpen: false
                             },
                             el(ToggleControl, {
