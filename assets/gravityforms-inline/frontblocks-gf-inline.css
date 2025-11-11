@@ -1,0 +1,175 @@
+/**
+ * FrontBlocks - Gravity Forms Inline Layout Styles
+ *
+ * @package    FrontBlocks
+ * @author     Closemarketing
+ * @copyright  2025 Closemarketing
+ */
+
+/* Inline Layout for Gravity Forms */
+.frontblocks-gf-inline .gform_wrapper form,
+.frontblocks-gf-inline-preview .gform_wrapper form,
+.frontblocks-gf-inline-wrapper .gform_wrapper form {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: var(--gf-inline-gap, 10px);
+}
+
+.frontblocks-gf-inline .gform_wrapper .gform_body,
+.frontblocks-gf-inline-preview .gform_wrapper .gform_body,
+.frontblocks-gf-inline-wrapper .gform_wrapper .gform_body {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.frontblocks-gf-inline .gform_wrapper .gform_footer,
+.frontblocks-gf-inline-preview .gform_wrapper .gform_footer,
+.frontblocks-gf-inline-wrapper .gform_wrapper .gform_footer {
+	flex: 0 0 auto;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+/* Make form fields display inline */
+.frontblocks-gf-inline .gform_wrapper .gform_fields,
+.frontblocks-gf-inline-preview .gform_wrapper .gform_fields,
+.frontblocks-gf-inline-wrapper .gform_wrapper .gform_fields {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: var(--gf-inline-gap, 10px);
+	margin: 0 !important;
+}
+
+.frontblocks-gf-inline .gform_wrapper .gfield,
+.frontblocks-gf-inline-preview .gform_wrapper .gfield,
+.frontblocks-gf-inline-wrapper .gform_wrapper .gfield {
+	flex: 1 1 auto;
+	min-width: 200px;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+/* Hide labels for cleaner inline appearance (optional - can be customized) */
+.frontblocks-gf-inline .gform_wrapper .gfield_label,
+.frontblocks-gf-inline-preview .gform_wrapper .gfield_label,
+.frontblocks-gf-inline-wrapper .gform_wrapper .gfield_label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border-width: 0;
+}
+
+/* Keep label visible for screen readers but show placeholder */
+.frontblocks-gf-inline .gform_wrapper .ginput_container input,
+.frontblocks-gf-inline .gform_wrapper .ginput_container select,
+.frontblocks-gf-inline .gform_wrapper .ginput_container textarea,
+.frontblocks-gf-inline-preview .gform_wrapper .ginput_container input,
+.frontblocks-gf-inline-preview .gform_wrapper .ginput_container select,
+.frontblocks-gf-inline-preview .gform_wrapper .ginput_container textarea,
+.frontblocks-gf-inline-wrapper .gform_wrapper .ginput_container input,
+.frontblocks-gf-inline-wrapper .gform_wrapper .ginput_container select,
+.frontblocks-gf-inline-wrapper .gform_wrapper .ginput_container textarea {
+	width: 100%;
+	margin: 0;
+}
+
+/* Button alignment */
+.frontblocks-gf-inline .gform_wrapper .gform_footer input[type="submit"],
+.frontblocks-gf-inline .gform_wrapper .gform_footer button,
+.frontblocks-gf-inline-preview .gform_wrapper .gform_footer input[type="submit"],
+.frontblocks-gf-inline-preview .gform_wrapper .gform_footer button,
+.frontblocks-gf-inline-wrapper .gform_wrapper .gform_footer input[type="submit"],
+.frontblocks-gf-inline-wrapper .gform_wrapper .gform_footer button {
+	margin: 0;
+	white-space: nowrap;
+}
+
+/* Validation errors */
+.frontblocks-gf-inline .gform_wrapper .gfield_error,
+.frontblocks-gf-inline-preview .gform_wrapper .gfield_error,
+.frontblocks-gf-inline-wrapper .gform_wrapper .gfield_error {
+	flex-basis: 100%;
+}
+
+.frontblocks-gf-inline .gform_wrapper .validation_message,
+.frontblocks-gf-inline-preview .gform_wrapper .validation_message,
+.frontblocks-gf-inline-wrapper .gform_wrapper .validation_message {
+	margin-top: 5px;
+}
+
+/* Responsive: Stack on mobile */
+@media (max-width: 768px) {
+	.frontblocks-gf-inline .gform_wrapper form,
+	.frontblocks-gf-inline-preview .gform_wrapper form,
+	.frontblocks-gf-inline-wrapper .gform_wrapper form {
+		flex-direction: column;
+	}
+
+	.frontblocks-gf-inline .gform_wrapper .gform_fields,
+	.frontblocks-gf-inline-preview .gform_wrapper .gform_fields,
+	.frontblocks-gf-inline-wrapper .gform_wrapper .gform_fields {
+		flex-direction: column;
+	}
+
+	.frontblocks-gf-inline .gform_wrapper .gfield,
+	.frontblocks-gf-inline-preview .gform_wrapper .gfield,
+	.frontblocks-gf-inline-wrapper .gform_wrapper .gfield {
+		width: 100%;
+	}
+
+	.frontblocks-gf-inline .gform_wrapper .gform_footer,
+	.frontblocks-gf-inline-preview .gform_wrapper .gform_footer,
+	.frontblocks-gf-inline-wrapper .gform_wrapper .gform_footer {
+		width: 100%;
+	}
+
+	.frontblocks-gf-inline .gform_wrapper .gform_footer input[type="submit"],
+	.frontblocks-gf-inline .gform_wrapper .gform_footer button,
+	.frontblocks-gf-inline-preview .gform_wrapper .gform_footer input[type="submit"],
+	.frontblocks-gf-inline-preview .gform_wrapper .gform_footer button,
+	.frontblocks-gf-inline-wrapper .gform_wrapper .gform_footer input[type="submit"],
+	.frontblocks-gf-inline-wrapper .gform_wrapper .gform_footer button {
+		width: 100%;
+	}
+}
+
+/* Support for specific form types */
+
+/* Newsletter signup (email + button) */
+.frontblocks-gf-inline .gform_wrapper .gfield--type-email {
+	flex: 1 1 auto;
+	min-width: 250px;
+}
+
+/* Search form (text + button) */
+.frontblocks-gf-inline .gform_wrapper .gfield--type-text {
+	flex: 1 1 auto;
+	min-width: 250px;
+}
+
+/* Honeypot and hidden fields */
+.frontblocks-gf-inline .gform_wrapper .gform_validation_container,
+.frontblocks-gf-inline .gform_wrapper .gfield_visibility_hidden {
+	display: none !important;
+}
+
+/* AJAX Spinner alignment */
+.frontblocks-gf-inline .gform_wrapper .gform_ajax_spinner {
+	display: inline-block;
+	margin-left: 10px;
+	vertical-align: middle;
+}
+
+/* RTL Support */
+[dir="rtl"] .frontblocks-gf-inline .gform_wrapper .gform_ajax_spinner {
+	margin-left: 0;
+	margin-right: 10px;
+}
+

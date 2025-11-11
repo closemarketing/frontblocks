@@ -104,6 +104,9 @@ class Plugin_Main {
 
 		// Back Button module.
 		new Frontend\BackButton();
+
+		// Gravity Forms Inline Layout module.
+		new Frontend\GravityFormsInline();
 	}
 
 	/**
