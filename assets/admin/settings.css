@@ -568,6 +568,9 @@ video {
 .frbl-settings-wrapper .tw-w-5 {
   width: 1.25rem;
 }
+.frbl-settings-wrapper .tw-w-full {
+  width: 100%;
+}
 .frbl-settings-wrapper .tw-max-w-5xl {
   max-width: 64rem;
 }
@@ -804,10 +807,6 @@ video {
 .frbl-settings-wrapper .tw-text-gray-600 {
   --tw-text-opacity: 1;
   color: rgb(75 85 99 / var(--tw-text-opacity, 1));
-}
-.frbl-settings-wrapper .tw-text-gray-800 {
-  --tw-text-opacity: 1;
-  color: rgb(31 41 55 / var(--tw-text-opacity, 1));
 }
 .frbl-settings-wrapper .tw-text-gray-900 {
   --tw-text-opacity: 1;
@@ -1067,6 +1066,9 @@ video {
 .frbl-settings-wrapper .hover\:tw-no-underline:hover {
   text-decoration-line: none;
 }
+.frbl-settings-wrapper .focus\:tw-border-transparent:focus {
+  border-color: transparent;
+}
 .frbl-settings-wrapper .focus\:tw-outline-none:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
@@ -1096,22 +1098,5 @@ video {
     padding-left: 2rem;
     padding-right: 2rem;
   }
-}
-
-/* Custom styles for license fields */
-.frbl-settings-wrapper .tw-text-base:not(button) {
-	font-size: 1rem;
-	line-height: 1.5rem;
-	width: 100%;
-}
-
-.frbl-settings-wrapper .tw-flex {
-	display: flex;
-	column-gap: 20px;
-}
-
-/* Submit button width */
-.frbl-settings-wrapper .tw-w-1\/2 {
-	width: 50%;
 }
 

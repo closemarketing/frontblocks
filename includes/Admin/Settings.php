@@ -1083,7 +1083,6 @@ class Settings {
 		);
 
 		foreach ( $value as $key => $val ) {
-
 			if ( $this->option_enable_testimonials === $key || $this->option_enable_reading_progress === $key || $this->option_enable_back_button === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key || $this->option_horizontal_product_form === $key ) {
 				// If it's a PRO feature and license is not valid, force it to false.
 				if ( in_array( $key, $pro_features, true ) && ! $this->is_license_valid ) {
