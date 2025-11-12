@@ -8,7 +8,7 @@ var Fragment = wp.element.Fragment;
 var InspectorControls = wp.blockEditor.InspectorControls;
 var _wp$components = wp.components,
   PanelBody = _wp$components.PanelBody,
-  CheckboxControl = _wp$components.CheckboxControl;
+  SelectControl = _wp$components.SelectControl;
 var __ = wp.i18n.__;
 
 /**
@@ -24,13 +24,9 @@ function addEdgeAlignmentAttributes(settings, name) {
     return settings;
   }
   settings.attributes = Object.assign(settings.attributes, {
-    frblEdgeAlignmentLeft: {
-      type: 'boolean',
-      default: false
-    },
-    frblEdgeAlignmentRight: {
-      type: 'boolean',
-      default: false
+    frblEdgeAlignment: {
+      type: 'string',
+      default: ''
     }
   });
   return settings;
@@ -73,8 +69,7 @@ var withEdgeAlignmentControls = createHigherOrderComponent(function (BlockEdit) 
     }
     var attributes = props.attributes,
       setAttributes = props.setAttributes;
-    var frblEdgeAlignmentLeft = attributes.frblEdgeAlignmentLeft,
-      frblEdgeAlignmentRight = attributes.frblEdgeAlignmentRight;
+    var frblEdgeAlignment = attributes.frblEdgeAlignment;
 
     // Only show panel if container uses centered layout (margin auto).
     if (!usesGlobalMaxWidth(attributes)) {
@@ -86,24 +81,25 @@ var withEdgeAlignmentControls = createHigherOrderComponent(function (BlockEdit) 
       className: "frbl-edge-alignment-panel"
     }, /*#__PURE__*/React.createElement("p", {
       className: "frbl-edge-alignment-description"
-    }, __('Remove padding from one side to create an edge-to-edge effect. Perfect for asymmetric layouts where content extends to the browser edge on one side.', 'frontblocks')), /*#__PURE__*/React.createElement(CheckboxControl, {
-      label: __('Remove Left Padding', 'frontblocks'),
-      checked: frblEdgeAlignmentLeft,
+    }, __('Remove padding from one side to create an edge-to-edge effect. Perfect for asymmetric layouts where content extends to the browser edge on one side.', 'frontblocks')), /*#__PURE__*/React.createElement(SelectControl, {
+      label: __('Align to Edge', 'frontblocks'),
+      value: frblEdgeAlignment,
+      options: [{
+        label: __('None', 'frontblocks'),
+        value: ''
+      }, {
+        label: __('Remove Left Padding', 'frontblocks'),
+        value: 'left'
+      }, {
+        label: __('Remove Right Padding', 'frontblocks'),
+        value: 'right'
+      }],
       onChange: function onChange(value) {
         return setAttributes({
-          frblEdgeAlignmentLeft: value
+          frblEdgeAlignment: value
         });
       },
-      help: __('Content will align to the left edge of the browser.', 'frontblocks')
-    }), /*#__PURE__*/React.createElement(CheckboxControl, {
-      label: __('Remove Right Padding', 'frontblocks'),
-      checked: frblEdgeAlignmentRight,
-      onChange: function onChange(value) {
-        return setAttributes({
-          frblEdgeAlignmentRight: value
-        });
-      },
-      help: __('Content will align to the right edge of the browser.', 'frontblocks')
+      help: __('Choose which side should extend to the browser edge.', 'frontblocks')
     }))));
   };
 }, 'withEdgeAlignmentControls');
@@ -119,14 +115,12 @@ var addEdgeAlignmentClass = createHigherOrderComponent(function (BlockListBlock)
       return /*#__PURE__*/React.createElement(BlockListBlock, props);
     }
     var attributes = props.attributes;
-    var frblEdgeAlignmentLeft = attributes.frblEdgeAlignmentLeft,
-      frblEdgeAlignmentRight = attributes.frblEdgeAlignmentRight;
+    var frblEdgeAlignment = attributes.frblEdgeAlignment;
     var additionalClasses = '';
-    if (frblEdgeAlignmentLeft) {
-      additionalClasses += ' frbl-edge-left';
-    }
-    if (frblEdgeAlignmentRight) {
-      additionalClasses += ' frbl-edge-right';
+    if (frblEdgeAlignment === 'left') {
+      additionalClasses = ' frbl-edge-left';
+    } else if (frblEdgeAlignment === 'right') {
+      additionalClasses = ' frbl-edge-right';
     }
     if (additionalClasses) {
       return /*#__PURE__*/React.createElement(BlockListBlock, _extends({}, props, {

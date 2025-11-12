@@ -94,30 +94,30 @@ class ContainerEdgeAlignment {
 			return $block_content;
 		}
 
-		// Check if edge alignment attributes exist.
-		if ( empty( $block['attrs']['frblEdgeAlignmentLeft'] ) && empty( $block['attrs']['frblEdgeAlignmentRight'] ) ) {
+		// Check if edge alignment attribute exists.
+		if ( empty( $block['attrs']['frblEdgeAlignment'] ) ) {
 			return $block_content;
 		}
 
-		// Add classes based on selected options.
-		$classes = array();
+		// Get the edge alignment value.
+		$edge_alignment = $block['attrs']['frblEdgeAlignment'];
 		
-		if ( ! empty( $block['attrs']['frblEdgeAlignmentLeft'] ) ) {
-			$classes[] = 'frbl-edge-left';
-		}
+		// Determine which class to add.
+		$class_string = '';
 		
-		if ( ! empty( $block['attrs']['frblEdgeAlignmentRight'] ) ) {
-			$classes[] = 'frbl-edge-right';
+		if ( 'left' === $edge_alignment ) {
+			$class_string = 'frbl-edge-left';
+		} elseif ( 'right' === $edge_alignment ) {
+			$class_string = 'frbl-edge-right';
 		}
 
-		if ( empty( $classes ) ) {
+		// If no valid alignment, return.
+		if ( empty( $class_string ) ) {
 			return $block_content;
 		}
 
-		// Add classes to the block.
-		$class_string = implode( ' ', $classes );
-		
-		// Find the first occurrence of class=" and add our classes.
+		// Add class to the block.
+		// Find the first occurrence of class=" and add our class.
 		if ( false !== strpos( $block_content, 'class="' ) ) {
 			$block_content = preg_replace(
 				'/class="/',
