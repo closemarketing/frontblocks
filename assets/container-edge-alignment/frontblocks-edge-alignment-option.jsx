@@ -1,6 +1,3 @@
-// TEST: Confirmar que el script se carga
-console.log('🚀 FrontBlocks Edge Alignment Script LOADED!');
-
 const { addFilter } = wp.hooks;
 const { createHigherOrderComponent } = wp.compose;
 const { Fragment } = wp.element;
@@ -42,44 +39,27 @@ addFilter(
 );
 
 /**
- * Check if container uses GeneratePress global max-width.
+ * Check if container uses GenerateBlocks global container width.
+ * Only containers with var(--gb-container-width) should have edge alignment.
  *
  * @param {Object} attributes Block attributes.
- * @return {boolean} True if uses global max-width.
+ * @return {boolean} True if uses global container width.
  */
 function usesGlobalMaxWidth(attributes) {
-	// Check if using global max width setting.
-	// GenerateBlocks uses 'useGlobalMaxWidth' or checks if maxWidth is empty/not set
-	// and innerContainer is enabled with global width.
-	
-	// Option 1: Has useGlobalMaxWidth attribute set to true.
-	if (attributes.useGlobalMaxWidth === true) {
-		return true;
+	// GenerateBlocks stores styles in an object (not array).
+	// Check if maxWidth uses var(--gb-container-width) and margins are auto.
+	if (!attributes.styles || typeof attributes.styles !== 'object') {
+		return false;
 	}
 	
-	// Option 2: Has isQueryLoopItem (uses global settings).
-	if (attributes.isQueryLoopItem === true) {
-		return true;
-	}
-	
-	// Option 3: maxWidth is set to a CSS variable (--content-width, etc).
-	if (attributes.maxWidth && typeof attributes.maxWidth === 'string') {
-		if (attributes.maxWidth.includes('var(--') || 
-		    attributes.maxWidth.includes('content-width') ||
-		    attributes.maxWidth === 'var(--gp-site-width)' ||
-		    attributes.maxWidth === 'var(--gp-page-width)') {
+	// Check if maxWidth contains the global container width variable.
+	if (attributes.styles.maxWidth && 
+	    attributes.styles.maxWidth.includes('var(--gb-container-width)')) {
+		// Also verify it's centered (marginLeft and marginRight are auto).
+		if (attributes.styles.marginLeft === 'auto' && 
+		    attributes.styles.marginRight === 'auto') {
 			return true;
 		}
-	}
-	
-	// Option 4: Check maxWidthUnit is 'global' or similar.
-	if (attributes.maxWidthUnit === 'global' || attributes.maxWidthUnit === '%') {
-		return true;
-	}
-	
-	// Option 5: Inner container with inherit/global width.
-	if (attributes.innerContainer === true && !attributes.maxWidth) {
-		return true;
 	}
 	
 	return false;
@@ -99,20 +79,10 @@ const withEdgeAlignmentControls = createHigherOrderComponent((BlockEdit) => {
 		const { attributes, setAttributes } = props;
 		const { frblEdgeAlignmentLeft, frblEdgeAlignmentRight } = attributes;
 		
-		// DEBUG: Ver atributos del contenedor
-		console.log('=== FrontBlocks Edge Alignment DEBUG ===');
-		console.log('Container attributes:', attributes);
-		console.log('Uses global width?', usesGlobalMaxWidth(attributes));
-		console.log('maxWidth:', attributes.maxWidth);
-		console.log('maxWidthUnit:', attributes.maxWidthUnit);
-		console.log('useGlobalMaxWidth:', attributes.useGlobalMaxWidth);
-		console.log('innerContainer:', attributes.innerContainer);
-		console.log('=======================================');
-		
-		// TEMPORAL: SIEMPRE MOSTRAR para debug
-		// if (!usesGlobalMaxWidth(attributes)) {
-		// 	return <BlockEdit {...props} />;
-		// }
+		// Only show panel if container uses centered layout (margin auto).
+		if (!usesGlobalMaxWidth(attributes)) {
+			return <BlockEdit {...props} />;
+		}
 
 		return (
 			<Fragment>

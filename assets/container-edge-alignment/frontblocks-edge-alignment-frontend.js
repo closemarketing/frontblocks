@@ -78,6 +78,18 @@
 				container.classList.add( 'frbl-edge-right' );
 			}
 
+			// IMPORTANT: Only apply edge alignment if viewport is wider than container.
+			// On small screens (mobile, tablet), disable the effect to avoid overflow.
+			if ( viewportWidth <= originalWidth ) {
+				// Viewport is too small, reset to normal centered layout.
+				container.style.marginLeft = '';
+				container.style.marginRight = '';
+				container.style.width = '';
+				container.style.maxWidth = '';
+				container.setAttribute( 'data-frbl-processed', 'true' );
+				return;
+			}
+
 			// Calculate the margin that was on each side (when centered with auto).
 			// If margins are "auto", they will show as equal values.
 			// Formula: (viewport - containerWidth) / 2.
