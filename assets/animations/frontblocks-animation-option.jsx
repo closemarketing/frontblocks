@@ -234,10 +234,68 @@ function addAnimationControls(BlockEdit) {
             frblAnimationRepeat = false,
             frblAnimationInfinite = false,
             frblDisableAnimationMobile = false,
+            frblGlassEffect = false,
+            frblGlassBlur = 10,
         } = props.attributes;
         
         // Create flattened options for the SelectControl
         const flattenedOptions = createFlattenedOptions();
+
+        // Apply glass effect styles to the block wrapper in the editor
+        useEffect(() => {
+            // Find the block wrapper in the editor
+            let doc = document;
+            const iframe = document.querySelector('iframe[name="editor-canvas"], iframe#editor-canvas');
+            if (iframe && iframe.contentDocument) {
+                doc = iframe.contentDocument;
+            }
+
+            // Try to find the block element
+            let blockElement = doc.querySelector(`[data-block="${props.clientId}"]`);
+            if (!blockElement) {
+                blockElement = doc.querySelector(`.wp-block[data-block="${props.clientId}"]`);
+            }
+            if (!blockElement) {
+                blockElement = doc.querySelector(`.block-editor-block-list__block[data-block="${props.clientId}"]`);
+            }
+
+            if (blockElement) {
+                // Get the actual content element
+                const childElement = blockElement.querySelector('[class*="wp-block-"]') || blockElement.firstElementChild || blockElement;
+                
+                if (childElement) {
+                    if (frblGlassEffect) {
+                        // Apply glass effect styles
+                        childElement.style.backdropFilter = `blur(${frblGlassBlur}px)`;
+                        childElement.style.webkitBackdropFilter = `blur(${frblGlassBlur}px)`;
+                        childElement.style.background = 'rgba(255, 255, 255, 0.1)';
+                        childElement.style.border = '1px solid rgba(255, 255, 255, 0.18)';
+                        childElement.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.15)';
+                    } else {
+                        // Remove glass effect styles when disabled
+                        childElement.style.backdropFilter = '';
+                        childElement.style.webkitBackdropFilter = '';
+                        childElement.style.background = '';
+                        childElement.style.border = '';
+                        childElement.style.boxShadow = '';
+                    }
+                }
+            }
+
+            // Cleanup function
+            return () => {
+                if (blockElement) {
+                    const childElement = blockElement.querySelector('[class*="wp-block-"]') || blockElement.firstElementChild || blockElement;
+                    if (childElement) {
+                        childElement.style.backdropFilter = '';
+                        childElement.style.webkitBackdropFilter = '';
+                        childElement.style.background = '';
+                        childElement.style.border = '';
+                        childElement.style.boxShadow = '';
+                    }
+                }
+            };
+        }, [frblGlassEffect, frblGlassBlur, props.clientId]);
 
         // Function to trigger animation preview
         const triggerAnimationPreview = () => {
@@ -420,6 +478,30 @@ function addAnimationControls(BlockEdit) {
                             </>
                         )}
                     </PanelBody>
+
+                    <PanelBody
+                        title={__('Container Effects', 'frontblocks')}
+                        initialOpen={false}
+                    >
+                        <ToggleControl
+                            label={__('Enable Glass Effect', 'frontblocks')}
+                            help={__('Applies a glassmorphism effect with blur to the container background', 'frontblocks')}
+                            checked={frblGlassEffect}
+                            onChange={(value) => props.setAttributes({ frblGlassEffect: value })}
+                        />
+
+                        {frblGlassEffect && (
+                            <RangeControl
+                                label={__('Blur Intensity', 'frontblocks')}
+                                help={__('Adjust the blur amount for the glass effect', 'frontblocks')}
+                                value={frblGlassBlur}
+                                onChange={(value) => props.setAttributes({ frblGlassBlur: value })}
+                                min={0}
+                                max={50}
+                                step={1}
+                            />
+                        )}
+                    </PanelBody>
                 </InspectorControls>
             </Fragment>
         );
@@ -445,8 +527,16 @@ addFilter(
             frblAnimationRepeat,
             frblAnimationInfinite,
             frblDisableAnimationMobile = false,
+            frblGlassEffect = false,
+            frblGlassBlur = 10,
         } = attributes;
 
+        // Add style attribute if needed
+        if (!props.style) {
+            props.style = {};
+        }
+
+        // Handle animations
         if (frblAnimation) {
             // Add animate.css base class and the specific animation
             let animationClasses = `animate__animated animate__${frblAnimation}`;
@@ -459,11 +549,6 @@ addFilter(
             props.className = props.className ? 
                 `${props.className} ${animationClasses}` : 
                 animationClasses;
-            
-            // Add style attribute if needed
-            if (!props.style) {
-                props.style = {};
-            }
             
             // Set animation properties as inline styles
             if (frblAnimationDuration) {
@@ -479,6 +564,18 @@ addFilter(
             } else if (frblAnimationRepeat) {
                 props.style['--animate-repeat'] = '2';
             }
+        }
+
+        // Handle glass effect
+        if (frblGlassEffect) {
+            const glassClass = 'frbl-glass-effect';
+            props.className = props.className ? 
+                `${props.className} ${glassClass}` : 
+                glassClass;
+            
+            // Add glass effect styles
+            props.style['backdropFilter'] = `blur(${frblGlassBlur}px)`;
+            props.style['-webkit-backdrop-filter'] = `blur(${frblGlassBlur}px)`;
         }
 
         return props;
