@@ -101,10 +101,10 @@ class ContainerEdgeAlignment {
 
 		// Get the edge alignment value.
 		$edge_alignment = $block['attrs']['frblEdgeAlignment'];
-		
+
 		// Determine which class to add.
 		$class_string = '';
-		
+
 		if ( 'left' === $edge_alignment ) {
 			$class_string = 'frbl-edge-left';
 		} elseif ( 'right' === $edge_alignment ) {
@@ -138,4 +138,3 @@ class ContainerEdgeAlignment {
 		return $block_content;
 	}
 }
-
