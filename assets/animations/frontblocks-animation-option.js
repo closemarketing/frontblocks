@@ -421,55 +421,102 @@ function addAnimationControls(BlockEdit) {
 
     // Apply glass effect styles to the block wrapper in the editor
     useEffect(function () {
-      // Find the block wrapper in the editor
-      var doc = document;
-      var iframe = document.querySelector('iframe[name="editor-canvas"], iframe#editor-canvas');
-      if (iframe && iframe.contentDocument) {
-        doc = iframe.contentDocument;
-      }
+      var applyGlassEffect = function applyGlassEffect() {
+        // Find the block wrapper in the editor
+        var doc = document;
+        var iframe = document.querySelector('iframe[name="editor-canvas"], iframe#editor-canvas');
+        if (iframe && iframe.contentDocument) {
+          doc = iframe.contentDocument;
+        }
 
-      // Try to find the block element
-      var blockElement = doc.querySelector("[data-block=\"".concat(props.clientId, "\"]"));
-      if (!blockElement) {
-        blockElement = doc.querySelector(".wp-block[data-block=\"".concat(props.clientId, "\"]"));
-      }
-      if (!blockElement) {
-        blockElement = doc.querySelector(".block-editor-block-list__block[data-block=\"".concat(props.clientId, "\"]"));
-      }
-      if (blockElement) {
-        // Get the actual content element
-        var childElement = blockElement.querySelector('[class*="wp-block-"]') || blockElement.firstElementChild || blockElement;
-        if (childElement) {
-          if (frblGlassEffect) {
-            // Apply glass effect styles
-            childElement.style.backdropFilter = "blur(".concat(frblGlassBlur, "px)");
-            childElement.style.webkitBackdropFilter = "blur(".concat(frblGlassBlur, "px)");
-            childElement.style.background = 'rgba(255, 255, 255, 0.1)';
-            childElement.style.border = '1px solid rgba(255, 255, 255, 0.18)';
-            childElement.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.15)';
-          } else {
-            // Remove glass effect styles when disabled
-            childElement.style.backdropFilter = '';
-            childElement.style.webkitBackdropFilter = '';
-            childElement.style.background = '';
-            childElement.style.border = '';
-            childElement.style.boxShadow = '';
+        // Find the block element in the editor canvas (not in the list view)
+        var blockElement = null;
+
+        // Try different selectors to find the actual block in the editor
+        var selectors = ["#block-".concat(props.clientId), ".wp-block[data-block=\"".concat(props.clientId, "\"]"), ".block-editor-block-list__block[data-block=\"".concat(props.clientId, "\"]")];
+        for (var _i = 0, _selectors = selectors; _i < _selectors.length; _i++) {
+          var selector = _selectors[_i];
+          blockElement = doc.querySelector(selector);
+          if (blockElement) break;
+        }
+        if (!blockElement) return;
+
+        // Find the actual content wrapper (skip the editor wrapper)
+        // Look for the first child that has wp-block class
+        var targetElement = blockElement.querySelector('[class*="wp-block-"]:not(.block-editor)');
+
+        // If not found, try to get the direct child
+        if (!targetElement) {
+          var children = blockElement.children;
+          for (var i = 0; i < children.length; i++) {
+            var child = children[i];
+            // Skip editor UI elements
+            if (!child.classList.contains('block-editor-block-list__block-edit') && !child.classList.contains('block-list-appender')) {
+              targetElement = child;
+              break;
+            }
+            // If it's the edit wrapper, look inside
+            if (child.classList.contains('block-editor-block-list__block-edit')) {
+              targetElement = child.querySelector('[class*="wp-block-"]') || child.firstElementChild;
+              break;
+            }
           }
         }
-      }
+
+        // Fallback to first element child
+        if (!targetElement) {
+          targetElement = blockElement.firstElementChild;
+        }
+        if (targetElement) {
+          if (frblGlassEffect) {
+            // Apply glass effect styles
+            targetElement.style.backdropFilter = "blur(".concat(frblGlassBlur, "px)");
+            targetElement.style.webkitBackdropFilter = "blur(".concat(frblGlassBlur, "px)");
+            targetElement.style.background = 'rgba(255, 255, 255, 0.1)';
+            targetElement.style.border = '1px solid rgba(255, 255, 255, 0.18)';
+            targetElement.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.15)';
+
+            // Mark element for cleanup
+            targetElement.setAttribute('data-frbl-glass-applied', 'true');
+          } else {
+            // Remove glass effect styles when disabled
+            if (targetElement.getAttribute('data-frbl-glass-applied')) {
+              targetElement.style.backdropFilter = '';
+              targetElement.style.webkitBackdropFilter = '';
+              targetElement.style.background = '';
+              targetElement.style.border = '';
+              targetElement.style.boxShadow = '';
+              targetElement.removeAttribute('data-frbl-glass-applied');
+            }
+          }
+        }
+      };
+
+      // Apply immediately
+      applyGlassEffect();
+
+      // Also apply after a small delay to ensure DOM is ready
+      var timeoutId = setTimeout(applyGlassEffect, 100);
 
       // Cleanup function
       return function () {
-        if (blockElement) {
-          var _childElement = blockElement.querySelector('[class*="wp-block-"]') || blockElement.firstElementChild || blockElement;
-          if (_childElement) {
-            _childElement.style.backdropFilter = '';
-            _childElement.style.webkitBackdropFilter = '';
-            _childElement.style.background = '';
-            _childElement.style.border = '';
-            _childElement.style.boxShadow = '';
-          }
+        clearTimeout(timeoutId);
+
+        // Clean up styles on unmount
+        var doc = document;
+        var iframe = document.querySelector('iframe[name="editor-canvas"], iframe#editor-canvas');
+        if (iframe && iframe.contentDocument) {
+          doc = iframe.contentDocument;
         }
+        var elements = doc.querySelectorAll('[data-frbl-glass-applied="true"]');
+        elements.forEach(function (el) {
+          el.style.backdropFilter = '';
+          el.style.webkitBackdropFilter = '';
+          el.style.background = '';
+          el.style.border = '';
+          el.style.boxShadow = '';
+          el.removeAttribute('data-frbl-glass-applied');
+        });
       };
     }, [frblGlassEffect, frblGlassBlur, props.clientId]);
 

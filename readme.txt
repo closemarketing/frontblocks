@@ -34,6 +34,9 @@ You can add animations to the blocks you want. To do this, go to the block setti
 
 The animations are based on [Animate.css](https://animate.style/): Attention seekers, Back entrances, Back exits, Bouncing entrances, Bouncing exits, Fading entrances, Fading exits, Flippers, Rotating entrances, Rotating exits, Specials, Zooming entrances, Zooming exits, and Sliding entrances.
 
+**Container Effects**
+Apply glassmorphism effects to any block with customizable blur intensity. In the block settings, open the 'Container Effects' panel to enable the glass effect and adjust the blur level (0-50px) for a modern, frosted glass appearance. The effect includes a semi-transparent background, subtle border, and soft shadow, creating a beautiful layered design. Perfect for hero sections, cards, and overlays.
+
 **Sticky option for Grid block:**
 The sticky option allows you to make the grid block stick to the top of the viewport when scrolling down. To use this feature, enable the "Sticky" option in the Grid block settings. When enabled, the grid block will remain fixed at the top of the viewport as you scroll down the page.
 
@@ -93,6 +96,7 @@ Extract the ZIP file and simply copy its contents into the wp-content/plugins/ d
 == Changelog ==
 
 == n.e.x.t ==
+*   Added: Container Effects with Glass Effect (Glassmorphism) - Apply customizable glass effect with adjustable blur intensity (0-50px) to any block.
 *   Added: Reading Progress Bar - Display a visual progress indicator on the right side of posts as users scroll through content.
 *   Added: Back Button feature with floating button to navigate to previous page.
 *   PRO: Horizontal Product Form Layout - Align price, quantity, and add to cart button in one row.

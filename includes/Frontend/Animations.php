@@ -192,7 +192,7 @@ class Animations {
 		$attrs = $block['attrs'];
 
 		// Check if either animation or glass effect is set.
-		$has_animation   = isset( $attrs['frblAnimation'] ) && ! empty( $attrs['frblAnimation'] );
+		$has_animation    = isset( $attrs['frblAnimation'] ) && ! empty( $attrs['frblAnimation'] );
 		$has_glass_effect = isset( $attrs['frblGlassEffect'] ) && $attrs['frblGlassEffect'];
 
 		if ( ! $has_animation && ! $has_glass_effect ) {
@@ -200,7 +200,7 @@ class Animations {
 		}
 
 		$properties = array();
-		
+
 		// Animation properties.
 		if ( $has_animation ) {
 			$animation                     = $attrs['frblAnimation'];
@@ -225,7 +225,7 @@ class Animations {
 
 		// Build style attributes.
 		$style_attr = '';
-		
+
 		// Animation styles.
 		if ( $has_animation ) {
 			if ( $properties['delay'] > 0 ) {
@@ -245,7 +245,7 @@ class Animations {
 
 		// Glass effect styles.
 		if ( $has_glass_effect ) {
-			$blur_value = $properties['glass_blur'];
+			$blur_value  = $properties['glass_blur'];
 			$style_attr .= 'backdrop-filter:blur(' . esc_attr( $blur_value ) . 'px);';
 			$style_attr .= '-webkit-backdrop-filter:blur(' . esc_attr( $blur_value ) . 'px);';
 		}

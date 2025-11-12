@@ -5,6 +5,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 ## Functionalities
 
 - Animations
+- Container Effects (Glass Effect / Glassmorphism)
 - Carousel/Slider
 - Native Gallery
 - Sticky Columns
