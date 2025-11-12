@@ -9,9 +9,12 @@ Version: 1.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-This plugin extends the functionality of GeneratePress by adding a carousel, slider, animations, sticky columns and the ability to insert posts.
+This plugin extends the functionality of GeneratePress by adding a carousel, slider, animations, sticky columns, edge alignment for containers and the ability to insert posts.
 
 == Description ==
+
+**Container Edge Alignment for GenerateBlocks**
+Add custom controls to GenerateBlocks Container blocks to remove padding from the left or right side, creating edge-to-edge layouts. This feature only appears for containers using GeneratePress global max-width settings, perfect for creating asymmetric layouts where content extends to one browser edge while maintaining proper spacing on the other side.
 
 **Carousel/Slider for GenerateBlocks Grid**
 We have added options to Gutenberg blocks that enable you to create a carousel or slider using your preferred blocks.
@@ -93,6 +96,7 @@ Extract the ZIP file and simply copy its contents into the wp-content/plugins/ d
 == Changelog ==
 
 == n.e.x.t ==
+*   Added: Container Edge Alignment - Remove padding from left or right side of GenerateBlocks containers to create asymmetric edge-to-edge layouts (only for containers using GeneratePress global max-width).
 *   Added: Reading Progress Bar - Display a visual progress indicator on the right side of posts as users scroll through content.
 *   Added: Back Button feature with floating button to navigate to previous page.
 *   PRO: Horizontal Product Form Layout - Align price, quantity, and add to cart button in one row.

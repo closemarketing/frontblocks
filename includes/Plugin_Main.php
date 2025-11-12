@@ -69,6 +69,9 @@ class Plugin_Main {
 			new Admin\Settings();
 		}
 
+		// Container Edge Alignment for GenerateBlocks.
+		new Frontend\ContainerEdgeAlignment();
+
 		// Carousel module.
 		new Frontend\Carousel();
 
