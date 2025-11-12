@@ -107,6 +107,12 @@ class Plugin_Main {
 
 		// Back Button module.
 		new Frontend\BackButton();
+
+		// Shape Animations module (for GenerateBlocks Shape block).
+		new Frontend\ShapeAnimations();
+
+		// Gravity Forms Inline Layout module.
+		new Frontend\GravityFormsInline();
 	}
 
 	/**
