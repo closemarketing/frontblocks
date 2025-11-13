@@ -104,6 +104,12 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Changelog ==
 
+== n.e.x.t ==
+*   Improved: Complete redesign of the Settings page with modern card-based layout.
+*   Improved: Each feature now displays in its own card with icon, title, and toggle switch.
+*   Improved: PRO features show distinctive badge in the top-left corner.
+*   Improved: Responsive grid layout that adapts to mobile, tablet, and desktop screens.
+*   Improved: License section displays as full-width card for better visibility.
 == 1.2.2 ==
 *   Added: Custom Animations for Shapes - Full Lottie/Bodymovin support + custom CSS animations via JSON. Auto-detects format.
 *   Added: Lottie-web library integration for After Effects animations.
