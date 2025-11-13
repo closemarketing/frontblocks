@@ -76,7 +76,7 @@ var withEdgeAlignmentControls = createHigherOrderComponent(function (BlockEdit) 
       return /*#__PURE__*/React.createElement(BlockEdit, props);
     }
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
-      title: __('Edge Alignment', 'frontblocks'),
+      title: __('FrontBlocks Edge Alignment', 'frontblocks'),
       initialOpen: false,
       className: "frbl-edge-alignment-panel"
     }, /*#__PURE__*/React.createElement("p", {

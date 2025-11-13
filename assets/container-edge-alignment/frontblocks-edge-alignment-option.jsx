@@ -85,7 +85,7 @@ const withEdgeAlignmentControls = createHigherOrderComponent((BlockEdit) => {
 				<BlockEdit {...props} />
 				<InspectorControls>
 					<PanelBody
-						title={__('Edge Alignment', 'frontblocks')}
+						title={__('FrontBlocks Edge Alignment', 'frontblocks')}
 						initialOpen={false}
 						className="frbl-edge-alignment-panel"
 					>
