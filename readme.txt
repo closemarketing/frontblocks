@@ -37,6 +37,9 @@ You can add animations to the blocks you want. To do this, go to the block setti
 
 The animations are based on [Animate.css](https://animate.style/): Attention seekers, Back entrances, Back exits, Bouncing entrances, Bouncing exits, Fading entrances, Fading exits, Flippers, Rotating entrances, Rotating exits, Specials, Zooming entrances, Zooming exits, and Sliding entrances.
 
+**Container Effects**
+Apply glassmorphism effects to any block with customizable blur intensity. In the block settings, open the 'Container Effects' panel to enable the glass effect and adjust the blur level (0-50px) for a modern, frosted glass appearance. The effect includes a semi-transparent background, subtle border, and soft shadow, creating a beautiful layered design. Perfect for hero sections, cards, and overlays.
+
 **Sticky option for Grid block:**
 The sticky option allows you to make the grid block stick to the top of the viewport when scrolling down. To use this feature, enable the "Sticky" option in the Grid block settings. When enabled, the grid block will remain fixed at the top of the viewport as you scroll down the page.
 
@@ -108,12 +111,12 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 == Changelog ==
 
 == n.e.x.t ==
+*   Added: Container Effects with Glass Effect (Glassmorphism) - Apply customizable glass effect with adjustable blur intensity (0-50px) to any block.
 *   Improved: Complete redesign of the Settings page with modern card-based layout.
 *   Improved: Each feature now displays in its own card with icon, title, and toggle switch.
 *   Improved: PRO features show distinctive badge in the top-left corner.
 *   Improved: Responsive grid layout that adapts to mobile, tablet, and desktop screens.
 *   Improved: License section displays as full-width card for better visibility.
-== 1.2.2 ==
 *   Added: Container Edge Alignment - Remove padding from left or right side of GenerateBlocks containers to create asymmetric edge-to-edge layouts (only for containers using GeneratePress global max-width).
 *   Added: Custom Animations for Shapes - Full Lottie/Bodymovin support + custom CSS animations via JSON. Auto-detects format.
 *   Added: Lottie-web library integration for After Effects animations.
