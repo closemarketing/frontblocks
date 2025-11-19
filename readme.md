@@ -4,6 +4,10 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 
 ## Functionalities
 
+### GenerateBlocks Extensions
+- **Container Edge Alignment** - Remove padding from left or right side to create edge-to-edge layouts
+
+### Block Enhancements
 - Animations
 - Container Effects (Glass Effect / Glassmorphism)
 - Carousel/Slider
@@ -16,8 +20,13 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - Product Categories Block
 - Gravity Forms Inline Layout
 - Back Button
+- Modern Settings Page with Card-based Layout
 - Custom SVG Animations
 
+
+## Documentation
+
+- [Container Edge Alignment](./docs/CONTAINER-EDGE-ALIGNMENT.md) - Create asymmetric layouts with edge-to-edge content
 
 ## Release
 Actions for making a release:
