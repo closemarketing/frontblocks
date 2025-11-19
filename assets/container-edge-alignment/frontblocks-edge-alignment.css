@@ -1,0 +1,121 @@
+/**
+ * Container Edge Alignment Styles
+ *
+ * Editor and frontend styles for edge alignment feature.
+ */
+
+/* ===========================
+   EDITOR STYLES
+   =========================== */
+
+.frbl-edge-alignment-panel .frbl-edge-alignment-description {
+	font-size: 12px;
+	color: #757575;
+	margin: 0 0 16px 0;
+	line-height: 1.4;
+}
+
+.frbl-edge-alignment-panel .components-base-control {
+	margin-bottom: 16px;
+}
+
+.frbl-edge-alignment-panel .components-base-control__help {
+	font-size: 11px;
+	color: #757575;
+	margin-top: 4px;
+}
+
+/* Visual feedback in editor */
+.editor-styles-wrapper .frbl-edge-left {
+	position: relative;
+}
+
+.editor-styles-wrapper .frbl-edge-left::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 3px;
+	background: #2271b1;
+	z-index: 1;
+	opacity: 0.6;
+}
+
+.editor-styles-wrapper .frbl-edge-right {
+	position: relative;
+}
+
+.editor-styles-wrapper .frbl-edge-right::after {
+	content: '';
+	position: absolute;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	width: 3px;
+	background: #2271b1;
+	z-index: 1;
+	opacity: 0.6;
+}
+
+/* ===========================
+   FRONTEND STYLES
+   =========================== */
+
+/* 
+ * Edge Alignment Styles
+ * 
+ * The actual margin/width calculations are done via JavaScript
+ * (see frontblocks-edge-alignment-frontend.js) because CSS variables
+ * are not available in GeneratePress by default.
+ * 
+ * JavaScript calculates:
+ * 1. Original container width (e.g., 1400px)
+ * 2. Side margin = (100vw - containerWidth) / 2
+ * 3. Applies inline styles to fix one side and extend the other
+ */
+
+/* 
+ * Remove LEFT padding - extends to left edge
+ * (JavaScript will set: marginLeft=0, marginRight=calculated, width=calculated)
+ */
+.frbl-edge-left {
+	padding-left: 0 !important;
+}
+
+/* 
+ * Remove RIGHT padding - extends to right edge
+ * (JavaScript will set: marginRight=0, marginLeft=calculated, width=calculated)
+ */
+.frbl-edge-right {
+	padding-right: 0 !important;
+}
+
+/* Ensure child elements respect the edge alignment */
+.frbl-edge-left > .gb-container,
+.frbl-edge-left > .gb-grid-wrapper,
+.frbl-edge-left > .gb-inside-container {
+	padding-left: 0 !important;
+	margin-left: 0 !important;
+}
+
+.frbl-edge-right > .gb-container,
+.frbl-edge-right > .gb-grid-wrapper,
+.frbl-edge-right > .gb-inside-container {
+	padding-right: 0 !important;
+	margin-right: 0 !important;
+}
+
+/* Media query for responsive behavior */
+@media (max-width: 768px) {
+	/* Keep the edge alignment on mobile by default */
+	/* Uncomment below to restore normal padding on mobile if needed */
+	/*
+	.frbl-edge-left,
+	.frbl-edge-right {
+		padding-left: var(--gb-spacing-mobile, 20px) !important;
+		padding-right: var(--gb-spacing-mobile, 20px) !important;
+	}
+	*/
+}
+
