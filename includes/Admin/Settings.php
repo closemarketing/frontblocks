@@ -251,7 +251,6 @@ class Settings {
 	 * @return void
 	 */
 	public function register_settings() {
-		global $frontblocks_pro_license;
 		register_setting(
 			'frontblocks_settings',
 			'frontblocks_settings',
@@ -383,7 +382,8 @@ class Settings {
 		);
 
 		// License section (only if PRO is active).
-		if ( frbl_is_pro_active() && ! empty( $frontblocks_pro_license ) ) {
+		if ( frbl_is_pro_active() ) {
+			global $frontblocks_pro_license;
 			add_settings_section(
 				'frontblocks_section_license',
 				__( 'License', 'frontblocks' ),
@@ -748,7 +748,6 @@ class Settings {
 	 * @return void
 	 */
 	public function section_woo_features_callback() {
-		global $frontblocks_pro_license;
 		if ( ! frbl_is_pro_active() ) {
 			echo '<div class="tw-bg-blue-50 tw-border-l-4 tw-border-blue-400 tw-p-4 tw-mb-4">';
 			echo '<div class="tw-flex">';
@@ -952,7 +951,7 @@ class Settings {
 	 */
 	public function field_license_key() {
 		global $frontblocks_pro_license;
-		$license_key = get_option( $this->option_license_key );
+		$license_key = $frontblocks_pro_license->get_option_value( 'apikey' );
 		?>
 		<div class="tw-space-y-4">
 			<!-- License Key and Product ID Fields in a row -->
@@ -980,9 +979,9 @@ class Settings {
 					<?php echo esc_html__( 'License Status', 'frontblocks' ); ?>
 				</label>
 				<?php
-				$status_text  = '';
-				$status_class = '';
-				$status_icon  = '';
+				$status_text    = '';
+				$status_class   = '';
+				$status_icon    = '';
 				$license_data   = $frontblocks_pro_license->license_key_status( true );
 				$license_status = empty( $license_data ) || ! isset( $license_data['status_check'] ) ? 'not_activated' : $license_data['status_check'];
 
@@ -1139,17 +1138,7 @@ class Settings {
 			}
 		}
 
-		// Save license key and product id.
-		global $frontblocks_pro_license;
-		if ( ! empty( $frontblocks_pro_license ) ) {
-			$result = $frontblocks_pro_license->sanitize_fields_license( $_POST );
-
-			if ( 'ok' === $result['status'] ) {
-				add_settings_error( 'frontblocks_settings', 'frontblocks_settings_license', $result['message'], 'updated' );
-			} else {
-				add_settings_error( 'frontblocks_settings', 'frontblocks_settings_license', $result['message'], 'error' );
-			}
-		}
+		do_action( 'frontblocks_sanitize_settings', $sanitized );
 
 		return $sanitized;
 	}
