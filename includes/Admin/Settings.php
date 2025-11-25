@@ -1040,7 +1040,7 @@ class Settings {
 			</div>
 
 			<!-- Help Text -->
-			<?php if ( empty( $license_key ) && empty( $product_id ) ) : ?>
+			<?php if ( empty( $license_key ) ) : ?>
 				<div class="tw-p-4 tw-rounded-lg tw-bg-gray-50 tw-border tw-border-gray-200">
 					<p class="tw-text-sm tw-text-gray-600">
 						<?php
