@@ -4,8 +4,8 @@ Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 1.2.2
-Version: 1.2.2
+Stable tag: 1.3.0
+Version: 1.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -110,7 +110,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Changelog ==
 
-== n.e.x.t ==
+== 1.3.0 ==
 *   Added: Container Effects with Glass Effect (Glassmorphism) - Apply customizable glass effect with adjustable blur intensity (0-50px) to any block.
 *   Improved: Complete redesign of the Settings page with modern card-based layout.
 *   Improved: Each feature now displays in its own card with icon, title, and toggle switch.
