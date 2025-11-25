@@ -125,13 +125,6 @@ class Settings {
 	private $option_license_key;
 
 	/**
-	 * Option key for product ID.
-	 *
-	 * @var string
-	 */
-	private $option_product_id;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -139,7 +132,6 @@ class Settings {
 		$this->is_license_valid = ! empty( $frontblocks_pro_license ) && $frontblocks_pro_license->get_api_key_status( true );
 
 		$this->option_license_key = ! empty( $frontblocks_pro_license ) ? $frontblocks_pro_license->get_option_key( 'apikey' ) : '';
-		$this->option_product_id  = ! empty( $frontblocks_pro_license ) ? $frontblocks_pro_license->get_option_key( 'product_id' ) : '';
 
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
@@ -259,7 +251,6 @@ class Settings {
 	 * @return void
 	 */
 	public function register_settings() {
-		global $frontblocks_pro_license;
 		register_setting(
 			'frontblocks_settings',
 			'frontblocks_settings',
@@ -391,7 +382,8 @@ class Settings {
 		);
 
 		// License section (only if PRO is active).
-		if ( frbl_is_pro_active() && ! empty( $frontblocks_pro_license ) ) {
+		if ( frbl_is_pro_active() ) {
+			global $frontblocks_pro_license;
 			add_settings_section(
 				'frontblocks_section_license',
 				__( 'License', 'frontblocks' ),
@@ -723,61 +715,31 @@ class Settings {
 	 * @return string SVG icon markup.
 	 */
 	private function get_feature_icon( $field_id ) {
-		// Testimonials icon.
-		$testimonials_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>';
-
-		// Reading progress icon.
-		$reading_progress_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>';
-
-		// Back button icon.
-		$back_button_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>';
-
-		// Gutenberg icon.
-		$gutenberg_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>';
-
-		// Simple prices icon.
-		$simple_prices_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-
-		// After add to cart icon.
-		$after_cart_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>';
-
-		// Deactivate description icon.
-		$deactivate_desc_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>';
-
-		// Move content icon.
-		$move_content_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7h12M8 12h12m-12 5h12m-15-9v.01M5 12v.01M5 19v.01"/></svg>';
-
-		// Disable zoom icon.
-		$disable_zoom_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
-
-		// Share buttons icon.
-		$share_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>';
-
-		// Deactivate tabs icon.
-		$deactivate_tabs_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>';
-
-		// Horizontal form icon.
-		$horizontal_form_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>';
-
-		// Default icon.
-		$default_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>';
-
-		$icons = array(
-			$this->option_enable_testimonials          => $testimonials_icon,
-			$this->option_enable_reading_progress      => $reading_progress_icon,
-			$this->option_enable_back_button           => $back_button_icon,
-			$this->option_enable_gutenberg             => $gutenberg_icon,
-			$this->option_enable_simple_prices_variable_products => $simple_prices_icon,
-			$this->option_enable_after_add_to_cart     => $after_cart_icon,
-			$this->option_deactivate_short_description => $deactivate_desc_icon,
-			$this->option_move_content_to_short_description => $move_content_icon,
-			$this->option_disable_zoom_images          => $disable_zoom_icon,
-			$this->option_add_share_buttons            => $share_icon,
-			$this->option_deactivate_product_tabs      => $deactivate_tabs_icon,
-			$this->option_horizontal_product_form      => $horizontal_form_icon,
+		// Map field IDs to icon file names.
+		$icon_map = array(
+			$this->option_enable_testimonials          => 'testimonials',
+			$this->option_enable_reading_progress      => 'reading-progress',
+			$this->option_enable_back_button           => 'back-button',
+			$this->option_enable_gutenberg             => 'gutenberg',
+			$this->option_enable_simple_prices_variable_products => 'simple-prices',
+			$this->option_enable_after_add_to_cart     => 'after-add-to-cart',
+			$this->option_deactivate_short_description => 'deactivate-description',
+			$this->option_move_content_to_short_description => 'move-content',
+			$this->option_disable_zoom_images          => 'disable-zoom',
+			$this->option_add_share_buttons            => 'share-buttons',
+			$this->option_deactivate_product_tabs      => 'deactivate-tabs',
+			$this->option_horizontal_product_form      => 'horizontal-form',
 		);
 
-		return $icons[ $field_id ] ?? $default_icon;
+		$icon_name = $icon_map[ $field_id ] ?? 'default';
+		$icon_path = FRBL_PLUGIN_PATH . 'assets/admin/icons/' . $icon_name . '.svg';
+
+		if ( file_exists( $icon_path ) ) {
+			$svg_content = file_get_contents( $icon_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			return $svg_content ? $svg_content : '';
+		}
+
+		return '';
 	}
 
 	/**
@@ -786,7 +748,6 @@ class Settings {
 	 * @return void
 	 */
 	public function section_woo_features_callback() {
-		global $frontblocks_pro_license;
 		if ( ! frbl_is_pro_active() ) {
 			echo '<div class="tw-bg-blue-50 tw-border-l-4 tw-border-blue-400 tw-p-4 tw-mb-4">';
 			echo '<div class="tw-flex">';
@@ -990,8 +951,7 @@ class Settings {
 	 */
 	public function field_license_key() {
 		global $frontblocks_pro_license;
-		$license_key = get_option( $this->option_license_key );
-		$product_id  = get_option( $this->option_product_id );
+		$license_key = $frontblocks_pro_license->get_option_value( 'apikey' );
 		?>
 		<div class="tw-space-y-4">
 			<!-- License Key and Product ID Fields in a row -->
@@ -1003,18 +963,6 @@ class Settings {
 						name="<?php echo esc_attr( $this->option_license_key ); ?>" 
 						value="<?php echo esc_attr( $license_key ); ?>"
 						placeholder="<?php echo esc_attr__( 'Enter your license key', 'frontblocks' ); ?>"
-						class="tw-block tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
-					/>
-				</div>
-
-				<!-- Product ID Field - 33.3% (1/3) -->
-				<div style="flex: 1 1 0%;">
-					<input type="text" 
-						id="<?php echo esc_attr( $this->option_product_id ); ?>" 
-						name="<?php echo esc_attr( $this->option_product_id ); ?>" 
-						value="<?php echo esc_attr( $product_id ); ?>"
-						placeholder="<?php echo esc_attr__( 'Product ID', 'frontblocks' ); ?>"
-						title="<?php echo esc_attr__( 'Product ID - You can find this in your purchase confirmation email.', 'frontblocks' ); ?>"
 						class="tw-block tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
 					/>
 				</div>
@@ -1031,12 +979,11 @@ class Settings {
 					<?php echo esc_html__( 'License Status', 'frontblocks' ); ?>
 				</label>
 				<?php
-				$status_text  = '';
-				$status_class = '';
-				$status_icon  = '';
-				global $frontblocks_pro_license;
+				$status_text    = '';
+				$status_class   = '';
+				$status_icon    = '';
 				$license_data   = $frontblocks_pro_license->license_key_status( true );
-				$license_status = empty( $license_data ) ? 'not_activated' : $license_data['status_check'];
+				$license_status = empty( $license_data ) || ! isset( $license_data['status_check'] ) ? 'not_activated' : $license_data['status_check'];
 
 				switch ( $license_status ) {
 					case 'active':
@@ -1051,6 +998,7 @@ class Settings {
 						break;
 					default:
 						$status_text  = __( 'Not Activated', 'frontblocks' );
+						$status_text .= ' ' . ( isset( $license_data['error'] ) ? $license_data['error'] : '' );
 						$status_class = 'tw-bg-yellow-100 tw-text-yellow-800 tw-border-yellow-300';
 						$status_icon  = '<svg class="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>';
 						break;
@@ -1061,7 +1009,21 @@ class Settings {
 						<?php echo $status_icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					</span>
 					<span class="tw-font-semibold tw-text-base">
-						<?php echo esc_html( $status_text ); ?>
+						<?php
+						echo wp_kses(
+							$status_text,
+							array(
+								'br'     => array(),
+								'em'     => array(),
+								'strong' => array(),
+								'a'      => array(
+									'href'   => true,
+									'target' => true,
+									'rel'    => true,
+								),
+							)
+						);
+						?>
 					</span>
 					<?php if ( ! empty( $license_data['expires'] ) && 'valid' === $license_data['status'] ) : ?>
 						<span class="tw-ml-auto tw-text-sm">
@@ -1078,7 +1040,7 @@ class Settings {
 			</div>
 
 			<!-- Help Text -->
-			<?php if ( empty( $license_key ) && empty( $product_id ) ) : ?>
+			<?php if ( empty( $license_key ) ) : ?>
 				<div class="tw-p-4 tw-rounded-lg tw-bg-gray-50 tw-border tw-border-gray-200">
 					<p class="tw-text-sm tw-text-gray-600">
 						<?php
@@ -1176,17 +1138,7 @@ class Settings {
 			}
 		}
 
-		// Save license key and product id.
-		global $frontblocks_pro_license;
-		if ( ! empty( $frontblocks_pro_license ) ) {
-			$result = $frontblocks_pro_license->sanitize_fields_license( $_POST );
-
-			if ( 'ok' === $result['status'] ) {
-				add_settings_error( 'frontblocks_settings', 'frontblocks_settings_license', $result['message'], 'updated' );
-			} else {
-				add_settings_error( 'frontblocks_settings', 'frontblocks_settings_license', $result['message'], 'error' );
-			}
-		}
+		do_action( 'frontblocks_sanitize_settings', $sanitized );
 
 		return $sanitized;
 	}

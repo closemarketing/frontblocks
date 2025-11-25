@@ -11,6 +11,10 @@ if (!defined('FRBL_PLUGIN_URL')) {
     define('FRBL_PLUGIN_URL', 'http://localhost/wp-content/plugins/frontblocks/');
 }
 
+if (!defined('FRBL_PLUGIN_PATH')) {
+    define('FRBL_PLUGIN_PATH', __DIR__ . '/../');
+}
+
 if (!defined('FRBL_VERSION')) {
     define('FRBL_VERSION', '1.0.0');
 }
