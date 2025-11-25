@@ -12,6 +12,8 @@ namespace FrontBlocks\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
+use FrontBlocks\Admin\UI;
+
 /**
  * Settings class
  */
@@ -123,13 +125,6 @@ class Settings {
 	private $option_license_key;
 
 	/**
-	 * Option key for product ID.
-	 *
-	 * @var string
-	 */
-	private $option_product_id;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -137,7 +132,6 @@ class Settings {
 		$this->is_license_valid = ! empty( $frontblocks_pro_license ) && $frontblocks_pro_license->get_api_key_status( true );
 
 		$this->option_license_key = ! empty( $frontblocks_pro_license ) ? $frontblocks_pro_license->get_option_key( 'apikey' ) : '';
-		$this->option_product_id  = ! empty( $frontblocks_pro_license ) ? $frontblocks_pro_license->get_option_key( 'product_id' ) : '';
 
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
@@ -303,7 +297,6 @@ class Settings {
 	 * @return void
 	 */
 	public function register_settings() {
-		global $frontblocks_pro_license;
 		register_setting(
 			'frontblocks_settings',
 			'frontblocks_settings',
@@ -315,12 +308,18 @@ class Settings {
 			)
 		);
 
+		// Always Active Blocks section.
+		add_settings_section(
+			'frontblocks_section_active_blocks',
+			__( 'Active Blocks & Features', 'frontblocks' ),
+			array( $this, 'section_active_blocks_callback' ),
+			$this->page_slug
+		);
+
 		add_settings_section(
 			'frontblocks_section_features',
-			__( 'Features', 'frontblocks' ),
-			function () {
-				echo '<p>' . esc_html__( 'Visual enhancements for your website.', 'frontblocks' ) . '</p>';
-			},
+			__( 'Optional Features', 'frontblocks' ),
+			array( $this, 'section_features_callback' ),
 			$this->page_slug
 		);
 
@@ -351,8 +350,8 @@ class Settings {
 		// PRO Features section.
 		add_settings_section(
 			'frontblocks_section_woocommerce_features',
-			__( 'PRO Features', 'frontblocks' ),
-			array( $this, 'section_pro_features_callback' ),
+			__( 'WooCommerce Features', 'frontblocks' ),
+			array( $this, 'section_woo_features_callback' ),
 			$this->page_slug
 		);
 
@@ -429,7 +428,8 @@ class Settings {
 		);
 
 		// License section (only if PRO is active).
-		if ( frbl_is_pro_active() && ! empty( $frontblocks_pro_license ) ) {
+		if ( frbl_is_pro_active() ) {
+			global $frontblocks_pro_license;
 			add_settings_section(
 				'frontblocks_section_license',
 				__( 'License', 'frontblocks' ),
@@ -571,6 +571,44 @@ class Settings {
 	}
 
 	/**
+	 * Active Blocks section callback.
+	 *
+	 * @return void
+	 */
+	private function section_active_blocks_callback() {
+		?>
+		<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
+			<?php echo esc_html__( 'These blocks and features are always active and available in the block editor.', 'frontblocks' ); ?>
+		</p>
+		<div class="frbl-features-grid">
+			<?php
+			UI::show_info_card( 'animations', __( 'Animations', 'frontblocks' ), __( 'Add animations to any block using Animate.css', 'frontblocks' ) );
+			UI::show_info_card( 'carousel', __( 'Carousel/Slider', 'frontblocks' ), __( 'Transform any Grid block into a carousel or slider', 'frontblocks' ) );
+			UI::show_info_card( 'gallery', __( 'Native Gallery', 'frontblocks' ), __( 'Enhanced gallery block with carousel and masonry options', 'frontblocks' ) );
+			UI::show_info_card( 'sticky', __( 'Sticky Columns', 'frontblocks' ), __( 'Make Grid blocks sticky when scrolling', 'frontblocks' ) );
+			UI::show_info_card( 'insert_post', __( 'Insert Post Block', 'frontblocks' ), __( 'Display content from other posts, pages or custom post types', 'frontblocks' ) );
+			UI::show_info_card( 'counter', __( 'Counter Block', 'frontblocks' ), __( 'Display animated counters with start and end values', 'frontblocks' ) );
+			UI::show_info_card( 'reading_time', __( 'Reading Time Block', 'frontblocks' ), __( 'Show estimated reading time for posts', 'frontblocks' ) );
+			UI::show_info_card( 'product_categories', __( 'Product Categories Block', 'frontblocks' ), __( 'Display WooCommerce product categories', 'frontblocks' ) );
+			?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Features section callback.
+	 *
+	 * @return void
+	 */
+	private function section_features_callback() {
+		?>
+		<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
+			<?php echo esc_html__( 'Enable or disable these optional features as needed.', 'frontblocks' ); ?>
+		</p>
+		<?php
+	}
+
+	/**
 	 * Render a single settings section as a card.
 	 *
 	 * @param array $section Section data.
@@ -579,25 +617,79 @@ class Settings {
 	private function render_settings_section( $section ) {
 		global $wp_settings_fields;
 
-		if ( ! isset( $wp_settings_fields[ $this->page_slug ][ $section['id'] ] ) ) {
+		$has_fields = isset( $wp_settings_fields[ $this->page_slug ][ $section['id'] ] );
+
+		// Si no hay campos Y no hay callback, no renderizar nada.
+		if ( ! $has_fields && ! $section['callback'] ) {
 			return;
 		}
-		?>
-		<div class="frbl-card tw-bg-white tw-rounded-lg tw-shadow-sm tw-border tw-border-gray-200 tw-overflow-hidden frbl-animate-slide-in">
-			<div class="tw-px-6 tw-py-5 tw-border-b tw-border-gray-200 tw-bg-gradient-to-r tw-from-gray-50 tw-to-white">
-				<h2 class="tw-text-xl tw-font-semibold tw-text-gray-900">
-					<?php echo esc_html( $section['title'] ); ?>
-				</h2>
-				<?php
-				if ( $section['callback'] ) {
-					echo '<div class="tw-mt-2 tw-text-sm tw-text-gray-600">';
-					call_user_func( $section['callback'], $section );
-					echo '</div>';
-				}
-				?>
+
+		// Check if this is a section with callback only (like active_blocks).
+		$is_callback_only = ! $has_fields && $section['callback'];
+
+		// Check if this is the license section - render it full width.
+		$is_license_section = 'frontblocks_section_license' === $section['id'];
+
+		if ( $is_callback_only ) {
+			// Render section with only callback (no fields).
+			?>
+			<div class="frbl-section-wrapper">
+				<div class="frbl-section-header">
+					<h2 class="tw-text-2xl tw-font-bold tw-text-gray-900 tw-mb-0">
+						<?php echo esc_html( $section['title'] ); ?>
+					</h2>
+				</div>
+				<?php call_user_func( $section['callback'], $section ); ?>
 			</div>
-			<div class="tw-px-6 tw-py-5">
-				<div class="tw-space-y-6">
+			<?php
+			return;
+		}
+
+		if ( $is_license_section ) {
+			// Render license section as a full-width card.
+			?>
+			<div class="frbl-card tw-bg-white tw-rounded-lg tw-shadow-sm tw-border tw-border-gray-200 tw-overflow-hidden frbl-animate-slide-in tw-mb-8">
+				<div class="tw-px-6 tw-py-5 tw-border-b tw-border-gray-200 tw-bg-gradient-to-r tw-from-gray-50 tw-to-white">
+					<h2 class="tw-text-xl tw-font-semibold tw-text-gray-900">
+						<?php echo esc_html( $section['title'] ); ?>
+					</h2>
+					<?php
+					if ( $section['callback'] ) {
+						echo '<div class="tw-mt-2 tw-text-sm tw-text-gray-600">';
+						call_user_func( $section['callback'], $section );
+						echo '</div>';
+					}
+					?>
+				</div>
+				<div class="tw-px-6 tw-py-5">
+					<?php
+					foreach ( (array) $wp_settings_fields[ $this->page_slug ][ $section['id'] ] as $field ) {
+						call_user_func( $field['callback'], $field['args'] );
+					}
+					?>
+				</div>
+			</div>
+			<?php
+		} else {
+			// Render regular sections with feature grid.
+			?>
+			<div class="frbl-section-wrapper">
+				<!-- Section Header -->
+				<div class="frbl-section-header">
+					<h2 class="tw-text-2xl tw-font-bold tw-text-gray-900 tw-mb-0">
+						<?php echo esc_html( $section['title'] ); ?>
+					</h2>
+					<?php
+					if ( $section['callback'] ) {
+						echo '<div class="tw-text-sm tw-text-gray-600">';
+						call_user_func( $section['callback'], $section );
+						echo '</div>';
+					}
+					?>
+				</div>
+				
+				<!-- Features Grid -->
+				<div class="frbl-features-grid">
 					<?php
 					foreach ( (array) $wp_settings_fields[ $this->page_slug ][ $section['id'] ] as $field ) {
 						$this->render_settings_field( $field );
@@ -605,24 +697,56 @@ class Settings {
 					?>
 				</div>
 			</div>
-		</div>
-		<?php
+			<?php
+		}
 	}
 
 	/**
-	 * Render a single settings field.
+	 * Render a single settings field as a card.
 	 *
 	 * @param array $field Field data.
 	 * @return void
 	 */
 	private function render_settings_field( $field ) {
+		// Determine if this is a PRO feature (always, regardless of license status).
+		$is_pro_feature = in_array(
+			$field['id'],
+			array(
+				$this->option_enable_gutenberg,
+				$this->option_enable_simple_prices_variable_products,
+				$this->option_enable_after_add_to_cart,
+				$this->option_deactivate_short_description,
+				$this->option_move_content_to_short_description,
+				$this->option_disable_zoom_images,
+				$this->option_add_share_buttons,
+				$this->option_deactivate_product_tabs,
+				$this->option_horizontal_product_form,
+			),
+			true
+		);
+
+		// Apply PRO styling only if license is not valid.
+		$needs_license = $is_pro_feature && ! $this->is_license_valid;
+
+		// Get icon for this feature.
+		$icon = $this->get_feature_icon( $field['id'] );
+
 		?>
-		<div class="tw-flex tw-items-start">
-			<div class="tw-flex-grow">
-				<label class="tw-block tw-text-sm tw-font-medium tw-text-gray-900 tw-mb-2">
-					<?php echo esc_html( $field['title'] ); ?>
-				</label>
-				<div class="tw-mt-1">
+		<div class="frbl-feature-card <?php echo $needs_license ? 'frbl-feature-pro' : ''; ?>">
+			<?php if ( $is_pro_feature ) : ?>
+				<div class="frbl-pro-badge">PRO</div>
+			<?php endif; ?>
+			
+			<div class="frbl-feature-content">
+				<div class="frbl-feature-icon">
+					<?php echo $icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</div>
+				<div class="frbl-feature-info">
+					<h3 class="frbl-feature-title">
+						<?php echo esc_html( $field['title'] ); ?>
+					</h3>
+				</div>
+				<div class="frbl-feature-toggle">
 					<?php call_user_func( $field['callback'], $field['args'] ); ?>
 				</div>
 			</div>
@@ -631,12 +755,45 @@ class Settings {
 	}
 
 	/**
+	 * Get icon SVG for a feature.
+	 *
+	 * @param string $field_id Field ID.
+	 * @return string SVG icon markup.
+	 */
+	private function get_feature_icon( $field_id ) {
+		// Map field IDs to icon file names.
+		$icon_map = array(
+			$this->option_enable_testimonials          => 'testimonials',
+			$this->option_enable_reading_progress      => 'reading-progress',
+			$this->option_enable_back_button           => 'back-button',
+			$this->option_enable_gutenberg             => 'gutenberg',
+			$this->option_enable_simple_prices_variable_products => 'simple-prices',
+			$this->option_enable_after_add_to_cart     => 'after-add-to-cart',
+			$this->option_deactivate_short_description => 'deactivate-description',
+			$this->option_move_content_to_short_description => 'move-content',
+			$this->option_disable_zoom_images          => 'disable-zoom',
+			$this->option_add_share_buttons            => 'share-buttons',
+			$this->option_deactivate_product_tabs      => 'deactivate-tabs',
+			$this->option_horizontal_product_form      => 'horizontal-form',
+		);
+
+		$icon_name = $icon_map[ $field_id ] ?? 'default';
+		$icon_path = FRBL_PLUGIN_PATH . 'assets/admin/icons/' . $icon_name . '.svg';
+
+		if ( file_exists( $icon_path ) ) {
+			$svg_content = file_get_contents( $icon_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			return $svg_content ? $svg_content : '';
+		}
+
+		return '';
+	}
+
+	/**
 	 * PRO Features section description.
 	 *
 	 * @return void
 	 */
-	public function section_pro_features_callback() {
-		global $frontblocks_pro_license;
+	public function section_woo_features_callback() {
 		if ( ! frbl_is_pro_active() ) {
 			echo '<div class="tw-bg-blue-50 tw-border-l-4 tw-border-blue-400 tw-p-4 tw-mb-4">';
 			echo '<div class="tw-flex">';
@@ -672,7 +829,11 @@ class Settings {
 			echo '</div>';
 			echo '</div>';
 		} else {
-			echo '<p>' . esc_html__( 'Advanced features for WooCommerce and more.', 'frontblocks' ) . '</p>';
+			?>
+			<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
+				<?php echo esc_html__( 'Advanced features for WooCommerce and more.', 'frontblocks' ); ?>
+			</p>
+			<?php
 		}
 	}
 
@@ -685,22 +846,15 @@ class Settings {
 		$options = get_option( 'frontblocks_settings', array() );
 		$enabled = (bool) ( $options[ $this->option_enable_testimonials ] ?? false );
 		?>
-		<div class="tw-flex tw-items-center tw-justify-between">
-			<div class="tw-flex-grow">
-				<p class="tw-mt-1 tw-text-sm tw-text-gray-500">
-					<?php echo esc_html__( 'Create and manage testimonials in the WordPress admin.', 'frontblocks' ); ?>
-				</p>
-			</div>
-			<label class="frbl-toggle">
-				<input type="checkbox" 
-					id="<?php echo esc_attr( $this->option_enable_testimonials ); ?>" 
-					name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_testimonials ); ?>]" 
-					value="1" 
-					<?php checked( true, $enabled ); ?>
-				/>
-				<span></span>
-			</label>
-		</div>
+		<label class="frbl-toggle">
+			<input type="checkbox" 
+				id="<?php echo esc_attr( $this->option_enable_testimonials ); ?>" 
+				name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_testimonials ); ?>]" 
+				value="1" 
+				<?php checked( true, $enabled ); ?>
+			/>
+			<span></span>
+		</label>
 		<?php
 	}
 
@@ -713,22 +867,15 @@ class Settings {
 		$options = get_option( 'frontblocks_settings', array() );
 		$enabled = (bool) ( $options[ $this->option_enable_reading_progress ] ?? false );
 		?>
-		<div class="tw-flex tw-items-center tw-justify-between">
-			<div class="tw-flex-grow">
-				<p class="tw-mt-1 tw-text-sm tw-text-gray-500">
-					<?php echo esc_html__( 'Display a vertical progress bar on the right side of posts that fills as you read.', 'frontblocks' ); ?>
-				</p>
-			</div>
-			<label class="frbl-toggle">
-				<input type="checkbox"
-					id="<?php echo esc_attr( $this->option_enable_reading_progress ); ?>"
-					name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_reading_progress ); ?>]"
-					value="1"
-					<?php checked( true, $enabled ); ?>
-				/>
-				<span></span>
-			</label>
-		</div>
+		<label class="frbl-toggle">
+			<input type="checkbox"
+				id="<?php echo esc_attr( $this->option_enable_reading_progress ); ?>"
+				name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_reading_progress ); ?>]"
+				value="1"
+				<?php checked( true, $enabled ); ?>
+			/>
+			<span></span>
+		</label>
 		<?php
 	}
 
@@ -741,22 +888,15 @@ class Settings {
 		$options = get_option( 'frontblocks_settings', array() );
 		$enabled = (bool) ( $options[ $this->option_enable_back_button ] ?? false );
 		?>
-		<div class="tw-flex tw-items-center tw-justify-between">
-			<div class="tw-flex-grow">
-				<p class="tw-mt-1 tw-text-sm tw-text-gray-500">
-					<?php echo esc_html__( 'Display a floating back button in the bottom left corner to navigate to the previous page.', 'frontblocks' ); ?>
-				</p>
-			</div>
-			<label class="frbl-toggle">
-				<input type="checkbox" 
-					id="<?php echo esc_attr( $this->option_enable_back_button ); ?>" 
-					name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_back_button ); ?>]" 
-					value="1" 
-					<?php checked( true, $enabled ); ?>
-				/>
-				<span></span>
-			</label>
-		</div>
+		<label class="frbl-toggle">
+			<input type="checkbox" 
+				id="<?php echo esc_attr( $this->option_enable_back_button ); ?>" 
+				name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_back_button ); ?>]" 
+				value="1" 
+				<?php checked( true, $enabled ); ?>
+			/>
+			<span></span>
+		</label>
 		<?php
 	}
 
@@ -766,10 +906,7 @@ class Settings {
 	 * @return void
 	 */
 	public function field_enable_gutenberg() {
-		$this->render_pro_toggle(
-			$this->option_enable_gutenberg,
-			__( 'Use the Gutenberg block editor for WooCommerce products.', 'frontblocks' )
-		);
+		$this->render_pro_toggle( $this->option_enable_gutenberg );
 	}
 
 	/**
@@ -778,10 +915,7 @@ class Settings {
 	 * @return void
 	 */
 	public function field_enable_simple_prices_variable_products() {
-		$this->render_pro_toggle(
-			$this->option_enable_simple_prices_variable_products,
-			__( 'Replaces the price range with "From" + minimum price on variable products.', 'frontblocks' )
-		);
+		$this->render_pro_toggle( $this->option_enable_simple_prices_variable_products );
 	}
 
 	/**
@@ -790,10 +924,7 @@ class Settings {
 	 * @return void
 	 */
 	public function field_enable_after_add_to_cart() {
-		$this->render_pro_toggle(
-			$this->option_enable_after_add_to_cart,
-			__( 'Display custom content after the Add to Cart button on WooCommerce product pages.', 'frontblocks' )
-		);
+		$this->render_pro_toggle( $this->option_enable_after_add_to_cart );
 	}
 
 	/**
@@ -802,10 +933,7 @@ class Settings {
 	 * @return void
 	 */
 	public function field_deactivate_short_description() {
-		$this->render_pro_toggle(
-			$this->option_deactivate_short_description,
-			__( 'Remove the short description from product pages.', 'frontblocks' )
-		);
+		$this->render_pro_toggle( $this->option_deactivate_short_description );
 	}
 
 	/**
@@ -814,10 +942,7 @@ class Settings {
 	 * @return void
 	 */
 	public function field_move_content_to_short_description() {
-		$this->render_pro_toggle(
-			$this->option_move_content_to_short_description,
-			__( 'Display the main product content in place of the short description and remove the description tab.', 'frontblocks' )
-		);
+		$this->render_pro_toggle( $this->option_move_content_to_short_description );
 	}
 
 	/**
@@ -826,10 +951,7 @@ class Settings {
 	 * @return void
 	 */
 	public function field_disable_zoom_images() {
-		$this->render_pro_toggle(
-			$this->option_disable_zoom_images,
-			__( 'Disable the zoom effect on WooCommerce product images.', 'frontblocks' )
-		);
+		$this->render_pro_toggle( $this->option_disable_zoom_images );
 	}
 
 	/**
@@ -838,10 +960,7 @@ class Settings {
 	 * @return void
 	 */
 	public function field_add_share_buttons() {
-		$this->render_pro_toggle(
-			$this->option_add_share_buttons,
-			__( 'Add social share buttons (Facebook, Twitter, WhatsApp, Email) at the end of product meta section.', 'frontblocks' )
-		);
+		$this->render_pro_toggle( $this->option_add_share_buttons );
 	}
 
 	/**
@@ -850,10 +969,7 @@ class Settings {
 	 * @return void
 	 */
 	public function field_deactivate_product_tabs() {
-		$this->render_pro_toggle(
-			$this->option_deactivate_product_tabs,
-			__( 'Remove all product tabs (Description, Additional Information, Reviews) from single product pages.', 'frontblocks' )
-		);
+		$this->render_pro_toggle( $this->option_deactivate_product_tabs );
 	}
 
 	/**
@@ -862,10 +978,7 @@ class Settings {
 	 * @return void
 	 */
 	public function field_horizontal_product_form() {
-		$this->render_pro_toggle(
-			$this->option_horizontal_product_form,
-			__( 'Align price, quantity selector, and add to cart button horizontally in a single row on product pages.', 'frontblocks' )
-		);
+		$this->render_pro_toggle( $this->option_horizontal_product_form );
 	}
 
 	/**
@@ -884,8 +997,7 @@ class Settings {
 	 */
 	public function field_license_key() {
 		global $frontblocks_pro_license;
-		$license_key = get_option( $this->option_license_key );
-		$product_id  = get_option( $this->option_product_id );
+		$license_key = $frontblocks_pro_license->get_option_value( 'apikey' );
 		?>
 		<div class="tw-space-y-4">
 			<!-- License Key and Product ID Fields in a row -->
@@ -897,18 +1009,6 @@ class Settings {
 						name="<?php echo esc_attr( $this->option_license_key ); ?>" 
 						value="<?php echo esc_attr( $license_key ); ?>"
 						placeholder="<?php echo esc_attr__( 'Enter your license key', 'frontblocks' ); ?>"
-						class="tw-block tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
-					/>
-				</div>
-
-				<!-- Product ID Field - 33.3% (1/3) -->
-				<div style="flex: 1 1 0%;">
-					<input type="text" 
-						id="<?php echo esc_attr( $this->option_product_id ); ?>" 
-						name="<?php echo esc_attr( $this->option_product_id ); ?>" 
-						value="<?php echo esc_attr( $product_id ); ?>"
-						placeholder="<?php echo esc_attr__( 'Product ID', 'frontblocks' ); ?>"
-						title="<?php echo esc_attr__( 'Product ID - You can find this in your purchase confirmation email.', 'frontblocks' ); ?>"
 						class="tw-block tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
 					/>
 				</div>
@@ -925,12 +1025,11 @@ class Settings {
 					<?php echo esc_html__( 'License Status', 'frontblocks' ); ?>
 				</label>
 				<?php
-				$status_text  = '';
-				$status_class = '';
-				$status_icon  = '';
-				global $frontblocks_pro_license;
+				$status_text    = '';
+				$status_class   = '';
+				$status_icon    = '';
 				$license_data   = $frontblocks_pro_license->license_key_status( true );
-				$license_status = empty( $license_data ) ? 'not_activated' : $license_data['status_check'];
+				$license_status = empty( $license_data ) || ! isset( $license_data['status_check'] ) ? 'not_activated' : $license_data['status_check'];
 
 				switch ( $license_status ) {
 					case 'active':
@@ -945,6 +1044,7 @@ class Settings {
 						break;
 					default:
 						$status_text  = __( 'Not Activated', 'frontblocks' );
+						$status_text .= ' ' . ( isset( $license_data['error'] ) ? $license_data['error'] : '' );
 						$status_class = 'tw-bg-yellow-100 tw-text-yellow-800 tw-border-yellow-300';
 						$status_icon  = '<svg class="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>';
 						break;
@@ -955,7 +1055,21 @@ class Settings {
 						<?php echo $status_icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					</span>
 					<span class="tw-font-semibold tw-text-base">
-						<?php echo esc_html( $status_text ); ?>
+						<?php
+						echo wp_kses(
+							$status_text,
+							array(
+								'br'     => array(),
+								'em'     => array(),
+								'strong' => array(),
+								'a'      => array(
+									'href'   => true,
+									'target' => true,
+									'rel'    => true,
+								),
+							)
+						);
+						?>
 					</span>
 					<?php if ( ! empty( $license_data['expires'] ) && 'valid' === $license_data['status'] ) : ?>
 						<span class="tw-ml-auto tw-text-sm">
@@ -972,7 +1086,7 @@ class Settings {
 			</div>
 
 			<!-- Help Text -->
-			<?php if ( empty( $license_key ) && empty( $product_id ) ) : ?>
+			<?php if ( empty( $license_key ) ) : ?>
 				<div class="tw-p-4 tw-rounded-lg tw-bg-gray-50 tw-border tw-border-gray-200">
 					<p class="tw-text-sm tw-text-gray-600">
 						<?php
@@ -1006,45 +1120,25 @@ class Settings {
 	/**
 	 * Helper method to render PRO toggle fields.
 	 *
-	 * @param string $option_key  Option key.
-	 * @param string $description Field description.
+	 * @param string $option_key Option key.
 	 * @return void
 	 */
-	private function render_pro_toggle( $option_key, $description ) {
-		$options     = get_option( 'frontblocks_settings', array() );
-		$enabled     = (bool) ( $options[ $option_key ] ?? false );
-		$is_enabled  = $this->is_license_valid;
-		$disabled    = ! $is_enabled ? 'disabled' : '';
-		$opacity_cls = ! $is_enabled ? 'tw-opacity-50' : '';
+	private function render_pro_toggle( $option_key ) {
+		$options    = get_option( 'frontblocks_settings', array() );
+		$enabled    = (bool) ( $options[ $option_key ] ?? false );
+		$is_enabled = $this->is_license_valid;
+		$disabled   = ! $is_enabled ? 'disabled' : '';
 		?>
-		<div class="tw-flex tw-items-center tw-justify-between <?php echo esc_attr( $opacity_cls ); ?>">
-			<div class="tw-flex-grow tw-pr-4">
-				<div class="tw-flex tw-items-center tw-gap-2">
-					<p class="tw-text-sm tw-text-gray-500">
-						<?php echo esc_html( $description ); ?>
-					</p>
-					<?php if ( ! $is_enabled ) : ?>
-						<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-badge" 
-							target="_blank" 
-							rel="noopener noreferrer"
-							class="tw-inline-flex tw-items-center tw-px-3 tw-py-1 tw-ml-2 tw-rounded tw-text-xs tw-font-semibold tw-bg-primary-100 tw-text-primary-700 hover:tw-bg-primary-200 tw-transition-colors tw-no-underline"
-							title="<?php echo esc_attr__( 'Upgrade to FrontBlocks PRO', 'frontblocks' ); ?>">
-							PRO
-						</a>
-					<?php endif; ?>
-				</div>
-			</div>
-			<label class="frbl-toggle">
-				<input type="checkbox" 
-					id="<?php echo esc_attr( $option_key ); ?>" 
-					name="frontblocks_settings[<?php echo esc_attr( $option_key ); ?>]" 
-					value="1" 
-					<?php checked( true, $enabled ); ?>
-					<?php echo esc_attr( $disabled ); ?>
-				/>
-				<span></span>
-			</label>
-		</div>
+		<label class="frbl-toggle">
+			<input type="checkbox" 
+				id="<?php echo esc_attr( $option_key ); ?>" 
+				name="frontblocks_settings[<?php echo esc_attr( $option_key ); ?>]" 
+				value="1" 
+				<?php checked( true, $enabled ); ?>
+				<?php echo esc_attr( $disabled ); ?>
+			/>
+			<span></span>
+		</label>
 		<?php
 	}
 
@@ -1109,17 +1203,7 @@ class Settings {
 			}
 		}
 
-		// Save license key and product id.
-		global $frontblocks_pro_license;
-		if ( ! empty( $frontblocks_pro_license ) ) {
-			$result = $frontblocks_pro_license->sanitize_fields_license( $_POST );
-
-			if ( 'ok' === $result['status'] ) {
-				add_settings_error( 'frontblocks_settings', 'frontblocks_settings_license', $result['message'], 'updated' );
-			} else {
-				add_settings_error( 'frontblocks_settings', 'frontblocks_settings_license', $result['message'], 'error' );
-			}
-		}
+		do_action( 'frontblocks_sanitize_settings', $sanitized );
 
 		return $sanitized;
 	}

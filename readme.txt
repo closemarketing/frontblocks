@@ -4,14 +4,17 @@ Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 1.2.2
-Version: 1.2.2
+Stable tag: 1.3.0
+Version: 1.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-This plugin extends the functionality of GeneratePress by adding a carousel, slider, animations, sticky columns and the ability to insert posts.
+This plugin extends the functionality of GeneratePress by adding a carousel, slider, animations, sticky columns, edge alignment for containers and the ability to insert posts.
 
 == Description ==
+
+**Container Edge Alignment for GenerateBlocks**
+Add custom controls to GenerateBlocks Container blocks to remove padding from the left or right side, creating edge-to-edge layouts. This feature only appears for containers using GeneratePress global max-width settings, perfect for creating asymmetric layouts where content extends to one browser edge while maintaining proper spacing on the other side.
 
 **Carousel/Slider for GenerateBlocks Grid**
 We have added options to Gutenberg blocks that enable you to create a carousel or slider using your preferred blocks.
@@ -33,6 +36,9 @@ We have added options to the native WordPress gallery that allow you to create a
 You can add animations to the blocks you want. To do this, go to the block settings and select the 'FrontBlocks Animation Option' section. There you will find a list of animations that you can apply to the block.
 
 The animations are based on [Animate.css](https://animate.style/): Attention seekers, Back entrances, Back exits, Bouncing entrances, Bouncing exits, Fading entrances, Fading exits, Flippers, Rotating entrances, Rotating exits, Specials, Zooming entrances, Zooming exits, and Sliding entrances.
+
+**Container Effects**
+Apply glassmorphism effects to any block with customizable blur intensity. In the block settings, open the 'Container Effects' panel to enable the glass effect and adjust the blur level (0-50px) for a modern, frosted glass appearance. The effect includes a semi-transparent background, subtle border, and soft shadow, creating a beautiful layered design. Perfect for hero sections, cards, and overlays.
 
 **Sticky option for Grid block:**
 The sticky option allows you to make the grid block stick to the top of the viewport when scrolling down. To use this feature, enable the "Sticky" option in the Grid block settings. When enabled, the grid block will remain fixed at the top of the viewport as you scroll down the page.
@@ -104,7 +110,14 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Changelog ==
 
-== 1.2.2 ==
+== 1.3.0 ==
+*   Added: Container Effects with Glass Effect (Glassmorphism) - Apply customizable glass effect with adjustable blur intensity (0-50px) to any block.
+*   Improved: Complete redesign of the Settings page with modern card-based layout.
+*   Improved: Each feature now displays in its own card with icon, title, and toggle switch.
+*   Improved: PRO features show distinctive badge in the top-left corner.
+*   Improved: Responsive grid layout that adapts to mobile, tablet, and desktop screens.
+*   Improved: License section displays as full-width card for better visibility.
+*   Added: Container Edge Alignment - Remove padding from left or right side of GenerateBlocks containers to create asymmetric edge-to-edge layouts (only for containers using GeneratePress global max-width).
 *   Added: Custom Animations for Shapes - Full Lottie/Bodymovin support + custom CSS animations via JSON. Auto-detects format.
 *   Added: Lottie-web library integration for After Effects animations.
 *   Added: Gravity Forms Inline Layout option for displaying fields and buttons on the same line.

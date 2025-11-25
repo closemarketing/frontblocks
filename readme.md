@@ -4,7 +4,12 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 
 ## Functionalities
 
+### GenerateBlocks Extensions
+- **Container Edge Alignment** - Remove padding from left or right side to create edge-to-edge layouts
+
+### Block Enhancements
 - Animations
+- Container Effects (Glass Effect / Glassmorphism)
 - Carousel/Slider
 - Native Gallery
 - Sticky Columns
@@ -15,6 +20,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - Product Categories Block
 - Gravity Forms Inline Layout
 - Back Button
+- Modern Settings Page with Card-based Layout
 - Custom SVG Animations
 
 ## PRO Features
@@ -31,6 +37,10 @@ FrontBlocks PRO includes advanced WooCommerce features with automatic license va
 
 **License Protection:** PRO features are automatically disabled when the license is deactivated or expires to ensure security and proper usage.
 
+
+## Documentation
+
+- [Container Edge Alignment](./docs/CONTAINER-EDGE-ALIGNMENT.md) - Create asymmetric layouts with edge-to-edge content
 
 ## Release
 Actions for making a release:

@@ -3,7 +3,7 @@
  * Plugin Name: FrontBlocks for GeneratePress
  * Plugin URI:  https://wordpress.org/plugins/frontblocks/
  * Description: Blocks and helpers that extends GeneratePress blocks.
- * Version:     1.2.2
+ * Version:     1.3.0
  * Author:      Closemarketing
  * Author URI:  https://close.marketing
  * Text Domain: frontblocks
@@ -26,7 +26,7 @@
 
 defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
-define( 'FRBL_VERSION', '1.2.2' );
+define( 'FRBL_VERSION', '1.3.0' );
 define( 'FRBL_PLUGIN', __FILE__ );
 define( 'FRBL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'FRBL_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
@@ -44,6 +44,33 @@ add_action(
 		FrontBlocks\Plugin_Main::get_instance();
 	}
 );
+
+/**
+ * Redirect to settings page on plugin activation.
+ */
+function frbl_plugin_activation_redirect() {
+	// Bail if activating from network or bulk activation.
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Checking WordPress activation parameter, not processing form data.
+	if ( is_network_admin() || isset( $_GET['activate-multi'] ) ) {
+		return;
+	}
+
+	// Redirect to settings page.
+	if ( get_option( 'frbl_activation_redirect', false ) ) {
+		delete_option( 'frbl_activation_redirect' );
+		wp_safe_redirect( admin_url( 'themes.php?page=frontblocks-settings' ) );
+		exit;
+	}
+}
+add_action( 'admin_init', 'frbl_plugin_activation_redirect' );
+
+/**
+ * Set redirect flag on plugin activation.
+ */
+function frbl_set_activation_redirect() {
+	add_option( 'frbl_activation_redirect', true );
+}
+register_activation_hook( __FILE__, 'frbl_set_activation_redirect' );
 
 /**
  * Check if FrontBlocks PRO is active.
