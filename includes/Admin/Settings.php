@@ -717,18 +717,18 @@ class Settings {
 	private function get_feature_icon( $field_id ) {
 		// Map field IDs to icon file names.
 		$icon_map = array(
-			$this->option_enable_testimonials                    => 'testimonials',
-			$this->option_enable_reading_progress                => 'reading-progress',
-			$this->option_enable_back_button                     => 'back-button',
-			$this->option_enable_gutenberg                       => 'gutenberg',
+			$this->option_enable_testimonials          => 'testimonials',
+			$this->option_enable_reading_progress      => 'reading-progress',
+			$this->option_enable_back_button           => 'back-button',
+			$this->option_enable_gutenberg             => 'gutenberg',
 			$this->option_enable_simple_prices_variable_products => 'simple-prices',
-			$this->option_enable_after_add_to_cart               => 'after-add-to-cart',
-			$this->option_deactivate_short_description           => 'deactivate-description',
-			$this->option_move_content_to_short_description      => 'move-content',
-			$this->option_disable_zoom_images                    => 'disable-zoom',
-			$this->option_add_share_buttons                      => 'share-buttons',
-			$this->option_deactivate_product_tabs                => 'deactivate-tabs',
-			$this->option_horizontal_product_form                => 'horizontal-form',
+			$this->option_enable_after_add_to_cart     => 'after-add-to-cart',
+			$this->option_deactivate_short_description => 'deactivate-description',
+			$this->option_move_content_to_short_description => 'move-content',
+			$this->option_disable_zoom_images          => 'disable-zoom',
+			$this->option_add_share_buttons            => 'share-buttons',
+			$this->option_deactivate_product_tabs      => 'deactivate-tabs',
+			$this->option_horizontal_product_form      => 'horizontal-form',
 		);
 
 		$icon_name = $icon_map[ $field_id ] ?? 'default';
