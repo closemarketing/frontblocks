@@ -71,7 +71,7 @@ Display a vertical progress bar on the right side of posts that fills up as user
 Display a floating back button in the bottom left corner that allows users to navigate to the previous page. Enable it from the FrontBlocks settings page.
 
 **Custom SVG Animations:**
-Add animated graphics to GenerateBlocks Shape blocks via JSON. Supports two formats that are automatically detected: **Lottie/Bodymovin** (paste JSON from After Effects or LottieFiles.com) and **Custom CSS** (SVG + @keyframes). Includes lottie-web library, real-time validation, format detection, and example templates. All animations are performance-optimized and respect user motion preferences.
+Add animated graphics to GenerateBlocks Shape blocks by importing JSON files. Supports two formats that are automatically detected: **Lottie/Bodymovin** (import JSON from After Effects or LottieFiles.com) and **Custom CSS** (SVG + @keyframes). 
 
 **Gravity Forms Inline Layout:**
 Display Gravity Forms with fields and buttons on the same line. Perfect for newsletter signup forms (email + subscribe button) or search forms (input + search button). 
@@ -109,6 +109,14 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 2. Go to Settings > FrontBlocks > Features and enable the features you want to use.
 
 == Changelog ==
+
+== n.e.x.t ==
+*   Improved: Custom SVG Animations now uses file upload instead of textarea for importing JSON files.
+*   Added: Download example JSON button for Custom SVG Animations feature.
+*   Added: Clear button to remove imported animation files.
+*   Added: Visual file name display with icon for imported JSON files.
+*   Improved: Better user experience with file import workflow for Shape animations.
+*   Fixed: File input now properly resets after clearing, allowing immediate re-import of files.
 
 == 1.3.0 ==
 *   Added: Container Effects with Glass Effect (Glassmorphism) - Apply customizable glass effect with adjustable blur intensity (0-50px) to any block.
