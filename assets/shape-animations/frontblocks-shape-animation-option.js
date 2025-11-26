@@ -18,9 +18,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var _wp$components = wp.components,
     PanelBody = _wp$components.PanelBody,
     ToggleControl = _wp$components.ToggleControl,
-    TextareaControl = _wp$components.TextareaControl,
     Button = _wp$components.Button,
-    Notice = _wp$components.Notice;
+    Notice = _wp$components.Notice,
+    FormFileUpload = _wp$components.FormFileUpload;
 
   /**
    * Add custom SVG animation controls to GenerateBlocks Shape block.
@@ -45,6 +45,14 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         _useState4 = _slicedToArray(_useState3, 2),
         jsonPreview = _useState4[0],
         setJsonPreview = _useState4[1];
+      var _useState5 = useState(''),
+        _useState6 = _slicedToArray(_useState5, 2),
+        fileName = _useState6[0],
+        setFileName = _useState6[1];
+      var _useState7 = useState(0),
+        _useState8 = _slicedToArray(_useState7, 2),
+        fileInputKey = _useState8[0],
+        setFileInputKey = _useState8[1];
 
       // Detect if JSON is Lottie format.
       var isLottieJson = function isLottieJson(parsed) {
@@ -92,19 +100,46 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         }
       };
 
-      // Handle JSON change.
-      var handleJsonChange = function handleJsonChange(value) {
-        setAttributes({
-          frblCustomSvgAnimationJson: value
-        });
-        if (value.trim()) {
-          validateJson(value);
-        } else {
-          setJsonError('');
-          setJsonPreview(null);
+      // Handle file upload.
+      var handleFileUpload = function handleFileUpload(event) {
+        var file = event.target.files[0];
+        if (!file) {
+          return;
         }
+        
+        // Check if it's a JSON file.
+        if (!file.name.endsWith('.json')) {
+          setJsonError(__('Please select a JSON file', 'frontblocks'));
+          setFileInputKey(function(prev) { return prev + 1; });
+          return;
+        }
+        
+        setFileName(file.name);
+        
+        // Read file content.
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var content = e.target.result;
+          setAttributes({ frblCustomSvgAnimationJson: content });
+          validateJson(content);
+          setFileInputKey(function(prev) { return prev + 1; });
+        };
+        reader.onerror = function() {
+          setJsonError(__('Error reading file', 'frontblocks'));
+          setFileInputKey(function(prev) { return prev + 1; });
+        };
+        reader.readAsText(file);
       };
-
+      
+      // Clear imported JSON.
+      var handleClear = function handleClear() {
+        setAttributes({ frblCustomSvgAnimationJson: '' });
+        setJsonError('');
+        setJsonPreview(null);
+        setFileName('');
+        setFileInputKey(function(prev) { return prev + 1; });
+      };
+      
       // Example JSON template.
       var exampleJson = JSON.stringify({
         "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"48\" height=\"48\" fill=\"currentColor\"><path d=\"M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z\"/></svg>",
@@ -117,6 +152,20 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           "trigger": "load"
         }
       }, null, 2);
+      
+      // Download example JSON.
+      var handleDownloadExample = function handleDownloadExample() {
+        var blob = new Blob([exampleJson], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'example-animation.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      };
+      
       return wp.element.createElement(Fragment, {}, wp.element.createElement(BlockEdit, props), wp.element.createElement(InspectorControls, {}, wp.element.createElement(PanelBody, {
         title: __('FrontBlocks Custom SVG Animation', 'frontblocks'),
         initialOpen: false
@@ -132,16 +181,36 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       }), frblCustomSvgAnimationEnabled && wp.element.createElement(Fragment, {}, wp.element.createElement('p', {
         style: {
           fontSize: '12px',
-          marginBottom: '8px',
+          marginBottom: '12px',
           color: '#757575'
         }
-      }, __('Paste your JSON configuration below:', 'frontblocks')), wp.element.createElement(TextareaControl, {
-        label: __('JSON Configuration', 'frontblocks'),
-        value: frblCustomSvgAnimationJson,
-        onChange: handleJsonChange,
-        rows: 10,
-        help: __('JSON with svg and animation properties', 'frontblocks')
-      }), jsonError && wp.element.createElement(Notice, {
+      }, __('Import a JSON file with your animation configuration:', 'frontblocks')), wp.element.createElement(FormFileUpload, {
+        key: fileInputKey,
+        accept: '.json',
+        onChange: handleFileUpload,
+        render: function(ref) {
+          return wp.element.createElement(Button, {
+            isSecondary: true,
+            onClick: ref.openFileDialog,
+            style: { marginBottom: '8px', width: '100%' }
+          }, fileName ? __('Change JSON file', 'frontblocks') : __('Import JSON file', 'frontblocks'));
+        }
+      }), fileName && wp.element.createElement('div', {
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '12px',
+          padding: '8px',
+          background: '#f6f7f7',
+          borderRadius: '4px',
+          fontSize: '12px'
+        }
+      }, wp.element.createElement('span', {}, '📄 ' + fileName), wp.element.createElement(Button, {
+        isSmall: true,
+        isDestructive: true,
+        onClick: handleClear
+      }, __('Clear', 'frontblocks'))), jsonError && wp.element.createElement(Notice, {
         status: 'error',
         isDismissible: false
       }, jsonError), jsonPreview && wp.element.createElement(Notice, {
@@ -158,7 +227,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
           fontWeight: '600',
           marginBottom: '8px'
         }
-      }, __('📋 Show example JSON', 'frontblocks')), wp.element.createElement('pre', {
+      }, __('📋 Download example JSON', 'frontblocks')), wp.element.createElement('pre', {
         style: {
           background: '#f6f7f7',
           padding: '12px',
@@ -170,11 +239,21 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       }, exampleJson), wp.element.createElement(Button, {
         isSecondary: true,
         isSmall: true,
+        onClick: handleDownloadExample,
+        style: {
+          marginTop: '8px',
+          marginRight: '8px'
+        }
+      }, __('Download example', 'frontblocks')), wp.element.createElement(Button, {
+        isSecondary: true,
+        isSmall: true,
         onClick: function onClick() {
           setAttributes({
             frblCustomSvgAnimationJson: exampleJson
           });
+          setFileName('example-animation.json');
           validateJson(exampleJson);
+          setFileInputKey(function(prev) { return prev + 1; });
         },
         style: {
           marginTop: '8px'
