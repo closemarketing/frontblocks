@@ -98,6 +98,13 @@ Features:
 - Product description behaviour.
 - Disable zoom on product image.
 - Share buttons.
+- Custom Post Types Builder: Create and manage custom post types with advanced configuration options:
+  * Create custom post types with a simple interface from the FrontBlocks settings page
+  * Configure post type behavior (Post or Page style - hierarchical or not)
+  * Enable/disable categories taxonomy for each custom post type
+  * Add custom meta fields with multiple field types (Text, Textarea, URL, Date, File, Number, Email)
+  * Individual settings page for each custom post type accessible from the post type menu
+  * Delete custom post types easily with a single click
 - Disable tabs on the product page.
 - Horizontal product form layout (price, quantity, and add to cart button in one row).
 
