@@ -23,6 +23,15 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - Modern Settings Page with Card-based Layout
 - Custom SVG Animations
 
+### PRO Features (FrontBlocks PRO)
+- **Custom Post Types Builder** - Create and manage custom post types with advanced configuration options:
+  - Create custom post types with a simple interface
+  - Configure post type behavior (Post or Page style)
+  - Enable/disable categories taxonomy
+  - Add custom meta fields (Text, Textarea, URL, Date, File, Number, Email)
+  - Individual settings page for each custom post type
+  - Delete custom post types easily
+
 
 ## Documentation
 
