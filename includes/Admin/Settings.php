@@ -104,6 +104,13 @@ class Settings {
 	private $option_horizontal_product_form = 'horizontal_product_form';
 
 	/**
+	 * Option key for custom post types builder (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_enable_custom_post_types = 'enable_custom_post_types';
+
+	/**
 	 * Page slug.
 	 *
 	 * @var string
@@ -228,6 +235,31 @@ class Settings {
 			});
 			"
 		);
+
+		// Enqueue script for custom post types if PRO is active and license is valid.
+		if ( frbl_is_pro_active() && $this->is_license_valid ) {
+			wp_enqueue_script(
+				'frontblocks-cpt-admin',
+				FRBL_PLUGIN_URL . 'assets/admin/custom-post-types.js',
+				array( 'jquery' ),
+				FRBL_VERSION,
+				true
+			);
+
+			wp_localize_script(
+				'frontblocks-cpt-admin',
+				'frontblocksCpt',
+				array(
+					'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+					'nonce'   => wp_create_nonce( 'frontblocks_create_cpt' ),
+					'i18n'    => array(
+						'creating' => __( 'Creating...', 'frontblocks' ),
+						'error'    => __( 'Error creating post type. Please try again.', 'frontblocks' ),
+						'success'  => __( 'Post type created successfully!', 'frontblocks' ),
+					),
+				)
+			);
+		}
 	}
 
 	/**
@@ -380,6 +412,24 @@ class Settings {
 			$this->page_slug,
 			'frontblocks_section_woocommerce_features'
 		);
+
+		// Custom Post Types section (PRO).
+		if ( frbl_is_pro_active() ) {
+			add_settings_section(
+				'frontblocks_section_custom_post_types',
+				__( 'Custom Post Types', 'frontblocks' ),
+				array( $this, 'section_custom_post_types_callback' ),
+				$this->page_slug
+			);
+
+			add_settings_field(
+				$this->option_enable_custom_post_types,
+				__( 'Enable Custom Post Types Builder', 'frontblocks' ),
+				array( $this, 'field_enable_custom_post_types' ),
+				$this->page_slug,
+				'frontblocks_section_custom_post_types'
+			);
+		}
 
 		// License section (only if PRO is active).
 		if ( frbl_is_pro_active() ) {
@@ -584,6 +634,9 @@ class Settings {
 		// Check if this is the license section - render it full width.
 		$is_license_section = 'frontblocks_section_license' === $section['id'];
 
+		// Check if this is the custom post types section - render it full width.
+		$is_cpt_section = 'frontblocks_section_custom_post_types' === $section['id'];
+
 		if ( $is_callback_only ) {
 			// Render section with only callback (no fields).
 			?>
@@ -599,8 +652,8 @@ class Settings {
 			return;
 		}
 
-		if ( $is_license_section ) {
-			// Render license section as a full-width card.
+		if ( $is_license_section || $is_cpt_section ) {
+			// Render license or CPT section as a full-width card.
 			?>
 			<div class="frbl-card tw-bg-white tw-rounded-lg tw-shadow-sm tw-border tw-border-gray-200 tw-overflow-hidden frbl-animate-slide-in tw-mb-8">
 				<div class="tw-px-6 tw-py-5 tw-border-b tw-border-gray-200 tw-bg-gradient-to-r tw-from-gray-50 tw-to-white">
@@ -936,6 +989,116 @@ class Settings {
 	}
 
 	/**
+	 * Custom Post Types section callback.
+	 *
+	 * @return void
+	 */
+	public function section_custom_post_types_callback() {
+		if ( ! frbl_is_pro_active() ) {
+			echo '<div class="tw-bg-blue-50 tw-border-l-4 tw-border-blue-400 tw-p-4 tw-mb-4">';
+			echo '<div class="tw-flex">';
+			echo '<div class="tw-flex-shrink-0">';
+			echo '<svg class="tw-h-5 tw-w-5 tw-text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>';
+			echo '</div>';
+			echo '<div class="tw-ml-3">';
+			echo '<p class="tw-text-sm tw-text-blue-700">';
+			printf(
+				/* translators: %s: FrontBlocks PRO link */
+				esc_html__( 'This feature requires %s. Upgrade to unlock advanced functionality.', 'frontblocks' ),
+				'<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings" target="_blank" class="tw-font-medium tw-underline">FrontBlocks PRO</a>'
+			);
+			echo '</p>';
+			echo '</div>';
+			echo '</div>';
+			echo '</div>';
+		} elseif ( ! $this->is_license_valid ) {
+			echo '<div class="tw-bg-yellow-50 tw-border-l-4 tw-border-yellow-400 tw-p-4 tw-mb-4">';
+			echo '<div class="tw-flex">';
+			echo '<div class="tw-flex-shrink-0">';
+			echo '<svg class="tw-h-5 tw-w-5 tw-text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>';
+			echo '</div>';
+			echo '<div class="tw-ml-3">';
+			echo '<p class="tw-text-sm tw-text-yellow-700">';
+			printf(
+				/* translators: %s: License section link */
+				esc_html__( 'License is not activated. Please activate your license in the %s section below to enable these features.', 'frontblocks' ),
+				'<a href="#frontblocks_section_license" class="tw-font-medium tw-underline">' . esc_html__( 'License', 'frontblocks' ) . '</a>'
+			);
+			echo '</p>';
+			echo '</div>';
+			echo '</div>';
+			echo '</div>';
+		} else {
+			?>
+			<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
+				<?php echo esc_html__( 'Create and manage custom post types with advanced configuration options.', 'frontblocks' ); ?>
+			</p>
+			<?php
+		}
+	}
+
+	/**
+	 * Render toggle field for enable custom post types.
+	 *
+	 * @return void
+	 */
+	public function field_enable_custom_post_types() {
+		$options = get_option( 'frontblocks_settings', array() );
+		$enabled = (bool) ( $options[ $this->option_enable_custom_post_types ] ?? false );
+		$is_enabled = $this->is_license_valid;
+		$disabled = ! $is_enabled ? 'disabled' : '';
+		?>
+		<div class="frbl-custom-post-types-wrapper">
+			<div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
+				<label for="<?php echo esc_attr( $this->option_enable_custom_post_types ); ?>" class="tw-text-base tw-font-medium tw-text-gray-900">
+					<?php echo esc_html__( 'Enable Custom Post Types Builder', 'frontblocks' ); ?>
+				</label>
+				<label class="frbl-toggle">
+					<input type="checkbox" 
+						id="<?php echo esc_attr( $this->option_enable_custom_post_types ); ?>" 
+						name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_custom_post_types ); ?>]" 
+						value="1" 
+						<?php checked( true, $enabled ); ?>
+						<?php echo esc_attr( $disabled ); ?>
+					/>
+					<span></span>
+				</label>
+			</div>
+			
+			<?php if ( $is_enabled ) : ?>
+				<div id="frbl-cpt-builder" class="frbl-cpt-builder" style="<?php echo $enabled ? '' : 'display: none;'; ?>">
+					<div class="tw-mt-4 tw-p-4 tw-bg-gray-50 tw-rounded-lg tw-border tw-border-gray-200">
+						<label for="frbl-cpt-name" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
+							<?php echo esc_html__( 'Post Type Name', 'frontblocks' ); ?>
+						</label>
+						<div class="tw-flex tw-gap-2">
+							<input 
+								type="text" 
+								id="frbl-cpt-name" 
+								class="tw-flex-1 tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent" 
+								placeholder="<?php echo esc_attr__( 'e.g., Portfolio, Team, Services', 'frontblocks' ); ?>"
+							/>
+							<button 
+								type="button" 
+								id="frbl-create-cpt-btn" 
+								class="tw-px-4 tw-py-2 tw-bg-primary-500 tw-text-white tw-rounded-lg hover:tw-bg-primary-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 tw-transition-colors"
+							>
+								<?php echo esc_html__( 'Crear', 'frontblocks' ); ?>
+							</button>
+						</div>
+						<p class="tw-text-xs tw-text-gray-500 tw-mt-2">
+							<?php echo esc_html__( 'Enter a singular name for your custom post type (e.g., "Portfolio" will create "portfolio" post type).', 'frontblocks' ); ?>
+						</p>
+					</div>
+
+					<?php do_action( 'frontblocks_render_existing_cpts' ); ?>
+				</div>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
 	 * License section description.
 	 *
 	 * @return void
@@ -1117,7 +1280,7 @@ class Settings {
 
 		$sanitized = array();
 		foreach ( $value as $key => $val ) {
-			if ( $this->option_enable_testimonials === $key || $this->option_enable_reading_progress === $key || $this->option_enable_back_button === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key || $this->option_horizontal_product_form === $key ) {
+			if ( $this->option_enable_testimonials === $key || $this->option_enable_reading_progress === $key || $this->option_enable_back_button === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key || $this->option_horizontal_product_form === $key || $this->option_enable_custom_post_types === $key ) {
 				$sanitized[ $key ] = (bool) $val;
 			}
 		}
