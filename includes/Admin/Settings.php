@@ -1043,10 +1043,10 @@ class Settings {
 	 * @return void
 	 */
 	public function field_enable_custom_post_types() {
-		$options = get_option( 'frontblocks_settings', array() );
-		$enabled = (bool) ( $options[ $this->option_enable_custom_post_types ] ?? false );
+		$options    = get_option( 'frontblocks_settings', array() );
+		$enabled    = (bool) ( $options[ $this->option_enable_custom_post_types ] ?? false );
 		$is_enabled = $this->is_license_valid;
-		$disabled = ! $is_enabled ? 'disabled' : '';
+		$disabled   = ! $is_enabled ? 'disabled' : '';
 		?>
 		<div class="frbl-custom-post-types-wrapper">
 			<div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
