@@ -289,8 +289,8 @@ class Settings {
 	 */
 	public function register_menu() {
 		// Use SVG icon if available, otherwise fallback to dashicon.
-		$icon_url = FRBL_PLUGIN_URL . 'assets/admin/icons/icon-menu.svg';
-		$icon_path = FRBL_PLUGIN_PATH . 'assets/admin/icons/icon-menu.svg';	
+		$icon_url  = FRBL_PLUGIN_URL . 'assets/admin/icons/icon-menu.svg';
+		$icon_path = FRBL_PLUGIN_PATH . 'assets/admin/icons/icon-menu.svg';
 		$menu_icon = file_exists( $icon_path ) ? $icon_url : 'dashicons-block-default';
 
 		add_menu_page(
