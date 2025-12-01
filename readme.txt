@@ -3,15 +3,18 @@ Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit
 Tags: carrusel, slider, lightweight, generatepress
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
-Tested up to: 6.8
-Stable tag: 1.2.1
-Version: 1.2.1
+Tested up to: 6.9
+Stable tag: 1.3.0
+Version: 1.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-This plugin extends the functionality of GeneratePress by adding a carousel, slider, animations, sticky columns and the ability to insert posts.
+This plugin extends the functionality of GeneratePress by adding a carousel, slider, animations, sticky columns, edge alignment for containers and the ability to insert posts.
 
 == Description ==
+
+**Container Edge Alignment for GenerateBlocks**
+Add custom controls to GenerateBlocks Container blocks to remove padding from the left or right side, creating edge-to-edge layouts. This feature only appears for containers using GeneratePress global max-width settings, perfect for creating asymmetric layouts where content extends to one browser edge while maintaining proper spacing on the other side.
 
 **Carousel/Slider for GenerateBlocks Grid**
 We have added options to Gutenberg blocks that enable you to create a carousel or slider using your preferred blocks.
@@ -33,6 +36,9 @@ We have added options to the native WordPress gallery that allow you to create a
 You can add animations to the blocks you want. To do this, go to the block settings and select the 'FrontBlocks Animation Option' section. There you will find a list of animations that you can apply to the block.
 
 The animations are based on [Animate.css](https://animate.style/): Attention seekers, Back entrances, Back exits, Bouncing entrances, Bouncing exits, Fading entrances, Fading exits, Flippers, Rotating entrances, Rotating exits, Specials, Zooming entrances, Zooming exits, and Sliding entrances.
+
+**Container Effects**
+Apply glassmorphism effects to any block with customizable blur intensity. In the block settings, open the 'Container Effects' panel to enable the glass effect and adjust the blur level (0-50px) for a modern, frosted glass appearance. The effect includes a semi-transparent background, subtle border, and soft shadow, creating a beautiful layered design. Perfect for hero sections, cards, and overlays.
 
 **Sticky option for Grid block:**
 The sticky option allows you to make the grid block stick to the top of the viewport when scrolling down. To use this feature, enable the "Sticky" option in the Grid block settings. When enabled, the grid block will remain fixed at the top of the viewport as you scroll down the page.
@@ -64,6 +70,21 @@ Display a vertical progress bar on the right side of posts that fills up as user
 **Back Button:**
 Display a floating back button in the bottom left corner that allows users to navigate to the previous page. Enable it from the FrontBlocks settings page.
 
+**Custom SVG Animations:**
+Add animated graphics to GenerateBlocks Shape blocks by importing JSON files. Supports two formats that are automatically detected: **Lottie/Bodymovin** (import JSON from After Effects or LottieFiles.com) and **Custom CSS** (SVG + @keyframes). 
+
+**Gravity Forms Inline Layout:**
+Display Gravity Forms with fields and buttons on the same line. Perfect for newsletter signup forms (email + subscribe button) or search forms (input + search button). 
+
+To use this feature:
+1. Select a form in the Gravity Forms block
+2. Find the "FrontBlocks Gravity Form Options" panel in the block settings where you can:
+   - Enable inline layout with a simple toggle
+   - Adjust the gap between elements (0-50px)
+   - Responsive design: automatically stacks on mobile devices
+
+This feature eliminates the need for custom CSS to achieve inline form layouts.
+
 **WooCommerce Features:**
 Included features for WooCommerce FrontBlocks PRO.
 
@@ -77,6 +98,13 @@ Features:
 - Product description behaviour.
 - Disable zoom on product image.
 - Share buttons.
+- Custom Post Types Builder: Create and manage custom post types with advanced configuration options:
+  * Create custom post types with a simple interface from the FrontBlocks settings page
+  * Configure post type behavior (Post or Page style - hierarchical or not)
+  * Enable/disable categories taxonomy for each custom post type
+  * Add custom meta fields with multiple field types (Text, Textarea, URL, Date, File, Number, Email)
+  * Individual settings page for each custom post type accessible from the post type menu
+  * Delete custom post types easily with a single click
 - Disable tabs on the product page.
 - Horizontal product form layout (price, quantity, and add to cart button in one row).
 
@@ -84,18 +112,37 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Installation ==
 
-Extract the ZIP file and simply copy its contents into the wp-content/plugins/ directory of your WordPress installation. Then activate the plugin from the Plugins page.
-
-
-== Developers ==
-[Official Repository Github](https://github.com/closemarketing/frontblocks)
+1. Go to Plugins > Add New > Search for "FrontBlocks" > Install and Activate.
+2. Go to Settings > FrontBlocks > Features and enable the features you want to use.
 
 == Changelog ==
 
 == n.e.x.t ==
+*   Improved: Custom SVG Animations now uses file upload instead of textarea for importing JSON files.
+*   Added: Download example JSON button for Custom SVG Animations feature.
+*   Added: Clear button to remove imported animation files.
+*   Added: Visual file name display with icon for imported JSON files.
+*   Improved: Better user experience with file import workflow for Shape animations.
+*   Fixed: File input now properly resets after clearing, allowing immediate re-import of files.
+
+== 1.3.0 ==
+*   Added: Container Effects with Glass Effect (Glassmorphism) - Apply customizable glass effect with adjustable blur intensity (0-50px) to any block.
+*   Improved: Complete redesign of the Settings page with modern card-based layout.
+*   Improved: Each feature now displays in its own card with icon, title, and toggle switch.
+*   Improved: PRO features show distinctive badge in the top-left corner.
+*   Improved: Responsive grid layout that adapts to mobile, tablet, and desktop screens.
+*   Improved: License section displays as full-width card for better visibility.
+*   Added: Container Edge Alignment - Remove padding from left or right side of GenerateBlocks containers to create asymmetric edge-to-edge layouts (only for containers using GeneratePress global max-width).
+*   Added: Custom Animations for Shapes - Full Lottie/Bodymovin support + custom CSS animations via JSON. Auto-detects format.
+*   Added: Lottie-web library integration for After Effects animations.
+*   Added: Gravity Forms Inline Layout option for displaying fields and buttons on the same line.
+*   Added: Gap control for inline form elements (0-50px).
+*   Added: Responsive design support - automatically stacks on mobile.
+*   Fixed: REST API validation errors with custom block attributes.
 *   Added: Reading Progress Bar - Display a visual progress indicator on the right side of posts as users scroll through content.
 *   Added: Back Button feature with floating button to navigate to previous page.
 *   PRO: Horizontal Product Form Layout - Align price, quantity, and add to cart button in one row.
+*   Added: Remove box shadow in Carrusel bullets.
 
 == 1.2.1 ==
 *   Fixed: Carousel/Slider not working correctly.

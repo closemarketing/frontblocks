@@ -66,8 +66,18 @@ class Plugin_Main {
 	private function load_modules() {
 		// Admin settings page.
 		if ( is_admin() ) {
+			// Load Admin classes if autoloader is not available.
+			if ( ! class_exists( 'FrontBlocks\Admin\UI' ) ) {
+				require_once FRBL_PLUGIN_PATH . 'includes/Admin/UI.php';
+			}
+			if ( ! class_exists( 'FrontBlocks\Admin\Settings' ) ) {
+				require_once FRBL_PLUGIN_PATH . 'includes/Admin/Settings.php';
+			}
 			new Admin\Settings();
 		}
+
+		// Container Edge Alignment for GenerateBlocks.
+		new Frontend\ContainerEdgeAlignment();
 
 		// Carousel module.
 		new Frontend\Carousel();
@@ -107,6 +117,12 @@ class Plugin_Main {
 
 		// Events module.
 		new Frontend\Events();
+
+		// Shape Animations module (for GenerateBlocks Shape block).
+		new Frontend\ShapeAnimations();
+
+		// Gravity Forms Inline Layout module.
+		new Frontend\GravityFormsInline();
 	}
 
 	/**

@@ -410,10 +410,115 @@ function addAnimationControls(BlockEdit) {
       _props$attributes$frb5 = _props$attributes.frblAnimationInfinite,
       frblAnimationInfinite = _props$attributes$frb5 === void 0 ? false : _props$attributes$frb5,
       _props$attributes$frb6 = _props$attributes.frblDisableAnimationMobile,
-      frblDisableAnimationMobile = _props$attributes$frb6 === void 0 ? false : _props$attributes$frb6;
+      frblDisableAnimationMobile = _props$attributes$frb6 === void 0 ? false : _props$attributes$frb6,
+      _props$attributes$frb7 = _props$attributes.frblGlassEffect,
+      frblGlassEffect = _props$attributes$frb7 === void 0 ? false : _props$attributes$frb7,
+      _props$attributes$frb8 = _props$attributes.frblGlassBlur,
+      frblGlassBlur = _props$attributes$frb8 === void 0 ? 10 : _props$attributes$frb8;
 
     // Create flattened options for the SelectControl
     var flattenedOptions = createFlattenedOptions();
+
+    // Apply glass effect styles to the block wrapper in the editor
+    useEffect(function () {
+      var applyGlassEffect = function applyGlassEffect() {
+        // Find the block wrapper in the editor
+        var doc = document;
+        var iframe = document.querySelector('iframe[name="editor-canvas"], iframe#editor-canvas');
+        if (iframe && iframe.contentDocument) {
+          doc = iframe.contentDocument;
+        }
+
+        // Find the block element in the editor canvas (not in the list view)
+        var blockElement = null;
+
+        // Try different selectors to find the actual block in the editor
+        var selectors = ["#block-".concat(props.clientId), ".wp-block[data-block=\"".concat(props.clientId, "\"]"), ".block-editor-block-list__block[data-block=\"".concat(props.clientId, "\"]")];
+        for (var _i = 0, _selectors = selectors; _i < _selectors.length; _i++) {
+          var selector = _selectors[_i];
+          blockElement = doc.querySelector(selector);
+          if (blockElement) break;
+        }
+        if (!blockElement) return;
+
+        // Find the actual content wrapper (skip the editor wrapper)
+        // Look for the first child that has wp-block class
+        var targetElement = blockElement.querySelector('[class*="wp-block-"]:not(.block-editor)');
+
+        // If not found, try to get the direct child
+        if (!targetElement) {
+          var children = blockElement.children;
+          for (var i = 0; i < children.length; i++) {
+            var child = children[i];
+            // Skip editor UI elements
+            if (!child.classList.contains('block-editor-block-list__block-edit') && !child.classList.contains('block-list-appender')) {
+              targetElement = child;
+              break;
+            }
+            // If it's the edit wrapper, look inside
+            if (child.classList.contains('block-editor-block-list__block-edit')) {
+              targetElement = child.querySelector('[class*="wp-block-"]') || child.firstElementChild;
+              break;
+            }
+          }
+        }
+
+        // Fallback to first element child
+        if (!targetElement) {
+          targetElement = blockElement.firstElementChild;
+        }
+        if (targetElement) {
+          if (frblGlassEffect) {
+            // Apply glass effect styles
+            targetElement.style.backdropFilter = "blur(".concat(frblGlassBlur, "px)");
+            targetElement.style.webkitBackdropFilter = "blur(".concat(frblGlassBlur, "px)");
+            targetElement.style.background = 'rgba(255, 255, 255, 0.1)';
+            targetElement.style.border = '1px solid rgba(255, 255, 255, 0.18)';
+            targetElement.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.15)';
+
+            // Mark element for cleanup
+            targetElement.setAttribute('data-frbl-glass-applied', 'true');
+          } else {
+            // Remove glass effect styles when disabled
+            if (targetElement.getAttribute('data-frbl-glass-applied')) {
+              targetElement.style.backdropFilter = '';
+              targetElement.style.webkitBackdropFilter = '';
+              targetElement.style.background = '';
+              targetElement.style.border = '';
+              targetElement.style.boxShadow = '';
+              targetElement.removeAttribute('data-frbl-glass-applied');
+            }
+          }
+        }
+      };
+
+      // Apply immediately
+      applyGlassEffect();
+
+      // Also apply after a small delay to ensure DOM is ready
+      var timeoutId = setTimeout(applyGlassEffect, 100);
+
+      // Cleanup function
+      return function () {
+        clearTimeout(timeoutId);
+
+        // Clean up styles on unmount
+        var doc = document;
+        var iframe = document.querySelector('iframe[name="editor-canvas"], iframe#editor-canvas');
+        if (iframe && iframe.contentDocument) {
+          doc = iframe.contentDocument;
+        }
+        var elements = doc.querySelectorAll('[data-frbl-glass-applied="true"]');
+        elements.forEach(function (el) {
+          el.style.backdropFilter = '';
+          el.style.webkitBackdropFilter = '';
+          el.style.background = '';
+          el.style.border = '';
+          el.style.boxShadow = '';
+          el.removeAttribute('data-frbl-glass-applied');
+        });
+      };
+    }, [frblGlassEffect, frblGlassBlur, props.clientId]);
 
     // Function to trigger animation preview
     var triggerAnimationPreview = function triggerAnimationPreview() {
@@ -599,7 +704,31 @@ function addAnimationControls(BlockEdit) {
       style: {
         width: '100%'
       }
-    }, __('Preview Animation', 'frontblocks')))))));
+    }, __('Preview Animation', 'frontblocks'))))), /*#__PURE__*/React.createElement(PanelBody, {
+      title: __('Container Effects', 'frontblocks'),
+      initialOpen: false
+    }, /*#__PURE__*/React.createElement(ToggleControl, {
+      label: __('Enable Glass Effect', 'frontblocks'),
+      help: __('Applies a glassmorphism effect with blur to the container background', 'frontblocks'),
+      checked: frblGlassEffect,
+      onChange: function onChange(value) {
+        return props.setAttributes({
+          frblGlassEffect: value
+        });
+      }
+    }), frblGlassEffect && /*#__PURE__*/React.createElement(RangeControl, {
+      label: __('Blur Intensity', 'frontblocks'),
+      help: __('Adjust the blur amount for the glass effect', 'frontblocks'),
+      value: frblGlassBlur,
+      onChange: function onChange(value) {
+        return props.setAttributes({
+          frblGlassBlur: value
+        });
+      },
+      min: 0,
+      max: 50,
+      step: 1
+    }))));
   };
 }
 
@@ -614,7 +743,18 @@ addFilter('blocks.getSaveContent.extraProps', 'frontblocks/apply-animations', fu
     frblAnimationRepeat = attributes.frblAnimationRepeat,
     frblAnimationInfinite = attributes.frblAnimationInfinite,
     _attributes$frblDisab = attributes.frblDisableAnimationMobile,
-    frblDisableAnimationMobile = _attributes$frblDisab === void 0 ? false : _attributes$frblDisab;
+    frblDisableAnimationMobile = _attributes$frblDisab === void 0 ? false : _attributes$frblDisab,
+    _attributes$frblGlass = attributes.frblGlassEffect,
+    frblGlassEffect = _attributes$frblGlass === void 0 ? false : _attributes$frblGlass,
+    _attributes$frblGlass2 = attributes.frblGlassBlur,
+    frblGlassBlur = _attributes$frblGlass2 === void 0 ? 10 : _attributes$frblGlass2;
+
+  // Add style attribute if needed
+  if (!props.style) {
+    props.style = {};
+  }
+
+  // Handle animations
   if (frblAnimation) {
     // Add animate.css base class and the specific animation
     var animationClasses = "animate__animated animate__".concat(frblAnimation);
@@ -624,11 +764,6 @@ addFilter('blocks.getSaveContent.extraProps', 'frontblocks/apply-animations', fu
       animationClasses += ' frbl-no-mobile-animation';
     }
     props.className = props.className ? "".concat(props.className, " ").concat(animationClasses) : animationClasses;
-
-    // Add style attribute if needed
-    if (!props.style) {
-      props.style = {};
-    }
 
     // Set animation properties as inline styles
     if (frblAnimationDuration) {
@@ -642,6 +777,16 @@ addFilter('blocks.getSaveContent.extraProps', 'frontblocks/apply-animations', fu
     } else if (frblAnimationRepeat) {
       props.style['--animate-repeat'] = '2';
     }
+  }
+
+  // Handle glass effect
+  if (frblGlassEffect) {
+    var glassClass = 'frbl-glass-effect';
+    props.className = props.className ? "".concat(props.className, " ").concat(glassClass) : glassClass;
+
+    // Add glass effect styles
+    props.style['backdropFilter'] = "blur(".concat(frblGlassBlur, "px)");
+    props.style['-webkit-backdrop-filter'] = "blur(".concat(frblGlassBlur, "px)");
   }
   return props;
 });
