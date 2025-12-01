@@ -84,31 +84,31 @@ class Events {
 	 */
 	public function register_cpt_event() {
 		$labels = array(
-			'name'               => __( 'Eventos', 'frontblocks' ),
-			'singular_name'      => __( 'Evento', 'frontblocks' ),
-			'menu_name'          => __( 'Eventos', 'frontblocks' ),
-			'all_items'          => __( 'Todos los eventos', 'frontblocks' ),
-			'add_new'            => __( 'Añadir evento', 'frontblocks' ),
-			'add_new_item'       => __( 'Añadir nuevo evento', 'frontblocks' ),
-			'edit_item'          => __( 'Editar evento', 'frontblocks' ),
-			'new_item'           => __( 'Nuevo evento', 'frontblocks' ),
-			'view_item'          => __( 'Ver evento', 'frontblocks' ),
-			'search_items'       => __( 'Buscar evento', 'frontblocks' ),
-			'not_found'          => __( 'No se han encontrado eventos', 'frontblocks' ),
+			'name'          => __( 'Eventos', 'frontblocks' ),
+			'singular_name' => __( 'Evento', 'frontblocks' ),
+			'menu_name'     => __( 'Eventos', 'frontblocks' ),
+			'all_items'     => __( 'Todos los eventos', 'frontblocks' ),
+			'add_new'       => __( 'Añadir evento', 'frontblocks' ),
+			'add_new_item'  => __( 'Añadir nuevo evento', 'frontblocks' ),
+			'edit_item'     => __( 'Editar evento', 'frontblocks' ),
+			'new_item'      => __( 'Nuevo evento', 'frontblocks' ),
+			'view_item'     => __( 'Ver evento', 'frontblocks' ),
+			'search_items'  => __( 'Buscar evento', 'frontblocks' ),
+			'not_found'     => __( 'No se han encontrado eventos', 'frontblocks' ),
 		);
 
 		$args = array(
-			'label'               => __( 'Eventos', 'frontblocks' ),
-			'labels'              => $labels,
-			'public'              => true,
-			'show_ui'             => true,
-			'show_in_rest'        => true,
-			'has_archive'         => true,
-			'menu_position'       => 6,
-			'menu_icon'           => 'dashicons-calendar-alt',
-			'supports'            => array( 'title', 'editor', 'excerpt', 'thumbnail' ),
-			'rewrite'             => array( 'slug' => 'evento' ),
-			'taxonomies'          => array( 'post_tag', 'event_category' ),
+			'label'         => __( 'Eventos', 'frontblocks' ),
+			'labels'        => $labels,
+			'public'        => true,
+			'show_ui'       => true,
+			'show_in_rest'  => true,
+			'has_archive'   => true,
+			'menu_position' => 6,
+			'menu_icon'     => 'dashicons-calendar-alt',
+			'supports'      => array( 'title', 'editor', 'excerpt', 'thumbnail' ),
+			'rewrite'       => array( 'slug' => 'evento' ),
+			'taxonomies'    => array( 'post_tag', 'event_category' ),
 		);
 
 		register_post_type( 'event', $args );

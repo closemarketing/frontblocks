@@ -1138,7 +1138,7 @@ video {
 	transition: all 0.2s ease;
 	overflow: hidden;
 	display: flex;
-	align-items: center;
+	flex-direction: column;
 	min-height: 80px;
 }
 

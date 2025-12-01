@@ -252,32 +252,62 @@ class Settings {
 				const eventsTypeWrapper = document.getElementById('events-type-wrapper');
 				
 				if (eventsCheckbox && eventsTypeWrapper) {
+					// Find the parent feature card and feature content.
+					const featureCard = eventsCheckbox.closest('.frbl-feature-card');
+					const featureContent = featureCard ? featureCard.querySelector('.frbl-feature-content') : null;
+					
+					// Move the wrapper outside of frbl-feature-content but inside frbl-feature-card.
+					// This ensures it appears below the entire horizontal row (icon, text, toggle).
+					if (featureCard && featureContent) {
+						// Check if wrapper is still inside feature-content and move it.
+						if (featureContent.contains(eventsTypeWrapper)) {
+							// Move it to be a direct child of feature-card, after feature-content.
+							featureCard.appendChild(eventsTypeWrapper);
+						}
+					}
+					
 					function updateEventsTypeVisibility() {
 						if (eventsCheckbox.checked) {
 							eventsTypeWrapper.style.display = 'block';
 							eventsTypeWrapper.style.width = '100%';
 							eventsTypeWrapper.style.minWidth = '100%';
-							// Find the parent feature card and make sure it expands.
-							const featureCard = eventsCheckbox.closest('.frbl-feature-card');
+							eventsTypeWrapper.style.marginTop = '1rem';
+							eventsTypeWrapper.style.paddingTop = '1rem';
+							eventsTypeWrapper.style.paddingLeft = '1rem';
+							eventsTypeWrapper.style.paddingRight = '1rem';
+							eventsTypeWrapper.style.paddingBottom = '1rem';
+							eventsTypeWrapper.style.borderTop = '1px solid #e5e7eb';
+							eventsTypeWrapper.style.backgroundColor = '#f9fafb';
+							// Set feature card to column layout.
 							if (featureCard) {
-								const featureContent = featureCard.querySelector('.frbl-feature-content');
-								if (featureContent) {
-									featureContent.style.flexDirection = 'column';
-									featureContent.style.alignItems = 'stretch';
-								}
+								featureCard.style.display = 'flex';
+								featureCard.style.flexDirection = 'column';
+							}
+							// Keep the feature content horizontal - never change it.
+							if (featureContent) {
+								featureContent.style.flexDirection = 'row';
+								featureContent.style.alignItems = 'center';
+								featureContent.style.justifyContent = 'space-between';
 							}
 						} else {
 							eventsTypeWrapper.style.display = 'none';
-							// Reset the feature content layout.
-							const featureCard = eventsCheckbox.closest('.frbl-feature-card');
+							// Reset feature card layout.
 							if (featureCard) {
-								const featureContent = featureCard.querySelector('.frbl-feature-content');
-								if (featureContent) {
-									featureContent.style.flexDirection = '';
-									featureContent.style.alignItems = '';
-								}
+								featureCard.style.display = '';
+								featureCard.style.flexDirection = '';
+							}
+							// Keep the feature content horizontal.
+							if (featureContent) {
+								featureContent.style.flexDirection = 'row';
+								featureContent.style.alignItems = 'center';
+								featureContent.style.justifyContent = 'space-between';
 							}
 						}
+					}
+					
+					// Run immediately to move the element on page load.
+					if (featureCard && featureContent && featureContent.contains(eventsTypeWrapper)) {
+						featureCard.appendChild(eventsTypeWrapper);
 					}
 					
 					eventsCheckbox.addEventListener('change', updateEventsTypeVisibility);
@@ -973,44 +1003,42 @@ class Settings {
 	 * @return void
 	 */
 	public function field_enable_events() {
-		$options = get_option( 'frontblocks_settings', array() );
-		$enabled = (bool) ( $options[ $this->option_enable_events ] ?? false );
+		$options     = get_option( 'frontblocks_settings', array() );
+		$enabled     = (bool) ( $options[ $this->option_enable_events ] ?? false );
 		$events_type = sanitize_text_field( $options[ $this->option_events_type ] ?? 'cpt' );
 		?>
-		<div class="tw-space-y-4" style="width: 100%; min-width: 100%;">
-			<div class="tw-flex tw-items-center tw-justify-between">
-				<label class="frbl-toggle">
-					<input type="checkbox" 
-						id="<?php echo esc_attr( $this->option_enable_events ); ?>" 
-						name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_events ); ?>]" 
-						value="1" 
-						<?php checked( true, $enabled ); ?>
-					/>
-					<span></span>
-				</label>
-			</div>
-			
-			<div id="events-type-wrapper" class="tw-mt-4" style="<?php echo $enabled ? 'width: 100%; min-width: 100%; display: block;' : 'display: none;'; ?>">
-				<label for="<?php echo esc_attr( $this->option_events_type ); ?>" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
-					<?php echo esc_html__( 'Tipo de eventos', 'frontblocks' ); ?>
-				</label>
-				<select 
-					id="<?php echo esc_attr( $this->option_events_type ); ?>" 
-					name="frontblocks_settings[<?php echo esc_attr( $this->option_events_type ); ?>]"
-					class="tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
-					style="width: 100%; min-width: 100%; max-width: 100%; box-sizing: border-box;"
-				>
-					<option value="cpt" <?php selected( $events_type, 'cpt' ); ?>>
-						<?php echo esc_html__( 'Custom Post Type (CPT)', 'frontblocks' ); ?>
-					</option>
-					<option value="posts" <?php selected( $events_type, 'posts' ); ?>>
-						<?php echo esc_html__( 'Entradas de blog', 'frontblocks' ); ?>
-					</option>
-				</select>
-				<p class="tw-text-xs tw-text-gray-500 tw-mt-2">
-					<?php echo esc_html__( 'Elige si los eventos se crearán en un CPT dedicado o en las entradas de blog normales.', 'frontblocks' ); ?>
-				</p>
-			</div>
+		<!-- Toggle - stays in horizontal layout with icon and text -->
+		<label class="frbl-toggle">
+			<input type="checkbox" 
+				id="<?php echo esc_attr( $this->option_enable_events ); ?>" 
+				name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_events ); ?>]" 
+				value="1" 
+				<?php checked( true, $enabled ); ?>
+			/>
+			<span></span>
+		</label>
+		
+		<!-- Select and description - will be moved below the card by JavaScript -->
+		<div id="events-type-wrapper" class="tw-mt-4" style="<?php echo $enabled ? 'width: 100%; min-width: 100%; display: block;' : 'display: none;'; ?>">
+			<label for="<?php echo esc_attr( $this->option_events_type ); ?>" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
+				<?php echo esc_html__( 'Tipo de eventos', 'frontblocks' ); ?>
+			</label>
+			<select 
+				id="<?php echo esc_attr( $this->option_events_type ); ?>" 
+				name="frontblocks_settings[<?php echo esc_attr( $this->option_events_type ); ?>]"
+				class="tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
+				style="width: 100%; min-width: 100%; max-width: 100%; box-sizing: border-box;"
+			>
+				<option value="cpt" <?php selected( $events_type, 'cpt' ); ?>>
+					<?php echo esc_html__( 'Custom Post Type (CPT)', 'frontblocks' ); ?>
+				</option>
+				<option value="posts" <?php selected( $events_type, 'posts' ); ?>>
+					<?php echo esc_html__( 'Entradas de blog', 'frontblocks' ); ?>
+				</option>
+			</select>
+			<p class="tw-text-xs tw-text-gray-500 tw-mt-2">
+				<?php echo esc_html__( 'Elige si los eventos se crearán en un CPT dedicado o en las entradas de blog normales.', 'frontblocks' ); ?>
+			</p>
 		</div>
 		<?php
 	}
