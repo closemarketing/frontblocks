@@ -26,6 +26,13 @@ class Events {
 	private $option_enable_events = 'enable_events';
 
 	/**
+	 * Option key for events type (cpt or posts).
+	 *
+	 * @var string
+	 */
+	private $option_events_type = 'events_type';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -33,13 +40,21 @@ class Events {
 			return;
 		}
 
-		// Register CPT and taxonomy.
-		add_action( 'init', array( $this, 'register_cpt_event' ) );
-		add_action( 'init', array( $this, 'register_taxonomy_event_category' ) );
+		$events_type = $this->get_events_type();
 
-		// Meta boxes.
-		add_action( 'add_meta_boxes', array( $this, 'add_metaboxes' ) );
-		add_action( 'save_post_event', array( $this, 'save_meta' ) );
+		if ( 'cpt' === $events_type ) {
+			// Register CPT and taxonomy.
+			add_action( 'init', array( $this, 'register_cpt_event' ) );
+			add_action( 'init', array( $this, 'register_taxonomy_event_category' ) );
+
+			// Meta boxes for CPT.
+			add_action( 'add_meta_boxes', array( $this, 'add_metaboxes' ) );
+			add_action( 'save_post_event', array( $this, 'save_meta' ) );
+		} else {
+			// Meta boxes for posts.
+			add_action( 'add_meta_boxes', array( $this, 'add_metaboxes_posts' ) );
+			add_action( 'save_post', array( $this, 'save_meta_posts' ) );
+		}
 	}
 
 	/**
@@ -50,6 +65,16 @@ class Events {
 	private function is_events_enabled() {
 		$options = get_option( 'frontblocks_settings', array() );
 		return (bool) ( $options[ $this->option_enable_events ] ?? false );
+	}
+
+	/**
+	 * Get events type (cpt or posts).
+	 *
+	 * @return string
+	 */
+	private function get_events_type() {
+		$options = get_option( 'frontblocks_settings', array() );
+		return sanitize_text_field( $options[ $this->option_events_type ] ?? 'cpt' );
 	}
 
 	/**
@@ -119,7 +144,7 @@ class Events {
 	}
 
 	/**
-	 * Add meta boxes for event data.
+	 * Add meta boxes for event data (CPT).
 	 *
 	 * @return void
 	 */
@@ -129,6 +154,22 @@ class Events {
 			__( 'Datos del Evento', 'frontblocks' ),
 			array( $this, 'render_metabox' ),
 			'event',
+			'normal',
+			'default'
+		);
+	}
+
+	/**
+	 * Add meta boxes for event data (Posts).
+	 *
+	 * @return void
+	 */
+	public function add_metaboxes_posts() {
+		add_meta_box(
+			'frbl_event_metabox',
+			__( 'Datos del Evento', 'frontblocks' ),
+			array( $this, 'render_metabox' ),
+			'post',
 			'normal',
 			'default'
 		);
@@ -247,7 +288,7 @@ class Events {
 	}
 
 	/**
-	 * Save metabox data.
+	 * Save metabox data (CPT).
 	 *
 	 * @param int $post_id Post ID.
 	 * @return void
@@ -260,6 +301,46 @@ class Events {
 			return;
 		}
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return;
+		}
+
+		$fields = array(
+			'all_day'          => isset( $_POST['all_day'] ) ? '1' : '0',
+			'start_date'       => isset( $_POST['start_date'] ) ? sanitize_text_field( wp_unslash( $_POST['start_date'] ) ) : '',
+			'start_time'       => isset( $_POST['start_time'] ) ? sanitize_text_field( wp_unslash( $_POST['start_time'] ) ) : '',
+			'end_date'         => isset( $_POST['end_date'] ) ? sanitize_text_field( wp_unslash( $_POST['end_date'] ) ) : '',
+			'end_time'         => isset( $_POST['end_time'] ) ? sanitize_text_field( wp_unslash( $_POST['end_time'] ) ) : '',
+			'cost'             => isset( $_POST['cost'] ) ? sanitize_text_field( wp_unslash( $_POST['cost'] ) ) : '',
+			'web'              => isset( $_POST['web'] ) ? esc_url_raw( wp_unslash( $_POST['web'] ) ) : '',
+			'poster_evento'    => isset( $_POST['poster_evento'] ) ? esc_url_raw( wp_unslash( $_POST['poster_evento'] ) ) : '',
+			'direccion_evento' => isset( $_POST['direccion_evento'] ) ? sanitize_text_field( wp_unslash( $_POST['direccion_evento'] ) ) : '',
+		);
+
+		foreach ( $fields as $key => $value ) {
+			update_post_meta( $post_id, $key, $value );
+		}
+	}
+
+	/**
+	 * Save metabox data (Posts).
+	 *
+	 * @param int $post_id Post ID.
+	 * @return void
+	 */
+	public function save_meta_posts( $post_id ) {
+		// Only save if metabox nonce is present (meaning user is editing a post with event data).
+		if ( ! isset( $_POST['frbl_event_meta_nonce'] ) ) {
+			return;
+		}
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['frbl_event_meta_nonce'] ) ), 'frbl_event_save_meta' ) ) {
+			return;
+		}
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return;
+		}
+
+		// Only save for posts.
+		if ( 'post' !== get_post_type( $post_id ) ) {
 			return;
 		}
 

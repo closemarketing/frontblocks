@@ -48,6 +48,13 @@ class Settings {
 	private $option_enable_events = 'enable_events';
 
 	/**
+	 * Option key for events type (cpt or posts).
+	 *
+	 * @var string
+	 */
+	private $option_events_type = 'events_type';
+
+	/**
 	 * Option key for Gutenberg in products (PRO).
 	 *
 	 * @var string
@@ -238,6 +245,43 @@ class Settings {
 					moveContentCheckbox.addEventListener('change', updateMutualExclusion);
 					
 					updateMutualExclusion();
+				}
+
+				// Show/hide events type select based on toggle state.
+				const eventsCheckbox = document.getElementById('enable_events');
+				const eventsTypeWrapper = document.getElementById('events-type-wrapper');
+				
+				if (eventsCheckbox && eventsTypeWrapper) {
+					function updateEventsTypeVisibility() {
+						if (eventsCheckbox.checked) {
+							eventsTypeWrapper.style.display = 'block';
+							eventsTypeWrapper.style.width = '100%';
+							eventsTypeWrapper.style.minWidth = '100%';
+							// Find the parent feature card and make sure it expands.
+							const featureCard = eventsCheckbox.closest('.frbl-feature-card');
+							if (featureCard) {
+								const featureContent = featureCard.querySelector('.frbl-feature-content');
+								if (featureContent) {
+									featureContent.style.flexDirection = 'column';
+									featureContent.style.alignItems = 'stretch';
+								}
+							}
+						} else {
+							eventsTypeWrapper.style.display = 'none';
+							// Reset the feature content layout.
+							const featureCard = eventsCheckbox.closest('.frbl-feature-card');
+							if (featureCard) {
+								const featureContent = featureCard.querySelector('.frbl-feature-content');
+								if (featureContent) {
+									featureContent.style.flexDirection = '';
+									featureContent.style.alignItems = '';
+								}
+							}
+						}
+					}
+					
+					eventsCheckbox.addEventListener('change', updateEventsTypeVisibility);
+					updateEventsTypeVisibility();
 				}
 
 			});
@@ -931,17 +975,42 @@ class Settings {
 	public function field_enable_events() {
 		$options = get_option( 'frontblocks_settings', array() );
 		$enabled = (bool) ( $options[ $this->option_enable_events ] ?? false );
+		$events_type = sanitize_text_field( $options[ $this->option_events_type ] ?? 'cpt' );
 		?>
-		<div class="tw-flex tw-items-center tw-justify-between">
-			<label class="frbl-toggle">
-				<input type="checkbox" 
-					id="<?php echo esc_attr( $this->option_enable_events ); ?>" 
-					name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_events ); ?>]" 
-					value="1" 
-					<?php checked( true, $enabled ); ?>
-				/>
-				<span></span>
-			</label>
+		<div class="tw-space-y-4" style="width: 100%; min-width: 100%;">
+			<div class="tw-flex tw-items-center tw-justify-between">
+				<label class="frbl-toggle">
+					<input type="checkbox" 
+						id="<?php echo esc_attr( $this->option_enable_events ); ?>" 
+						name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_events ); ?>]" 
+						value="1" 
+						<?php checked( true, $enabled ); ?>
+					/>
+					<span></span>
+				</label>
+			</div>
+			
+			<div id="events-type-wrapper" class="tw-mt-4" style="<?php echo $enabled ? 'width: 100%; min-width: 100%; display: block;' : 'display: none;'; ?>">
+				<label for="<?php echo esc_attr( $this->option_events_type ); ?>" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
+					<?php echo esc_html__( 'Tipo de eventos', 'frontblocks' ); ?>
+				</label>
+				<select 
+					id="<?php echo esc_attr( $this->option_events_type ); ?>" 
+					name="frontblocks_settings[<?php echo esc_attr( $this->option_events_type ); ?>]"
+					class="tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
+					style="width: 100%; min-width: 100%; max-width: 100%; box-sizing: border-box;"
+				>
+					<option value="cpt" <?php selected( $events_type, 'cpt' ); ?>>
+						<?php echo esc_html__( 'Custom Post Type (CPT)', 'frontblocks' ); ?>
+					</option>
+					<option value="posts" <?php selected( $events_type, 'posts' ); ?>>
+						<?php echo esc_html__( 'Entradas de blog', 'frontblocks' ); ?>
+					</option>
+				</select>
+				<p class="tw-text-xs tw-text-gray-500 tw-mt-2">
+					<?php echo esc_html__( 'Elige si los eventos se crearán en un CPT dedicado o en las entradas de blog normales.', 'frontblocks' ); ?>
+				</p>
+			</div>
 		</div>
 		<?php
 	}
@@ -1321,6 +1390,9 @@ class Settings {
 		foreach ( $value as $key => $val ) {
 			if ( $this->option_enable_testimonials === $key || $this->option_enable_reading_progress === $key || $this->option_enable_back_button === $key || $this->option_enable_events === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key || $this->option_horizontal_product_form === $key || $this->option_enable_custom_post_types === $key ) {
 				$sanitized[ $key ] = (bool) $val;
+			} elseif ( $this->option_events_type === $key ) {
+				// Sanitize events type: only allow 'cpt' or 'posts'.
+				$sanitized[ $key ] = in_array( $val, array( 'cpt', 'posts' ), true ) ? $val : 'cpt';
 			}
 		}
 
