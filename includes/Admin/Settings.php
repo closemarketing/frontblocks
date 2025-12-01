@@ -143,6 +143,26 @@ class Settings {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
+		add_action( 'admin_head', array( $this, 'add_menu_icon_styles' ) );
+	}
+
+	/**
+	 * Add menu icon styles.
+	 *
+	 * @return void
+	 */
+	public function add_menu_icon_styles() {
+		?>
+		<style>
+		#toplevel_page_frontblocks-settings .wp-menu-image img,
+		#toplevel_page_frontblocks-settings .wp-menu-image svg {
+			width: 20px !important;
+			height: 20px !important;
+			max-width: 20px !important;
+			max-height: 20px !important;
+		}
+		</style>
+		<?php
 	}
 
 	/**
@@ -152,7 +172,7 @@ class Settings {
 	 * @return void
 	 */
 	public function enqueue_admin_styles( $hook ) {
-		if ( 'appearance_page_' . $this->page_slug !== $hook ) {
+		if ( 'toplevel_page_' . $this->page_slug !== $hook ) {
 			return;
 		}
 
@@ -263,17 +283,24 @@ class Settings {
 	}
 
 	/**
-	 * Register options page under Appearance.
+	 * Register options page as dedicated menu.
 	 *
 	 * @return void
 	 */
 	public function register_menu() {
-		add_theme_page(
+		// Use SVG icon if available, otherwise fallback to dashicon.
+		$icon_url = FRBL_PLUGIN_URL . 'assets/admin/icons/icon-menu.svg';
+		$icon_path = FRBL_PLUGIN_PATH . 'assets/admin/icons/icon-menu.svg';	
+		$menu_icon = file_exists( $icon_path ) ? $icon_url : 'dashicons-block-default';
+
+		add_menu_page(
 			__( 'FrontBlocks Settings', 'frontblocks' ),
 			__( 'FrontBlocks', 'frontblocks' ),
 			'edit_theme_options',
 			$this->page_slug,
-			array( $this, 'render_page' )
+			array( $this, 'render_page' ),
+			$menu_icon,
+			81
 		);
 	}
 
