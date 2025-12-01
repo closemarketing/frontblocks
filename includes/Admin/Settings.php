@@ -933,11 +933,6 @@ class Settings {
 		$enabled = (bool) ( $options[ $this->option_enable_events ] ?? false );
 		?>
 		<div class="tw-flex tw-items-center tw-justify-between">
-			<div class="tw-flex-grow">
-				<p class="tw-mt-1 tw-text-sm tw-text-gray-500">
-					<?php echo esc_html__( 'Create and manage events with a custom post type. The events shortcode [calendario_eventos] is available with FrontBlocks PRO.', 'frontblocks' ); ?>
-				</p>
-			</div>
 			<label class="frbl-toggle">
 				<input type="checkbox" 
 					id="<?php echo esc_attr( $this->option_enable_events ); ?>" 
