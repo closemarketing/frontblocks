@@ -104,6 +104,9 @@ class Plugin_Main {
 
 		// Back Button module.
 		new Frontend\BackButton();
+
+		// Events module.
+		new Frontend\Events();
 	}
 
 	/**
