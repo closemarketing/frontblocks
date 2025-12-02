@@ -14,8 +14,8 @@ var _wp$components = wp.components,
 var __ = wp.i18n.__;
 function addCustomCarouselPanel(BlockEdit) {
   return function (props) {
-    // Support both grid blocks and element blocks with grid display
-    if (props.name !== 'generateblocks/grid' && props.name !== 'generateblocks/element') {
+    // Support grid blocks, element blocks with grid display, and core/group blocks
+    if (props.name !== 'generateblocks/grid' && props.name !== 'generateblocks/element' && props.name !== 'core/group') {
       return /*#__PURE__*/React.createElement(BlockEdit, props);
     }
 
@@ -23,6 +23,14 @@ function addCustomCarouselPanel(BlockEdit) {
     if (props.name === 'generateblocks/element') {
       var styles = props.attributes.styles || {};
       if (styles.display !== 'grid') {
+        return /*#__PURE__*/React.createElement(BlockEdit, props);
+      }
+    }
+
+    // For core/group blocks, only show carousel options if it has grid layout
+    if (props.name === 'core/group') {
+      var layout = props.attributes.layout || {};
+      if (layout.type !== 'grid') {
         return /*#__PURE__*/React.createElement(BlockEdit, props);
       }
     }
