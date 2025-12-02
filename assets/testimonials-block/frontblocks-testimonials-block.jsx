@@ -223,28 +223,42 @@ registerBlockType('frontblocks/testimonials', {
 
 				// Initialize Glide
 				try {
-					glideInstanceRef.current = new window.Glide(glideWrapper, {
+					const glideConfig = {
 						type: 'carousel',
 						perView: itemsToView || 3,
 						startAt: 0,
 						autoplay: autoplay > 0 ? autoplay : false,
 						gap: 20,
 						animationDuration: 400,
+						animationTimingFunc: 'cubic-bezier(0.165, 0.840, 0.440, 1.000)',
 						rewind: true,
+						bound: false,
+						focusAt: 0,
 						breakpoints: {
 							768: {
-								perView: itemsToViewMobile || 1
+								perView: itemsToViewMobile || 1,
+								gap: 15
 							},
 							1024: {
-								perView: itemsToViewTablet || 2
+								perView: itemsToViewTablet || 2,
+								gap: 18
 							},
 							1440: {
-								perView: itemsToViewLaptop || 2
+								perView: itemsToViewLaptop || 2,
+								gap: 20
 							}
 						}
-					});
+					};
 
+					glideInstanceRef.current = new window.Glide(glideWrapper, glideConfig);
 					glideInstanceRef.current.mount();
+
+					// Force update on mount to ensure correct sizing
+					setTimeout(() => {
+						if (glideInstanceRef.current) {
+							glideInstanceRef.current.update();
+						}
+					}, 100);
 				} catch (e) {
 					console.error('Error initializing Glide in editor:', e);
 				}
@@ -410,12 +424,6 @@ registerBlockType('frontblocks/testimonials', {
 									);
 								})}
 								</div>
-							</div>
-							<div className="preview-info">
-								<span className="dashicons dashicons-info"></span>
-								{__('Preview:', 'frontblocks')} {testimonials.length} {__('testimonials', 'frontblocks')} | 
-								{__(' Items to view:', 'frontblocks')} {itemsToView} (Desktop), {itemsToViewMobile} (Mobile) | 
-								{__(' Navigation:', 'frontblocks')} {navigationStyle}
 							</div>
 						</div>
 					)}

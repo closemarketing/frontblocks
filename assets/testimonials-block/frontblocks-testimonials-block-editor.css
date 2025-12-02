@@ -76,10 +76,24 @@
 	position: relative;
 	width: 100%;
 	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
 }
 
 .frontblocks-testimonials-carousel-preview .carousel-container .glide * {
-	box-sizing: inherit;
+	box-sizing: border-box;
+}
+
+/* Prevent any inherited styles from breaking the carousel */
+.frontblocks-testimonials-carousel-preview .glide__slide {
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+/* Ensure proper slide visibility */
+.frontblocks-testimonials-carousel-preview .glide__slides > .glide__slide {
+	opacity: 1;
+	visibility: visible;
 }
 
 .frontblocks-testimonials-carousel-preview .testimonials-carousel-wrapper {
@@ -102,15 +116,21 @@
 	padding: 25px;
 	text-align: center;
 	box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-	transition: transform 0.3s ease;
+	transition: box-shadow 0.3s ease;
 	height: 100%;
 	min-height: 250px;
 	display: flex;
 	flex-direction: column;
+	box-sizing: border-box;
+	margin: 0;
+}
+
+.frontblocks-testimonials-carousel-preview .glide__slide .testimonial-card {
+	margin: 0;
+	width: 100%;
 }
 
 .frontblocks-testimonials-carousel-preview .testimonial-card:hover {
-	transform: translateY(-5px);
 	box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
 
@@ -178,23 +198,6 @@
 	color: #ffc107;
 }
 
-/* Preview Info Bar */
-.frontblocks-testimonials-carousel-preview .preview-info {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 12px 20px;
-	background: #2271b1;
-	color: #fff;
-	border-radius: 6px;
-	font-size: 13px;
-	margin-top: 15px;
-}
-
-.frontblocks-testimonials-carousel-preview .preview-info .dashicons {
-	color: #fff;
-	font-size: 18px;
-}
 
 /* Inspector Controls */
 .components-panel__body .components-color-palette {
@@ -203,20 +206,43 @@
 
 /* Glide Navigation in Editor */
 .frontblocks-testimonials-carousel-preview .glide__arrows {
-	position: relative;
-	display: flex;
-	justify-content: center;
-	gap: 10px;
-	margin-top: 20px;
+	position: absolute;
+	width: 100%;
+	top: 50%;
+	left: 0;
+	right: 0;
+	transform: translateY(-50%);
+	pointer-events: none;
+	z-index: 10;
 }
 
 .frontblocks-testimonials-carousel-preview .glide__arrow {
-	position: static;
-	transform: none;
+	position: absolute;
+	pointer-events: all;
+	opacity: 1;
+	cursor: pointer;
+}
+
+.frontblocks-testimonials-carousel-preview .glide__arrow--left {
+	left: -15px;
+}
+
+.frontblocks-testimonials-carousel-preview .glide__arrow--right {
+	right: -15px;
 }
 
 .frontblocks-testimonials-carousel-preview .glide__bullets {
-	bottom: -30px;
+	position: absolute;
+	bottom: -40px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	gap: 8px;
+	z-index: 10;
+}
+
+.frontblocks-testimonials-carousel-preview .carousel-container {
+	padding-bottom: 50px;
 }
 
 /* Make carousel work in editor */
@@ -228,8 +254,8 @@
 .frontblocks-testimonials-carousel-preview .glide__slides {
 	display: flex;
 	flex-wrap: nowrap;
-	margin: 0;
-	padding: 0;
+	margin: 0 !important;
+	padding: 0 !important;
 	list-style: none;
 	backface-visibility: hidden;
 	transform-style: preserve-3d;
@@ -237,15 +263,23 @@
 	overflow: visible;
 	white-space: nowrap;
 	will-change: transform;
-	width: 100%;
+	transition: transform .4s cubic-bezier(.165,.84,.44,1);
 }
 
 .frontblocks-testimonials-carousel-preview .glide__slide {
-	width: 100%;
+	width: 100% !important;
 	height: auto;
 	flex-shrink: 0;
 	white-space: normal;
 	user-select: none;
+	-webkit-touch-callout: none;
+	-webkit-tap-highlight-color: transparent;
+	box-sizing: border-box;
+}
+
+.frontblocks-testimonials-carousel-preview .glide__slide > * {
+	width: 100%;
+	height: 100%;
 }
 
 /* Responsive */
