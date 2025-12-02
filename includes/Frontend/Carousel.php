@@ -189,7 +189,7 @@ class Carousel {
 		$attrs = $block['attrs'] ?? array();
 
 		// Check if this group has grid layout.
-		$layout = $attrs['layout'] ?? array();
+		$layout      = $attrs['layout'] ?? array();
 		$layout_type = $layout['type'] ?? '';
 
 		// Only process if it's a grid layout.
