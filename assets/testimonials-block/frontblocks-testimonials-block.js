@@ -224,17 +224,18 @@ registerBlockType('frontblocks/testimonials', {
             rewind: true,
             bound: false,
             focusAt: 0,
+            peek: 0,
             breakpoints: {
-              768: {
+              600: {
                 perView: itemsToViewMobile || 1,
-                gap: 15
+                gap: 20
               },
-              1024: {
+              900: {
                 perView: itemsToViewTablet || 2,
-                gap: 18
+                gap: 20
               },
-              1440: {
-                perView: itemsToViewLaptop || 2,
+              1200: {
+                perView: itemsToViewLaptop || 3,
                 gap: 20
               }
             }

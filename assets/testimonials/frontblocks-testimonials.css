@@ -72,22 +72,25 @@
 }
 
 .frontblocks-testimonials-carousel .stars-container {
-	background-color: var(--primary);
+	background-color: transparent;
 	padding: 10px 20px;
 	border-radius: 5px;
 	display: inline-block;
 	border-bottom-left-radius: 15px;
 	border-bottom-right-radius: 15px;
+	margin-top: 15px;
 }
 
 .frontblocks-testimonials-carousel .stars-container .star {
-	color: rgba(255, 255, 255, 0.5);
+	color: #ddd;
 	font-size: 1.5em;
 	line-height: 1;
+	display: inline-block;
+	margin: 0 2px;
 }
 
 .frontblocks-testimonials-carousel .stars-container .star.filled {
-	color: #fff;
+	color: #ffc107;
 }
 
 .frontblocks-testimonials-carousel .glide__arrow {

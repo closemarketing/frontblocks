@@ -35,6 +35,7 @@ class Testimonials_Block {
 
 		add_action( 'init', array( $this, 'register_block' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'register_frontend_styles' ) );
 	}
 
 	/**
@@ -104,6 +105,21 @@ class Testimonials_Block {
 				),
 				'render_callback' => array( $this, 'render_block' ),
 			)
+		);
+	}
+
+	/**
+	 * Register frontend styles.
+	 *
+	 * @return void
+	 */
+	public function register_frontend_styles() {
+		// Register testimonials CSS for frontend.
+		wp_register_style(
+			'frontblocks-testimonials-style',
+			FRBL_PLUGIN_URL . 'assets/testimonials/frontblocks-testimonials.css',
+			array(),
+			FRBL_VERSION
 		);
 	}
 
