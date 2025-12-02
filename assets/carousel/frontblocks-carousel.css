@@ -152,3 +152,41 @@
 }
 
 /*# sourceMappingURL=glide.theme.css.map */
+
+/**
+ * Override native Gutenberg Grid styles when carousel is active
+ */
+.wp-block-group.frontblocks-carousel,
+.wp-block-group.frontblocks-carousel.is-layout-grid {
+	display: block !important;
+	grid-template-columns: none !important;
+	gap: 0 !important;
+}
+
+.wp-block-group.frontblocks-carousel > * {
+	width: 100%;
+}
+
+/* Ensure inner container doesn't interfere with carousel */
+.wp-block-group.frontblocks-carousel > .wp-block-group__inner-container {
+	display: block !important;
+	grid-template-columns: none !important;
+	gap: 0 !important;
+	width: 100%;
+}
+
+/* Override grid styles for direct children in carousel mode */
+.glide__slides.wp-block-group,
+.glide__slides.wp-block-group.is-layout-grid {
+	display: flex !important;
+	grid-template-columns: none !important;
+	gap: 0 !important;
+	column-gap: 0 !important;
+	row-gap: 0 !important;
+}
+
+/* Ensure slides have proper width */
+.glide__slides > .glide__slide {
+	min-width: 0;
+	flex-shrink: 0;
+}
