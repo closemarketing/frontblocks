@@ -410,7 +410,7 @@ registerBlockType('frontblocks/testimonials', {
         className: "testimonial-name"
       }, /*#__PURE__*/React.createElement(RawHTML, null, testimonial.title.rendered)), /*#__PURE__*/React.createElement("p", {
         className: "testimonial-text"
-      }, "\"", /*#__PURE__*/React.createElement(RawHTML, null, testimonial.content.rendered), "\""), showStars && stars > 0 && /*#__PURE__*/React.createElement("div", {
+      }, "\"", /*#__PURE__*/React.createElement(RawHTML, null, testimonial.content.rendered), "\""), showStars && /*#__PURE__*/React.createElement("div", {
         className: "stars-container"
       }, [1, 2, 3, 4, 5].map(function (i) {
         return /*#__PURE__*/React.createElement("span", {

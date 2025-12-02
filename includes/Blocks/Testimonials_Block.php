@@ -242,7 +242,7 @@ class Testimonials_Block {
 					<div class="testimonial-content">
 						<h3 class="testimonial-name"><?php echo esc_html( $nombre ); ?></h3>
 						<p class="testimonial-text">"<?php echo esc_html( $texto_resena ); ?>"</p>
-						<?php if ( $show_stars && ! empty( $stars_html ) ) : ?>
+						<?php if ( $show_stars ) : ?>
 							<div class="stars-container">
 								<?php echo $stars_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							</div>

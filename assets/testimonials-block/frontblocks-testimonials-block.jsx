@@ -393,18 +393,18 @@ registerBlockType('frontblocks/testimonials', {
 												<h3 className="testimonial-name">
 													<RawHTML>{testimonial.title.rendered}</RawHTML>
 												</h3>
-												<p className="testimonial-text">
-													"<RawHTML>{testimonial.content.rendered}</RawHTML>"
-												</p>
-												{showStars && stars > 0 && (
-													<div className="stars-container">
-														{[1, 2, 3, 4, 5].map((i) => (
-															<span key={i} className={`star ${i <= stars ? 'filled' : ''}`}>
-																★
-															</span>
-														))}
-													</div>
-												)}
+											<p className="testimonial-text">
+												"<RawHTML>{testimonial.content.rendered}</RawHTML>"
+											</p>
+											{showStars && (
+												<div className="stars-container">
+													{[1, 2, 3, 4, 5].map((i) => (
+														<span key={i} className={`star ${i <= stars ? 'filled' : ''}`}>
+															★
+														</span>
+													))}
+												</div>
+											)}
 											</div>
 										</div>
 									);
