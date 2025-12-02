@@ -97,6 +97,12 @@ class Plugin_Main {
 		// Testimonials module (includes settings).
 		new Frontend\Testimonials();
 
+		// Testimonials Block (Gutenberg block).
+		if ( ! class_exists( 'FrontBlocks\Blocks\Testimonials_Block' ) ) {
+			require_once FRBL_PLUGIN_PATH . 'includes/Blocks/Testimonials_Block.php';
+		}
+		new Blocks\Testimonials_Block();
+
 		// Headline module (GenerateBlocks Headline enhancements).
 		new Frontend\Headline();
 

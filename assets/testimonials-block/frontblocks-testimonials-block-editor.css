@@ -1,0 +1,119 @@
+/**
+ * FrontBlocks Testimonials Block - Editor Styles
+ */
+
+.frontblocks-testimonials-block-editor {
+	background: #f8f9fa;
+	border: 2px dashed #e0e0e0;
+	border-radius: 8px;
+	padding: 20px;
+}
+
+.frontblocks-testimonials-preview {
+	max-width: 100%;
+}
+
+.frontblocks-testimonials-preview .testimonials-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 20px;
+	padding-bottom: 15px;
+	border-bottom: 2px solid #e0e0e0;
+}
+
+.frontblocks-testimonials-preview .testimonials-header .dashicons {
+	font-size: 32px;
+	color: #2271b1;
+}
+
+.frontblocks-testimonials-preview .testimonials-header h3 {
+	margin: 0;
+	font-size: 20px;
+	color: #1d2327;
+}
+
+.frontblocks-testimonials-preview .no-testimonials {
+	text-align: center;
+	padding: 40px 20px;
+	background: white;
+	border-radius: 6px;
+}
+
+.frontblocks-testimonials-preview .no-testimonials p {
+	margin: 10px 0;
+	color: #666;
+}
+
+.frontblocks-testimonials-preview .testimonials-info {
+	background: white;
+	padding: 20px;
+	border-radius: 6px;
+}
+
+.frontblocks-testimonials-preview .testimonials-info p {
+	margin: 8px 0;
+	font-size: 14px;
+	color: #1d2327;
+}
+
+.frontblocks-testimonials-preview .testimonials-info p strong {
+	color: #2271b1;
+}
+
+.frontblocks-testimonials-preview .testimonials-preview-list {
+	margin-top: 20px;
+	padding-top: 20px;
+	border-top: 1px solid #e0e0e0;
+}
+
+.frontblocks-testimonials-preview .testimonial-preview-item {
+	background: #f8f9fa;
+	padding: 15px;
+	margin-bottom: 15px;
+	border-radius: 6px;
+	border-left: 4px solid #2271b1;
+}
+
+.frontblocks-testimonials-preview .testimonial-preview-item .testimonial-image {
+	width: 60px;
+	height: 60px;
+	border-radius: 50%;
+	overflow: hidden;
+	margin-bottom: 10px;
+}
+
+.frontblocks-testimonials-preview .testimonial-preview-item .testimonial-image img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.frontblocks-testimonials-preview .testimonial-preview-item h4 {
+	margin: 0 0 10px 0;
+	font-size: 16px;
+	color: #1d2327;
+}
+
+.frontblocks-testimonials-preview .testimonial-preview-item .testimonial-excerpt {
+	font-size: 14px;
+	color: #666;
+	line-height: 1.5;
+}
+
+.frontblocks-testimonials-preview .testimonial-preview-item .testimonial-excerpt p {
+	margin: 0;
+}
+
+.frontblocks-testimonials-preview .more-testimonials {
+	text-align: center;
+	font-style: italic;
+	color: #666;
+	margin-top: 10px;
+}
+
+/* Inspector Controls */
+.components-panel__body .components-color-palette {
+	margin-bottom: 15px;
+}
+
