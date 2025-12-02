@@ -113,10 +113,35 @@ class Testimonials_Block {
 	 * @return void
 	 */
 	public function enqueue_editor_assets() {
+		// Enqueue Glide.js library.
+		wp_enqueue_script(
+			'frontblocks-carousel',
+			FRBL_PLUGIN_URL . 'assets/carousel/glide.min.js',
+			array(),
+			FRBL_VERSION,
+			true
+		);
+
+		// Enqueue Glide CSS.
+		wp_enqueue_style(
+			'frontblocks-carousel-css',
+			FRBL_PLUGIN_URL . 'assets/carousel/frontblocks-carousel.css',
+			array(),
+			FRBL_VERSION
+		);
+
+		// Enqueue testimonials CSS for editor.
+		wp_enqueue_style(
+			'frontblocks-testimonials-style',
+			FRBL_PLUGIN_URL . 'assets/testimonials/frontblocks-testimonials.css',
+			array(),
+			FRBL_VERSION
+		);
+
 		wp_enqueue_script(
 			'frontblocks-testimonials-block',
 			FRBL_PLUGIN_URL . 'assets/testimonials-block/frontblocks-testimonials-block.js',
-			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-block-editor', 'wp-i18n' ),
+			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-block-editor', 'wp-i18n', 'frontblocks-carousel' ),
 			FRBL_VERSION,
 			true
 		);
@@ -124,7 +149,7 @@ class Testimonials_Block {
 		wp_enqueue_style(
 			'frontblocks-testimonials-block-editor',
 			FRBL_PLUGIN_URL . 'assets/testimonials-block/frontblocks-testimonials-block-editor.css',
-			array(),
+			array( 'frontblocks-carousel-css' ),
 			FRBL_VERSION
 		);
 

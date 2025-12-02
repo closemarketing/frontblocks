@@ -110,16 +110,29 @@ class Testimonials {
 		$args = array(
 			'label'         => __( 'Testimonials', 'frontblocks' ),
 			'labels'        => $labels,
-			'supports'      => array( 'title', 'editor', 'thumbnail' ),
+			'supports'      => array( 'title', 'editor', 'thumbnail', 'custom-fields' ),
 			'public'        => true,
 			'show_ui'       => true,
 			'show_in_menu'  => true,
+			'show_in_rest'  => true,
 			'menu_position' => 5,
 			'menu_icon'     => 'dashicons-testimonial',
 			'can_export'    => true,
 		);
 
 		register_post_type( 'fbrl_testimonial', $args );
+
+		// Register meta field for REST API.
+		register_post_meta(
+			'fbrl_testimonial',
+			'frontblocks_stars',
+			array(
+				'show_in_rest' => true,
+				'single'       => true,
+				'type'         => 'integer',
+				'default'      => 0,
+			)
+		);
 	}
 
 	/**
