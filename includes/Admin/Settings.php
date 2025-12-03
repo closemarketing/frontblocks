@@ -41,6 +41,20 @@ class Settings {
 	private $option_enable_back_button = 'enable_back_button';
 
 	/**
+	 * Option key for events CPT feature.
+	 *
+	 * @var string
+	 */
+	private $option_enable_events = 'enable_events';
+
+	/**
+	 * Option key for events type (cpt or posts).
+	 *
+	 * @var string
+	 */
+	private $option_events_type = 'events_type';
+
+	/**
 	 * Option key for Gutenberg in products (PRO).
 	 *
 	 * @var string
@@ -190,68 +204,136 @@ class Settings {
 				const deactivateCheckbox = document.getElementById('deactivate_short_description');
 				const moveContentCheckbox = document.getElementById('move_content_to_short_description');
 				
-				if (!deactivateCheckbox || !moveContentCheckbox) return;
-				
-				function updateMutualExclusion() {
-					const deactivateWrapper = deactivateCheckbox.closest('.tw-flex');
-					const moveContentWrapper = moveContentCheckbox.closest('.tw-flex');
-					
-					// Check if license is valid (not just PRO active).
-					const isLicenseValid = " . ( $this->is_license_valid ? 'true' : 'false' ) . ";
-					
-					if (deactivateCheckbox.checked) {
-						moveContentCheckbox.disabled = true;
-						if (moveContentWrapper) {
-							moveContentWrapper.style.opacity = '0.5';
-							moveContentWrapper.style.filter = 'grayscale(100%)';
-							const toggle = moveContentWrapper.querySelector('.frbl-toggle');
-							if (toggle) {
-								toggle.style.borderColor = '#ef4444';
-								toggle.style.opacity = '0.7';
+				if (deactivateCheckbox && moveContentCheckbox) {
+					function updateMutualExclusion() {
+						const deactivateWrapper = deactivateCheckbox.closest('.tw-flex');
+						const moveContentWrapper = moveContentCheckbox.closest('.tw-flex');
+						
+						// Check if license is valid (not just PRO active).
+						const isLicenseValid = " . ( $this->is_license_valid ? 'true' : 'false' ) . ";
+						
+						if (deactivateCheckbox.checked) {
+							moveContentCheckbox.disabled = true;
+							if (moveContentWrapper) {
+								moveContentWrapper.style.opacity = '0.5';
+								moveContentWrapper.style.filter = 'grayscale(100%)';
+								const toggle = moveContentWrapper.querySelector('.frbl-toggle');
+								if (toggle) {
+									toggle.style.borderColor = '#ef4444';
+									toggle.style.opacity = '0.7';
+								}
+							}
+						} else {
+							moveContentCheckbox.disabled = !isLicenseValid;
+							if (moveContentWrapper) {
+								moveContentWrapper.style.opacity = isLicenseValid ? '1' : '0.5';
+								moveContentWrapper.style.filter = '';
+								const toggle = moveContentWrapper.querySelector('.frbl-toggle');
+								if (toggle) {
+									toggle.style.borderColor = '';
+									toggle.style.opacity = '';
+								}
 							}
 						}
-					} else {
-						moveContentCheckbox.disabled = !isLicenseValid;
-						if (moveContentWrapper) {
-							moveContentWrapper.style.opacity = isLicenseValid ? '1' : '0.5';
-							moveContentWrapper.style.filter = '';
-							const toggle = moveContentWrapper.querySelector('.frbl-toggle');
-							if (toggle) {
-								toggle.style.borderColor = '';
-								toggle.style.opacity = '';
+						
+						if (moveContentCheckbox.checked) {
+							deactivateCheckbox.disabled = true;
+							if (deactivateWrapper) {
+								deactivateWrapper.style.opacity = '0.5';
+								deactivateWrapper.style.filter = 'grayscale(100%)';
+								const toggle = deactivateWrapper.querySelector('.frbl-toggle');
+								if (toggle) {
+									toggle.style.borderColor = '#ef4444';
+									toggle.style.opacity = '0.7';
+								}
+							}
+						} else {
+							deactivateCheckbox.disabled = !isLicenseValid;
+							if (deactivateWrapper) {
+								deactivateWrapper.style.opacity = isLicenseValid ? '1' : '0.5';
+								deactivateWrapper.style.filter = '';
+								const toggle = deactivateWrapper.querySelector('.frbl-toggle');
+								if (toggle) {
+									toggle.style.borderColor = '';
+									toggle.style.opacity = '';
+								}
 							}
 						}
 					}
 					
-					if (moveContentCheckbox.checked) {
-						deactivateCheckbox.disabled = true;
-						if (deactivateWrapper) {
-							deactivateWrapper.style.opacity = '0.5';
-							deactivateWrapper.style.filter = 'grayscale(100%)';
-							const toggle = deactivateWrapper.querySelector('.frbl-toggle');
-							if (toggle) {
-								toggle.style.borderColor = '#ef4444';
-								toggle.style.opacity = '0.7';
-							}
-						}
-					} else {
-						deactivateCheckbox.disabled = !isLicenseValid;
-						if (deactivateWrapper) {
-							deactivateWrapper.style.opacity = isLicenseValid ? '1' : '0.5';
-							deactivateWrapper.style.filter = '';
-							const toggle = deactivateWrapper.querySelector('.frbl-toggle');
-							if (toggle) {
-								toggle.style.borderColor = '';
-								toggle.style.opacity = '';
-							}
-						}
-					}
+					deactivateCheckbox.addEventListener('change', updateMutualExclusion);
+					moveContentCheckbox.addEventListener('change', updateMutualExclusion);
+					
+					updateMutualExclusion();
 				}
+
+				// Show/hide events type select based on toggle state.
+				const eventsCheckbox = document.getElementById('enable_events');
+				const eventsTypeWrapper = document.getElementById('events-type-wrapper');
 				
-				deactivateCheckbox.addEventListener('change', updateMutualExclusion);
-				moveContentCheckbox.addEventListener('change', updateMutualExclusion);
-				
-				updateMutualExclusion();
+				if (eventsCheckbox && eventsTypeWrapper) {
+					// Find the parent feature card and feature content.
+					const featureCard = eventsCheckbox.closest('.frbl-feature-card');
+					const featureContent = featureCard ? featureCard.querySelector('.frbl-feature-content') : null;
+					
+					// Move the wrapper outside of frbl-feature-content but inside frbl-feature-card.
+					// This ensures it appears below the entire horizontal row (icon, text, toggle).
+					if (featureCard && featureContent) {
+						// Check if wrapper is still inside feature-content and move it.
+						if (featureContent.contains(eventsTypeWrapper)) {
+							// Move it to be a direct child of feature-card, after feature-content.
+							featureCard.appendChild(eventsTypeWrapper);
+						}
+					}
+					
+					function updateEventsTypeVisibility() {
+						if (eventsCheckbox.checked) {
+							eventsTypeWrapper.style.display = 'block';
+							eventsTypeWrapper.style.width = '100%';
+							eventsTypeWrapper.style.minWidth = '100%';
+							eventsTypeWrapper.style.marginTop = '1rem';
+							eventsTypeWrapper.style.paddingTop = '1rem';
+							eventsTypeWrapper.style.paddingLeft = '1rem';
+							eventsTypeWrapper.style.paddingRight = '1rem';
+							eventsTypeWrapper.style.paddingBottom = '1rem';
+							eventsTypeWrapper.style.borderTop = '1px solid #e5e7eb';
+							eventsTypeWrapper.style.backgroundColor = '#f9fafb';
+							// Set feature card to column layout.
+							if (featureCard) {
+								featureCard.style.display = 'flex';
+								featureCard.style.flexDirection = 'column';
+							}
+							// Keep the feature content horizontal - never change it.
+							if (featureContent) {
+								featureContent.style.flexDirection = 'row';
+								featureContent.style.alignItems = 'center';
+								featureContent.style.justifyContent = 'space-between';
+							}
+						} else {
+							eventsTypeWrapper.style.display = 'none';
+							// Reset feature card layout.
+							if (featureCard) {
+								featureCard.style.display = '';
+								featureCard.style.flexDirection = '';
+							}
+							// Keep the feature content horizontal.
+							if (featureContent) {
+								featureContent.style.flexDirection = 'row';
+								featureContent.style.alignItems = 'center';
+								featureContent.style.justifyContent = 'space-between';
+							}
+						}
+					}
+					
+					// Run immediately to move the element on page load.
+					if (featureCard && featureContent && featureContent.contains(eventsTypeWrapper)) {
+						featureCard.appendChild(eventsTypeWrapper);
+					}
+					
+					eventsCheckbox.addEventListener('change', updateEventsTypeVisibility);
+					updateEventsTypeVisibility();
+				}
+
 			});
 			"
 		);
@@ -356,6 +438,14 @@ class Settings {
 			$this->option_enable_back_button,
 			__( 'Enable Back Button', 'frontblocks' ),
 			array( $this, 'field_enable_back_button' ),
+			$this->page_slug,
+			'frontblocks_section_features'
+		);
+
+		add_settings_field(
+			$this->option_enable_events,
+			__( 'Enable Events', 'frontblocks' ),
+			array( $this, 'field_enable_events' ),
 			$this->page_slug,
 			'frontblocks_section_features'
 		);
@@ -935,6 +1025,52 @@ class Settings {
 	}
 
 	/**
+	 * Render toggle field for enable events.
+	 *
+	 * @return void
+	 */
+	public function field_enable_events() {
+		$options     = get_option( 'frontblocks_settings', array() );
+		$enabled     = (bool) ( $options[ $this->option_enable_events ] ?? false );
+		$events_type = sanitize_text_field( $options[ $this->option_events_type ] ?? 'cpt' );
+		?>
+		<!-- Toggle - stays in horizontal layout with icon and text -->
+		<label class="frbl-toggle">
+			<input type="checkbox" 
+				id="<?php echo esc_attr( $this->option_enable_events ); ?>" 
+				name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_events ); ?>]" 
+				value="1" 
+				<?php checked( true, $enabled ); ?>
+			/>
+			<span></span>
+		</label>
+		
+		<!-- Select and description - will be moved below the card by JavaScript -->
+		<div id="events-type-wrapper" class="tw-mt-4" style="<?php echo $enabled ? 'width: 100%; min-width: 100%; display: block;' : 'display: none;'; ?>">
+			<label for="<?php echo esc_attr( $this->option_events_type ); ?>" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
+				<?php echo esc_html__( 'Tipo de eventos', 'frontblocks' ); ?>
+			</label>
+			<select 
+				id="<?php echo esc_attr( $this->option_events_type ); ?>" 
+				name="frontblocks_settings[<?php echo esc_attr( $this->option_events_type ); ?>]"
+				class="tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
+				style="width: 100%; min-width: 100%; max-width: 100%; box-sizing: border-box;"
+			>
+				<option value="cpt" <?php selected( $events_type, 'cpt' ); ?>>
+					<?php echo esc_html__( 'Custom Post Type (CPT)', 'frontblocks' ); ?>
+				</option>
+				<option value="posts" <?php selected( $events_type, 'posts' ); ?>>
+					<?php echo esc_html__( 'Entradas de blog', 'frontblocks' ); ?>
+				</option>
+			</select>
+			<p class="tw-text-xs tw-text-gray-500 tw-mt-2">
+				<?php echo esc_html__( 'Elige si los eventos se crearán en un CPT dedicado o en las entradas de blog normales.', 'frontblocks' ); ?>
+			</p>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Render toggle field for enable Gutenberg in products (PRO).
 	 *
 	 * @return void
@@ -1307,8 +1443,11 @@ class Settings {
 
 		$sanitized = array();
 		foreach ( $value as $key => $val ) {
-			if ( $this->option_enable_testimonials === $key || $this->option_enable_reading_progress === $key || $this->option_enable_back_button === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key || $this->option_horizontal_product_form === $key || $this->option_enable_custom_post_types === $key ) {
+			if ( $this->option_enable_testimonials === $key || $this->option_enable_reading_progress === $key || $this->option_enable_back_button === $key || $this->option_enable_events === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key || $this->option_horizontal_product_form === $key || $this->option_enable_custom_post_types === $key ) {
 				$sanitized[ $key ] = (bool) $val;
+			} elseif ( $this->option_events_type === $key ) {
+				// Sanitize events type: only allow 'cpt' or 'posts'.
+				$sanitized[ $key ] = in_array( $val, array( 'cpt', 'posts' ), true ) ? $val : 'cpt';
 			}
 		}
 

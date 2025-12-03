@@ -115,6 +115,9 @@ class Plugin_Main {
 		// Back Button module.
 		new Frontend\BackButton();
 
+		// Events module.
+		new Frontend\Events();
+
 		// Shape Animations module (for GenerateBlocks Shape block).
 		new Frontend\ShapeAnimations();
 
