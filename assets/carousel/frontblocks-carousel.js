@@ -67,6 +67,7 @@ window.addEventListener('load', function (event) {
                     const bullet = document.createElement('button');
                     bullet.classList.add('glide__bullet');
                     bullet.setAttribute('data-glide-dir', '=' + i);
+                    bullet.setAttribute('aria-label', 'Go to slide ' + (i + 1));
                     bullet.style.backgroundColor = carouselbuttonsBackgroundColor;
                     bullets.appendChild(bullet);
                 }
@@ -94,11 +95,12 @@ window.addEventListener('load', function (event) {
 
                 arrows.setAttribute('data-glide-el', 'controls');
                 arrowsHTML = '<button class="glide__arrow glide__arrow--left glide__arrow glide__arrow--left" data-glide-dir="<"';
+                arrowsHTML += ' aria-label="Previous slide"';
                 arrowsHTML += ' style="background-color: ' + carouselbuttonsBackgroundColor + '"';
                 arrowsHTML += '><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="';
                 arrowsHTML += carouselbuttonsColor;
                 arrowsHTML += '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="glide__arrow glide__arrow--right glide__arrow glide__arrow--right" data-glide-dir=">"';
-
+                arrowsHTML += ' aria-label="Next slide"';
                 arrowsHTML += ' style="background-color: ' + carouselbuttonsBackgroundColor + '"';
                 arrowsHTML += '><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 11L6 6L1 1" stroke="';
                 arrowsHTML += carouselbuttonsColor;
