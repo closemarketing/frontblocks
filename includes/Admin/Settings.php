@@ -1127,19 +1127,14 @@ class Settings {
 	/**
 	 * Render license key field.
 	 *
+	 * Uses wp-plugin-license-manager library.
+	 *
 	 * @return void
 	 */
 	public function field_license_key() {
 		// Get license data from FrontBlocks PRO.
 		$license_status = function_exists( 'frblp_get_license_status' ) ? frblp_get_license_status() : 'inactive';
-		$license_key    = '';
-		$expiration     = '';
-
-		if ( class_exists( '\FrontBlocksPro\Admin\LicenseManager' ) ) {
-			$license_manager = \FrontBlocksPro\Admin\LicenseManager::get_instance();
-			$license_key     = $license_manager->get_license_key();
-			$expiration      = $license_manager->get_expiration_date();
-		}
+		$license_key    = function_exists( 'frblp_get_stored_license_key' ) ? frblp_get_stored_license_key() : '';
 
 		$status_text  = '';
 		$status_class = '';
@@ -1162,187 +1157,88 @@ class Settings {
 				$status_icon  = '<svg class="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>';
 				break;
 		}
-
-		// Output nonce for AJAX.
-		wp_nonce_field( 'frblp_license_nonce', 'frblp_license_nonce' );
 		?>
-		<div class="tw-space-y-4" id="frblp-license-section">
-			<!-- License Key Input -->
-			<div>
-				<label for="frblp_license_key" class="tw-block tw-text-sm tw-font-medium tw-text-gray-900 tw-mb-2">
-					<?php echo esc_html__( 'License Key', 'frontblocks' ); ?>
-				</label>
-				<div class="tw-flex tw-gap-2">
-					<input type="text" 
-						id="frblp_license_key" 
-						name="frblp_license_key" 
-						value="<?php echo esc_attr( $license_key ); ?>"
-						placeholder="<?php echo esc_attr__( 'Enter your license key', 'frontblocks' ); ?>"
-						class="tw-flex-1 tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
-						<?php echo 'active' === $license_status ? 'readonly' : ''; ?>
-					/>
-					<?php if ( 'active' === $license_status ) : ?>
-						<button type="button" 
-							id="frblp_deactivate_btn"
-							class="tw-px-4 tw-py-2 tw-bg-red-500 tw-text-white tw-rounded-lg hover:tw-bg-red-600 tw-transition-colors tw-text-sm tw-font-medium tw-whitespace-nowrap">
-							<?php echo esc_html__( 'Deactivate', 'frontblocks' ); ?>
-						</button>
-					<?php else : ?>
-						<button type="button" 
-							id="frblp_activate_btn"
-							class="tw-px-4 tw-py-2 tw-bg-primary-500 tw-text-white tw-rounded-lg hover:tw-bg-primary-600 tw-transition-colors tw-text-sm tw-font-medium tw-whitespace-nowrap">
-							<?php echo esc_html__( 'Activate', 'frontblocks' ); ?>
-						</button>
-					<?php endif; ?>
+		</form>
+		<form method="post" action="options.php" class="tw-mt-0">
+			<?php settings_fields( 'frontblocks-pro_license' ); ?>
+			<div class="tw-space-y-4" id="frblp-license-section">
+				<!-- License Key Input -->
+				<div>
+					<label for="frontblocks-pro_license_apikey" class="tw-block tw-text-sm tw-font-medium tw-text-gray-900 tw-mb-2">
+						<?php echo esc_html__( 'License Key', 'frontblocks' ); ?>
+					</label>
+					<div class="tw-flex tw-gap-2">
+						<input type="text" 
+							id="frontblocks-pro_license_apikey" 
+							name="frontblocks-pro_license_apikey" 
+							value="<?php echo esc_attr( $license_key ); ?>"
+							placeholder="<?php echo esc_attr__( 'Enter your license key', 'frontblocks' ); ?>"
+							class="tw-flex-1 tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
+							<?php echo 'active' === $license_status ? 'readonly' : ''; ?>
+						/>
+						<?php if ( 'active' === $license_status ) : ?>
+							<label class="tw-flex tw-items-center tw-gap-2 tw-px-4 tw-py-2 tw-bg-red-50 tw-border tw-border-red-200 tw-rounded-lg tw-cursor-pointer hover:tw-bg-red-100 tw-transition-colors">
+								<input type="checkbox" name="frontblocks-pro_license_deactivate_checkbox" value="on" class="tw-rounded tw-border-red-300 tw-text-red-600 focus:tw-ring-red-500" />
+								<span class="tw-text-sm tw-font-medium tw-text-red-700"><?php echo esc_html__( 'Deactivate', 'frontblocks' ); ?></span>
+							</label>
+						<?php endif; ?>
+					</div>
+					<p class="tw-text-xs tw-text-gray-500 tw-mt-2">
+						<?php echo esc_html__( 'Enter your license key from your purchase confirmation email.', 'frontblocks' ); ?>
+					</p>
 				</div>
-				<p class="tw-text-xs tw-text-gray-500 tw-mt-2">
-					<?php echo esc_html__( 'Enter your license key from your purchase confirmation email.', 'frontblocks' ); ?>
-				</p>
-			</div>
 
-			<!-- License Status -->
-			<div>
-				<label class="tw-block tw-text-sm tw-font-medium tw-text-gray-900 tw-mb-2">
-					<?php echo esc_html__( 'License Status', 'frontblocks' ); ?>
-				</label>
-				<div id="frblp_license_status" class="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-3 tw-border tw-rounded-lg <?php echo esc_attr( $status_class ); ?>">
-					<span class="tw-flex-shrink-0">
-						<?php echo $status_icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					</span>
-					<span class="tw-font-semibold tw-text-base">
-						<?php echo esc_html( $status_text ); ?>
-					</span>
-					<?php if ( ! empty( $expiration ) && 'active' === $license_status ) : ?>
-						<span class="tw-ml-auto tw-text-sm">
+				<!-- License Status -->
+				<div>
+					<label class="tw-block tw-text-sm tw-font-medium tw-text-gray-900 tw-mb-2">
+						<?php echo esc_html__( 'License Status', 'frontblocks' ); ?>
+					</label>
+					<div id="frblp_license_status" class="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-3 tw-border tw-rounded-lg <?php echo esc_attr( $status_class ); ?>">
+						<span class="tw-flex-shrink-0">
+							<?php echo $status_icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						</span>
+						<span class="tw-font-semibold tw-text-base">
+							<?php echo esc_html( $status_text ); ?>
+						</span>
+					</div>
+				</div>
+
+				<!-- Help Text -->
+				<?php if ( empty( $license_key ) ) : ?>
+					<div class="tw-p-4 tw-rounded-lg tw-bg-gray-50 tw-border tw-border-gray-200">
+						<p class="tw-text-sm tw-text-gray-600">
 							<?php
 							printf(
-								/* translators: %s: expiration date */
-								esc_html__( 'Expires: %s', 'frontblocks' ),
-								esc_html( date_i18n( get_option( 'date_format' ), strtotime( $expiration ) ) )
+								/* translators: %s: purchase link */
+								esc_html__( 'Don\'t have a license? %s to get started.', 'frontblocks' ),
+								'<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-license" target="_blank" rel="noopener noreferrer" class="tw-text-primary-500 hover:tw-text-primary-600 tw-font-medium">' . esc_html__( 'Purchase FrontBlocks PRO', 'frontblocks' ) . '</a>'
 							);
 							?>
-						</span>
-					<?php endif; ?>
+						</p>
+					</div>
+				<?php endif; ?>
+
+				<?php if ( 'expired' === $license_status ) : ?>
+					<div class="tw-p-4 tw-rounded-lg tw-bg-red-50 tw-border tw-border-red-200">
+						<p class="tw-text-sm tw-text-red-700">
+							<?php
+							printf(
+								/* translators: %s: renewal link */
+								esc_html__( 'Your license has expired. %s to continue receiving updates and support.', 'frontblocks' ),
+								'<a href="https://close.technology/my-account/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=renew-license" target="_blank" rel="noopener noreferrer" class="tw-font-medium tw-underline hover:tw-no-underline">' . esc_html__( 'Renew your license', 'frontblocks' ) . '</a>'
+							);
+							?>
+						</p>
+					</div>
+				<?php endif; ?>
+
+				<!-- Submit Button for License -->
+				<div class="tw-pt-4">
+					<button type="submit" name="submit_license" class="tw-inline-flex tw-items-center tw-px-4 tw-py-2 tw-border tw-border-transparent tw-text-sm tw-font-medium tw-rounded-lg tw-shadow-sm tw-text-white tw-bg-primary-500 hover:tw-bg-primary-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-primary-500 tw-transition-colors tw-duration-200">
+						<?php echo 'active' === $license_status ? esc_html__( 'Update License', 'frontblocks' ) : esc_html__( 'Activate License', 'frontblocks' ); ?>
+					</button>
 				</div>
 			</div>
-
-			<!-- Message Area -->
-			<div id="frblp_license_message" class="tw-hidden"></div>
-
-			<!-- Help Text -->
-			<?php if ( empty( $license_key ) ) : ?>
-				<div class="tw-p-4 tw-rounded-lg tw-bg-gray-50 tw-border tw-border-gray-200">
-					<p class="tw-text-sm tw-text-gray-600">
-						<?php
-						printf(
-							/* translators: %s: purchase link */
-							esc_html__( 'Don\'t have a license? %s to get started.', 'frontblocks' ),
-							'<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-license" target="_blank" rel="noopener noreferrer" class="tw-text-primary-500 hover:tw-text-primary-600 tw-font-medium">' . esc_html__( 'Purchase FrontBlocks PRO', 'frontblocks' ) . '</a>'
-						);
-						?>
-					</p>
-				</div>
-			<?php endif; ?>
-
-			<?php if ( 'expired' === $license_status ) : ?>
-				<div class="tw-p-4 tw-rounded-lg tw-bg-red-50 tw-border tw-border-red-200">
-					<p class="tw-text-sm tw-text-red-700">
-						<?php
-						printf(
-							/* translators: %s: renewal link */
-							esc_html__( 'Your license has expired. %s to continue receiving updates and support.', 'frontblocks' ),
-							'<a href="https://close.technology/my-account/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=renew-license" target="_blank" rel="noopener noreferrer" class="tw-font-medium tw-underline hover:tw-no-underline">' . esc_html__( 'Renew your license', 'frontblocks' ) . '</a>'
-						);
-						?>
-					</p>
-				</div>
-			<?php endif; ?>
-		</div>
-
-		<script>
-		document.addEventListener('DOMContentLoaded', function() {
-			const activateBtn = document.getElementById('frblp_activate_btn');
-			const deactivateBtn = document.getElementById('frblp_deactivate_btn');
-			const licenseInput = document.getElementById('frblp_license_key');
-			const messageArea = document.getElementById('frblp_license_message');
-			const nonce = document.getElementById('frblp_license_nonce').value;
-
-			function showMessage(message, isError) {
-				messageArea.className = 'tw-p-4 tw-rounded-lg tw-border ' + 
-					(isError ? 'tw-bg-red-50 tw-border-red-200 tw-text-red-700' : 'tw-bg-green-50 tw-border-green-200 tw-text-green-700');
-				messageArea.innerHTML = '<p class="tw-text-sm tw-font-medium">' + message + '</p>';
-				messageArea.classList.remove('tw-hidden');
-			}
-
-			if (activateBtn) {
-				activateBtn.addEventListener('click', function() {
-					const licenseKey = licenseInput.value.trim();
-					if (!licenseKey) {
-						showMessage('<?php echo esc_js( __( 'Please enter a license key.', 'frontblocks' ) ); ?>', true);
-						return;
-					}
-
-					activateBtn.disabled = true;
-					activateBtn.textContent = '<?php echo esc_js( __( 'Activating...', 'frontblocks' ) ); ?>';
-
-					fetch(ajaxurl, {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-						body: 'action=frblp_activate_license&nonce=' + nonce + '&license_key=' + encodeURIComponent(licenseKey)
-					})
-					.then(response => response.json())
-					.then(data => {
-						if (data.success) {
-							showMessage(data.data.message, false);
-							setTimeout(() => location.reload(), 1500);
-						} else {
-							showMessage(data.data.message, true);
-							activateBtn.disabled = false;
-							activateBtn.textContent = '<?php echo esc_js( __( 'Activate', 'frontblocks' ) ); ?>';
-						}
-					})
-					.catch(() => {
-						showMessage('<?php echo esc_js( __( 'Connection error. Please try again.', 'frontblocks' ) ); ?>', true);
-						activateBtn.disabled = false;
-						activateBtn.textContent = '<?php echo esc_js( __( 'Activate', 'frontblocks' ) ); ?>';
-					});
-				});
-			}
-
-			if (deactivateBtn) {
-				deactivateBtn.addEventListener('click', function() {
-					if (!confirm('<?php echo esc_js( __( 'Are you sure you want to deactivate this license?', 'frontblocks' ) ); ?>')) {
-						return;
-					}
-
-					deactivateBtn.disabled = true;
-					deactivateBtn.textContent = '<?php echo esc_js( __( 'Deactivating...', 'frontblocks' ) ); ?>';
-
-					fetch(ajaxurl, {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-						body: 'action=frblp_deactivate_license&nonce=' + nonce
-					})
-					.then(response => response.json())
-					.then(data => {
-						if (data.success) {
-							showMessage(data.data.message, false);
-							setTimeout(() => location.reload(), 1500);
-						} else {
-							showMessage(data.data.message, true);
-							deactivateBtn.disabled = false;
-							deactivateBtn.textContent = '<?php echo esc_js( __( 'Deactivate', 'frontblocks' ) ); ?>';
-						}
-					})
-					.catch(() => {
-						showMessage('<?php echo esc_js( __( 'Connection error. Please try again.', 'frontblocks' ) ); ?>', true);
-						deactivateBtn.disabled = false;
-						deactivateBtn.textContent = '<?php echo esc_js( __( 'Deactivate', 'frontblocks' ) ); ?>';
-					});
-				});
-			}
-		});
-		</script>
 		<?php
 	}
 
