@@ -1263,119 +1263,49 @@ class Settings {
 	/**
 	 * Render license key field.
 	 *
-	 * Uses wp-plugin-license-manager library.
+	 * Uses FormsCRMSettings from wp-plugin-license-manager library.
 	 *
 	 * @return void
 	 */
 	public function field_license_key() {
-		// Get license data from FrontBlocks PRO.
-		$license_status = function_exists( 'frblp_get_license_status' ) ? frblp_get_license_status() : 'inactive';
-		$license_key    = function_exists( 'frblp_get_stored_license_key' ) ? frblp_get_stored_license_key() : '';
+		global $frblp_license;
 
-		$status_text  = '';
-		$status_class = '';
-		$status_icon  = '';
-
-		switch ( $license_status ) {
-			case 'active':
-				$status_text  = __( 'Active', 'frontblocks' );
-				$status_class = 'tw-bg-green-100 tw-text-green-800 tw-border-green-300';
-				$status_icon  = '<svg class="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>';
-				break;
-			case 'expired':
-				$status_text  = __( 'Expired', 'frontblocks' );
-				$status_class = 'tw-bg-red-100 tw-text-red-800 tw-border-red-300';
-				$status_icon  = '<svg class="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>';
-				break;
-			default: // inactive.
-				$status_text  = __( 'Not Activated', 'frontblocks' );
-				$status_class = 'tw-bg-yellow-100 tw-text-yellow-800 tw-border-yellow-300';
-				$status_icon  = '<svg class="tw-w-5 tw-h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>';
-				break;
-		}
+		// Close the main settings form before rendering license section.
 		?>
 		</form>
-		<form method="post" action="options.php" class="tw-mt-0">
-			<?php settings_fields( 'frontblocks-pro_license' ); ?>
-			<div class="tw-space-y-4" id="frblp-license-section">
-				<!-- License Key Input -->
-				<div>
-					<label for="frontblocks-pro_license_apikey" class="tw-block tw-text-sm tw-font-medium tw-text-gray-900 tw-mb-2">
-						<?php echo esc_html__( 'License Key', 'frontblocks' ); ?>
-					</label>
-					<div class="tw-flex tw-gap-2">
-						<input type="text" 
-							id="frontblocks-pro_license_apikey" 
-							name="frontblocks-pro_license_apikey" 
-							value="<?php echo esc_attr( $license_key ); ?>"
-							placeholder="<?php echo esc_attr__( 'Enter your license key', 'frontblocks' ); ?>"
-							class="tw-flex-1 tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
-							<?php echo 'active' === $license_status ? 'readonly' : ''; ?>
-						/>
-						<?php if ( 'active' === $license_status ) : ?>
-							<label class="tw-flex tw-items-center tw-gap-2 tw-px-4 tw-py-2 tw-bg-red-50 tw-border tw-border-red-200 tw-rounded-lg tw-cursor-pointer hover:tw-bg-red-100 tw-transition-colors">
-								<input type="checkbox" name="frontblocks-pro_license_deactivate_checkbox" value="on" class="tw-rounded tw-border-red-300 tw-text-red-600 focus:tw-ring-red-500" />
-								<span class="tw-text-sm tw-font-medium tw-text-red-700"><?php echo esc_html__( 'Deactivate', 'frontblocks' ); ?></span>
-							</label>
-						<?php endif; ?>
-					</div>
-					<p class="tw-text-xs tw-text-gray-500 tw-mt-2">
-						<?php echo esc_html__( 'Enter your license key from your purchase confirmation email.', 'frontblocks' ); ?>
-					</p>
-				</div>
 
-				<!-- License Status -->
-				<div>
-					<label class="tw-block tw-text-sm tw-font-medium tw-text-gray-900 tw-mb-2">
-						<?php echo esc_html__( 'License Status', 'frontblocks' ); ?>
-					</label>
-					<div id="frblp_license_status" class="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-3 tw-border tw-rounded-lg <?php echo esc_attr( $status_class ); ?>">
-						<span class="tw-flex-shrink-0">
-							<?php echo $status_icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-						</span>
-						<span class="tw-font-semibold tw-text-base">
-							<?php echo esc_html( $status_text ); ?>
-						</span>
-					</div>
-				</div>
-
-				<!-- Help Text -->
-				<?php if ( empty( $license_key ) ) : ?>
-					<div class="tw-p-4 tw-rounded-lg tw-bg-gray-50 tw-border tw-border-gray-200">
-						<p class="tw-text-sm tw-text-gray-600">
-							<?php
-							printf(
-								/* translators: %s: purchase link */
-								esc_html__( 'Don\'t have a license? %s to get started.', 'frontblocks' ),
-								'<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-license" target="_blank" rel="noopener noreferrer" class="tw-text-primary-500 hover:tw-text-primary-600 tw-font-medium">' . esc_html__( 'Purchase FrontBlocks PRO', 'frontblocks' ) . '</a>'
-							);
-							?>
-						</p>
-					</div>
-				<?php endif; ?>
-
-				<?php if ( 'expired' === $license_status ) : ?>
-					<div class="tw-p-4 tw-rounded-lg tw-bg-red-50 tw-border tw-border-red-200">
-						<p class="tw-text-sm tw-text-red-700">
-							<?php
-							printf(
-								/* translators: %s: renewal link */
-								esc_html__( 'Your license has expired. %s to continue receiving updates and support.', 'frontblocks' ),
-								'<a href="https://close.technology/my-account/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=renew-license" target="_blank" rel="noopener noreferrer" class="tw-font-medium tw-underline hover:tw-no-underline">' . esc_html__( 'Renew your license', 'frontblocks' ) . '</a>'
-							);
-							?>
-						</p>
-					</div>
-				<?php endif; ?>
-
-				<!-- Submit Button for License -->
-				<div class="tw-pt-4">
-					<button type="submit" name="submit_license" class="tw-inline-flex tw-items-center tw-px-4 tw-py-2 tw-border tw-border-transparent tw-text-sm tw-font-medium tw-rounded-lg tw-shadow-sm tw-text-white tw-bg-primary-500 hover:tw-bg-primary-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-primary-500 tw-transition-colors tw-duration-200">
-						<?php echo 'active' === $license_status ? esc_html__( 'Update License', 'frontblocks' ) : esc_html__( 'Activate License', 'frontblocks' ); ?>
-					</button>
-				</div>
-			</div>
 		<?php
+		// Check if license instance exists.
+		if ( ! $frblp_license ) {
+			?>
+			<div class="tw-p-4 tw-rounded-lg tw-bg-red-50 tw-border tw-border-red-200">
+				<p class="tw-text-sm tw-text-red-700">
+					<?php echo esc_html__( 'License manager not initialized.', 'frontblocks' ); ?>
+				</p>
+			</div>
+			<?php
+			return;
+		}
+
+		// Use FormsCRMSettings renderer (same as formscrm-inmovilla and PBC).
+		$settings = new \Closemarketing\WPLicenseManager\FormsCRMSettings(
+			$frblp_license,
+			array(
+				'title'        => __( 'FrontBlocks PRO License', 'frontblocks' ),
+				'description'  => __( 'Manage your license to receive automatic updates and support.', 'frontblocks' ),
+				'plugin_name'  => 'FrontBlocks PRO',
+				'purchase_url' => 'https://close.technology/wordpress-plugins/frontblocks-pro/',
+				'renew_url'    => 'https://close.technology/my-account/',
+				'benefits'     => array(
+					__( 'Automatic plugin updates', 'frontblocks' ),
+					__( 'Access to new features', 'frontblocks' ),
+					__( 'Priority support', 'frontblocks' ),
+					__( 'Security patches', 'frontblocks' ),
+				),
+			)
+		);
+
+		$settings->render();
 	}
 
 	/**

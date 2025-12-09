@@ -3,7 +3,7 @@
  * Plugin Name: FrontBlocks for GeneratePress
  * Plugin URI:  https://wordpress.org/plugins/frontblocks/
  * Description: Blocks and helpers that extends GeneratePress blocks.
- * Version:     1.3.1
+ * Version:     1.3.2
  * Author:      Closemarketing
  * Author URI:  https://close.marketing
  * Text Domain: frontblocks
