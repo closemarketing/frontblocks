@@ -1287,6 +1287,18 @@ class Settings {
 			return;
 		}
 
+		// Check if FormsCRMSettings class exists (requires FrontBlocks PRO).
+		if ( ! class_exists( '\Closemarketing\WPLicenseManager\FormsCRMSettings' ) ) {
+			?>
+			<div class="tw-p-4 tw-rounded-lg tw-bg-yellow-50 tw-border tw-border-yellow-200">
+				<p class="tw-text-sm tw-text-yellow-700">
+					<?php echo esc_html__( 'License management requires FrontBlocks PRO to be installed and active.', 'frontblocks' ); ?>
+				</p>
+			</div>
+			<?php
+			return;
+		}
+
 		// Use FormsCRMSettings renderer (same as formscrm-inmovilla and PBC).
 		$settings = new \Closemarketing\WPLicenseManager\FormsCRMSettings(
 			$frblp_license,
