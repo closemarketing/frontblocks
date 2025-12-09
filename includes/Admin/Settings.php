@@ -1294,7 +1294,7 @@ class Settings {
 			);
 
 			$settings->render();
-			?>
+		?>
 		</div>
 		<?php
 	}
