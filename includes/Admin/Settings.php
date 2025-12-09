@@ -539,23 +539,8 @@ class Settings {
 			);
 		}
 
-		// License section (only if PRO is active).
-		if ( frbl_is_pro_active() ) {
-			add_settings_section(
-				'frontblocks_section_license',
-				__( 'License', 'frontblocks' ),
-				array( $this, 'section_license_callback' ),
-				$this->page_slug
-			);
-
-			add_settings_field(
-				'frblp_license_info',
-				__( 'License Information', 'frontblocks' ),
-				array( $this, 'field_license_key' ),
-				$this->page_slug,
-				'frontblocks_section_license'
-			);
-		}
+		// Note: License section is rendered separately outside the main form.
+		// See render_license_section() method called from render_page().
 
 		do_action( 'frontblocks_register_settings' );
 	}
@@ -666,6 +651,13 @@ class Settings {
 					</div>
 				</form>
 
+				<?php
+				// Render license section separately (outside main form) if PRO is active.
+				if ( frbl_is_pro_active() ) {
+					$this->render_license_section();
+				}
+				?>
+
 				<!-- Footer Info -->
 				<div class="tw-mt-8 tw-text-center tw-text-sm tw-text-gray-500">
 					<?php
@@ -738,9 +730,6 @@ class Settings {
 		// Check if this is a section with callback only (like active_blocks).
 		$is_callback_only = ! $has_fields && $section['callback'];
 
-		// Check if this is the license section - render it full width.
-		$is_license_section = 'frontblocks_section_license' === $section['id'];
-
 		// Check if this is the custom post types section - render it full width.
 		$is_cpt_section = 'frontblocks_section_custom_post_types' === $section['id'];
 
@@ -759,8 +748,8 @@ class Settings {
 			return;
 		}
 
-		if ( $is_license_section || $is_cpt_section ) {
-			// Render license or CPT section as a full-width card.
+		if ( $is_cpt_section ) {
+			// Render CPT section as a full-width card.
 			?>
 			<div class="frbl-card tw-bg-white tw-rounded-lg tw-shadow-sm tw-border tw-border-gray-200 tw-overflow-hidden frbl-animate-slide-in tw-mb-8">
 				<div class="tw-px-6 tw-py-5 tw-border-b tw-border-gray-200 tw-bg-gradient-to-r tw-from-gray-50 tw-to-white">
@@ -1252,72 +1241,62 @@ class Settings {
 	}
 
 	/**
-	 * License section description.
+	 * Render license section (separate from main form).
 	 *
 	 * @return void
 	 */
-	public function section_license_callback() {
-		echo '<p>' . esc_html__( 'Manage your FrontBlocks PRO license.', 'frontblocks' ) . '</p>';
-	}
-
-	/**
-	 * Render license key field.
-	 *
-	 * Uses FormsCRMSettings from wp-plugin-license-manager library.
-	 *
-	 * @return void
-	 */
-	public function field_license_key() {
+	private function render_license_section() {
 		global $frblp_license;
 
-		// Close the main settings form before rendering license section.
 		?>
-		</form>
+		<div class="tw-mt-6">
+			<?php
+			// Check if license instance exists.
+			if ( ! $frblp_license ) {
+				?>
+				<div class="tw-p-4 tw-rounded-lg tw-bg-red-50 tw-border tw-border-red-200">
+					<p class="tw-text-sm tw-text-red-700">
+						<?php echo esc_html__( 'License manager not initialized.', 'frontblocks' ); ?>
+					</p>
+				</div>
+				<?php
+				return;
+			}
 
+			// Check if FormsCRMSettings class exists (requires FrontBlocks PRO).
+			if ( ! class_exists( '\Closemarketing\WPLicenseManager\FormsCRMSettings' ) ) {
+				?>
+				<div class="tw-p-4 tw-rounded-lg tw-bg-yellow-50 tw-border tw-border-yellow-200">
+					<p class="tw-text-sm tw-text-yellow-700">
+						<?php echo esc_html__( 'License management requires FrontBlocks PRO to be installed and active.', 'frontblocks' ); ?>
+					</p>
+				</div>
+				<?php
+				return;
+			}
+
+			// Use FormsCRMSettings renderer (same as formscrm-inmovilla and PBC).
+			$settings = new \Closemarketing\WPLicenseManager\FormsCRMSettings(
+				$frblp_license,
+				array(
+					'title'        => __( 'FrontBlocks PRO License', 'frontblocks' ),
+					'description'  => __( 'Manage your license to receive automatic updates and support.', 'frontblocks' ),
+					'plugin_name'  => 'FrontBlocks PRO',
+					'purchase_url' => 'https://close.technology/wordpress-plugins/frontblocks-pro/',
+					'renew_url'    => 'https://close.technology/my-account/',
+					'benefits'     => array(
+						__( 'Automatic plugin updates', 'frontblocks' ),
+						__( 'Access to new features', 'frontblocks' ),
+						__( 'Priority support', 'frontblocks' ),
+						__( 'Security patches', 'frontblocks' ),
+					),
+				)
+			);
+
+			$settings->render();
+			?>
+		</div>
 		<?php
-		// Check if license instance exists.
-		if ( ! $frblp_license ) {
-			?>
-			<div class="tw-p-4 tw-rounded-lg tw-bg-red-50 tw-border tw-border-red-200">
-				<p class="tw-text-sm tw-text-red-700">
-					<?php echo esc_html__( 'License manager not initialized.', 'frontblocks' ); ?>
-				</p>
-			</div>
-			<?php
-			return;
-		}
-
-		// Check if FormsCRMSettings class exists (requires FrontBlocks PRO).
-		if ( ! class_exists( '\Closemarketing\WPLicenseManager\FormsCRMSettings' ) ) {
-			?>
-			<div class="tw-p-4 tw-rounded-lg tw-bg-yellow-50 tw-border tw-border-yellow-200">
-				<p class="tw-text-sm tw-text-yellow-700">
-					<?php echo esc_html__( 'License management requires FrontBlocks PRO to be installed and active.', 'frontblocks' ); ?>
-				</p>
-			</div>
-			<?php
-			return;
-		}
-
-		// Use FormsCRMSettings renderer (same as formscrm-inmovilla and PBC).
-		$settings = new \Closemarketing\WPLicenseManager\FormsCRMSettings(
-			$frblp_license,
-			array(
-				'title'        => __( 'FrontBlocks PRO License', 'frontblocks' ),
-				'description'  => __( 'Manage your license to receive automatic updates and support.', 'frontblocks' ),
-				'plugin_name'  => 'FrontBlocks PRO',
-				'purchase_url' => 'https://close.technology/wordpress-plugins/frontblocks-pro/',
-				'renew_url'    => 'https://close.technology/my-account/',
-				'benefits'     => array(
-					__( 'Automatic plugin updates', 'frontblocks' ),
-					__( 'Access to new features', 'frontblocks' ),
-					__( 'Priority support', 'frontblocks' ),
-					__( 'Security patches', 'frontblocks' ),
-				),
-			)
-		);
-
-		$settings->render();
 	}
 
 	/**
@@ -1364,9 +1343,38 @@ class Settings {
 			return array();
 		}
 
-		$sanitized = array();
+		// Get current options to preserve unchecked checkboxes.
+		$current_options = get_option( 'frontblocks_settings', array() );
+
+		// Initialize sanitized array with current values.
+		$sanitized = $current_options;
+
+		// List of all boolean options (checkboxes).
+		$boolean_options = array(
+			$this->option_enable_testimonials,
+			$this->option_enable_reading_progress,
+			$this->option_enable_back_button,
+			$this->option_enable_events,
+			$this->option_enable_gutenberg,
+			$this->option_enable_simple_prices_variable_products,
+			$this->option_enable_after_add_to_cart,
+			$this->option_deactivate_short_description,
+			$this->option_move_content_to_short_description,
+			$this->option_disable_zoom_images,
+			$this->option_add_share_buttons,
+			$this->option_deactivate_product_tabs,
+			$this->option_horizontal_product_form,
+			$this->option_enable_custom_post_types,
+		);
+
+		// Initialize all boolean options to false (unchecked checkboxes are not submitted).
+		foreach ( $boolean_options as $option ) {
+			$sanitized[ $option ] = false;
+		}
+
+		// Process submitted values.
 		foreach ( $value as $key => $val ) {
-			if ( $this->option_enable_testimonials === $key || $this->option_enable_reading_progress === $key || $this->option_enable_back_button === $key || $this->option_enable_events === $key || $this->option_enable_gutenberg === $key || $this->option_enable_simple_prices_variable_products === $key || $this->option_enable_after_add_to_cart === $key || $this->option_deactivate_short_description === $key || $this->option_move_content_to_short_description === $key || $this->option_disable_zoom_images === $key || $this->option_add_share_buttons === $key || $this->option_deactivate_product_tabs === $key || $this->option_horizontal_product_form === $key || $this->option_enable_custom_post_types === $key ) {
+			if ( in_array( $key, $boolean_options, true ) ) {
 				$sanitized[ $key ] = (bool) $val;
 			} elseif ( $this->option_events_type === $key ) {
 				// Sanitize events type: only allow 'cpt' or 'posts'.
@@ -1377,7 +1385,6 @@ class Settings {
 		// Ensure mutual exclusion: if both description options are enabled, keep only the last one changed.
 		if ( ! empty( $sanitized[ $this->option_deactivate_short_description ] ) && ! empty( $sanitized[ $this->option_move_content_to_short_description ] ) ) {
 			// Get current saved values to determine which one was just changed.
-			$current_options    = get_option( 'frontblocks_settings', array() );
 			$current_deactivate = ! empty( $current_options[ $this->option_deactivate_short_description ] );
 			$current_move       = ! empty( $current_options[ $this->option_move_content_to_short_description ] );
 
