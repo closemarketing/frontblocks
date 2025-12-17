@@ -56,6 +56,14 @@ class Headline {
 			array(),
 			FRBL_VERSION
 		);
+
+		wp_register_script(
+			'frontblocks-headline-marquee',
+			FRBL_PLUGIN_URL . 'assets/headline/frontblocks-headline-marquee.js',
+			array(),
+			FRBL_VERSION,
+			true
+		);
 	}
 	/**
 	 * Editor assets
@@ -75,12 +83,13 @@ class Headline {
 	}
 
 	/**
-	 * Enqueue frontend styles.
+	 * Enqueue frontend styles and scripts.
 	 *
 	 * @return void
 	 */
 	public function enqueue_frontend_styles() {
 		wp_enqueue_style( 'frontblocks-headline-styles' );
+		wp_enqueue_script( 'frontblocks-headline-marquee' );
 	}
 
 	/**

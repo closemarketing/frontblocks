@@ -38,3 +38,39 @@
     height: 3px;
     background-color: black; 
 }
+
+/* Infinite Scrolling Marquee Effect */
+.gb-marquee-infinite-scroll {
+    overflow: hidden;
+    white-space: nowrap;
+    width: 100%;
+    position: relative;
+}
+
+/* Marquee wrapper created by JavaScript */
+.gb-marquee-infinite-scroll .gb-marquee-wrapper {
+    display: inline-flex;
+    white-space: nowrap;
+    animation: marquee-scroll 20s linear infinite;
+}
+
+/* Individual copies of content */
+.gb-marquee-infinite-scroll .gb-marquee-copy {
+    display: inline-block;
+    white-space: nowrap;
+    padding-right: 2em;
+}
+
+@keyframes marquee-scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* Ensure all text content doesn't break */
+.gb-marquee-infinite-scroll * {
+    white-space: nowrap !important;
+}
