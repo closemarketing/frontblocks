@@ -1,13 +1,37 @@
 const { createHigherOrderComponent } = wp.compose;
 const { Fragment } = wp.element;
 const { InspectorControls } = wp.blockEditor; 
-const { PanelBody, SelectControl, ToggleControl, RangeControl } = wp.components;
+const { PanelBody, SelectControl, ToggleControl } = wp.components;
 const { __, sprintf } = wp.i18n;
 
 const LINE_CLASS_PREFIX = 'gb-line-effect-'; 
 const MARQUEE_CLASS = 'gb-marquee-infinite-scroll';
 const MARQUEE_SPEED_ATTR = 'frblMarqueeSpeed';
-const BLOCK_NAME = 'generateblocks/text'; 
+const BLOCK_NAME = 'generateblocks/text';
+
+// Marquee speed presets
+const MARQUEE_SPEEDS = {
+    fast: 10,    // 10 seconds - fast
+    medium: 20,  // 20 seconds - medium
+    slow: 40     // 40 seconds - slow
+};
+
+// Register marquee speed attribute
+wp.hooks.addFilter(
+    'blocks.registerBlockType',
+    'frontblocks/add-marquee-attribute',
+    ( settings, name ) => {
+        if ( name === BLOCK_NAME ) {
+            settings.attributes = Object.assign( settings.attributes || {}, {
+                [MARQUEE_SPEED_ATTR]: {
+                    type: 'string',
+                    default: 'medium',
+                },
+            } );
+        }
+        return settings;
+    }
+); 
 
 const withHeadlineLineControl = createHigherOrderComponent( ( BlockEdit ) => {
    return ( props ) => {
@@ -17,6 +41,8 @@ const withHeadlineLineControl = createHigherOrderComponent( ( BlockEdit ) => {
 
       const { attributes, setAttributes } = props;
       const existingClasses = attributes.className || '';
+      const htmlAttributes = attributes.htmlAttributes || {};
+      const marqueeSpeed = attributes[MARQUEE_SPEED_ATTR] || 'medium';
         
       const cleanExistingLineClasses = ( classes ) => {
          return classes
@@ -70,12 +96,71 @@ const withHeadlineLineControl = createHigherOrderComponent( ( BlockEdit ) => {
       */
       const setMarqueeEnabled = ( enabled ) => {
          let newClasses = cleanMarqueeClass(existingClasses);
+         const updatedHtmlAttributes = { ...htmlAttributes };
+         const newAttributes = { className: newClasses };
 
          if ( enabled ) {
             newClasses = ( newClasses + ' ' + MARQUEE_CLASS ).trim();
+            newAttributes.className = newClasses;
+            // Set default speed if not already set
+            if ( !attributes[MARQUEE_SPEED_ATTR] ) {
+               newAttributes[MARQUEE_SPEED_ATTR] = 'medium';
+               updatedHtmlAttributes['data-marquee-speed'] = MARQUEE_SPEEDS.medium;
+            } else {
+               const speedValue = MARQUEE_SPEEDS[attributes[MARQUEE_SPEED_ATTR]] || MARQUEE_SPEEDS.medium;
+               updatedHtmlAttributes['data-marquee-speed'] = speedValue;
+            }
+            newAttributes.htmlAttributes = updatedHtmlAttributes;
+         } else {
+            // Remove speed attribute when disabling
+            newAttributes[MARQUEE_SPEED_ATTR] = undefined;
+            delete updatedHtmlAttributes['data-marquee-speed'];
+            newAttributes.htmlAttributes = updatedHtmlAttributes;
          }
 
-         setAttributes( { className: newClasses } );
+         setAttributes( newAttributes );
+      };
+
+      /**
+      * Maneja el cambio de la velocidad del marquee.
+      */
+      const setMarqueeSpeed = ( speedPreset ) => {
+         const speedValue = MARQUEE_SPEEDS[speedPreset] || MARQUEE_SPEEDS.medium;
+         const updatedHtmlAttributes = { ...htmlAttributes };
+         updatedHtmlAttributes['data-marquee-speed'] = speedValue;
+         setAttributes( { 
+            [MARQUEE_SPEED_ATTR]: speedPreset,
+            htmlAttributes: updatedHtmlAttributes
+         } );
+         
+         // Update marquee wrapper directly if it exists (for immediate preview)
+         setTimeout(function() {
+            // Try to find the marquee wrapper in editor
+            const blockElement = document.querySelector('[data-block="' + props.clientId + '"]');
+            if (blockElement) {
+               const marqueeElement = blockElement.querySelector('.gb-marquee-infinite-scroll');
+               if (marqueeElement) {
+                  const wrapper = marqueeElement.querySelector('.gb-marquee-wrapper');
+                  if (wrapper && typeof wrapper.updateMarqueeSpeed === 'function') {
+                     wrapper.updateMarqueeSpeed(speedValue);
+                  } else if (wrapper) {
+                     // Fallback: update directly
+                     wrapper.setAttribute('data-marquee-speed', speedValue);
+                     wrapper.style.setProperty('--marquee-speed', speedValue + 's');
+                     // Force animation update
+                     const currentAnimation = wrapper.style.animation;
+                     if (currentAnimation) {
+                        const match = currentAnimation.match(/marquee-scroll-[\w-]+/);
+                        if (match) {
+                           const styleId = match[0].replace('marquee-scroll-', '');
+                           wrapper.style.animation = 'marquee-scroll-' + styleId + ' ' + speedValue + 's linear infinite';
+                           wrapper.style.animationDuration = speedValue + 's';
+                        }
+                     }
+                  }
+               }
+            }
+         }, 50);
       };
 
 
@@ -121,6 +206,20 @@ const withHeadlineLineControl = createHigherOrderComponent( ( BlockEdit ) => {
                         __( 'Enable infinite scrolling marquee effect for the headline text.', 'frontblocks' )
                      }
                   />
+
+                  { isMarqueeEnabled && (
+                     <SelectControl
+                        label={ __( 'Marquee Speed', 'frontblocks' ) }
+                        value={ marqueeSpeed }
+                        onChange={ setMarqueeSpeed }
+                        options={[
+                           { label: __( 'Fast', 'frontblocks' ), value: 'fast' },
+                           { label: __( 'Medium', 'frontblocks' ), value: 'medium' },
+                           { label: __( 'Slow', 'frontblocks' ), value: 'slow' },
+                        ]}
+                        help={ __( 'Select the scrolling speed for the marquee effect.', 'frontblocks' ) }
+                     />
+                  )}
                </PanelBody>
                
             </InspectorControls>
