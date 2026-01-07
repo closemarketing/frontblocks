@@ -107,6 +107,7 @@ Features:
   * Delete custom post types easily with a single click
 - Disable tabs on the product page.
 - Horizontal product form layout (price, quantity, and add to cart button in one row).
+- Full Page Scroll: Create fullpage scroll experiences with smooth section-by-section navigation and automatic side navigation dots. Perfect for landing pages, portfolios, and presentations.
 
 More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-plugins/frontblocks-pro/?utm_source=WordPressORGReadme&utm_medium=link&utm_campaign=frontblocks) page.
 
@@ -116,6 +117,13 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 2. Go to Settings > FrontBlocks > Features and enable the features you want to use.
 
 == Changelog ==
+
+== n.e.x.t ==
+*   Added: Full Page Scroll toggle in settings (PRO feature).
+*   PRO: Full Page Scroll - Create smooth fullpage scroll experiences with automatic section navigation.
+*   PRO: Side navigation with dots that updates automatically as you scroll.
+*   PRO: Smooth scroll between sections with mouse wheel control.
+*   PRO: Responsive design with mobile-optimized navigation.
 
 == 1.3.1 ==
 *   Improved: Custom SVG Animations now uses file upload instead of textarea for importing JSON files.
