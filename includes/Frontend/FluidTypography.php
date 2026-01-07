@@ -151,7 +151,7 @@ class FluidTypography {
 			// Pattern for body in media query.
 			$pattern_tablet = '/@media[^{]*max-width:\s*1024px[^{]*\{[^@]*\b' . preg_quote( $selector, '/' ) . '\b[^{]*\{[^}]*font-size:\s*([0-9.]+)(px|rem|em)/is';
 		} else {
-			// Pattern for headings in media query: @media (max-width: 1024px){h1{font-size:40px;}}
+ 
 			$pattern_tablet = '/@media[^{]*max-width:\s*1024px[^{]*\{[^}]*' . preg_quote( $selector, '/' ) . '\s*\{[^}]*font-size:\s*([0-9.]+)(px|rem|em)/is';
 		}
 		

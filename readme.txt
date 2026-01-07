@@ -70,6 +70,18 @@ Display a vertical progress bar on the right side of posts that fills up as user
 **Back Button:**
 Display a floating back button in the bottom left corner that allows users to navigate to the previous page. Enable it from the FrontBlocks settings page.
 
+**Fluid Typography:**
+Automatically converts GeneratePress Pro's static typography settings into modern fluid typography using CSS clamp(). Instead of abrupt font size changes at breakpoints, this creates smooth, gradual scaling from mobile (320px) to desktop (1440px). 
+
+Supports all typography elements configured in GeneratePress:
+- Body text and paragraphs (including GenerateBlocks headline elements)
+- All headings (H1-H6)
+- Each element maintains its own responsive values
+- Zero configuration - automatically reads from GeneratePress dynamic CSS
+- Smooth transitions across all viewport sizes without jumps
+
+Simply enable "Fluid Typography" in FrontBlocks settings, and all your responsive typography will scale smoothly between devices!
+
 **Custom SVG Animations:**
 Add animated graphics to GenerateBlocks Shape blocks by importing JSON files. Supports two formats that are automatically detected: **Lottie/Bodymovin** (import JSON from After Effects or LottieFiles.com) and **Custom CSS** (SVG + @keyframes). 
 
@@ -116,6 +128,15 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 2. Go to Settings > FrontBlocks > Features and enable the features you want to use.
 
 == Changelog ==
+
+== n.e.x.t ==
+*   Added: Fluid Typography - Automatically converts GeneratePress typography to smooth fluid scaling using CSS clamp().
+*   Added: Support for all typography elements (body, h1-h6) with individual responsive values.
+*   Added: Smart detection of multi-selector CSS patterns (body, button, input, textarea).
+*   Added: Automatic conversion from static breakpoints to fluid viewport scaling (320px-1440px).
+*   Added: High specificity CSS to properly override GenerateBlocks inline styles.
+*   Added: Debug mode for Fluid Typography troubleshooting (?frbl_debug=1).
+*   Improved: Better CSS parsing for media queries and responsive font sizes.
 
 == 1.3.1 ==
 *   Improved: Custom SVG Animations now uses file upload instead of textarea for importing JSON files.
