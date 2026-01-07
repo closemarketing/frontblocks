@@ -132,6 +132,13 @@ class Settings {
 	private $option_enable_custom_post_types = 'enable_custom_post_types';
 
 	/**
+	 * Option key for full page scroll feature (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_enable_fullpage_scroll = 'enable_fullpage_scroll';
+
+	/**
 	 * Page slug.
 	 *
 	 * @var string
@@ -536,6 +543,14 @@ class Settings {
 			'frontblocks_section_woocommerce_features'
 		);
 
+		add_settings_field(
+			$this->option_enable_fullpage_scroll,
+			__( 'Enable Full Page Scroll', 'frontblocks' ),
+			array( $this, 'field_enable_fullpage_scroll' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
 		// Custom Post Types section (PRO).
 		if ( frbl_is_pro_active() ) {
 			add_settings_section(
@@ -891,6 +906,7 @@ class Settings {
 				$this->option_add_share_buttons,
 				$this->option_deactivate_product_tabs,
 				$this->option_horizontal_product_form,
+				$this->option_enable_fullpage_scroll,
 			),
 			true
 		);
@@ -947,6 +963,7 @@ class Settings {
 			$this->option_add_share_buttons            => 'share-buttons',
 			$this->option_deactivate_product_tabs      => 'deactivate-tabs',
 			$this->option_horizontal_product_form      => 'horizontal-form',
+			$this->option_enable_fullpage_scroll       => 'fullpage-scroll',
 		);
 
 		$icon_name = $icon_map[ $field_id ] ?? 'default';
@@ -1221,6 +1238,15 @@ class Settings {
 	}
 
 	/**
+	 * Render Enable Full Page Scroll field.
+	 *
+	 * @return void
+	 */
+	public function field_enable_fullpage_scroll() {
+		$this->render_pro_toggle( $this->option_enable_fullpage_scroll );
+	}
+
+	/**
 	 * Custom Post Types section callback.
 	 *
 	 * @return void
@@ -1456,6 +1482,7 @@ class Settings {
 			$this->option_deactivate_product_tabs,
 			$this->option_horizontal_product_form,
 			$this->option_enable_custom_post_types,
+			$this->option_enable_fullpage_scroll,
 		);
 
 		// Initialize all boolean options to false (unchecked checkboxes are not submitted).

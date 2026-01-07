@@ -32,10 +32,31 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
   - Individual settings page for each custom post type
   - Delete custom post types easily
 
+- **Full Page Scroll** - Create smooth fullpage scroll experiences:
+  - Smooth section-by-section navigation
+  - Automatic side navigation with dots
+  - Mouse wheel control for precise scrolling
+  - Tooltips on navigation dots
+  - Fully responsive design
+  - Vanilla JavaScript (no dependencies)
+
+- **WooCommerce Enhancements**:
+  - Enable Gutenberg in product editor
+  - Simple prices for variable products
+  - Block after add to cart button
+  - Product description behavior options
+  - Disable zoom on product images
+  - Share buttons on product pages
+  - Deactivate product tabs
+  - Horizontal product form layout
+
 
 ## Documentation
 
 - [Container Edge Alignment](./docs/CONTAINER-EDGE-ALIGNMENT.md) - Create asymmetric layouts with edge-to-edge content
+- [Full Page Scroll](./docs/FULLPAGE-SCROLL.md) - Smooth fullpage scroll with navigation
+- [Full Page Implementation](./docs/FULLPAGE-IMPLEMENTATION-SUMMARY.md) - Technical implementation details
+- [Changelog Full Page](./docs/CHANGELOG-FULLPAGE.md) - Full Page feature changelog
 
 ## Release
 Actions for making a release:
