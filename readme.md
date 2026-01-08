@@ -20,6 +20,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - Product Categories Block
 - Gravity Forms Inline Layout
 - Back Button
+- Headline Marquee - Infinite scrolling marquee effect for headline/text blocks with customizable speed (Fast, Medium, Slow)
 - Modern Settings Page with Card-based Layout
 - Custom SVG Animations
 

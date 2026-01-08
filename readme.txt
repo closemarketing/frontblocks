@@ -49,6 +49,14 @@ Display content from other posts, pages or custom post types. Search and select 
 **Decoration for Headline block:**
 Add a decorative line to the Headline Block. You can choose between a vertical or horizontal line on the right.
 
+**Headline Marquee Effect:**
+Add an infinite scrolling marquee effect to Headline/Text blocks. The text scrolls continuously from right to left, automatically adapting to the container width. Short text repeats more times, long text repeats less. Features:
+- Toggle to enable/disable the marquee effect
+- Speed control with three presets: Fast (10s), Medium (20s), Slow (40s)
+- Seamless infinite loop with no jumps or interruptions
+- Automatically fills container width with appropriate text repetitions
+- Smooth, fluid animation optimized for performance
+
 **Product Categories block:**
 Display product categories from WooCommerce. Choose the number of categories to display, the order by and the order. You can also choose to hide empty categories. You can also select the number of columns in which to display the categories. You can also customise the background colour, border colour, border width, border radius, text colour, hover background colour, hover border colour and hover text colour.
 
