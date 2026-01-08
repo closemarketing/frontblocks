@@ -720,10 +720,10 @@ class Settings {
 			return;
 		}
 
-		// Get GeneratePress settings.
-		$gp_settings = get_option( 'generate_settings', array() );
-		
-		// Filter only font-related settings.
+	// Get GeneratePress settings.
+	$gp_settings = get_option( 'generate_settings', array() );
+
+	// Filter only font-related settings.
 		$font_settings = array();
 		foreach ( $gp_settings as $key => $value ) {
 			if ( strpos( $key, 'font' ) !== false || strpos( $key, 'heading' ) !== false ) {
