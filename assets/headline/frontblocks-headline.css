@@ -38,3 +38,61 @@
     height: 3px;
     background-color: black; 
 }
+
+/* Infinite Scrolling Marquee Effect */
+.gb-marquee-infinite-scroll {
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    display: block;
+}
+
+/* Marquee wrapper created by JavaScript */
+.gb-marquee-infinite-scroll .gb-marquee-wrapper {
+    display: flex;
+    white-space: nowrap;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    width: auto;
+    min-width: 100%;
+    animation-iteration-count: infinite;
+    animation-fill-mode: none;
+}
+
+/* Individual copies of content */
+.gb-marquee-infinite-scroll .gb-marquee-copy {
+    display: inline-block;
+    white-space: nowrap;
+    padding-right: 2em;
+    flex-shrink: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Base animation - will be overridden by inline styles for dynamic copies */
+@keyframes marquee-scroll {
+    0% {
+        transform: translateX(0) translateZ(0);
+    }
+    100% {
+        transform: translateX(-50%) translateZ(0);
+    }
+}
+
+/* Ensure all text content doesn't break */
+.gb-marquee-infinite-scroll * {
+    white-space: nowrap !important;
+}
+
+/* Smooth transition for better performance */
+.gb-marquee-infinite-scroll,
+.gb-marquee-infinite-scroll .gb-marquee-wrapper,
+.gb-marquee-infinite-scroll .gb-marquee-copy {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}

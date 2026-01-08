@@ -49,6 +49,14 @@ Display content from other posts, pages or custom post types. Search and select 
 **Decoration for Headline block:**
 Add a decorative line to the Headline Block. You can choose between a vertical or horizontal line on the right.
 
+**Headline Marquee Effect:**
+Add an infinite scrolling marquee effect to Headline/Text blocks. The text scrolls continuously from right to left, automatically adapting to the container width. Short text repeats more times, long text repeats less. Features:
+- Toggle to enable/disable the marquee effect
+- Speed control with three presets: Fast (10s), Medium (20s), Slow (40s)
+- Seamless infinite loop with no jumps or interruptions
+- Automatically fills container width with appropriate text repetitions
+- Smooth, fluid animation optimized for performance
+
 **Product Categories block:**
 Display product categories from WooCommerce. Choose the number of categories to display, the order by and the order. You can also choose to hide empty categories. You can also select the number of columns in which to display the categories. You can also customise the background colour, border colour, border width, border radius, text colour, hover background colour, hover border colour and hover text colour.
 
@@ -107,6 +115,7 @@ Features:
   * Delete custom post types easily with a single click
 - Disable tabs on the product page.
 - Horizontal product form layout (price, quantity, and add to cart button in one row).
+- Full Page Scroll: Create fullpage scroll experiences with smooth section-by-section navigation and automatic side navigation dots. Perfect for landing pages, portfolios, and presentations.
 
 More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-plugins/frontblocks-pro/?utm_source=WordPressORGReadme&utm_medium=link&utm_campaign=frontblocks) page.
 
@@ -120,6 +129,11 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 == n.e.x.t ==
 *   Improved: Increased carousel bullet size from 9px to 13px for better accessibility and easier interaction.
 *   Improved: Updated carousel bullets spacing using CSS gap property for more consistent layout.
+*   Added: Full Page Scroll toggle in settings (PRO feature).
+*   PRO: Full Page Scroll - Create smooth fullpage scroll experiences with automatic section navigation.
+*   PRO: Side navigation with dots that updates automatically as you scroll.
+*   PRO: Smooth scroll between sections with mouse wheel control.
+*   PRO: Responsive design with mobile-optimized navigation.
 
 == 1.3.1 ==
 *   Improved: Custom SVG Animations now uses file upload instead of textarea for importing JSON files.
