@@ -55,6 +55,13 @@ class Settings {
 	private $option_events_type = 'events_type';
 
 	/**
+	 * Option key for fluid typography feature.
+	 *
+	 * @var string
+	 */
+	private $option_enable_fluid_typography = 'enable_fluid_typography';
+
+	/**
 	 * Option key for Gutenberg in products (PRO).
 	 *
 	 * @var string
@@ -448,6 +455,14 @@ class Settings {
 			'frontblocks_section_features'
 		);
 
+		add_settings_field(
+			$this->option_enable_fluid_typography,
+			__( 'Enable Fluid Typography', 'frontblocks' ),
+			array( $this, 'field_enable_fluid_typography' ),
+			$this->page_slug,
+			'frontblocks_section_features'
+		);
+
 		// PRO Features section.
 		add_settings_section(
 			'frontblocks_section_woocommerce_features',
@@ -683,7 +698,59 @@ class Settings {
 					);
 					?>
 				</div>
+
+				<?php $this->render_debug_section(); ?>
 			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render debug section for Fluid Typography.
+	 *
+	 * @return void
+	 */
+	private function render_debug_section() {
+		// Only show if Fluid Typography is enabled and user requested debug.
+		$options = get_option( 'frontblocks_settings', array() );
+		$enabled = ! empty( $options['enable_fluid_typography'] );
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! $enabled || ! isset( $_GET['frbl_debug_typography'] ) ) {
+			return;
+		}
+
+		// Get GeneratePress settings.
+		$gp_settings = get_option( 'generate_settings', array() );
+
+		// Filter only font-related settings.
+		$font_settings = array();
+		foreach ( $gp_settings as $key => $value ) {
+			if ( strpos( $key, 'font' ) !== false || strpos( $key, 'heading' ) !== false ) {
+				$font_settings[ $key ] = $value;
+			}
+		}
+
+		?>
+		<div class="tw-mt-8 tw-p-6 tw-bg-yellow-50 tw-border tw-border-yellow-200 tw-rounded-lg">
+			<h3 class="tw-text-lg tw-font-semibold tw-text-gray-900 tw-mb-4">
+				🐛 Debug: Fluid Typography Settings
+			</h3>
+			<p class="tw-text-sm tw-text-gray-600 tw-mb-4">
+				<?php echo esc_html__( 'This shows the GeneratePress font settings being used by the Fluid Typography module.', 'frontblocks' ); ?>
+			</p>
+			<div class="tw-bg-white tw-p-4 tw-rounded tw-border tw-border-gray-300 tw-overflow-auto" style="max-height: 400px;">
+				<pre style="margin: 0; font-size: 12px;"><?php print_r( $font_settings ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r ?></pre>
+			</div>
+			<p class="tw-text-xs tw-text-gray-500 tw-mt-4">
+				<?php
+				printf(
+					/* translators: %s: URL parameter */
+					esc_html__( 'To hide this debug info, remove %s from the URL.', 'frontblocks' ),
+					'<code>?frbl_debug_typography=1</code>'
+				);
+				?>
+			</p>
 		</div>
 		<?php
 	}
@@ -886,6 +953,8 @@ class Settings {
 			$this->option_enable_testimonials          => 'testimonials',
 			$this->option_enable_reading_progress      => 'reading-progress',
 			$this->option_enable_back_button           => 'back-button',
+			$this->option_enable_events                => 'events',
+			$this->option_enable_fluid_typography      => 'fluid-typography',
 			$this->option_enable_gutenberg             => 'gutenberg',
 			$this->option_enable_simple_prices_variable_products => 'simple-prices',
 			$this->option_enable_after_add_to_cart     => 'after-add-to-cart',
@@ -1064,6 +1133,27 @@ class Settings {
 				<?php echo esc_html__( 'Elige si los eventos se crearán en un CPT dedicado o en las entradas de blog normales.', 'frontblocks' ); ?>
 			</p>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Render toggle field for enable fluid typography.
+	 *
+	 * @return void
+	 */
+	public function field_enable_fluid_typography() {
+		$options = get_option( 'frontblocks_settings', array() );
+		$enabled = (bool) ( $options[ $this->option_enable_fluid_typography ] ?? false );
+		?>
+		<label class="frbl-toggle">
+			<input type="checkbox" 
+				id="<?php echo esc_attr( $this->option_enable_fluid_typography ); ?>" 
+				name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_fluid_typography ); ?>]" 
+				value="1" 
+				<?php checked( true, $enabled ); ?>
+			/>
+			<span></span>
+		</label>
 		<?php
 	}
 
@@ -1382,6 +1472,7 @@ class Settings {
 			$this->option_enable_reading_progress,
 			$this->option_enable_back_button,
 			$this->option_enable_events,
+			$this->option_enable_fluid_typography,
 			$this->option_enable_gutenberg,
 			$this->option_enable_simple_prices_variable_products,
 			$this->option_enable_after_add_to_cart,

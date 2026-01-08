@@ -123,6 +123,9 @@ class Plugin_Main {
 
 		// Gravity Forms Inline Layout module.
 		new Frontend\GravityFormsInline();
+
+		// Fluid Typography module (GeneratePress Pro integration).
+		new Frontend\FluidTypography();
 	}
 
 	/**
