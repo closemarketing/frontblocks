@@ -717,8 +717,8 @@ class Settings {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! $enabled || ! isset( $_GET['frbl_debug_typography'] ) ) {
-		return;
-	}
+			return;
+		}
 
 		// Get GeneratePress settings.
 		$gp_settings = get_option( 'generate_settings', array() );
