@@ -58,7 +58,7 @@ class FluidTypography {
 	public function enqueue_fluid_typography() {
 		// Get GeneratePress dynamic CSS output.
 		$dynamic_css = get_option( 'generate_dynamic_css_output', '' );
-		
+
 		if ( empty( $dynamic_css ) ) {
 			return;
 		}
@@ -103,7 +103,7 @@ class FluidTypography {
 
 		foreach ( $selectors as $selector ) {
 			$fluid_rule = $this->extract_and_convert_selector( $css, $selector );
-			
+
 			if ( ! empty( $fluid_rule ) ) {
 				$fluid_css .= $fluid_rule . "\n";
 			}
@@ -132,13 +132,11 @@ class FluidTypography {
 
 		// Extract base/desktop font-size.
 		if ( $is_multiple_selector ) {
-			// Pattern for body: body, button, input{font-size:18px;}
 			$pattern = '/(?:^|,|\})\s*[^{]*\b' . preg_quote( $selector, '/' ) . '\b[^{]*\{[^}]*font-size:\s*([0-9.]+)(px|rem|em)/i';
 		} else {
-			// Pattern for headings: h1{font-size:80px;}
 			$pattern = '/' . preg_quote( $selector, '/' ) . '\s*\{[^}]*font-size:\s*([0-9.]+)(px|rem|em)/i';
 		}
-		
+
 		if ( preg_match( $pattern, $css, $matches ) ) {
 			$sizes['desktop'] = array(
 				'value' => floatval( $matches[1] ),
@@ -151,10 +149,9 @@ class FluidTypography {
 			// Pattern for body in media query.
 			$pattern_tablet = '/@media[^{]*max-width:\s*1024px[^{]*\{[^@]*\b' . preg_quote( $selector, '/' ) . '\b[^{]*\{[^}]*font-size:\s*([0-9.]+)(px|rem|em)/is';
 		} else {
- 
 			$pattern_tablet = '/@media[^{]*max-width:\s*1024px[^{]*\{[^}]*' . preg_quote( $selector, '/' ) . '\s*\{[^}]*font-size:\s*([0-9.]+)(px|rem|em)/is';
 		}
-		
+
 		if ( preg_match( $pattern_tablet, $css, $matches ) ) {
 			$sizes['tablet'] = array(
 				'value' => floatval( $matches[1] ),
@@ -167,10 +164,9 @@ class FluidTypography {
 			// Pattern for body in media query.
 			$pattern_mobile = '/@media[^{]*max-width:\s*768px[^{]*\{[^@]*\b' . preg_quote( $selector, '/' ) . '\b[^{]*\{[^}]*font-size:\s*([0-9.]+)(px|rem|em)/is';
 		} else {
-			// Pattern for headings in media query: @media (max-width:768px){h1{font-size:20px;}}
 			$pattern_mobile = '/@media[^{]*max-width:\s*768px[^{]*\{[^}]*' . preg_quote( $selector, '/' ) . '\s*\{[^}]*font-size:\s*([0-9.]+)(px|rem|em)/is';
 		}
-		
+
 		if ( preg_match( $pattern_mobile, $css, $matches ) ) {
 			$sizes['mobile'] = array(
 				'value' => floatval( $matches[1] ),
@@ -222,7 +218,7 @@ class FluidTypography {
 		);
 
 		// Generate CSS rule with appropriate specificity.
-		if ( in_array( $selector, array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' ) ) ) {
+		if ( in_array( $selector, array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' ), true ) ) {
 			// For headings, use high specificity to ensure they always win over body classes.
 			$rule = sprintf( "body %s,\nbody %s.gb-headline {\n\tfont-size: %s !important;\n}", $selector, $selector, $clamp_rule );
 		} else {
@@ -232,7 +228,7 @@ class FluidTypography {
 				$rule .= sprintf( "\np.gb-headline-text {\n\tfont-size: %s !important;\n}", $clamp_rule );
 			}
 		}
-		
+
 		return $rule;
 	}
 }
