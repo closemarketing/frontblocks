@@ -117,6 +117,10 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Changelog ==
 
+== n.e.x.t ==
+*   Improved: Increased carousel bullet size from 9px to 13px for better accessibility and easier interaction.
+*   Improved: Updated carousel bullets spacing using CSS gap property for more consistent layout.
+
 == 1.3.1 ==
 *   Improved: Custom SVG Animations now uses file upload instead of textarea for importing JSON files.
 *   Added: Download example JSON button for Custom SVG Animations feature.
