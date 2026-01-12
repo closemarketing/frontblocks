@@ -142,6 +142,8 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 == Changelog ==
 
 == n.e.x.t ==
+*   Improved: Increased carousel bullet size from 9px to 13px for better accessibility and easier interaction.
+*   Improved: Updated carousel bullets spacing using CSS gap property for more consistent layout.
 *   Added: Fluid Typography - Automatically converts GeneratePress typography to smooth fluid scaling using CSS clamp().
 *   Added: Support for all typography elements (body, h1-h6) with individual responsive values.
 *   Added: Smart detection of multi-selector CSS patterns (body, button, input, textarea).
