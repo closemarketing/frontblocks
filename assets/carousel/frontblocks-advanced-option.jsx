@@ -33,6 +33,8 @@ function addCustomCarouselPanel(BlockEdit) {
 	const {
 			frblGridOption = 'none',
 			frblItemsToView = '4',
+			frblLaptopToView = '3',
+			frblTabletToView = '2',
 			frblResponsiveToView = '1',
 			frblAutoplay = '',
 			frblButtons = 'arrows',
@@ -67,14 +69,28 @@ function addCustomCarouselPanel(BlockEdit) {
 				{frblGridOption !== 'none' && (
 					<>
 					<TextControl
-						label={__('Items to view', 'frontblocks')}
+						label={__('Items to view (Desktop)', 'frontblocks')}
 						value={frblItemsToView}
 						onChange={(value) => props.setAttributes({ frblItemsToView: value })}
+						help={__('Number of items to show on desktop (>1200px)', 'frontblocks')}
 					/>
 					<TextControl
-						label={__('Responsive to view', 'frontblocks')}
+						label={__('Items to view (Laptop)', 'frontblocks')}
+						value={frblLaptopToView}
+						onChange={(value) => props.setAttributes({ frblLaptopToView: value })}
+						help={__('Number of items to show on laptop (992px-1199px)', 'frontblocks')}
+					/>
+					<TextControl
+						label={__('Items to view (Tablet)', 'frontblocks')}
+						value={frblTabletToView}
+						onChange={(value) => props.setAttributes({ frblTabletToView: value })}
+						help={__('Number of items to show on tablet (768px-991px)', 'frontblocks')}
+					/>
+					<TextControl
+						label={__('Items to view (Mobile)', 'frontblocks')}
 						value={frblResponsiveToView}
 						onChange={(value) => props.setAttributes({ frblResponsiveToView: value })}
+						help={__('Number of items to show on mobile (<768px)', 'frontblocks')}
 				/>
 					<TextControl
 						label={__('Autoplay (seconds)', 'frontblocks')}

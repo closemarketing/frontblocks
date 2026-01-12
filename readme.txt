@@ -23,8 +23,11 @@ To start using the carousel, go to the grid block and select the 'Carousel' or '
 
 Carousel/Slider attributes:
 - Autoplay: automatically changes the slides after a certain amount of time (in seconds).
-- View: the number of items to display in the carousel/slider.
-Responsive view: the number of items to show in the carousel/slider in responsive view.
+- Items to view: configure the number of items to display for different screen sizes:
+  * Desktop (>1200px): number of items to show on desktop screens.
+  * Laptop (992px-1199px): number of items to show on laptop screens.
+  * Tablet (768px-991px): number of items to show on tablet screens.
+  * Mobile (<768px): number of items to show on mobile devices.
 - Buttons: the type of buttons to display in the carousel/slider (bullets, arrows or none).
 - Button colour: colour of the buttons.
 - Button background colour: background colour of the buttons (can be transparent).
@@ -151,6 +154,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 *   PRO: Side navigation with dots that updates automatically as you scroll.
 *   PRO: Smooth scroll between sections with mouse wheel control.
 *   PRO: Responsive design with mobile-optimized navigation.
+*   Improved: Carousel/Slider - Added individual controls for desktop, laptop, tablet, and mobile view items instead of hardcoded values.
 
 == 1.3.1 ==
 *   Improved: Custom SVG Animations now uses file upload instead of textarea for importing JSON files.
