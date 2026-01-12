@@ -23,8 +23,11 @@ To start using the carousel, go to the grid block and select the 'Carousel' or '
 
 Carousel/Slider attributes:
 - Autoplay: automatically changes the slides after a certain amount of time (in seconds).
-- View: the number of items to display in the carousel/slider.
-Responsive view: the number of items to show in the carousel/slider in responsive view.
+- Items to view: configure the number of items to display for different screen sizes:
+  * Desktop (>1200px): number of items to show on desktop screens.
+  * Laptop (992px-1199px): number of items to show on laptop screens.
+  * Tablet (768px-991px): number of items to show on tablet screens.
+  * Mobile (<768px): number of items to show on mobile devices.
 - Buttons: the type of buttons to display in the carousel/slider (bullets, arrows or none).
 - Button colour: colour of the buttons.
 - Button background colour: background colour of the buttons (can be transparent).
@@ -78,6 +81,18 @@ Display a vertical progress bar on the right side of posts that fills up as user
 **Back Button:**
 Display a floating back button in the bottom left corner that allows users to navigate to the previous page. Enable it from the FrontBlocks settings page.
 
+**Fluid Typography:**
+Automatically converts GeneratePress Pro's static typography settings into modern fluid typography using CSS clamp(). Instead of abrupt font size changes at breakpoints, this creates smooth, gradual scaling from mobile (320px) to desktop (1440px). 
+
+Supports all typography elements configured in GeneratePress:
+- Body text and paragraphs (including GenerateBlocks headline elements)
+- All headings (H1-H6)
+- Each element maintains its own responsive values
+- Zero configuration - automatically reads from GeneratePress dynamic CSS
+- Smooth transitions across all viewport sizes without jumps
+
+Simply enable "Fluid Typography" in FrontBlocks settings, and all your responsive typography will scale smoothly between devices!
+
 **Custom SVG Animations:**
 Add animated graphics to GenerateBlocks Shape blocks by importing JSON files. Supports two formats that are automatically detected: **Lottie/Bodymovin** (import JSON from After Effects or LottieFiles.com) and **Custom CSS** (SVG + @keyframes). 
 
@@ -129,11 +144,19 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 == n.e.x.t ==
 *   Improved: Increased carousel bullet size from 9px to 13px for better accessibility and easier interaction.
 *   Improved: Updated carousel bullets spacing using CSS gap property for more consistent layout.
+*   Added: Fluid Typography - Automatically converts GeneratePress typography to smooth fluid scaling using CSS clamp().
+*   Added: Support for all typography elements (body, h1-h6) with individual responsive values.
+*   Added: Smart detection of multi-selector CSS patterns (body, button, input, textarea).
+*   Added: Automatic conversion from static breakpoints to fluid viewport scaling (320px-1440px).
+*   Added: High specificity CSS to properly override GenerateBlocks inline styles.
+*   Added: Debug mode for Fluid Typography troubleshooting (?frbl_debug=1).
+*   Improved: Better CSS parsing for media queries and responsive font sizes.
 *   Added: Full Page Scroll toggle in settings (PRO feature).
 *   PRO: Full Page Scroll - Create smooth fullpage scroll experiences with automatic section navigation.
 *   PRO: Side navigation with dots that updates automatically as you scroll.
 *   PRO: Smooth scroll between sections with mouse wheel control.
 *   PRO: Responsive design with mobile-optimized navigation.
+*   Improved: Carousel/Slider - Added individual controls for desktop, laptop, tablet, and mobile view items instead of hardcoded values.
 
 == 1.3.1 ==
 *   Improved: Custom SVG Animations now uses file upload instead of textarea for importing JSON files.
