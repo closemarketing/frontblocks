@@ -24,6 +24,10 @@ wp.hooks.addFilter('blocks.registerBlockType', 'frontblocks/add-counter-attribut
         type: 'number',
         default: 2000
       },
+      startNumber: {
+        type: 'string',
+        default: '0'
+      },
       finalNumber: {
         type: 'string',
         default: ''
@@ -50,6 +54,7 @@ var withHeadlineCounterControl = createHigherOrderComponent(function (BlockEdit)
       clientId = props.clientId;
     var isCounterActive = attributes.isCounterActive,
       animationDuration = attributes.animationDuration,
+      startNumber = attributes.startNumber,
       finalNumber = attributes.finalNumber,
       numberPrefix = attributes.numberPrefix,
       numberSuffix = attributes.numberSuffix;
@@ -65,7 +70,7 @@ var withHeadlineCounterControl = createHigherOrderComponent(function (BlockEdit)
           });
         }
       }
-    }, [isCounterActive, finalNumber, numberPrefix, numberSuffix, clientId]);
+    }, [isCounterActive, startNumber, finalNumber, numberPrefix, numberSuffix, clientId]);
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
       title: __('FrontBlocks - Counter Effect', 'frontblocks'),
       initialOpen: false
@@ -79,6 +84,15 @@ var withHeadlineCounterControl = createHigherOrderComponent(function (BlockEdit)
         });
       }
     }), isCounterActive && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(TextControl, {
+      label: __('Start Number', 'frontblocks'),
+      value: startNumber,
+      onChange: function onChange(val) {
+        return setAttributes({
+          startNumber: val
+        });
+      },
+      help: __('The number to start counting from (e.g.: 0).', 'frontblocks')
+    }), /*#__PURE__*/React.createElement(TextControl, {
       label: __('Final Number', 'frontblocks'),
       value: finalNumber,
       onChange: function onChange(val) {

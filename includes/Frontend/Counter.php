@@ -90,6 +90,7 @@ class Counter {
 		$attrs              = $block['attrs'];
 		$is_counter_active  = isset( $attrs['isCounterActive'] ) && $attrs['isCounterActive'];
 		$animation_duration = isset( $attrs['animationDuration'] ) ? (int) $attrs['animationDuration'] : 2000;
+		$start_number       = isset( $attrs['startNumber'] ) ? $attrs['startNumber'] : '0';
 		$final_number       = isset( $attrs['finalNumber'] ) ? $attrs['finalNumber'] : '';
 		$number_prefix      = isset( $attrs['numberPrefix'] ) ? $attrs['numberPrefix'] : '';
 		$number_suffix      = isset( $attrs['numberSuffix'] ) ? $attrs['numberSuffix'] : '';
@@ -107,6 +108,7 @@ class Counter {
 			}
 
 			$data_attributes = ' data-counter-target="' . esc_attr( $target_value_full ) . '"' .
+				' data-counter-start="' . esc_attr( $start_number ) . '"' .
 				' data-counter-duration="' . $animation_duration . '"' .
 				' data-counter-prefix="' . esc_attr( $number_prefix ) . '"' .
 				' data-counter-suffix="' . esc_attr( $number_suffix ) . '"';

@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const animationDuration = parseInt(element.getAttribute('data-counter-duration'), 10) || 2000;
         const customPrefix = element.getAttribute('data-counter-prefix') || '';
         const customSuffix = element.getAttribute('data-counter-suffix') || '';
+        const startNumberAttr = element.getAttribute('data-counter-start') || '0';
 
         element.setAttribute('data-original-text', originalText);
         
@@ -29,12 +30,13 @@ document.addEventListener('DOMContentLoaded', function() {
         let targetString = numberMatch[0].replace(/[^0-9]/g, ''); 
         const target = parseInt(targetString, 10);
         
-        if (isNaN(target) || target === 0) return;
+        if (isNaN(target)) return;
 
-        let current = 0;
+        const startValue = parseInt(startNumberAttr.replace(/[^0-9]/g, ''), 10) || 0;
+        let current = startValue;
         const interval = 10;
         const steps = animationDuration / interval;
-        const stepValue = target / steps;
+        const stepValue = (target - startValue) / steps;
 
         const timer = setInterval(() => {
             current += stepValue;
@@ -75,8 +77,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const customPrefix = counter.getAttribute('data-counter-prefix') || '';
         const customSuffix = counter.getAttribute('data-counter-suffix') || '';
+        const startNumberAttr = counter.getAttribute('data-counter-start') || '0';
+        const startValue = parseInt(startNumberAttr.replace(/[^0-9]/g, ''), 10) || 0;
         
-        counter.textContent = customPrefix + '0' + customSuffix;
+        counter.textContent = customPrefix + startValue.toLocaleString('en-US') + customSuffix;
         
         observer.observe(counter);
     });
