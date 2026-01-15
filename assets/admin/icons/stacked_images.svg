@@ -1,0 +1,5 @@
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+	<rect x="3" y="7" width="12" height="10" rx="1" transform="rotate(-5 9 12)"/>
+	<rect x="6" y="5" width="12" height="10" rx="1" transform="rotate(3 12 10)"/>
+	<rect x="9" y="3" width="12" height="10" rx="1"/>
+</svg>

@@ -73,6 +73,9 @@ class UI {
 		// Reading time icon.
 		$reading_time_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
 
+		// Stacked images icon.
+		$stacked_images_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="12" height="10" rx="1" transform="rotate(-5 9 12)"/><rect x="6" y="5" width="12" height="10" rx="1" transform="rotate(3 12 10)"/><rect x="9" y="3" width="12" height="10" rx="1"/></svg>';
+
 		// Product categories icon.
 		$product_categories_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>';
 
@@ -90,6 +93,7 @@ class UI {
 			'insert_post'        => $insert_post_icon,
 			'counter'            => $counter_icon,
 			'reading_time'       => $reading_time_icon,
+			'stacked_images'     => $stacked_images_icon,
 			'product_categories' => $product_categories_icon,
 			'headline_marquee'   => $headline_marquee_icon,
 		);
