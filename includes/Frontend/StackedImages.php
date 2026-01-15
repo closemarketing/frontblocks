@@ -163,8 +163,8 @@ class StackedImages {
 			<div class="frbl-stacked-images-container">
 				<?php foreach ( $images as $index => $image ) : ?>
 					<?php
-					$image_url = isset( $image['url'] ) ? esc_url( $image['url'] ) : '';
-					$image_alt = isset( $image['alt'] ) ? esc_attr( $image['alt'] ) : '';
+					$image_url = isset( $image['url'] ) ? $image['url'] : '';
+					$image_alt = isset( $image['alt'] ) ? $image['alt'] : '';
 					$image_id  = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 					?>
 					<div 
@@ -173,8 +173,8 @@ class StackedImages {
 						style="z-index: <?php echo esc_attr( $index + 1 ); ?>;"
 					>
 						<img 
-							src="<?php echo $image_url; ?>" 
-							alt="<?php echo $image_alt; ?>"
+							src="<?php echo esc_url( $image_url ); ?>" 
+							alt="<?php echo esc_attr( $image_alt ); ?>"
 							loading="lazy"
 						/>
 					</div>
