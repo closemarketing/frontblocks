@@ -126,6 +126,9 @@ class Plugin_Main {
 
 		// Fluid Typography module (GeneratePress Pro integration).
 		new Frontend\FluidTypography();
+
+		// Stacked Images module.
+		new Frontend\StackedImages();
 	}
 
 	/**
