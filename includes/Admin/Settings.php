@@ -774,6 +774,7 @@ class Settings {
 			UI::show_info_card( 'insert_post', __( 'Insert Post Block', 'frontblocks' ), __( 'Display content from other posts, pages or custom post types', 'frontblocks' ) );
 			UI::show_info_card( 'counter', __( 'Counter Block', 'frontblocks' ), __( 'Display animated counters with start and end values', 'frontblocks' ) );
 			UI::show_info_card( 'reading_time', __( 'Reading Time Block', 'frontblocks' ), __( 'Show estimated reading time for posts', 'frontblocks' ) );
+			UI::show_info_card( 'stacked_images', __( 'Stacked Images Block', 'frontblocks' ), __( 'Display images with animated stacking effect from different directions', 'frontblocks' ) );
 			UI::show_info_card( 'product_categories', __( 'Product Categories Block', 'frontblocks' ), __( 'Display WooCommerce product categories', 'frontblocks' ) );
 			UI::show_info_card( 'headline_marquee', __( 'Headline Marquee', 'frontblocks' ), __( 'Infinite scrolling marquee effect for headline/text blocks with customizable speed', 'frontblocks' ) );
 			?>
