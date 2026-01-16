@@ -139,6 +139,13 @@ class Settings {
 	private $option_enable_fullpage_scroll = 'enable_fullpage_scroll';
 
 	/**
+	 * Option key for language banner feature (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_enable_language_banner = 'enable_language_banner';
+
+	/**
 	 * Page slug.
 	 *
 	 * @var string
@@ -551,6 +558,14 @@ class Settings {
 			'frontblocks_section_woocommerce_features'
 		);
 
+		add_settings_field(
+			$this->option_enable_language_banner,
+			__( 'Enable Language Banner', 'frontblocks' ),
+			array( $this, 'field_enable_language_banner' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
 		// Custom Post Types section (PRO).
 		if ( frbl_is_pro_active() ) {
 			add_settings_section(
@@ -909,6 +924,7 @@ class Settings {
 				$this->option_deactivate_product_tabs,
 				$this->option_horizontal_product_form,
 				$this->option_enable_fullpage_scroll,
+				$this->option_enable_language_banner,
 			),
 			true
 		);
@@ -966,6 +982,7 @@ class Settings {
 			$this->option_deactivate_product_tabs      => 'deactivate-tabs',
 			$this->option_horizontal_product_form      => 'horizontal-form',
 			$this->option_enable_fullpage_scroll       => 'fullpage-scroll',
+			$this->option_enable_language_banner       => 'language-banner',
 		);
 
 		$icon_name = $icon_map[ $field_id ] ?? 'default';
@@ -1249,6 +1266,15 @@ class Settings {
 	}
 
 	/**
+	 * Render Enable Language Banner field.
+	 *
+	 * @return void
+	 */
+	public function field_enable_language_banner() {
+		$this->render_pro_toggle( $this->option_enable_language_banner );
+	}
+
+	/**
 	 * Custom Post Types section callback.
 	 *
 	 * @return void
@@ -1485,6 +1511,7 @@ class Settings {
 			$this->option_horizontal_product_form,
 			$this->option_enable_custom_post_types,
 			$this->option_enable_fullpage_scroll,
+			$this->option_enable_language_banner,
 		);
 
 		// Initialize all boolean options to false (unchecked checkboxes are not submitted).
