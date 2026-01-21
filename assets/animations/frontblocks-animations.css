@@ -27,3 +27,55 @@
 	border: 1px solid rgba(255, 255, 255, 0.18) !important;
 	box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15) !important;
 }
+
+/* FrontBlocks: Hover Background Image Scale Effect */
+.frbl-hover-bg-scale {
+	position: relative;
+	overflow: hidden;
+}
+
+/* For elements with --inline-bg-image variable (like GB Query Loop) */
+.frbl-hover-bg-scale[style*="--inline-bg-image"]::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-image: var(--inline-bg-image);
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	transition: transform 0.4s ease-in-out;
+	z-index: 0;
+}
+
+/* For elements with regular background-image */
+.frbl-hover-bg-scale:not([style*="--inline-bg-image"])::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-image: inherit;
+	background-size: inherit;
+	background-position: inherit;
+	background-repeat: inherit;
+	transition: transform 0.4s ease-in-out;
+	z-index: 0;
+}
+
+/* Hide original background on element with --inline-bg-image */
+.frbl-hover-bg-scale[style*="--inline-bg-image"] {
+	background-image: none !important;
+}
+
+.frbl-hover-bg-scale:hover::before {
+	transform: scale(var(--frbl-hover-scale, 1.1));
+}
+
+.frbl-hover-bg-scale > * {
+	position: relative;
+	z-index: 1;
+}

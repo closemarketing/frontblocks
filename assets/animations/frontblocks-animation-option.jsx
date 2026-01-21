@@ -236,6 +236,8 @@ function addAnimationControls(BlockEdit) {
             frblDisableAnimationMobile = false,
             frblGlassEffect = false,
             frblGlassBlur = 10,
+            frblHoverBgScale = false,
+            frblHoverBgScaleAmount = 1.1,
         } = props.attributes;
         
         // Create flattened options for the SelectControl
@@ -555,6 +557,30 @@ function addAnimationControls(BlockEdit) {
                             />
                         )}
                     </PanelBody>
+
+                    <PanelBody
+                        title={__('FrontBlocks Hover Effects', 'frontblocks')}
+                        initialOpen={false}
+                    >
+                        <ToggleControl
+                            label={__('FrontBlocks: Scale Background on Hover', 'frontblocks')}
+                            help={__('Scales the background image when hovering (FrontBlocks Hover Effect). Works with inline background images (--inline-bg-image) and standard CSS backgrounds.', 'frontblocks')}
+                            checked={frblHoverBgScale}
+                            onChange={(value) => props.setAttributes({ frblHoverBgScale: value })}
+                        />
+
+                        {frblHoverBgScale && (
+                            <RangeControl
+                                label={__('Scale Amount', 'frontblocks')}
+                                help={__('How much to scale the background image (1.0 = no scale, 1.1 = 110%, 1.5 = 150%)', 'frontblocks')}
+                                value={frblHoverBgScaleAmount}
+                                onChange={(value) => props.setAttributes({ frblHoverBgScaleAmount: value })}
+                                min={1.0}
+                                max={2.0}
+                                step={0.05}
+                            />
+                        )}
+                    </PanelBody>
                 </InspectorControls>
             </Fragment>
         );
@@ -582,6 +608,8 @@ addFilter(
             frblDisableAnimationMobile = false,
             frblGlassEffect = false,
             frblGlassBlur = 10,
+            frblHoverBgScale = false,
+            frblHoverBgScaleAmount = 1.1,
         } = attributes;
 
         // Add style attribute if needed
@@ -629,6 +657,17 @@ addFilter(
             // Add glass effect styles
             props.style['backdropFilter'] = `blur(${frblGlassBlur}px)`;
             props.style['-webkit-backdrop-filter'] = `blur(${frblGlassBlur}px)`;
+        }
+
+        // Handle hover background scale
+        if (frblHoverBgScale) {
+            const hoverBgScaleClass = 'frbl-hover-bg-scale';
+            props.className = props.className ? 
+                `${props.className} ${hoverBgScaleClass}` : 
+                hoverBgScaleClass;
+            
+            // Add hover scale amount as CSS variable
+            props.style['--frbl-hover-scale'] = frblHoverBgScaleAmount;
         }
 
         return props;

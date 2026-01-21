@@ -164,6 +164,14 @@ class Animations {
 							frblGlassBlur: {
 								type: 'number',
 								default: 10
+							},
+							frblHoverBgScale: {
+								type: 'boolean',
+								default: false
+							},
+							frblHoverBgScaleAmount: {
+								type: 'number',
+								default: 1.1
 							}
 						};
 					} catch( error ) {
@@ -191,11 +199,12 @@ class Animations {
 
 		$attrs = $block['attrs'];
 
-		// Check if either animation or glass effect is set.
-		$has_animation    = isset( $attrs['frblAnimation'] ) && ! empty( $attrs['frblAnimation'] );
-		$has_glass_effect = isset( $attrs['frblGlassEffect'] ) && $attrs['frblGlassEffect'];
+		// Check if either animation, glass effect or hover bg scale is set.
+		$has_animation      = isset( $attrs['frblAnimation'] ) && ! empty( $attrs['frblAnimation'] );
+		$has_glass_effect   = isset( $attrs['frblGlassEffect'] ) && $attrs['frblGlassEffect'];
+		$has_hover_bg_scale = isset( $attrs['frblHoverBgScale'] ) && $attrs['frblHoverBgScale'];
 
-		if ( ! $has_animation && ! $has_glass_effect ) {
+		if ( ! $has_animation && ! $has_glass_effect && ! $has_hover_bg_scale ) {
 			return $block_content;
 		}
 
@@ -221,6 +230,12 @@ class Animations {
 		if ( $has_glass_effect ) {
 			$properties['glass_effect'] = true;
 			$properties['glass_blur']   = isset( $attrs['frblGlassBlur'] ) ? $attrs['frblGlassBlur'] : 10;
+		}
+
+		// Hover background scale properties.
+		if ( $has_hover_bg_scale ) {
+			$properties['hover_bg_scale']        = true;
+			$properties['hover_bg_scale_amount'] = isset( $attrs['frblHoverBgScaleAmount'] ) ? $attrs['frblHoverBgScaleAmount'] : 1.1;
 		}
 
 		// Build style attributes.
@@ -250,6 +265,12 @@ class Animations {
 			$style_attr .= '-webkit-backdrop-filter:blur(' . esc_attr( $blur_value ) . 'px);';
 		}
 
+		// Hover background scale styles.
+		if ( $has_hover_bg_scale ) {
+			$scale_amount = $properties['hover_bg_scale_amount'];
+			$style_attr  .= '--frbl-hover-scale:' . esc_attr( $scale_amount ) . ';';
+		}
+
 		// Add animation classes and styles to the first HTML tag.
 		$block_content = preg_replace_callback(
 			'/^<([a-z][a-z0-9]*)\s*((?:[^>]|\\n)*?)(?:style="([^"]*?)")?([^>]*?)>/i',
@@ -273,6 +294,11 @@ class Animations {
 				// Add glass effect class.
 				if ( $has_glass_effect ) {
 					$classes .= ( ! empty( $classes ) ? ' ' : '' ) . 'frbl-glass-effect';
+				}
+
+				// Add hover background scale class.
+				if ( $has_hover_bg_scale ) {
+					$classes .= ( ! empty( $classes ) ? ' ' : '' ) . 'frbl-hover-bg-scale';
 				}
 
 				// Add classes to existing class attribute or create new one.
@@ -301,6 +327,11 @@ class Animations {
 				// Add glass effect data attributes.
 				if ( $has_glass_effect ) {
 					$beginning .= ' data-frontblocks-glass-blur="' . esc_attr( $properties['glass_blur'] ) . '"';
+				}
+
+				// Add hover background scale data attributes.
+				if ( $has_hover_bg_scale ) {
+					$beginning .= ' data-frontblocks-hover-scale="' . esc_attr( $properties['hover_bg_scale_amount'] ) . '"';
 				}
 
 				// Add styles if needed.

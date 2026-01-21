@@ -414,7 +414,11 @@ function addAnimationControls(BlockEdit) {
       _props$attributes$frb7 = _props$attributes.frblGlassEffect,
       frblGlassEffect = _props$attributes$frb7 === void 0 ? false : _props$attributes$frb7,
       _props$attributes$frb8 = _props$attributes.frblGlassBlur,
-      frblGlassBlur = _props$attributes$frb8 === void 0 ? 10 : _props$attributes$frb8;
+      frblGlassBlur = _props$attributes$frb8 === void 0 ? 10 : _props$attributes$frb8,
+      _props$attributes$frb9 = _props$attributes.frblHoverBgScale,
+      frblHoverBgScale = _props$attributes$frb9 === void 0 ? false : _props$attributes$frb9,
+      _props$attributes$frb0 = _props$attributes.frblHoverBgScaleAmount,
+      frblHoverBgScaleAmount = _props$attributes$frb0 === void 0 ? 1.1 : _props$attributes$frb0;
 
     // Create flattened options for the SelectControl
     var flattenedOptions = createFlattenedOptions();
@@ -728,6 +732,30 @@ function addAnimationControls(BlockEdit) {
       min: 0,
       max: 50,
       step: 1
+    })), /*#__PURE__*/React.createElement(PanelBody, {
+      title: __('FrontBlocks Hover Effects', 'frontblocks'),
+      initialOpen: false
+    }, /*#__PURE__*/React.createElement(ToggleControl, {
+      label: __('FrontBlocks: Scale Background on Hover', 'frontblocks'),
+      help: __('Scales the background image when hovering (FrontBlocks Hover Effect). Works with inline background images (--inline-bg-image) and standard CSS backgrounds.', 'frontblocks'),
+      checked: frblHoverBgScale,
+      onChange: function onChange(value) {
+        return props.setAttributes({
+          frblHoverBgScale: value
+        });
+      }
+    }), frblHoverBgScale && /*#__PURE__*/React.createElement(RangeControl, {
+      label: __('Scale Amount', 'frontblocks'),
+      help: __('How much to scale the background image (1.0 = no scale, 1.1 = 110%, 1.5 = 150%)', 'frontblocks'),
+      value: frblHoverBgScaleAmount,
+      onChange: function onChange(value) {
+        return props.setAttributes({
+          frblHoverBgScaleAmount: value
+        });
+      },
+      min: 1.0,
+      max: 2.0,
+      step: 0.05
     }))));
   };
 }
@@ -747,7 +775,11 @@ addFilter('blocks.getSaveContent.extraProps', 'frontblocks/apply-animations', fu
     _attributes$frblGlass = attributes.frblGlassEffect,
     frblGlassEffect = _attributes$frblGlass === void 0 ? false : _attributes$frblGlass,
     _attributes$frblGlass2 = attributes.frblGlassBlur,
-    frblGlassBlur = _attributes$frblGlass2 === void 0 ? 10 : _attributes$frblGlass2;
+    frblGlassBlur = _attributes$frblGlass2 === void 0 ? 10 : _attributes$frblGlass2,
+    _attributes$frblHover = attributes.frblHoverBgScale,
+    frblHoverBgScale = _attributes$frblHover === void 0 ? false : _attributes$frblHover,
+    _attributes$frblHover2 = attributes.frblHoverBgScaleAmount,
+    frblHoverBgScaleAmount = _attributes$frblHover2 === void 0 ? 1.1 : _attributes$frblHover2;
 
   // Add style attribute if needed
   if (!props.style) {
@@ -787,6 +819,15 @@ addFilter('blocks.getSaveContent.extraProps', 'frontblocks/apply-animations', fu
     // Add glass effect styles
     props.style['backdropFilter'] = "blur(".concat(frblGlassBlur, "px)");
     props.style['-webkit-backdrop-filter'] = "blur(".concat(frblGlassBlur, "px)");
+  }
+
+  // Handle hover background scale
+  if (frblHoverBgScale) {
+    var hoverBgScaleClass = 'frbl-hover-bg-scale';
+    props.className = props.className ? "".concat(props.className, " ").concat(hoverBgScaleClass) : hoverBgScaleClass;
+
+    // Add hover scale amount as CSS variable
+    props.style['--frbl-hover-scale'] = frblHoverBgScaleAmount;
   }
   return props;
 });
