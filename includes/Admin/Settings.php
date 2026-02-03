@@ -199,7 +199,7 @@ class Settings {
 			'frontblocks-admin-settings',
 			FRBL_PLUGIN_URL . 'assets/admin/settings.css',
 			array(),
-			FRBL_VERSION
+			FRBL_VERSION . '.3' // Force CSS reload
 		);
 
 		wp_add_inline_script(
@@ -1381,37 +1381,137 @@ class Settings {
 				return;
 			}
 
-			// Check if FormsCRMSettings class exists (requires FrontBlocks PRO).
-			if ( ! class_exists( '\Closemarketing\WPLicenseManager\FormsCRMSettings' ) ) {
-				?>
-				<div class="tw-p-4 tw-rounded-lg tw-bg-yellow-50 tw-border tw-border-yellow-200">
-					<p class="tw-text-sm tw-text-yellow-700">
-						<?php echo esc_html__( 'License management requires FrontBlocks PRO to be installed and active.', 'frontblocks' ); ?>
+		// Check if License class exists (requires FrontBlocks PRO).
+		if ( ! class_exists( '\Closemarketing\WPLicenseManager\License' ) ) {
+			?>
+			<div class="tw-p-4 tw-rounded-lg tw-bg-yellow-50 tw-border tw-border-yellow-200">
+				<p class="tw-text-sm tw-text-yellow-700">
+					<?php echo esc_html__( 'License management requires FrontBlocks PRO to be installed and active.', 'frontblocks' ); ?>
+				</p>
+			</div>
+			<?php
+			return;
+		}
+
+		// Render inline license form HTML.
+		$is_activated = $frblp_license->is_license_active();
+		$license_key  = $frblp_license->get_option_value( 'apikey' );
+		$product_id   = $frblp_license->get_option_value( 'product_id' );
+		?>
+		<div class="frbl-card tw-bg-white tw-rounded-lg tw-shadow-sm tw-border tw-border-gray-200 tw-overflow-hidden frbl-animate-slide-in tw-mb-8">
+			<div class="tw-px-6 tw-py-5 tw-border-b tw-border-gray-200 tw-bg-gradient-to-r tw-from-gray-50 tw-to-white">
+				<h2 class="tw-text-xl tw-font-semibold tw-text-gray-900">
+					<?php esc_html_e( 'FrontBlocks PRO License', 'frontblocks' ); ?>
+				</h2>
+				<div class="tw-mt-2 tw-text-sm tw-text-gray-600">
+					<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
+						<?php esc_html_e( 'Manage your license to receive automatic updates and support.', 'frontblocks' ); ?>
 					</p>
 				</div>
-				<?php
-				return;
-			}
+			</div>
+			<div class="tw-px-6 tw-py-5">
 
-			// Use FormsCRMSettings renderer (same as formscrm-inmovilla and PBC).
-			$settings = new \Closemarketing\WPLicenseManager\FormsCRMSettings(
-				$frblp_license,
-				array(
-					'title'        => __( 'FrontBlocks PRO License', 'frontblocks' ),
-					'description'  => __( 'Manage your license to receive automatic updates and support.', 'frontblocks' ),
-					'plugin_name'  => 'FrontBlocks PRO',
-					'purchase_url' => 'https://close.technology/wordpress-plugins/frontblocks-pro/',
-					'renew_url'    => 'https://close.technology/my-account/',
-					'benefits'     => array(
-						__( 'Automatic plugin updates', 'frontblocks' ),
-						__( 'Access to new features', 'frontblocks' ),
-						__( 'Priority support', 'frontblocks' ),
-						__( 'Security patches', 'frontblocks' ),
-					),
-				)
-			);
+				<!-- License Status -->
+				<div class="tw-mb-6">
+					<div class="tw-flex tw-items-center tw-gap-3">
+						<span class="tw-font-semibold"><?php esc_html_e( 'Status:', 'frontblocks' ); ?></span>
+					<?php if ( $is_activated ) : ?>
+						<span class="tw-inline-flex tw-items-center tw-px-3 tw-py-1 tw-rounded-full tw-text-sm tw-font-medium tw-bg-green-100 tw-text-green-800">
+							<svg class="tw-w-4 tw-h-4 tw-mr-1" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							</svg>
+							<?php esc_html_e( 'Active', 'frontblocks' ); ?>
+						</span>
+					<?php else : ?>
+						<span class="tw-inline-flex tw-items-center tw-px-3 tw-py-1 tw-rounded-full tw-text-sm tw-font-medium tw-bg-red-100 tw-text-red-800">
+							<svg class="tw-w-4 tw-h-4 tw-mr-1" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+							</svg>
+							<?php esc_html_e( 'Inactive', 'frontblocks' ); ?>
+						</span>
+					<?php endif; ?>
+					</div>
+				</div>
 
-			$settings->render();
+				<form method="post" action="options.php">
+					<?php settings_fields( $frblp_license->get_option_group() ); ?>
+
+					<!-- License Key Field -->
+					<div class="tw-mb-6">
+						<label for="<?php echo esc_attr( $frblp_license->get_option_key( 'apikey' ) ); ?>" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
+							<?php esc_html_e( 'License Key', 'frontblocks' ); ?>
+						</label>
+						<input type="text" id="<?php echo esc_attr( $frblp_license->get_option_key( 'apikey' ) ); ?>" name="<?php echo esc_attr( $frblp_license->get_option_key( 'apikey' ) ); ?>" value="<?php echo esc_attr( $license_key ); ?>" class="tw-w-full tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-blue-500" placeholder="<?php esc_attr_e( 'Enter your license key', 'frontblocks' ); ?>">
+						<p class="tw-mt-2 tw-text-sm tw-text-gray-500">
+						<?php
+							printf(
+								/* translators: %s: purchase URL */
+								esc_html__( 'Don\'t have a license? %s', 'frontblocks' ),
+								'<a href="https://close.technology/wordpress-plugins/frontblocks-pro/" target="_blank" class="tw-text-blue-600 hover:tw-text-blue-800 tw-underline">' . esc_html__( 'Purchase one here', 'frontblocks' ) . '</a>'
+							);
+							?>
+						</p>
+					</div>
+
+					<!-- Product ID (hidden) -->
+					<input type="hidden" name="<?php echo esc_attr( $frblp_license->get_option_key( 'product_id' ) ); ?>" value="<?php echo esc_attr( $product_id ); ?>">
+
+					<!-- Deactivate Button (only if activated) -->
+					<?php if ( $is_activated ) : ?>
+						<div class="tw-mb-6">
+							<label class="tw-flex tw-items-center tw-gap-2">
+								<input type="checkbox" name="<?php echo esc_attr( $frblp_license->get_option_key( 'deactivate_license' ) ); ?>" value="1" class="tw-rounded tw-border-gray-300 tw-text-blue-600 focus:tw-ring-blue-500">
+								<span class="tw-text-sm tw-text-gray-700">
+									<?php esc_html_e( 'Deactivate license on this site', 'frontblocks' ); ?>
+								</span>
+							</label>
+							<p class="tw-mt-1 tw-ml-6 tw-text-sm tw-text-gray-500">
+								<?php esc_html_e( 'Deactivating allows you to use the license on another site.', 'frontblocks' ); ?>
+							</p>
+						</div>
+					<?php endif; ?>
+
+					<!-- Submit Button -->
+					<button type="submit" class="tw-inline-flex tw-items-center tw-px-4 tw-py-2 tw-border tw-border-transparent tw-text-sm tw-font-medium tw-rounded-lg tw-shadow-sm tw-text-white tw-bg-blue-600 hover:tw-bg-blue-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-blue-500">
+						<?php esc_html_e( 'Save License', 'frontblocks' ); ?>
+					</button>
+				</form>
+
+				<!-- Benefits -->
+				<div class="tw-mt-6 tw-p-4 tw-bg-blue-50 tw-rounded-lg tw-border tw-border-blue-100">
+					<h3 class="tw-text-sm tw-font-semibold tw-text-blue-900 tw-mb-2">
+						<?php esc_html_e( 'License Benefits', 'frontblocks' ); ?>
+					</h3>
+					<ul class="tw-space-y-1">
+						<li class="tw-flex tw-items-start tw-gap-2 tw-text-sm tw-text-blue-800">
+							<svg class="tw-w-4 tw-h-4 tw-mt-0.5 tw-flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+							</svg>
+							<?php esc_html_e( 'Automatic plugin updates', 'frontblocks' ); ?>
+						</li>
+						<li class="tw-flex tw-items-start tw-gap-2 tw-text-sm tw-text-blue-800">
+							<svg class="tw-w-4 tw-h-4 tw-mt-0.5 tw-flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+							</svg>
+							<?php esc_html_e( 'Access to new features', 'frontblocks' ); ?>
+						</li>
+						<li class="tw-flex tw-items-start tw-gap-2 tw-text-sm tw-text-blue-800">
+							<svg class="tw-w-4 tw-h-4 tw-mt-0.5 tw-flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+							</svg>
+							<?php esc_html_e( 'Priority support', 'frontblocks' ); ?>
+						</li>
+						<li class="tw-flex tw-items-start tw-gap-2 tw-text-sm tw-text-blue-800">
+							<svg class="tw-w-4 tw-h-4 tw-mt-0.5 tw-flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+							</svg>
+							<?php esc_html_e( 'Security patches', 'frontblocks' ); ?>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<?php
 		?>
 		</div>
 		<?php
