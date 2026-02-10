@@ -58,6 +58,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - [Full Page Scroll](./docs/FULLPAGE-SCROLL.md) - Smooth fullpage scroll with navigation
 - [Full Page Implementation](./docs/FULLPAGE-IMPLEMENTATION-SUMMARY.md) - Technical implementation details
 - [Changelog Full Page](./docs/CHANGELOG-FULLPAGE.md) - Full Page feature changelog
+- [Carousel Pattern](./docs/CAROUSEL-PATTERN.md) - Hero carousel pattern with native WordPress blocks
 
 ## Release
 Actions for making a release:

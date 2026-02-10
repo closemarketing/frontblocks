@@ -1,0 +1,38 @@
+{
+  "name": "carousel-hero-pattern",
+  "title": "Hero Carousel Pattern",
+  "description": "Full-width carousel with hero slides featuring gradient backgrounds, headings, text and CTA buttons",
+  "keywords": ["carousel", "hero", "slider", "cover", "cta", "gradient"],
+  "categories": ["hero", "marketing"],
+  "content": "<!-- wp:group {\"layout\":{\"type\":\"grid\",\"columnCount\":1,\"minimumColumnWidth\":null},\"frblGridOption\":\"carousel\",\"frblItemsToView\":\"1\",\"frblLaptopToView\":\"1\",\"frblTabletToView\":\"1\"} -->\n<div class=\"wp-block-group\"><!-- wp:cover {\"dimRatio\":40,\"isUserOverlayColor\":true,\"customGradient\":\"linear-gradient(135deg,rgb(224,15,15) 0%,rgb(225,15,15) 100%)\",\"isDark\":false,\"sizeSlug\":\"large\",\"align\":\"full\",\"style\":{\"spacing\":{\"padding\":{\"top\":\"120px\",\"bottom\":\"120px\"}}}} -->\n<div class=\"wp-block-cover alignfull is-light\" style=\"padding-top:120px;padding-bottom:120px\"><span aria-hidden=\"true\" class=\"wp-block-cover__background has-background-dim-40 has-background-dim has-background-gradient\" style=\"background:linear-gradient(135deg,rgb(224,15,15) 0%,rgb(225,15,15) 100%)\"></span><div class=\"wp-block-cover__inner-container\"><!-- wp:group {\"align\":\"wide\",\"layout\":{\"type\":\"constrained\",\"contentSize\":\"800px\"}} -->\n<div class=\"wp-block-group alignwide\"><!-- wp:heading {\"textAlign\":\"left\",\"level\":1,\"style\":{\"typography\":{\"fontSize\":\"52px\",\"fontWeight\":\"700\",\"lineHeight\":\"1.2\"}},\"textColor\":\"white\"} -->\n<h1 class=\"wp-block-heading has-text-align-left has-white-color has-text-color\" style=\"font-size:52px;font-weight:700;line-height:1.2\">Lorem ipsum</h1>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"align\":\"left\",\"style\":{\"typography\":{\"fontSize\":\"18px\"},\"spacing\":{\"margin\":{\"top\":\"20px\"}}},\"textColor\":\"white\"} -->\n<p class=\"has-text-align-left has-white-color has-text-color\" style=\"margin-top:20px;font-size:18px\">Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:buttons {\"style\":{\"spacing\":{\"margin\":{\"top\":\"40px\"}}}} -->\n<div class=\"wp-block-buttons\" style=\"margin-top:40px\"><!-- wp:button {\"backgroundColor\":\"primary\",\"className\":\"is-style-fill\",\"style\":{\"border\":{\"radius\":\"25px\"},\"spacing\":{\"padding\":{\"left\":\"35px\",\"right\":\"35px\",\"top\":\"15px\",\"bottom\":\"15px\"}}}} -->\n<div class=\"wp-block-button is-style-fill\"><a class=\"wp-block-button__link has-primary-background-color has-background wp-element-button\" style=\"border-radius:25px;padding-top:15px;padding-right:35px;padding-bottom:15px;padding-left:35px\">Lorem ipsum</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons --></div>\n<!-- /wp:group --></div></div>\n<!-- /wp:cover -->\n\n<!-- wp:cover {\"dimRatio\":40,\"customOverlayColor\":\"#006f49\",\"isUserOverlayColor\":true,\"isDark\":false,\"sizeSlug\":\"large\",\"align\":\"full\",\"style\":{\"spacing\":{\"padding\":{\"top\":\"120px\",\"bottom\":\"120px\"}}}} -->\n<div class=\"wp-block-cover alignfull is-light\" style=\"padding-top:120px;padding-bottom:120px\"><span aria-hidden=\"true\" class=\"wp-block-cover__background has-background-dim-40 has-background-dim\" style=\"background-color:#006f49\"></span><div class=\"wp-block-cover__inner-container\"><!-- wp:group {\"align\":\"wide\",\"layout\":{\"type\":\"constrained\",\"contentSize\":\"800px\"}} -->\n<div class=\"wp-block-group alignwide\"><!-- wp:heading {\"textAlign\":\"left\",\"level\":1,\"style\":{\"typography\":{\"fontSize\":\"52px\",\"fontWeight\":\"700\",\"lineHeight\":\"1.2\"}},\"textColor\":\"white\"} -->\n<h1 class=\"wp-block-heading has-text-align-left has-white-color has-text-color\" style=\"font-size:52px;font-weight:700;line-height:1.2\">Lorem ipsum</h1>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"align\":\"left\",\"style\":{\"typography\":{\"fontSize\":\"18px\"},\"spacing\":{\"margin\":{\"top\":\"20px\"}}},\"textColor\":\"white\"} -->\n<p class=\"has-text-align-left has-white-color has-text-color\" style=\"margin-top:20px;font-size:18px\">Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:buttons {\"style\":{\"spacing\":{\"margin\":{\"top\":\"40px\"}}}} -->\n<div class=\"wp-block-buttons\" style=\"margin-top:40px\"><!-- wp:button {\"backgroundColor\":\"primary\",\"className\":\"is-style-fill\",\"style\":{\"border\":{\"radius\":\"25px\"},\"spacing\":{\"padding\":{\"left\":\"35px\",\"right\":\"35px\",\"top\":\"15px\",\"bottom\":\"15px\"}}}} -->\n<div class=\"wp-block-button is-style-fill\"><a class=\"wp-block-button__link has-primary-background-color has-background wp-element-button\" style=\"border-radius:25px;padding-top:15px;padding-right:35px;padding-bottom:15px;padding-left:35px\">Lorem ipsum</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons --></div>\n<!-- /wp:group --></div></div>\n<!-- /wp:cover --></div>\n<!-- /wp:group -->",
+  "viewport_width": 1440,
+  "instructions": {
+    "how_to_use": [
+      "Copy the content from this file",
+      "In WordPress editor, click on the + button to add a block",
+      "Search for 'Patterns' or use keyboard shortcut / to search",
+      "Paste the content directly into the editor",
+      "Customize colors, text, and images as needed"
+    ],
+    "customization": {
+      "change_colors": "Modify the customGradient or customOverlayColor attributes in the Cover blocks",
+      "change_text": "Edit the heading and paragraph text directly in the editor",
+      "add_images": "Add background images to Cover blocks by uploading images",
+      "adjust_spacing": "Modify padding values in the style attribute",
+      "change_cta": "Update button text and link href attribute"
+    },
+    "carousel_settings": {
+      "slides_per_view": "Currently set to 1 slide at a time for all devices",
+      "autoplay": "Add frblCarouselAutoplay attribute to enable (value in milliseconds)",
+      "navigation": "Arrows are shown by default. Change frblCarouselButtons to 'bullets' for dots navigation"
+    }
+  },
+  "requirements": [
+    "FrontBlocks plugin must be installed and activated",
+    "Carousel feature must be enabled in FrontBlocks settings",
+    "GeneratePress theme recommended but not required"
+  ],
+  "version": "1.0",
+  "author": "Closemarketing",
+  "author_uri": "https://close.technology"
+}
