@@ -122,11 +122,11 @@ class BlockPatterns {
 		register_block_pattern(
 			'frontblocks/carousel-hero',
 			array(
-				'title'       => __( 'Hero Carousel', 'frontblocks' ),
-				'description' => __( 'Full-width hero carousel with smooth transitions, featuring gradient backgrounds, headings, and call-to-action buttons. Perfect for landing pages and promotional content.', 'frontblocks' ),
-				'content'     => $pattern_content,
-				'categories'  => array( 'frontblocks', 'featured', 'header' ),
-				'keywords'    => array( 'carousel', 'hero', 'slider', 'cover', 'cta', 'gradient', 'header', 'banner' ),
+				'title'         => __( 'Hero Carousel', 'frontblocks' ),
+				'description'   => __( 'Full-width hero carousel with smooth transitions, featuring gradient backgrounds, headings, and call-to-action buttons. Perfect for landing pages and promotional content.', 'frontblocks' ),
+				'content'       => $pattern_content,
+				'categories'    => array( 'frontblocks', 'featured', 'header' ),
+				'keywords'      => array( 'carousel', 'hero', 'slider', 'cover', 'cta', 'gradient', 'header', 'banner' ),
 				'viewportWidth' => 1440,
 			)
 		);

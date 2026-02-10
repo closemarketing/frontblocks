@@ -411,8 +411,6 @@ class Settings {
 		// Register license setting group for FrontBlocks PRO.
 		global $frblp_license;
 		if ( $frblp_license && class_exists( '\Closemarketing\WPLicenseManager\License' ) ) {
-			error_log( 'Registering frontblocks-pro_license setting with callback' );
-			
 			// Register each individual license field.
 			register_setting(
 				'frontblocks-pro_license',
@@ -422,7 +420,7 @@ class Settings {
 					'sanitize_callback' => 'sanitize_text_field',
 				)
 			);
-			
+
 			register_setting(
 				'frontblocks-pro_license',
 				'frontblocks-pro_license_deactivate_checkbox',
@@ -431,29 +429,27 @@ class Settings {
 					'sanitize_callback' => 'sanitize_text_field',
 				)
 			);
-			
+
 			// Hook into admin_init to process license activation/deactivation.
-			add_action( 'admin_init', function() use ( $frblp_license ) {
-				// Check if license form was submitted.
-				if ( isset( $_POST['option_page'] ) && 'frontblocks-pro_license' === $_POST['option_page'] ) {
-					if ( isset( $_POST['submit_license'] ) ) {
-						error_log( 'License form submitted - processing' );
-						
-						// Build input array for validate_license.
-						$input = array(
-							'frontblocks-pro_license_apikey'              => isset( $_POST['frontblocks-pro_license_apikey'] ) ? sanitize_text_field( wp_unslash( $_POST['frontblocks-pro_license_apikey'] ) ) : '',
-							'frontblocks-pro_license_deactivate_checkbox' => isset( $_POST['frontblocks-pro_license_deactivate_checkbox'] ) ? sanitize_text_field( wp_unslash( $_POST['frontblocks-pro_license_deactivate_checkbox'] ) ) : '',
-						);
-						
-						error_log( 'Calling validate_license with input: ' . print_r( $input, true ) );
-						
-						// Call the license validation.
-						$frblp_license->validate_license( $input );
+			add_action(
+				'admin_init',
+				function () use ( $frblp_license ) {
+					// Check if license form was submitted and verify nonce.
+					if ( isset( $_POST['option_page'], $_POST['_wpnonce'] ) && 'frontblocks-pro_license' === $_POST['option_page'] && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'frontblocks-pro_license-options' ) ) {
+						if ( isset( $_POST['submit_license'] ) ) {
+							// Build input array for validate_license.
+							$input = array(
+								'frontblocks-pro_license_apikey'              => isset( $_POST['frontblocks-pro_license_apikey'] ) ? sanitize_text_field( wp_unslash( $_POST['frontblocks-pro_license_apikey'] ) ) : '',
+								'frontblocks-pro_license_deactivate_checkbox' => isset( $_POST['frontblocks-pro_license_deactivate_checkbox'] ) ? sanitize_text_field( wp_unslash( $_POST['frontblocks-pro_license_deactivate_checkbox'] ) ) : '',
+							);
+
+							// Call the license validation.
+							$frblp_license->validate_license( $input );
+						}
 					}
-				}
-			}, 15 );
-		} else {
-			error_log( 'Cannot register license setting - frblp_license: ' . ( $frblp_license ? 'exists' : 'missing' ) );
+				},
+				15
+			);
 		}
 
 		// Always Active Blocks section.
@@ -742,6 +738,7 @@ class Settings {
 				// Show license error message.
 				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				if ( isset( $_GET['license_error'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['license_error'] ) ) ) :
+					// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					$error_msg = isset( $_GET['error_msg'] ) ? sanitize_text_field( wp_unslash( $_GET['error_msg'] ) ) : '';
 					?>
 					<div style="background-color: #fef2f2; border-left: 4px solid #f87171; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
@@ -753,7 +750,7 @@ class Settings {
 							</div>
 							<div class="tw-ml-3">
 								<p class="tw-text-sm tw-font-medium" style="color: #991b1b; margin: 0;">
-									<?php 
+									<?php
 									if ( ! empty( $error_msg ) ) {
 										echo esc_html__( 'Failed to activate license: ', 'frontblocks' ) . '<br><strong>' . esc_html( $error_msg ) . '</strong>';
 									} else {
@@ -1513,7 +1510,7 @@ class Settings {
 
 			// Render license settings inline.
 			$this->render_inline_license_settings( $frblp_license );
-		?>
+			?>
 		</div>
 		<?php
 	}
