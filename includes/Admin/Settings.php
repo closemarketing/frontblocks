@@ -1771,5 +1771,4 @@ class Settings {
 
 		return $sanitized;
 	}
-
 }
