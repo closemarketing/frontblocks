@@ -32,6 +32,9 @@ Carousel/Slider attributes:
 - Button colour: colour of the buttons.
 - Button background colour: background colour of the buttons (can be transparent).
 
+**PRO Carousel Pattern:**
+FrontBlocks PRO provides a ready-to-use Hero Carousel pattern using native WordPress Cover blocks. This pattern is automatically registered in the WordPress editor's "Patterns" tab under the "FrontBlocks PRO" category. The pattern creates full-width hero sliders with smooth transitions, perfect for landing pages and promotional content. It includes three customizable slides with gradients, colors, headings, text, and call-to-action buttons. More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-plugins/frontblocks-pro/) page.
+
 **Enhanced WordPress native gallery**
 We have added options to the native WordPress gallery that allow you to create a different layout, such as grid or masonry, and also enable you to create a carousel with images that can be clicked on.
 
@@ -142,8 +145,16 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 == Changelog ==
 
 == n.e.x.t ==
+*   Improved: Carousel single-slide view now displays full width (100%) instead of 50% of two slides.
+*   Improved: Dynamic gap calculation - 0px gap when showing 1 slide, 20px gap for multiple slides.
+*   Improved: Smooth carousel transitions with cubic-bezier easing for fluid animations.
+*   Improved: Carousel responsive behavior with proper width and spacing across all devices.
+*   Fixed: Carousel appearing blank/white when initialized.
+*   Fixed: Slides being cut in half or showing partial content.
+*   Fixed: Autoplay not respecting empty or zero values.
 *   Improved: Increased carousel bullet size from 9px to 13px for better accessibility and easier interaction.
 *   Improved: Updated carousel bullets spacing using CSS gap property for more consistent layout.
+*   PRO: Added Hero Carousel Pattern - Ready-to-use block pattern with 3 customizable hero slides (FrontBlocks PRO feature).
 *   Added: Fluid Typography - Automatically converts GeneratePress typography to smooth fluid scaling using CSS clamp().
 *   Added: Support for all typography elements (body, h1-h6) with individual responsive values.
 *   Added: Smart detection of multi-selector CSS patterns (body, button, input, textarea).
