@@ -180,9 +180,9 @@
  */
 .wp-block-group.frontblocks-carousel,
 .wp-block-group.frontblocks-carousel.is-layout-grid {
-	display: block !important;
-	grid-template-columns: none !important;
-	gap: 0 !important;
+	display: block;
+	grid-template-columns: none;
+	gap: 0;
 }
 
 .wp-block-group.frontblocks-carousel > * {
@@ -191,20 +191,20 @@
 
 /* Ensure inner container doesn't interfere with carousel */
 .wp-block-group.frontblocks-carousel > .wp-block-group__inner-container {
-	display: block !important;
-	grid-template-columns: none !important;
-	gap: 0 !important;
+	display: block;
+	grid-template-columns: none;
+	gap: 0;
 	width: 100%;
 }
 
 /* Override grid styles for direct children in carousel mode */
 .glide__slides.wp-block-group,
 .glide__slides.wp-block-group.is-layout-grid {
-	display: flex !important;
-	grid-template-columns: none !important;
-	gap: 0 !important;
-	column-gap: 0 !important;
-	row-gap: 0 !important;
+	display: flex;
+	grid-template-columns: none;
+	gap: 0;
+	column-gap: 0;
+	row-gap: 0;
 }
 
 /* Ensure slides have proper width */
@@ -215,53 +215,53 @@
 
 /* Force full width for single slide view */
 .frontblocks-carousel[data-view="1"] .glide__slide {
-	margin-left: 0 !important;
-	margin-right: 0 !important;
+	margin-left: 0;
+	margin-right: 0;
 }
 
 /* Remove gaps when showing one slide */
 .frontblocks-carousel[data-view="1"].glide__slides {
-	gap: 0 !important;
+	gap: 0;
 }
 
 /* Responsive single slide view */
 @media only screen and (max-width: 768px) {
 	.frontblocks-carousel[data-mobile-view="1"] .glide__slide {
-		width: 100% !important;
-		flex: 0 0 100% !important;
-		max-width: 100% !important;
-		margin-left: 0 !important;
-		margin-right: 0 !important;
+		width: 100%;
+		flex: 0 0 100%;
+		max-width: 100%;
+		margin-left: 0;
+		margin-right: 0;
 	}
 }
 
 @media only screen and (min-width: 769px) and (max-width: 1024px) {
 	.frontblocks-carousel[data-tablet-view="1"] .glide__slide {
-		width: 100% !important;
-		flex: 0 0 100% !important;
-		max-width: 100% !important;
-		margin-left: 0 !important;
-		margin-right: 0 !important;
+		width: 100%;
+		flex: 0 0 100%;
+		max-width: 100%;
+		margin-left: 0;
+		margin-right: 0;
 	}
 }
 
 @media only screen and (min-width: 1025px) and (max-width: 1440px) {
 	.frontblocks-carousel[data-laptop-view="1"] .glide__slide {
-		width: 100% !important;
-		flex: 0 0 100% !important;
-		max-width: 100% !important;
-		margin-left: 0 !important;
-		margin-right: 0 !important;
+		width: 100%;
+		flex: 0 0 100%;
+		max-width: 100%;
+		margin-left: 0;
+		margin-right: 0;
 	}
 }
 
 /* Handle alignfull content within carousel slides */
 .glide__slide > .wp-block-cover.alignfull,
 .glide__slide > .alignfull {
-	width: 100% !important;
-	max-width: none !important;
-	margin-left: 0 !important;
-	margin-right: 0 !important;
+	width: 100%;
+	max-width: none;
+	margin-left: 0;
+	margin-right: 0;
 }
 
 /* Ensure cover blocks maintain minimum height */
@@ -297,6 +297,6 @@
 	position: relative;
 	z-index: 1;
 	height: auto;
-	opacity: 1 !important;
-	visibility: visible !important;
+	opacity: 1;
+	visibility: visible;
 }
