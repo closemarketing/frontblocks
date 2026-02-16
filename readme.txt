@@ -46,6 +46,15 @@ The animations are based on [Animate.css](https://animate.style/): Attention see
 **Container Effects**
 Apply glassmorphism effects to any block with customizable blur intensity. In the block settings, open the 'Container Effects' panel to enable the glass effect and adjust the blur level (0-50px) for a modern, frosted glass appearance. The effect includes a semi-transparent background, subtle border, and soft shadow, creating a beautiful layered design. Perfect for hero sections, cards, and overlays.
 
+**FrontBlocks Hover Effects**
+Add smooth zoom effects to background images when users hover over elements. Perfect for post grids, galleries, and cards. In the block settings, open the 'FrontBlocks Hover Effects' panel to enable background scaling. Features:
+- Compatible with GenerateBlocks Query Loop (--inline-bg-image)
+- Works with standard CSS background-image
+- Configurable scale amount from 1.0 to 2.0 (default: 1.1 for 110% zoom)
+- Smooth 0.4s transition with GPU acceleration
+- Content remains readable and properly positioned above the scaled image
+- Overflow protection ensures images don't extend beyond container
+
 **Sticky option for Grid block:**
 The sticky option allows you to make the grid block stick to the top of the viewport when scrolling down. To use this feature, enable the "Sticky" option in the Grid block settings. When enabled, the grid block will remain fixed at the top of the viewport as you scroll down the page.
 
@@ -145,6 +154,10 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 == Changelog ==
 
 == n.e.x.t ==
+*   Added: FrontBlocks Hover Effects - Smooth background image zoom on hover for Query Loops, grids, and cards.
+*   Added: Configurable scale amount (1.0-2.0) for hover background zoom effect.
+*   Added: Support for GenerateBlocks --inline-bg-image and standard CSS background-image.
+*   Added: GPU-accelerated smooth transitions (0.4s) for optimal performance.
 *   Added: Hero Carousel Pattern - Ready-to-use block pattern automatically registered in WordPress Patterns tab.
 *   Added: Pattern includes 3 full-width hero slides with customizable gradients, headings, text, and CTA buttons.
 *   Added: One-click pattern insertion under "FrontBlocks" category in block editor.

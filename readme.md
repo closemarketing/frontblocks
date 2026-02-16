@@ -10,6 +10,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 ### Block Enhancements
 - Animations
 - Container Effects (Glass Effect / Glassmorphism)
+- **FrontBlocks Hover Effects** - Smooth background image zoom on hover with configurable scale
 - Carousel/Slider
 - Native Gallery
 - Sticky Columns
@@ -55,6 +56,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 ## Documentation
 
 - [Container Edge Alignment](./docs/CONTAINER-EDGE-ALIGNMENT.md) - Create asymmetric layouts with edge-to-edge content
+- [FrontBlocks Hover Effects](./docs/HOVER-BG-SCALE.md) - Smooth background image zoom effect on hover
 - [Full Page Scroll](./docs/FULLPAGE-SCROLL.md) - Smooth fullpage scroll with navigation
 - [Full Page Implementation](./docs/FULLPAGE-IMPLEMENTATION-SUMMARY.md) - Technical implementation details
 - [Changelog Full Page](./docs/CHANGELOG-FULLPAGE.md) - Full Page feature changelog
