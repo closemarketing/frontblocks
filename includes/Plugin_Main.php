@@ -129,6 +129,9 @@ class Plugin_Main {
 
 		// Stacked Images module.
 		new Frontend\StackedImages();
+
+		// Block Patterns module (WordPress block patterns registration).
+		new Frontend\BlockPatterns();
 	}
 
 	/**

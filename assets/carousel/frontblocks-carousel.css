@@ -27,6 +27,7 @@
   display: flex;
   flex-wrap: nowrap;
   will-change: transform;
+  transition: transform 400ms cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 .glide__slides--dragging {
   user-select: none;
@@ -142,6 +143,26 @@
     left: 50px;
     right: unset;
 }
+/* Arrows position top/side - spans full container width */
+.glide__arrows--top {
+	position: absolute;
+	top: 50%;
+	left: 0;
+	right: 0;
+	width: 100%;
+	z-index: 10;
+	pointer-events: none;
+	transform: translateY(-50%);
+}
+.glide__arrows--top .glide__arrow {
+	pointer-events: all;
+}
+.glide__arrows--top .glide__arrow--left {
+	left: 2em;
+}
+.glide__arrows--top .glide__arrow--right {
+	right: 2em;
+}
 /* Responsive */
 @media only screen and (max-width: 768px) {
 	.glide__arrow--left {
@@ -159,9 +180,9 @@
  */
 .wp-block-group.frontblocks-carousel,
 .wp-block-group.frontblocks-carousel.is-layout-grid {
-	display: block !important;
-	grid-template-columns: none !important;
-	gap: 0 !important;
+	display: block;
+	grid-template-columns: none;
+	gap: 0;
 }
 
 .wp-block-group.frontblocks-carousel > * {
@@ -170,24 +191,112 @@
 
 /* Ensure inner container doesn't interfere with carousel */
 .wp-block-group.frontblocks-carousel > .wp-block-group__inner-container {
-	display: block !important;
-	grid-template-columns: none !important;
-	gap: 0 !important;
+	display: block;
+	grid-template-columns: none;
+	gap: 0;
 	width: 100%;
 }
 
 /* Override grid styles for direct children in carousel mode */
 .glide__slides.wp-block-group,
 .glide__slides.wp-block-group.is-layout-grid {
-	display: flex !important;
-	grid-template-columns: none !important;
-	gap: 0 !important;
-	column-gap: 0 !important;
-	row-gap: 0 !important;
+	display: flex;
+	grid-template-columns: none;
+	gap: 0;
+	column-gap: 0;
+	row-gap: 0;
 }
 
 /* Ensure slides have proper width */
 .glide__slides > .glide__slide {
 	min-width: 0;
 	flex-shrink: 0;
+}
+
+/* Force full width for single slide view */
+.frontblocks-carousel[data-view="1"] .glide__slide {
+	margin-left: 0;
+	margin-right: 0;
+}
+
+/* Remove gaps when showing one slide */
+.frontblocks-carousel[data-view="1"].glide__slides {
+	gap: 0;
+}
+
+/* Responsive single slide view */
+@media only screen and (max-width: 768px) {
+	.frontblocks-carousel[data-mobile-view="1"] .glide__slide {
+		width: 100%;
+		flex: 0 0 100%;
+		max-width: 100%;
+		margin-left: 0;
+		margin-right: 0;
+	}
+}
+
+@media only screen and (min-width: 769px) and (max-width: 1024px) {
+	.frontblocks-carousel[data-tablet-view="1"] .glide__slide {
+		width: 100%;
+		flex: 0 0 100%;
+		max-width: 100%;
+		margin-left: 0;
+		margin-right: 0;
+	}
+}
+
+@media only screen and (min-width: 1025px) and (max-width: 1440px) {
+	.frontblocks-carousel[data-laptop-view="1"] .glide__slide {
+		width: 100%;
+		flex: 0 0 100%;
+		max-width: 100%;
+		margin-left: 0;
+		margin-right: 0;
+	}
+}
+
+/* Handle alignfull content within carousel slides */
+.glide__slide > .wp-block-cover.alignfull,
+.glide__slide > .alignfull {
+	width: 100%;
+	max-width: none;
+	margin-left: 0;
+	margin-right: 0;
+}
+
+/* Ensure cover blocks maintain minimum height */
+.glide__slide .wp-block-cover {
+	min-height: 430px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Prevent carousel from overflowing viewport */
+.glide {
+	position: relative;
+	overflow: visible;
+	min-height: 430px;
+}
+
+.glide__track {
+	overflow: hidden;
+	width: 100%;
+	position: relative;
+	z-index: 1;
+}
+
+.glide__slides {
+	position: relative;
+	z-index: 1;
+	height: auto;
+	min-height: 430px;
+}
+
+.glide__slide {
+	position: relative;
+	z-index: 1;
+	height: auto;
+	opacity: 1;
+	visibility: visible;
 }
