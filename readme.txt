@@ -1,11 +1,11 @@
-=== FrontBlocks for GeneratePress ===
+=== FrontBlocks for Gutenberg and GeneratePress ===
 Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit2sumit, alexcm13
-Tags: carrusel, slider, lightweight, generatepress
+Tags: carrusel, slider, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 1.3.1
-Version: 1.3.1
+Stable tag: 1.3.2
+Version: 1.3.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -153,7 +153,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Changelog ==
 
-== n.e.x.t ==
+== 1.3.2 ==
 *   Added: FrontBlocks Hover Effects - Smooth background image zoom on hover for Query Loops, grids, and cards.
 *   Added: Configurable scale amount (1.0-2.0) for hover background zoom effect.
 *   Added: Support for GenerateBlocks --inline-bg-image and standard CSS background-image.
