@@ -1,4 +1,4 @@
-=== FrontBlocks for Gutenberg and GeneratePress ===
+=== FrontBlocks for Gutenberg/GeneratePress ===
 Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit2sumit, alexcm13
 Tags: carrusel, slider, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
@@ -9,7 +9,7 @@ Version: 1.3.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-This plugin extends the functionality of GeneratePress by adding a carousel, slider, animations, sticky columns, edge alignment for containers and the ability to insert posts.
+Plugin extending Gutenberg and GeneratePress with carousel, slider, animations, sticky columns, edge alignment and post insertion capabilities.
 
 == Description ==
 

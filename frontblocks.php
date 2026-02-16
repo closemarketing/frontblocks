@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: FrontBlocks for GeneratePress
+ * Plugin Name: FrontBlocks for Gutenberg/GeneratePress
  * Plugin URI:  https://wordpress.org/plugins/frontblocks/
- * Description: Blocks and helpers that extends GeneratePress blocks.
+ * Description: Blocks and helpers that extends Gutenberg and GeneratePress blocks.
  * Version:     1.3.2
  * Author:      Closemarketing
  * Author URI:  https://close.marketing
