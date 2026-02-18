@@ -63,6 +63,8 @@ window.addEventListener('load', function (event) {
                 const bullets = document.createElement('div');
                 bullets.classList.add('glide__bullets');
                 bullets.setAttribute('data-glide-el', 'controls[nav]');
+                bullets.setAttribute('role', 'group');
+                bullets.setAttribute('aria-label', 'Slide navigation');
 
                 for (let i = 0; i < item.children.length; i++) {
                     const bullet = document.createElement('button');
