@@ -37,8 +37,8 @@ window.addEventListener('load', function (event) {
             const carouselLaptopView = item.getAttribute('data-laptop-view') ? parseInt(item.getAttribute('data-laptop-view')) : 3;
             const carouselTabletView = item.getAttribute('data-tablet-view') ? parseInt(item.getAttribute('data-tablet-view')) : 2;
             const carouselMobileView = item.getAttribute('data-mobile-view') ? parseInt(item.getAttribute('data-mobile-view')) : 1;
-            const autoplayValue = item.getAttribute('data-autoplay');
-            const carouselAutoplay = autoplayValue && autoplayValue !== '' ? parseInt(autoplayValue) : 0;
+            const carouselAutoplay = item.getAttribute('data-autoplay') ? item.getAttribute('data-autoplay') : 0;
+            const carouselGap = item.getAttribute('data-gap') ? parseInt(item.getAttribute('data-gap'), 10) : 20;
             const carouselRewind = item.getAttribute('data-rewind') ? item.getAttribute('data-rewind') : false;
             const carouselbuttonsColor = item.getAttribute('data-buttons-color') ? item.getAttribute('data-buttons-color') : 'black';
             const carouselbuttonsBackgroundColor = item.getAttribute('data-buttons-background-color') ? item.getAttribute('data-buttons-background-color') : 'transparent';
@@ -109,28 +109,22 @@ window.addEventListener('load', function (event) {
                 arrows.innerHTML = arrowsHTML;
                 wrapperParent.appendChild(arrows);
             }
-            // Calculate gap based on perView - use 0 gap when showing 1 slide
-            const calculateGap = (view) => view === 1 ? 0 : 20;
-            
             const glideFrontBlocks = new Glide(wrapperParent, {
                 type: carouselType,
                 perView: carouselView,
                 startAt: 0,
-                autoplay: carouselAutoplay === 0 ? false : carouselAutoplay,
-                gap: calculateGap(carouselView),
+                autoplay: carouselAutoplay === 0 ? 2500 : carouselAutoplay,
+                gap: isNaN(carouselGap) ? 20 : carouselGap,
                 rewind: carouselRewind,
                 breakpoints: {
                     768: {
-                        perView: carouselMobileView,
-                        gap: calculateGap(carouselMobileView)
+                        perView: carouselMobileView
                     },
                     1024: {
-                        perView: carouselTabletView,
-                        gap: calculateGap(carouselTabletView)
+                        perView: carouselTabletView
                     },
                     1440: {
-                        perView: carouselLaptopView,
-                        gap: calculateGap(carouselLaptopView)
+                        perView: carouselLaptopView
                     }
                 }
             });
