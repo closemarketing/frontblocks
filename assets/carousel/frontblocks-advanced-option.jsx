@@ -37,6 +37,7 @@ function addCustomCarouselPanel(BlockEdit) {
 			frblTabletToView = '2',
 			frblResponsiveToView = '1',
 			frblAutoplay = '',
+			frblGap = '20',
 			frblButtons = 'arrows',
 			frblRewind = true,
 			frblButtonColor,
@@ -96,6 +97,12 @@ function addCustomCarouselPanel(BlockEdit) {
 						label={__('Autoplay (seconds)', 'frontblocks')}
 						value={frblAutoplay}
 						onChange={(value) => props.setAttributes({ frblAutoplay: value })}
+					/>
+					<TextControl
+						label={__('Gap (px)', 'frontblocks')}
+						value={frblGap}
+						onChange={(value) => props.setAttributes({ frblGap: value })}
+						help={__('Space between slides in pixels. Leave empty for 20.', 'frontblocks')}
 					/>
 					{frblGridOption === 'slider' && (
 						<>

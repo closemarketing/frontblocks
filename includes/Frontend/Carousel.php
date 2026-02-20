@@ -75,6 +75,7 @@ class Carousel {
 		$tablet_to_view     = isset( $attrs['frblTabletToView'] ) ? (int) $attrs['frblTabletToView'] : 2;
 		$responsive_to_view = isset( $attrs['frblResponsiveToView'] ) ? (int) $attrs['frblResponsiveToView'] : 1;
 		$autoplay           = isset( $attrs['frblAutoplay'] ) ? ( (int) $attrs['frblAutoplay'] * 1000 ) : '';
+		$gap                = isset( $attrs['frblGap'] ) && '' !== $attrs['frblGap'] ? (int) $attrs['frblGap'] : 20;
 		$rewind             = isset( $attrs['frblRewind'] ) ? (bool) $attrs['frblRewind'] : true;
 		$buttons            = isset( $attrs['frblButtons'] ) ? sanitize_text_field( $attrs['frblButtons'] ) : 'arrows';
 		$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
@@ -99,6 +100,7 @@ class Carousel {
 					' data-tablet-view="' . esc_attr( $tablet_to_view ) . '"' .
 					' data-mobile-view="' . esc_attr( $responsive_to_view ) . '"' .
 					' data-autoplay="' . esc_attr( $autoplay ) . '"' .
+					' data-gap="' . esc_attr( $gap ) . '"' .
 					' data-buttons="' . esc_attr( $buttons ) . '"' .
 					' data-buttons-color="' . esc_attr( $button_color ) . '"' .
 					' data-buttons-background-color="' . esc_attr( $button_bg_color ) . '"' .
@@ -139,6 +141,7 @@ class Carousel {
 		$tablet_to_view     = isset( $attrs['frblTabletToView'] ) ? (int) $attrs['frblTabletToView'] : 2;
 		$responsive_to_view = isset( $attrs['frblResponsiveToView'] ) ? (int) $attrs['frblResponsiveToView'] : 1;
 		$autoplay           = isset( $attrs['frblAutoplay'] ) ? ( (int) $attrs['frblAutoplay'] * 1000 ) : '';
+		$gap                = isset( $attrs['frblGap'] ) && '' !== $attrs['frblGap'] ? (int) $attrs['frblGap'] : 20;
 		$rewind             = isset( $attrs['frblRewind'] ) ? (bool) $attrs['frblRewind'] : true;
 		$buttons            = isset( $attrs['frblButtons'] ) ? sanitize_text_field( $attrs['frblButtons'] ) : 'arrows';
 		$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
@@ -163,6 +166,7 @@ class Carousel {
 					' data-tablet-view="' . esc_attr( $tablet_to_view ) . '"' .
 					' data-mobile-view="' . esc_attr( $responsive_to_view ) . '"' .
 					' data-autoplay="' . esc_attr( $autoplay ) . '"' .
+					' data-gap="' . esc_attr( $gap ) . '"' .
 					' data-buttons="' . esc_attr( $buttons ) . '"' .
 					' data-buttons-color="' . esc_attr( $button_color ) . '"' .
 					' data-buttons-background-color="' . esc_attr( $button_bg_color ) . '"' .
@@ -203,6 +207,7 @@ class Carousel {
 		$tablet_to_view     = isset( $attrs['frblTabletToView'] ) ? (int) $attrs['frblTabletToView'] : 2;
 		$responsive_to_view = isset( $attrs['frblResponsiveToView'] ) ? (int) $attrs['frblResponsiveToView'] : 1;
 		$autoplay           = isset( $attrs['frblAutoplay'] ) ? ( (int) $attrs['frblAutoplay'] * 1000 ) : '';
+		$gap                = isset( $attrs['frblGap'] ) && '' !== $attrs['frblGap'] ? (int) $attrs['frblGap'] : 20;
 		$rewind             = isset( $attrs['frblRewind'] ) ? (bool) $attrs['frblRewind'] : true;
 		$buttons            = isset( $attrs['frblButtons'] ) ? sanitize_text_field( $attrs['frblButtons'] ) : 'arrows';
 		$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
@@ -227,6 +232,7 @@ class Carousel {
 					' data-tablet-view="' . esc_attr( $tablet_to_view ) . '"' .
 					' data-mobile-view="' . esc_attr( $responsive_to_view ) . '"' .
 					' data-autoplay="' . esc_attr( $autoplay ) . '"' .
+					' data-gap="' . esc_attr( $gap ) . '"' .
 					' data-buttons="' . esc_attr( $buttons ) . '"' .
 					' data-buttons-color="' . esc_attr( $button_color ) . '"' .
 					' data-buttons-background-color="' . esc_attr( $button_bg_color ) . '"' .
@@ -299,6 +305,10 @@ class Carousel {
 			'type'    => 'string',
 			'default' => '',
 		);
+		$block_args['attributes']['frblGap']              = array(
+			'type'    => 'string',
+			'default' => '20',
+		);
 		$block_args['attributes']['frblRewind']           = array(
 			'type'    => 'boolean',
 			'default' => true,
@@ -369,6 +379,10 @@ class Carousel {
 						frblAutoplay: {
 							type: 'string',
 							default: ''
+						},
+						frblGap: {
+							type: 'string',
+							default: '20'
 						},
 						frblButtons: {
 							type: 'string',
