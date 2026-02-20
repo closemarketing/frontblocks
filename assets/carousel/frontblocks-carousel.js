@@ -28,7 +28,7 @@ window.addEventListener('load', function (event) {
 
             parentwrap.replaceChild(wrapperParent, wrapper);
             wrapperParent.appendChild(wrapper);
-            wrapperParent.classList.add('glide');
+            wrapperParent.classList.add('frontblocks', 'glide');
 
             // Options
             const carouselType = item.getAttribute('data-type') ? item.getAttribute('data-type') : 'carousel';
@@ -79,8 +79,8 @@ window.addEventListener('load', function (event) {
                 // Add custom CSS for active bullet color
                 const style = document.createElement('style');
                 style.textContent = `
-					.glide__bullet.glide__bullet--active {
-						background-color: ${carouselbuttonsColor} !important;
+					.frontblocks .glide__bullet.glide__bullet--active {
+						background-color: ${carouselbuttonsColor};
 					}
 				`;
                 document.head.appendChild(style);
