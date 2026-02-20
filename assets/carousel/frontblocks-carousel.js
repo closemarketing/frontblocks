@@ -37,7 +37,8 @@ window.addEventListener('load', function (event) {
             const carouselLaptopView = item.getAttribute('data-laptop-view') ? parseInt(item.getAttribute('data-laptop-view')) : 3;
             const carouselTabletView = item.getAttribute('data-tablet-view') ? parseInt(item.getAttribute('data-tablet-view')) : 2;
             const carouselMobileView = item.getAttribute('data-mobile-view') ? parseInt(item.getAttribute('data-mobile-view')) : 1;
-            const carouselAutoplay = item.getAttribute('data-autoplay') ? item.getAttribute('data-autoplay') : 0;
+            const autoplayAttr = item.getAttribute('data-autoplay');
+            const carouselAutoplay = (autoplayAttr !== '' && autoplayAttr !== null && autoplayAttr !== undefined) ? parseInt(autoplayAttr, 10) : 0;
             const carouselGap = item.getAttribute('data-gap') ? parseInt(item.getAttribute('data-gap'), 10) : 20;
             const carouselRewind = item.getAttribute('data-rewind') ? item.getAttribute('data-rewind') : false;
             const carouselbuttonsColor = item.getAttribute('data-buttons-color') ? item.getAttribute('data-buttons-color') : 'black';
@@ -113,7 +114,7 @@ window.addEventListener('load', function (event) {
                 type: carouselType,
                 perView: carouselView,
                 startAt: 0,
-                autoplay: carouselAutoplay === 0 ? 2500 : carouselAutoplay,
+                autoplay: carouselAutoplay > 0 ? carouselAutoplay : false,
                 gap: isNaN(carouselGap) ? 20 : carouselGap,
                 rewind: carouselRewind,
                 breakpoints: {
