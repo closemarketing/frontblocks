@@ -47,6 +47,8 @@ function addCustomCarouselPanel(BlockEdit) {
       frblResponsiveToView = _props$attributes$frb5 === void 0 ? '1' : _props$attributes$frb5,
       _props$attributes$frb6 = _props$attributes.frblAutoplay,
       frblAutoplay = _props$attributes$frb6 === void 0 ? '' : _props$attributes$frb6,
+      _props$attributes$frbGap = _props$attributes.frblGap,
+      frblGap = _props$attributes$frbGap === void 0 ? '20' : _props$attributes$frbGap,
       _props$attributes$frb7 = _props$attributes.frblButtons,
       frblButtons = _props$attributes$frb7 === void 0 ? 'arrows' : _props$attributes$frb7,
       _props$attributes$frb8 = _props$attributes.frblRewind,
@@ -123,6 +125,15 @@ function addCustomCarouselPanel(BlockEdit) {
           frblAutoplay: value
         });
       }
+    }), /*#__PURE__*/React.createElement(TextControl, {
+      label: __('Gap (px)', 'frontblocks'),
+      value: frblGap,
+      onChange: function onChange(value) {
+        return props.setAttributes({
+          frblGap: value
+        });
+      },
+      help: __('Space between slides in pixels. Leave empty for 20.', 'frontblocks')
     }), frblGridOption === 'slider' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(ToggleControl, {
       label: __('Rewind', 'frontblocks'),
       checked: frblRewind,

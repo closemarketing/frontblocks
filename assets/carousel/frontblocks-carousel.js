@@ -28,7 +28,7 @@ window.addEventListener('load', function (event) {
 
             parentwrap.replaceChild(wrapperParent, wrapper);
             wrapperParent.appendChild(wrapper);
-            wrapperParent.classList.add('glide');
+            wrapperParent.classList.add('frontblocks', 'glide');
 
             // Options
             const carouselType = item.getAttribute('data-type') ? item.getAttribute('data-type') : 'carousel';
@@ -37,8 +37,9 @@ window.addEventListener('load', function (event) {
             const carouselLaptopView = item.getAttribute('data-laptop-view') ? parseInt(item.getAttribute('data-laptop-view')) : 3;
             const carouselTabletView = item.getAttribute('data-tablet-view') ? parseInt(item.getAttribute('data-tablet-view')) : 2;
             const carouselMobileView = item.getAttribute('data-mobile-view') ? parseInt(item.getAttribute('data-mobile-view')) : 1;
-            const autoplayValue = item.getAttribute('data-autoplay');
-            const carouselAutoplay = autoplayValue && autoplayValue !== '' ? parseInt(autoplayValue) : 0;
+            const autoplayAttr = item.getAttribute('data-autoplay');
+            const carouselAutoplay = (autoplayAttr !== '' && autoplayAttr !== null && autoplayAttr !== undefined) ? parseInt(autoplayAttr, 10) : 0;
+            const carouselGap = item.getAttribute('data-gap') ? parseInt(item.getAttribute('data-gap'), 10) : 20;
             const carouselRewind = item.getAttribute('data-rewind') ? item.getAttribute('data-rewind') : false;
             const carouselbuttonsColor = item.getAttribute('data-buttons-color') ? item.getAttribute('data-buttons-color') : 'black';
             const carouselbuttonsBackgroundColor = item.getAttribute('data-buttons-background-color') ? item.getAttribute('data-buttons-background-color') : 'transparent';
@@ -80,8 +81,8 @@ window.addEventListener('load', function (event) {
                 // Add custom CSS for active bullet color
                 const style = document.createElement('style');
                 style.textContent = `
-					.glide__bullet.glide__bullet--active {
-						background-color: ${carouselbuttonsColor} !important;
+					.frontblocks .glide__bullet.glide__bullet--active {
+						background-color: ${carouselbuttonsColor};
 					}
 				`;
                 document.head.appendChild(style);
@@ -111,28 +112,22 @@ window.addEventListener('load', function (event) {
                 arrows.innerHTML = arrowsHTML;
                 wrapperParent.appendChild(arrows);
             }
-            // Calculate gap based on perView - use 0 gap when showing 1 slide
-            const calculateGap = (view) => view === 1 ? 0 : 20;
-            
             const glideFrontBlocks = new Glide(wrapperParent, {
                 type: carouselType,
                 perView: carouselView,
                 startAt: 0,
-                autoplay: carouselAutoplay === 0 ? false : carouselAutoplay,
-                gap: calculateGap(carouselView),
+                autoplay: carouselAutoplay > 0 ? carouselAutoplay : false,
+                gap: isNaN(carouselGap) ? 20 : carouselGap,
                 rewind: carouselRewind,
                 breakpoints: {
                     768: {
-                        perView: carouselMobileView,
-                        gap: calculateGap(carouselMobileView)
+                        perView: carouselMobileView
                     },
                     1024: {
-                        perView: carouselTabletView,
-                        gap: calculateGap(carouselTabletView)
+                        perView: carouselTabletView
                     },
                     1440: {
-                        perView: carouselLaptopView,
-                        gap: calculateGap(carouselLaptopView)
+                        perView: carouselLaptopView
                     }
                 }
             });
