@@ -122,16 +122,17 @@
   display: inline-flex;
   list-style: none;
   transform: translateX(-50%);
-  gap: 5px;
+  gap: 2px;
 }
 
 .frontblocks .glide__bullet {
   background-color: rgba(255, 255, 255, 0.5);
-  width: 13px;
-  height: 13px;
-  padding: 0;
+  width: 14px;
+  height: 14px;
+  padding: 10px;
   border-radius: 50%;
   border: 2px solid transparent;
+  background-clip: content-box;
   transition: all 300ms ease-in-out;
   cursor: pointer;
   line-height: 0;
@@ -139,17 +140,20 @@
 }
 
 .frontblocks .glide__bullet:focus {
-  outline: none;
+  outline: 2px solid white;
+  outline-offset: 2px;
 }
 
 .frontblocks .glide__bullet:hover,
 .frontblocks .glide__bullet:focus {
   border: 2px solid white;
   background-color: rgba(255, 255, 255, 0.5);
+  background-clip: content-box;
 }
 
 .frontblocks .glide__bullet--active {
   background-color: white;
+  background-clip: content-box;
 }
 
 .frontblocks.glide--swipeable {
