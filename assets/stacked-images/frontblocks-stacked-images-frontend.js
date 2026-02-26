@@ -77,18 +77,27 @@
 				(entries) => {
 					entries.forEach(entry => {
 						if (entry.isIntersecting) {
+							container.classList.add('frbl-animated');
 							animateImages(images, duration, delay);
 							observer.unobserve(entry.target);
 						}
 					});
 				},
 				{
-					threshold: 0.2,
-					rootMargin: '0px',
+					threshold: 0.05,
+					rootMargin: '50px 0px 50px 0px',
 				}
 			);
 
 			observer.observe(container);
+
+			// Fallback: if observer never fires (e.g. layout/height issue on mobile), animate after a short delay.
+			setTimeout(() => {
+				if (!container.classList.contains('frbl-animated')) {
+					container.classList.add('frbl-animated');
+					animateImages(images, duration, delay);
+				}
+			}, 800);
 		});
 	}
 

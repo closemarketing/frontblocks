@@ -53,6 +53,14 @@
   user-select: none;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Prevent inner content (cards, AWB, etc.) from overflowing the slide and being cut off. */
+.frontblocks .glide__slide > * {
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .frontblocks .glide__slide a {

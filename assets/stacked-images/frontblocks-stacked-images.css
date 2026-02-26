@@ -2,18 +2,22 @@
  * FrontBlocks Stacked Images Styles
  */
 
-/* Wrapper */
+/* Wrapper – centered, compact size on all viewports */
 .frbl-stacked-images-wrapper {
 	position: relative;
 	width: 100%;
+	max-width: 520px;
+	max-height: 65vh;
+	margin-left: auto;
+	margin-right: auto;
 	overflow: visible;
 	display: block;
 	background: transparent;
-	padding: 50px;
-	margin: -50px;
+	padding: 40px;
+	box-sizing: border-box;
 }
 
-/* Container */
+/* Container – center content horizontally and vertically */
 .frbl-stacked-images-container {
 	position: relative;
 	width: 100%;
@@ -22,13 +26,16 @@
 	align-items: center;
 	justify-content: center;
 	overflow: visible;
+	margin: 0 auto;
 }
 
-/* Individual image */
+/* Individual image – flex center so img is always centered */
 .frbl-stacked-image {
 	position: absolute;
 	top: 0;
 	left: 0;
+	right: 0;
+	bottom: 0;
 	width: 100%;
 	height: 100%;
 	display: flex;
@@ -38,6 +45,7 @@
 	opacity: 0;
 	visibility: hidden;
 	overflow: visible;
+	margin: auto;
 }
 
 /* Show when initialized */
@@ -46,12 +54,14 @@
 }
 
 .frbl-stacked-image img {
-	max-width: 100%;
-	max-height: 100%;
+	max-width: 85%;
+	max-height: 85%;
 	width: auto;
 	height: auto;
 	object-fit: contain;
+	object-position: center;
 	display: block;
+	margin: auto;
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -98,10 +108,37 @@
 	pointer-events: none;
 }
 
-/* Responsive */
+/* Tablet / ventana media: aquí suele verse enorme, lo limitamos mucho */
+@media (min-width: 769px) and (max-width: 1200px) {
+	.frbl-stacked-images-wrapper {
+		max-width: 420px;
+		max-height: 55vh;
+		padding: 24px;
+	}
+	.frbl-stacked-image img {
+		max-width: 82%;
+		max-height: 82%;
+	}
+}
+
+/* Mobile */
 @media (max-width: 768px) {
 	.frbl-stacked-images-wrapper {
-		height: auto !important;
-		min-height: 300px;
+		min-height: 260px;
+		max-height: 60vh;
+		max-width: 88%;
+		margin-left: auto;
+		margin-right: auto;
+		padding: 20px;
+	}
+	.frbl-stacked-images-container {
+		min-height: 260px;
+		margin: 0 auto;
+	}
+	.frbl-stacked-image img {
+		max-width: 85%;
+		max-height: 55vh;
+		object-position: center;
+		margin: auto;
 	}
 }
