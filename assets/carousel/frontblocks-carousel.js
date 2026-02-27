@@ -72,20 +72,19 @@ window.addEventListener('load', function (event) {
                     bullet.classList.add('glide__bullet');
                     bullet.setAttribute('data-glide-dir', '=' + i);
                     bullet.setAttribute('aria-label', 'Go to slide ' + (i + 1));
-                    bullet.style.backgroundColor = carouselbuttonsBackgroundColor;
                     bullets.appendChild(bullet);
                 }
 
                 wrapperParent.appendChild(bullets);
 
-                // Add custom CSS for active bullet color
-                const style = document.createElement('style');
-                style.textContent = `
-					.frontblocks .glide__bullet.glide__bullet--active {
-						background-color: ${carouselbuttonsColor};
-					}
-				`;
-                document.head.appendChild(style);
+                // Set bullet colors via CSS custom properties on the wrapper.
+                // This avoids specificity conflicts with the stylesheet.
+                if (carouselbuttonsColor) {
+                    wrapperParent.style.setProperty('--frbl-bullet-color', carouselbuttonsColor);
+                }
+                if (carouselbuttonsBackgroundColor && carouselbuttonsBackgroundColor !== 'transparent') {
+                    wrapperParent.style.setProperty('--frbl-bullet-bg', carouselbuttonsBackgroundColor);
+                }
             }
 
             if (carouselbuttons == 'arrows') {
