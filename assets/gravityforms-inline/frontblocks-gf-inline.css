@@ -173,3 +173,26 @@
 	margin-right: 10px;
 }
 
+/* -------------------------------------------------------------------------
+   GenerateBlocks Accordion + Gravity Form: remove blank space when closed
+   When a Gravity Form is inside a GB accordion and the accordion is above
+   the footer, the closed content can still reserve space. Force it to none.
+   ------------------------------------------------------------------------- */
+.gb-accordion__item:not(.gb-accordion__item-open):not([data-accordion-is-open="true"]) > .gb-accordion__content {
+	display: none;
+	overflow: hidden;
+	max-height: 0;
+	min-height: 0 ;
+	margin: 0 ;
+	padding: 0 ;
+	visibility: hidden;
+}
+
+/* Prevent Gravity Form wrapper from forcing height when inside closed accordion. */
+.gb-accordion__item:not(.gb-accordion__item-open):not([data-accordion-is-open="true"]) > .gb-accordion__content .gform_wrapper {
+	min-height: 0;
+	height: 0;
+	overflow: hidden;
+	visibility: hidden;
+}
+
