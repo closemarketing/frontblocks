@@ -106,31 +106,40 @@ function addCustomCarouselPanel( BlockEdit ) {
 			let mounted = true;
 			let timer   = null;
 
-			function cleanup() {
-				if ( ! stateRef.current ) return;
-				const { originalParent, wrapper, gridEl, clones } = stateRef.current;
-				try {
-					// Remove clones first
-					( clones || [] ).forEach( ( c ) => c.parentNode && c.parentNode.removeChild( c ) );
+		function cleanup() {
+			if ( ! stateRef.current ) return;
+			const { gridEl, slides, spacer, prevBtn, nextBtn, resizeObs, scrollFn } = stateRef.current;
 
-					if ( wrapper.parentNode ) {
-						originalParent.replaceChild( gridEl, wrapper );
-					}
-					// Remove ALL inline styles we added
-					[
-						'display', 'flex-wrap', 'gap',
-						'transition', 'will-change', 'transform',
-					].forEach( ( p ) => gridEl.style.removeProperty( p ) );
+			// Disconnect observer and scroll listener.
+			if ( resizeObs ) resizeObs.disconnect();
+			const editorDoc = getEditorDocument();
+			const editorScrollEl = editorDoc.documentElement || editorDoc.body;
+			if ( scrollFn ) editorScrollEl.removeEventListener( 'scroll', scrollFn, true );
 
-					// Remove slide sizing from children
-					Array.from( gridEl.children )
-						.filter( ( el ) => UUID_RE.test( el.dataset.block || '' ) )
-						.forEach( ( slide ) => {
-							slide.style.removeProperty( 'flex-shrink' );
-							slide.style.removeProperty( 'width' );
-							slide.style.removeProperty( 'min-width' );
-						} );
+			// Remove arrows from outer window body (completely outside React).
+			[ prevBtn, nextBtn ].forEach( ( btn ) => {
+				if ( btn && btn.parentNode ) btn.parentNode.removeChild( btn );
+			} );
+
+			// Remove right spacer element.
+			if ( spacer && spacer.parentNode ) spacer.parentNode.removeChild( spacer );
+
+			// Restore gridEl styles.
+			try {
+				gridEl.classList.remove( 'frbl-carousel-noscrollbar' );
+				[
+					'display', 'flex-wrap', 'gap',
+					'overflow-x', 'scroll-behavior',
+					'padding-left', 'padding-right',
+				].forEach( ( p ) => gridEl.style.removeProperty( p ) );
+
+					slides.forEach( ( slide ) => {
+						[ 'flex-shrink', 'width', 'min-width',
+						  'margin-left', 'margin-right', 'grid-column',
+						].forEach( ( p ) => slide.style.removeProperty( p ) );
+					} );
 				} catch ( e ) {}
+
 				stateRef.current = null;
 			}
 
@@ -141,9 +150,7 @@ function addCustomCarouselPanel( BlockEdit ) {
 				const editorDoc = getEditorDocument();
 
 				// GB 2.x wraps blocks in a root element that shares the same data-block UUID.
-				// Using data-type ensures we pick the inner element that actually IS the block.
-				// For native blocks (core/group) there is no double-wrapper, so the fallback
-				// to plain [data-block] is safe.
+				// Use data-type to select the correct inner element; fall back for native blocks.
 				let blockEl = editorDoc.querySelector(
 					`[data-block="${ props.clientId }"][data-type="${ props.name }"]`
 				);
@@ -153,7 +160,7 @@ function addCustomCarouselPanel( BlockEdit ) {
 				if ( ! blockEl ) return;
 
 				const gridEl = findGridEl( blockEl, props.name );
-				if ( ! gridEl || gridEl.closest( '.frbl-editor-carousel' ) ) return;
+				if ( ! gridEl ) return;
 
 				// Slides = direct children that are real blocks (UUID data-block).
 				const slides = Array.from( gridEl.children ).filter(
@@ -161,112 +168,127 @@ function addCustomCarouselPanel( BlockEdit ) {
 				);
 				if ( slides.length === 0 ) return;
 
-				const perView = Math.max( 1, parseInt( frblItemsToView ) || 4 );
-				const gap     = Math.max( 0, parseInt( frblGap ) || 20 );
+				const perView    = Math.max( 1, parseInt( frblItemsToView ) || 4 );
+				const gap        = Math.max( 0, parseInt( frblGap ) || 20 );
+				const btnColor   = frblButtonColor   || '#fff';
+				const btnBg      = frblButtonBgColor || 'rgba(0,0,0,0.45)';
 
-				// ── Create the overflow:hidden wrapper ───────────────────────
-				const originalParent = gridEl.parentNode;
-				const wrapper        = editorDoc.createElement( 'div' );
-				wrapper.className    = 'frbl-editor-carousel';
-				originalParent.replaceChild( wrapper, gridEl );
-				wrapper.appendChild( gridEl );
+				// Measure content-box width before any style changes.
+				const editorWin  = editorDoc.defaultView || window;
+			const ARROW_W    = 40; // px reserved on each side for arrow buttons.
+			const cs         = editorWin.getComputedStyle( gridEl );
+			const innerW     = gridEl.getBoundingClientRect().width
+				- ( parseFloat( cs.paddingLeft )  || 0 )
+				- ( parseFloat( cs.paddingRight ) || 0 );
+			const totalWidth = Math.round( innerW ) || 600;
+			// Content area after reserving space for both arrow buttons.
+			const contentW   = totalWidth - ARROW_W * 2;
+			const slideWidth = Math.round( ( contentW - gap * ( perView - 1 ) ) / perView );
+			const step       = slideWidth + gap;
 
-				// ── Apply flex layout to the grid element itself ─────────────
-				gridEl.style.display    = 'flex';
-				gridEl.style.flexWrap   = 'nowrap';
-				gridEl.style.gap        = gap + 'px';
-				gridEl.style.transition = 'transform 400ms ease';
-				gridEl.style.willChange = 'transform';
+			// ── Apply scroll-based layout directly to gridEl ─────────────
+			// No DOM restructuring → no React reconciliation conflicts.
+			gridEl.classList.add( 'frbl-carousel-noscrollbar' );
+			gridEl.style.display        = 'flex';
+			gridEl.style.flexWrap       = 'nowrap';
+			gridEl.style.gap            = gap + 'px';
+			gridEl.style.overflowX      = 'scroll';
+			gridEl.style.scrollBehavior = 'smooth';
+			// paddingLeft creates left space for the prev arrow.
+			// paddingRight is NOT used because Chrome ignores it in scroll extent;
+			// a spacer flex child is appended instead to guarantee right-side space.
+			gridEl.style.paddingLeft    = ARROW_W + 'px';
+			gridEl.style.paddingRight   = '0';
 
-				// ── Size each slide ──────────────────────────────────────────
-				const totalWidth = wrapper.offsetWidth || 600;
-				const slideWidth = Math.floor(
-					( totalWidth - gap * ( perView - 1 ) ) / perView
-				);
+			slides.forEach( ( slide ) => {
+				slide.style.flexShrink  = '0';
+				slide.style.width       = slideWidth + 'px';
+				slide.style.minWidth    = slideWidth + 'px';
+				slide.style.marginLeft  = '0';
+				slide.style.marginRight = '0';
+				slide.style.gridColumn  = 'unset';
+			} );
 
-				slides.forEach( ( slide ) => {
-					slide.style.flexShrink = '0';
-					slide.style.width      = slideWidth + 'px';
-					slide.style.minWidth   = slideWidth + 'px';
-				} );
+			// Right-side spacer: Chrome does not include padding-right in horizontal
+			// scroll extent, so we use a real flex child to guarantee right space.
+			const appender = gridEl.querySelector( '.block-list-appender' );
+			const spacer   = editorDoc.createElement( 'span' );
+			spacer.setAttribute( 'data-frbl-spacer', '1' );
+			spacer.style.cssText = `display:block;flex-shrink:0;width:${ ARROW_W }px;min-width:${ ARROW_W }px;`;
+			gridEl.insertBefore( spacer, appender || null );
 
-				// ── Trailing loop clones ─────────────────────────────────────
-				// Add perView clones from the start after the last real slide so
-				// the next-arrow transition looks smooth before snapping back.
-				const clones = [];
-				const directAppender = Array.from( gridEl.children ).find(
-					( c ) => c.classList.contains( 'block-list-appender' )
-				);
-				for ( let i = 0; i < perView; i++ ) {
-					const clone = slides[ i % slides.length ].cloneNode( true );
-					clone.removeAttribute( 'data-block' );
-					clone.setAttribute( 'aria-hidden', 'true' );
-					clone.classList.add( 'frbl-slide-clone' );
-					clone.style.flexShrink    = '0';
-					clone.style.width         = slideWidth + 'px';
-					clone.style.minWidth      = slideWidth + 'px';
-					clone.style.pointerEvents = 'none';
-					gridEl.insertBefore( clone, directAppender || null );
-					clones.push( clone );
-				}
+			// ── Navigation (scrollLeft, infinite loop) ───────────────────
+				let idx = 0;
 
-				// ── Slide navigation (infinite loop) ─────────────────────────
-				let idx     = 0;
-				let looping = false;
-
-				function slideTo( n ) {
-					if ( looping ) return;
-
-					if ( n < 0 ) {
-						// Backwards wrap: jump to end of real slides silently, then animate back one.
-						gridEl.style.transition = 'none';
-						idx = slides.length;
-						gridEl.style.transform = `translateX(-${ idx * ( slideWidth + gap ) }px)`;
-						void gridEl.offsetWidth; // force reflow
-						gridEl.style.transition = 'transform 400ms ease';
-						idx = slides.length - 1;
-						gridEl.style.transform = `translateX(-${ idx * ( slideWidth + gap ) }px)`;
+				function scrollTo( n ) {
+					const total = slides.length;
+					if ( n >= total ) {
+						// Forward past last: instant snap to 0 then continue.
+						gridEl.style.scrollBehavior = 'auto';
+						gridEl.scrollLeft = 0;
+						void gridEl.offsetWidth;
+						gridEl.style.scrollBehavior = 'smooth';
+						idx = 0;
 						return;
 					}
-
-					idx = n;
-					gridEl.style.transform = `translateX(-${ idx * ( slideWidth + gap ) }px)`;
-
-					// After animating into the trailing clones zone, silently snap back to real position.
-					if ( idx >= slides.length ) {
-						looping = true;
-						setTimeout( () => {
-							gridEl.style.transition = 'none';
-							idx = idx % slides.length;
-							gridEl.style.transform = `translateX(-${ idx * ( slideWidth + gap ) }px)`;
-							void gridEl.offsetWidth;
-							gridEl.style.transition = 'transform 400ms ease';
-							looping = false;
-						}, 420 );
+					if ( n < 0 ) {
+						// Back past first: instant snap to last.
+						gridEl.style.scrollBehavior = 'auto';
+						gridEl.scrollLeft = Math.round( ( total - 1 ) * step );
+						void gridEl.offsetWidth;
+						gridEl.style.scrollBehavior = 'smooth';
+						idx = total - 1;
+						return;
 					}
+					idx = n;
+					gridEl.scrollLeft = Math.round( idx * step );
 				}
 
+				// ── Arrows in OUTER document body ────────────────────────────
+				// Placing them outside the iframe means React never touches them.
+				const iframe = document.querySelector( 'iframe[name="editor-canvas"]' );
 
-				// ── Arrows ───────────────────────────────────────────────────
-				const btnColor = frblButtonColor   || '#fff';
-				const btnBg    = frblButtonBgColor || 'rgba(0,0,0,0.45)';
+				function updateArrowPos() {
+					if ( ! stateRef.current ) return;
+					const ifrRect = iframe ? iframe.getBoundingClientRect() : { top: 0, left: 0 };
+					const rect    = gridEl.getBoundingClientRect(); // coords in iframe viewport
+					const midY    = Math.round( ifrRect.top + rect.top + rect.height / 2 - 16 );
 
-				[ 'prev', 'next' ].forEach( ( dir ) => {
-					const btn   = editorDoc.createElement( 'button' );
-					btn.type    = 'button';
+					prevBtn.style.top   = midY + 'px';
+					prevBtn.style.left  = Math.round( ifrRect.left + rect.left + 8 ) + 'px';
+					nextBtn.style.top   = midY + 'px';
+					nextBtn.style.right = Math.round( window.innerWidth - ( ifrRect.left + rect.right ) + 8 ) + 'px';
+				}
+
+				function makeArrow( dir ) {
+					const btn = document.createElement( 'button' );
+					btn.type  = 'button';
 					btn.className = `frbl-editor-arrow frbl-editor-arrow-${ dir }`;
 					btn.setAttribute( 'aria-label', dir === 'prev' ? 'Previous slide' : 'Next slide' );
-					btn.style.backgroundColor = btnBg;
+					btn.style.cssText = `position:fixed;z-index:99999;background-color:${ btnBg };`;
 					const d = dir === 'prev' ? 'M6 1L1 6L6 11' : 'M1 11L6 6L1 1';
-					btn.innerHTML = `<svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="${ d }" stroke="${ btnColor }" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+					btn.innerHTML = `<svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="${ d }" stroke="${ btnColor }" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 					btn.addEventListener( 'click', ( e ) => {
 						e.stopPropagation();
-						slideTo( dir === 'prev' ? idx - 1 : idx + 1 );
+						scrollTo( dir === 'prev' ? idx - 1 : idx + 1 );
 					} );
-					wrapper.appendChild( btn );
-				} );
+					document.body.appendChild( btn );
+					return btn;
+				}
 
-				stateRef.current = { originalParent, wrapper, gridEl, clones };
+				const prevBtn = makeArrow( 'prev' );
+				const nextBtn = makeArrow( 'next' );
+				updateArrowPos();
+
+				// Keep arrows positioned correctly when the editor scrolls or resizes.
+				const resizeObs = new ResizeObserver( updateArrowPos );
+				resizeObs.observe( gridEl );
+
+				const editorScrollEl = editorDoc.documentElement || editorDoc.body;
+				const scrollFn       = updateArrowPos;
+				editorScrollEl.addEventListener( 'scroll', scrollFn, { passive: true, capture: true } );
+
+				stateRef.current = { gridEl, slides, spacer, prevBtn, nextBtn, resizeObs, scrollFn };
 			}
 
 			if ( frblGridOption !== 'none' ) {

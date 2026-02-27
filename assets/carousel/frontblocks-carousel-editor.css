@@ -1,18 +1,16 @@
 /* Editor-only carousel preview styles */
 
-.frbl-editor-carousel {
-	position: relative;
-	overflow: hidden;
-	width: 100%;
+/* Hide the native scrollbar on the carousel grid element */
+.frbl-carousel-noscrollbar {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+.frbl-carousel-noscrollbar::-webkit-scrollbar {
+	display: none;
 }
 
-
-/* Navigation arrows */
+/* Navigation arrows – rendered in the outer document body as position:fixed */
 .frbl-editor-arrow {
-	position: absolute;
-	top: 50%;
-	transform: translateY(-50%);
-	z-index: 10;
 	width: 32px;
 	height: 32px;
 	border-radius: 50%;
@@ -27,12 +25,4 @@
 
 .frbl-editor-arrow:hover {
 	opacity: 0.8;
-}
-
-.frbl-editor-arrow-prev {
-	left: 8px;
-}
-
-.frbl-editor-arrow-next {
-	right: 8px;
 }

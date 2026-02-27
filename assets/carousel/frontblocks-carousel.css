@@ -262,3 +262,15 @@
   min-width: 0;
   flex-shrink: 0;
 }
+
+/**
+ * GenerateBlocks (and any other plugin) may inject column-gap via generated
+ * utility classes on the carousel slides container.  Glide manages its own
+ * spacing through margin-right on each slide, so any external column-gap
+ * breaks the width calculation and must be zeroed out.
+ */
+.frontblocks-carousel,
+.frontblocks .glide__slides {
+  column-gap: 0 !important;
+  gap: 0 !important;
+}
