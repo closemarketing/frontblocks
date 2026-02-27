@@ -1,5 +1,8 @@
 "use strict";
 
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 // Add custom controls to the Advanced panel of GenerateBlocks Grid block
 var addFilter = wp.hooks.addFilter;
 var _wp$element = wp.element,
@@ -24,27 +27,56 @@ function getEditorDocument() {
   var iframe = document.querySelector('iframe[name="editor-canvas"]');
   return iframe && iframe.contentDocument && iframe.contentDocument.body ? iframe.contentDocument : document;
 }
+var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-/;
+
+/**
+ * Walk an element's subtree to find the container whose DIRECT children
+ * are actual blocks (UUID data-block).  Stops at depth 4.
+ */
+function findSlidesParent(el, depth) {
+  if (depth === 0) return null;
+  if (Array.from(el.children).some(function (c) {
+    return UUID_RE.test(c.dataset.block || '');
+  })) {
+    return el;
+  }
+  var _iterator = _createForOfIteratorHelper(el.children),
+    _step;
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var child = _step.value;
+      var found = findSlidesParent(child, depth - 1);
+      if (found) return found;
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+  return null;
+}
 
 /**
  * Find the grid DOM element for a given block.
  *
- * KEY INSIGHT from inspecting the real DOM:
- *   - For generateblocks/element (Grid): the [data-block] wrapper IS the
- *     gb-element element.  Do NOT search inside – that returns a child item.
- *   - For generateblocks/grid: look for .gb-grid-wrapper inside.
- *   - For core/group: the [data-block] wrapper itself has is-layout-grid.
+ * For generateblocks/element: [data-block][data-type] IS the gb-element.
+ *   Do NOT search inside – that returns a child item.
+ * For generateblocks/grid:  look for .gb-grid-wrapper inside.
+ * For core/group: walk the subtree to find the element whose children
+ *   are the real blocks, because WP nests them differently across versions.
  */
 function findGridEl(blockEl, name) {
   if (name === 'generateblocks/element') {
-    return blockEl; // blockEl IS the gb-element grid
+    return blockEl;
   }
   if (name === 'generateblocks/grid') {
     if (blockEl.classList.contains('gb-grid-wrapper')) return blockEl;
-    return blockEl.querySelector('.gb-grid-wrapper') || null;
+    var grid = blockEl.querySelector('.gb-grid-wrapper');
+    return grid || null;
   }
   if (name === 'core/group') {
-    if (blockEl.classList.contains('is-layout-grid')) return blockEl;
-    return blockEl.querySelector('.is-layout-grid') || null;
+    // Walk up to 4 levels deep to find where the child blocks live.
+    return findSlidesParent(blockEl, 4) || blockEl;
   }
   return null;
 }
@@ -117,9 +149,8 @@ function addCustomCarouselPanel(BlockEdit) {
           });
 
           // Remove slide sizing from children
-          var uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-/;
           Array.from(gridEl.children).filter(function (el) {
-            return uuidRe.test(el.dataset.block || '');
+            return UUID_RE.test(el.dataset.block || '');
           }).forEach(function (slide) {
             slide.style.removeProperty('flex-shrink');
             slide.style.removeProperty('width');
@@ -133,19 +164,21 @@ function addCustomCarouselPanel(BlockEdit) {
         cleanup();
         var editorDoc = getEditorDocument();
 
-        // Both the outer root wrapper and the inner gb-element share the same
-        // data-block UUID in GenerateBlocks 2.x. Use data-type to select the
-        // correct inner element.
+        // GB 2.x wraps blocks in a root element that shares the same data-block UUID.
+        // Using data-type ensures we pick the inner element that actually IS the block.
+        // For native blocks (core/group) there is no double-wrapper, so the fallback
+        // to plain [data-block] is safe.
         var blockEl = editorDoc.querySelector("[data-block=\"".concat(props.clientId, "\"][data-type=\"").concat(props.name, "\"]"));
+        if (!blockEl) {
+          blockEl = editorDoc.querySelector("[data-block=\"".concat(props.clientId, "\"]"));
+        }
         if (!blockEl) return;
         var gridEl = findGridEl(blockEl, props.name);
         if (!gridEl || gridEl.closest('.frbl-editor-carousel')) return;
 
-        // Slides = direct children that are real blocks.
-        // Filter by UUID pattern to exclude block-list-appender (data-block="true").
-        var uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-/;
+        // Slides = direct children that are real blocks (UUID data-block).
         var slides = Array.from(gridEl.children).filter(function (el) {
-          return uuidRe.test(el.dataset.block || '');
+          return UUID_RE.test(el.dataset.block || '');
         });
         if (slides.length === 0) return;
         var perView = Math.max(1, parseInt(frblItemsToView) || 4);
@@ -226,12 +259,6 @@ function addCustomCarouselPanel(BlockEdit) {
             }, 420);
           }
         }
-
-        // ── Badge ────────────────────────────────────────────────────
-        var badge = editorDoc.createElement('div');
-        badge.className = 'frbl-editor-badge';
-        badge.textContent = '🎠 Carousel Preview';
-        wrapper.appendChild(badge);
 
         // ── Arrows ───────────────────────────────────────────────────
         var btnColor = frblButtonColor || '#fff';
