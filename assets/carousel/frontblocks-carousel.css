@@ -7,7 +7,7 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;
   margin: 0;
   padding: 0;
 }
@@ -123,45 +123,41 @@
 }
 
 .frontblocks .glide__bullets {
-  position: absolute;
-  z-index: 2;
-  bottom: -1em;
-  left: 50%;
-  display: inline-flex;
+  display: flex;
+  justify-content: center;
   list-style: none;
-  transform: translateX(-50%);
   gap: 2px;
+  margin: 0.75em 0 0;
+  padding: 0;
 }
 
 .frontblocks .glide__bullet {
-  background-color: rgba(255, 255, 255, 0.5);
-  width: 14px;
-  height: 14px;
-  padding: 10px;
+  box-sizing: content-box;
+  width: 10px;
+  height: 10px;
+  padding: 0;
   border-radius: 50%;
-  border: 2px solid transparent;
-  background-clip: content-box;
-  transition: all 300ms ease-in-out;
+  border: none;
+  background-color: var(--frbl-bullet-bg, rgba(0, 0, 0, 0.25));
   cursor: pointer;
-  line-height: 0;
-  margin: 0;
+  transition: background-color 300ms ease-in-out, transform 300ms ease-in-out;
+  margin: 0 2px;
+  flex-shrink: 0;
 }
 
 .frontblocks .glide__bullet:focus {
-  outline: 2px solid white;
+  outline: 2px solid var(--frbl-bullet-color, rgba(0, 0, 0, 0.8));
   outline-offset: 2px;
 }
 
-.frontblocks .glide__bullet:hover,
-.frontblocks .glide__bullet:focus {
-  border: 2px solid white;
-  background-color: rgba(255, 255, 255, 0.5);
-  background-clip: content-box;
+.frontblocks .glide__bullet:hover {
+  background-color: var(--frbl-bullet-color, rgba(0, 0, 0, 0.8));
+  transform: scale(1.2);
 }
 
 .frontblocks .glide__bullet--active {
-  background-color: white;
-  background-clip: content-box;
+  background-color: var(--frbl-bullet-color, rgba(0, 0, 0, 0.8));
+  transform: scale(1.2);
 }
 
 .frontblocks.glide--swipeable {
@@ -261,4 +257,16 @@
 .frontblocks .glide__slides > .glide__slide {
   min-width: 0;
   flex-shrink: 0;
+}
+
+/**
+ * GenerateBlocks (and any other plugin) may inject column-gap via generated
+ * utility classes on the carousel slides container.  Glide manages its own
+ * spacing through margin-right on each slide, so any external column-gap
+ * breaks the width calculation and must be zeroed out.
+ */
+.frontblocks-carousel,
+.frontblocks .glide__slides {
+  column-gap: 0 !important;
+  gap: 0 !important;
 }

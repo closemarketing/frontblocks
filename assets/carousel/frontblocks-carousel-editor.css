@@ -1,0 +1,28 @@
+/* Editor-only carousel preview styles */
+
+/* Hide the native scrollbar on the carousel grid element */
+.frbl-carousel-noscrollbar {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+.frbl-carousel-noscrollbar::-webkit-scrollbar {
+	display: none;
+}
+
+/* Navigation arrows – rendered in the outer document body as position:fixed */
+.frbl-editor-arrow {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	border: none;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	transition: opacity 0.2s;
+}
+
+.frbl-editor-arrow:hover {
+	opacity: 0.8;
+}

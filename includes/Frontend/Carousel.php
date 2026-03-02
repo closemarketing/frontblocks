@@ -33,10 +33,28 @@ class Carousel {
 	 */
 	private function init_hooks() {
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_block_canvas_assets' ) );
 		add_filter( 'render_block_generateblocks/grid', array( $this, 'add_custom_attributes_to_grid_block' ), 10, 2 );
 		add_filter( 'render_block_generateblocks/element', array( $this, 'add_custom_attributes_to_element_block' ), 10, 2 );
 		add_filter( 'render_block_core/group', array( $this, 'add_custom_attributes_to_core_group_block' ), 10, 2 );
 		add_action( 'init', array( $this, 'register_custom_attributes' ), 5 );
+	}
+
+	/**
+	 * Enqueue carousel CSS in the editor canvas (iframe).
+	 *
+	 * @return void
+	 */
+	public function enqueue_block_canvas_assets() {
+		if ( ! is_admin() ) {
+			return;
+		}
+		wp_enqueue_style(
+			'frontblocks-carousel-editor',
+			FRBL_PLUGIN_URL . 'assets/carousel/frontblocks-carousel-editor.css',
+			array(),
+			FRBL_VERSION
+		);
 	}
 
 	/**
