@@ -162,5 +162,14 @@ class Plugin_Main {
 			FRBL_VERSION,
 			true
 		);
+
+		// GenerateBlocks Accordion fix – ensures accordions work when FrontBlocks is active.
+		wp_enqueue_script(
+			'frontblocks-accordion',
+			FRBL_PLUGIN_URL . 'assets/accordion/frontblocks-accordion.js',
+			array(),
+			FRBL_VERSION,
+			true
+		);
 	}
 }
