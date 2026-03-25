@@ -32,12 +32,37 @@ class Carousel {
 	 * @return void
 	 */
 	private function init_hooks() {
+		add_action( 'init', array( $this, 'register_frontend_assets' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		add_action( 'enqueue_block_assets', array( $this, 'enqueue_block_canvas_assets' ) );
 		add_filter( 'render_block_generateblocks/grid', array( $this, 'add_custom_attributes_to_grid_block' ), 10, 2 );
 		add_filter( 'render_block_generateblocks/element', array( $this, 'add_custom_attributes_to_element_block' ), 10, 2 );
 		add_filter( 'render_block_core/group', array( $this, 'add_custom_attributes_to_core_group_block' ), 10, 2 );
 		add_action( 'init', array( $this, 'register_custom_attributes' ), 5 );
+	}
+
+	/**
+	 * Register frontend carousel assets for conditional enqueueing.
+	 *
+	 * @return void
+	 */
+	public function register_frontend_assets() {
+		// Assets are registered in Plugin_Main::register_scripts().
+		// This method exists as a hook point for any additional registration needs.
+	}
+
+	/**
+	 * Enqueue carousel frontend assets when a carousel block is detected.
+	 *
+	 * @return void
+	 */
+	private function enqueue_carousel_assets() {
+		if ( ! wp_style_is( 'frontblocks-carousel', 'enqueued' ) ) {
+			wp_enqueue_style( 'frontblocks-carousel' );
+		}
+		if ( ! wp_script_is( 'frontblocks-carousel-custom', 'enqueued' ) ) {
+			wp_enqueue_script( 'frontblocks-carousel-custom' );
+		}
 	}
 
 	/**
@@ -129,6 +154,8 @@ class Carousel {
 				$block_content,
 				1 // Only replace the first occurrence.
 			);
+
+			$this->enqueue_carousel_assets();
 		}
 
 		return $block_content;
@@ -195,6 +222,8 @@ class Carousel {
 				$block_content,
 				1 // Only replace the first occurrence.
 			);
+
+			$this->enqueue_carousel_assets();
 		}
 
 		return $block_content;
@@ -261,6 +290,8 @@ class Carousel {
 				$block_content,
 				1 // Only replace the first occurrence.
 			);
+
+			$this->enqueue_carousel_assets();
 		}
 
 		return $block_content;

@@ -24,9 +24,10 @@ class Headline {
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_assets' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ), 100 );
 		add_filter( 'generateblocks_attr_headline', array( $this, 'add_line_class_attribute' ), 10 );
 		add_filter( 'generateblocks_attr_text', array( $this, 'add_marquee_speed_attribute' ), 10, 2 );
+		add_filter( 'render_block_generateblocks/text', array( $this, 'maybe_enqueue_frontend_assets' ), 10, 2 );
+		add_filter( 'render_block_generateblocks/headline', array( $this, 'maybe_enqueue_frontend_assets' ), 10, 2 );
 	}
 
 	/**
@@ -84,13 +85,26 @@ class Headline {
 	}
 
 	/**
-	 * Enqueue frontend styles and scripts.
+	 * Conditionally enqueue frontend assets when a GenerateBlocks headline/text block is rendered.
 	 *
-	 * @return void
+	 * @param string $block_content Block content.
+	 * @param array  $block         Block data.
+	 * @return string
 	 */
-	public function enqueue_frontend_styles() {
-		wp_enqueue_style( 'frontblocks-headline-styles' );
-		wp_enqueue_script( 'frontblocks-headline-marquee' );
+	public function maybe_enqueue_frontend_assets( $block_content, $block ) {
+		$attrs = $block['attrs'] ?? array();
+
+		// Enqueue headline styles when any headline/text block with frbl features is rendered.
+		if ( ! wp_style_is( 'frontblocks-headline-styles', 'enqueued' ) ) {
+			wp_enqueue_style( 'frontblocks-headline-styles' );
+		}
+
+		// Enqueue marquee script only when marquee is active on this block.
+		if ( ! empty( $attrs['frblMarqueeSpeed'] ) && ! wp_script_is( 'frontblocks-headline-marquee', 'enqueued' ) ) {
+			wp_enqueue_script( 'frontblocks-headline-marquee' );
+		}
+
+		return $block_content;
 	}
 
 	/**
