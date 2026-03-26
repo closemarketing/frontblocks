@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Accordion fixture – FrontBlocks</title>
+	<style>
+		.gb-accordion__content { display: none; }
+		.gb-accordion__item-open .gb-accordion__content { display: block; }
+	</style>
+</head>
+<body>
+	<div class="gb-accordion">
+		<!-- Item 1: starts closed -->
+		<div class="gb-accordion__item" id="item-1">
+			<button class="gb-accordion__toggle" aria-expanded="false">Toggle 1</button>
+			<div class="gb-accordion__content">
+				<p id="content-1">Content for item 1</p>
+			</div>
+		</div>
+
+		<!-- Item 2: starts open -->
+		<div class="gb-accordion__item gb-accordion__item-open" id="item-2">
+			<button class="gb-accordion__toggle" aria-expanded="true">Toggle 2</button>
+			<div class="gb-accordion__content">
+				<p id="content-2">Content for item 2</p>
+			</div>
+		</div>
+
+		<!-- Item 3: starts closed -->
+		<div class="gb-accordion__item" id="item-3">
+			<button class="gb-accordion__toggle" aria-expanded="false">Toggle 3</button>
+			<div class="gb-accordion__content">
+				<p id="content-3">Content for item 3</p>
+			</div>
+		</div>
+	</div>
+
+	<script src="/assets/accordion/frontblocks-accordion.js"></script>
+</body>
+</html>

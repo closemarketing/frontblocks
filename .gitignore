@@ -40,3 +40,8 @@ node_modules/
 
 # dotenv environment variables file
 .env
+
+# Playwright
+tests/e2e/playwright-report/
+tests/e2e/test-results/
+tests/e2e/dist/

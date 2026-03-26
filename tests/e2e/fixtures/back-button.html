@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Back Button fixture – FrontBlocks</title>
+	<style>
+		body { margin: 0; }
+		#frbl-back-button {
+			position: fixed;
+			bottom: 20px;
+			right: 20px;
+			display: none;
+			padding: 10px 20px;
+			background: #3b82f6;
+			color: white;
+			border: none;
+			cursor: pointer;
+		}
+		#frbl-back-button.frbl-show {
+			display: block;
+		}
+		.tall-content { height: 3000px; padding: 20px; }
+	</style>
+</head>
+<body>
+	<a id="frbl-back-button" href="#">Back</a>
+
+	<div class="tall-content">
+		<h1>Back Button Test Page</h1>
+		<p>Scroll down to see the back button appear.</p>
+	</div>
+
+	<script src="/assets/back-button/frontblocks-back-button.js"></script>
+</body>
+</html>

@@ -4,6 +4,7 @@
     "@babel/core": "^7.27.4",
     "@babel/preset-env": "^7.27.2",
     "@babel/preset-react": "^7.27.1",
+    "@playwright/test": "^1.58.2",
     "autoprefixer": "^10.4.20",
     "gulp": "^5.0.0",
     "gulp-clean-css": "^4.3.0",
@@ -11,6 +12,7 @@
     "merge-stream": "^2.0.0",
     "postcss": "^8.4.49",
     "postcss-cli": "^11.0.0",
+    "serve": "^14.2.6",
     "tailwindcss": "^3.4.15"
   },
   "babel": {
@@ -44,15 +46,15 @@
     "build:product-categories": "babel assets/product-categories/frontblocks-product-categories-option.jsx --out-file assets/product-categories/frontblocks-product-categories.js",
     "build:reading-time": "babel assets/reading-time/frontblocks-reading-time-option.jsx --out-file assets/reading-time/frontblocks-reading-time.js",
     "build:stacked-images": "babel assets/stacked-images/frontblocks-stacked-images-option.jsx --out-file assets/stacked-images/frontblocks-stacked-images.js",
-    
     "build:edge-alignment": "babel assets/container-edge-alignment/frontblocks-edge-alignment-option.jsx --out-file assets/container-edge-alignment/frontblocks-edge-alignment.js",
     "build:shape-animations": "babel assets/shape-animations/frontblocks-shape-animation-option.jsx --out-file assets/shape-animations/frontblocks-shape-animation-option.js",
     "build:gf-inline": "babel assets/gravityforms-inline/frontblocks-gf-inline-option.jsx --out-file assets/gravityforms-inline/frontblocks-gf-inline-option.js",
-
     "build:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css",
     "watch:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css --watch",
-    
-    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:headline && npm run build:product-categories && npm run build:reading-time && npm run build:stacked-images && npm run build:edge-alignment && npm run build:shape-animations && npm run build:gf-inline && npm run build:css"
+    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:headline && npm run build:product-categories && npm run build:reading-time && npm run build:stacked-images && npm run build:edge-alignment && npm run build:shape-animations && npm run build:gf-inline && npm run build:css",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed"
   },
   "dependencies": {
     "react": "^19.1.0",

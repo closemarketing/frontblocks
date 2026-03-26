@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Sticky Column fixture – FrontBlocks</title>
+	<style>
+		body { margin: 0; }
+		.frontblocks-sticky-wrapper {
+			display: flex;
+			height: 2000px;
+			margin-top: 800px;
+		}
+		.gb-grid-column {
+			flex: 1;
+			padding: 16px;
+		}
+		.gb-container {
+			background: #e5e7eb;
+			padding: 16px;
+		}
+		.sticky-active .gb-container {
+			position: sticky;
+		}
+		.spacer { height: 800px; background: #f3f4f6; }
+	</style>
+</head>
+<body>
+	<div class="spacer" id="top-spacer">Scroll down to reach the sticky wrapper</div>
+
+	<div
+		class="frontblocks-sticky-wrapper"
+		id="sticky-wrapper"
+		data-sticky-enabled="true"
+		data-sticky-offset="20"
+		data-sticky-column-index="0"
+	>
+		<div class="gb-grid-column" id="sticky-col">
+			<div class="gb-container" id="sticky-content">
+				Sticky column content
+			</div>
+		</div>
+		<div class="gb-grid-column">
+			<p>Normal column content</p>
+		</div>
+	</div>
+
+	<script src="/assets/sticky-column/frontblocks-sticky-column.js"></script>
+</body>
+</html>
