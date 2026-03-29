@@ -5,29 +5,49 @@
 	<title>Back Button fixture – FrontBlocks</title>
 	<style>
 		body { margin: 0; }
-		#frbl-back-button {
+
+		/* Mirrors the plugin's own CSS for the back button */
+		.frbl-back-button {
+			display: none;
 			position: fixed;
 			bottom: 20px;
 			right: 20px;
-			display: none;
-			padding: 10px 20px;
+			padding: 10px;
 			background: #3b82f6;
 			color: white;
 			border: none;
+			border-radius: 50%;
 			cursor: pointer;
+			z-index: 9999;
 		}
-		#frbl-back-button.frbl-show {
-			display: block;
+		.frbl-back-button.frbl-show {
+			display: flex;
+			align-items: center;
+			justify-content: center;
 		}
 		.tall-content { height: 3000px; padding: 20px; }
 	</style>
 </head>
 <body>
-	<a id="frbl-back-button" href="#">Back</a>
+
+	<!-- Matches the HTML rendered by BackButton::render_button() via wp_footer -->
+	<button
+		id="frbl-back-button"
+		class="frbl-back-button"
+		aria-label="Go back to previous page"
+		title="Go back"
+	>
+		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+			fill="none" stroke="currentColor" stroke-width="2"
+			stroke-linecap="round" stroke-linejoin="round">
+			<line x1="19" y1="12" x2="5" y2="12"></line>
+			<polyline points="12 19 5 12 12 5"></polyline>
+		</svg>
+	</button>
 
 	<div class="tall-content">
 		<h1>Back Button Test Page</h1>
-		<p>Scroll down to see the back button appear.</p>
+		<p>Scroll down to see the back button appear (requires prior navigation).</p>
 	</div>
 
 	<script src="/assets/back-button/frontblocks-back-button.js"></script>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Carousel fixture – FrontBlocks</title>
+	<style>
+		body { margin: 0; font-family: sans-serif; }
+
+		/* Minimal Glide base styles needed for rendering */
+		.glide { position: relative; width: 100%; box-sizing: border-box; }
+		.glide__track { overflow: hidden; }
+		.glide__slides {
+			position: relative;
+			width: 100%;
+			list-style: none;
+			backface-visibility: hidden;
+			transform-style: preserve-3d;
+			touch-action: pan-Y;
+			overflow: hidden;
+			margin: 0;
+			padding: 0;
+			white-space: nowrap;
+			display: flex;
+			flex-wrap: nowrap;
+			will-change: transform;
+		}
+		.glide__slide {
+			width: 100%;
+			height: 100%;
+			flex-shrink: 0;
+			white-space: normal;
+			user-select: none;
+			-webkit-touch-callout: none;
+			-webkit-tap-highlight-color: transparent;
+		}
+		.glide__arrow { cursor: pointer; }
+		.glide__bullet { cursor: pointer; }
+		.glide__slide { padding: 20px; background: #f3f4f6; margin-right: 10px; }
+	</style>
+</head>
+<body>
+
+	<!--
+		Mirrors the HTML rendered by Carousel.php on a GenerateBlocks grid.
+		The PHP class adds the `frontblocks-carousel` class and all data-* attributes
+		to the existing gb-grid-wrapper element.
+	-->
+	<div
+		id="carousel-arrows"
+		class="gb-grid-wrapper frontblocks-carousel"
+		data-type="carousel"
+		data-view="3"
+		data-laptop-view="2"
+		data-tablet-view="2"
+		data-mobile-view="1"
+		data-autoplay=""
+		data-gap="20"
+		data-buttons="arrows"
+		data-buttons-color="#ffffff"
+		data-buttons-background-color="rgba(0,0,0,0.45)"
+		data-buttons-position="side"
+		data-disable-on-desktop="false"
+	>
+		<div class="gb-grid-column"><p>Slide 1</p></div>
+		<div class="gb-grid-column"><p>Slide 2</p></div>
+		<div class="gb-grid-column"><p>Slide 3</p></div>
+		<div class="gb-grid-column"><p>Slide 4</p></div>
+		<div class="gb-grid-column"><p>Slide 5</p></div>
+	</div>
+
+	<hr style="margin: 40px 0;">
+
+	<!-- Carousel with bullet navigation -->
+	<div
+		id="carousel-bullets"
+		class="gb-grid-wrapper frontblocks-carousel"
+		data-type="carousel"
+		data-view="2"
+		data-laptop-view="2"
+		data-tablet-view="1"
+		data-mobile-view="1"
+		data-autoplay=""
+		data-gap="10"
+		data-buttons="bullets"
+		data-buttons-color="#3b82f6"
+		data-buttons-background-color="transparent"
+		data-buttons-position="side"
+		data-disable-on-desktop="false"
+	>
+		<div class="gb-grid-column"><p>Item A</p></div>
+		<div class="gb-grid-column"><p>Item B</p></div>
+		<div class="gb-grid-column"><p>Item C</p></div>
+	</div>
+
+	<hr style="margin: 40px 0;">
+
+	<!-- Slider type (rewind) -->
+	<div
+		id="carousel-slider"
+		class="gb-grid-wrapper frontblocks-carousel"
+		data-type="slider"
+		data-view="1"
+		data-laptop-view="1"
+		data-tablet-view="1"
+		data-mobile-view="1"
+		data-autoplay=""
+		data-gap="0"
+		data-buttons="arrows"
+		data-buttons-color="#000000"
+		data-buttons-background-color="transparent"
+		data-buttons-position="side"
+		data-disable-on-desktop="false"
+		data-rewind="true"
+	>
+		<div class="gb-grid-column"><p>Slide A</p></div>
+		<div class="gb-grid-column"><p>Slide B</p></div>
+		<div class="gb-grid-column"><p>Slide C</p></div>
+	</div>
+
+	<!-- Glide.js must be loaded before the carousel initialisation script -->
+	<script src="/assets/carousel/glide.min.js"></script>
+	<script src="/assets/carousel/frontblocks-carousel.js"></script>
+</body>
+</html>

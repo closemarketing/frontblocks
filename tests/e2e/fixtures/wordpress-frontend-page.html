@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+	Realistic WordPress frontend page fixture.
+
+	Simulates a GeneratePress + GenerateBlocks page that has FrontBlocks active.
+	Includes the HTML that each PHP Frontend class outputs:
+	  - ReadingProgress  → <div class="frbl-reading-progress-bar"> via wp_footer
+	  - BackButton       → <button id="frbl-back-button"> via wp_footer
+	  - Carousel         → .frontblocks-carousel on a gb-grid-wrapper
+	  - Counter          → .frontblocks-counter-active on a gb text block
+	  - Sticky column    → .frontblocks-sticky-wrapper on a gb-grid-wrapper
+	  - Accordion        → .gb-accordion__item blocks
+	  - Marquee          → .gb-marquee-infinite-scroll on a headline block
+-->
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Sample Page – My WordPress Site</title>
+	<style>
+		*, *::before, *::after { box-sizing: border-box; }
+		body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1a1a1a; }
+
+		/* GeneratePress-like layout */
+		.site-header { background: #1e293b; color: white; padding: 16px 32px; }
+		.site-content { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+		.entry-content { line-height: 1.7; }
+		.site-footer { background: #f1f5f9; padding: 24px 32px; margin-top: 60px; text-align: center; color: #64748b; }
+
+		/* Reading progress bar (right-side vertical) */
+		.frbl-reading-progress-bar {
+			position: fixed;
+			top: 0; right: 0;
+			width: 6px; height: 100vh;
+			background: #e2e8f0;
+			z-index: 9999;
+		}
+		.frbl-reading-progress-fill {
+			width: 100%;
+			height: 0%;
+			background: #3b82f6;
+			transition: height 0.1s linear;
+		}
+
+		/* Back button */
+		.frbl-back-button {
+			display: none;
+			position: fixed;
+			bottom: 24px; right: 24px;
+			width: 44px; height: 44px;
+			background: #3b82f6;
+			color: white;
+			border: none;
+			border-radius: 50%;
+			cursor: pointer;
+			align-items: center;
+			justify-content: center;
+			z-index: 9999;
+			box-shadow: 0 2px 8px rgba(0,0,0,.2);
+		}
+		.frbl-back-button.frbl-show { display: flex; }
+
+		/* Glide carousel base */
+		.glide { position: relative; width: 100%; }
+		.glide__track { overflow: hidden; }
+		.glide__slides {
+			display: flex; flex-wrap: nowrap; list-style: none;
+			margin: 0; padding: 0;
+			backface-visibility: hidden; transform-style: preserve-3d;
+			touch-action: pan-Y; white-space: nowrap; will-change: transform;
+		}
+		.glide__slide {
+			width: 100%; height: 100%; flex-shrink: 0;
+			white-space: normal; padding: 16px;
+			background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+		}
+		.glide__arrow {
+			position: absolute; top: 50%; transform: translateY(-50%);
+			background: rgba(0,0,0,.45); border: none; border-radius: 50%;
+			cursor: pointer; padding: 8px; color: white;
+		}
+		.glide__arrow--left { left: -20px; }
+		.glide__arrow--right { right: -20px; }
+		.glide__bullets { display: flex; justify-content: center; gap: 8px; margin-top: 12px; }
+		.glide__bullet { width: 10px; height: 10px; border-radius: 50%; background: #94a3b8; border: none; cursor: pointer; }
+		.glide__bullet--active { background: #3b82f6; }
+
+		/* Counter block */
+		.stat-number {
+			font-size: 3rem; font-weight: 700;
+			color: #1e40af; text-align: center;
+		}
+		.stat-label { text-align: center; color: #64748b; margin-top: 4px; }
+
+		/* Sticky column */
+		.frontblocks-sticky-wrapper { display: flex; gap: 32px; }
+		.gb-grid-column { flex: 1; }
+		.sticky-active .gb-container { position: sticky; }
+		.sidebar-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; }
+
+		/* Accordion */
+		.gb-accordion { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+		.gb-accordion__item { border-bottom: 1px solid #e2e8f0; }
+		.gb-accordion__item:last-child { border-bottom: none; }
+		.gb-accordion__toggle {
+			width: 100%; text-align: left; padding: 16px 20px;
+			background: white; border: none; cursor: pointer;
+			font-size: 1rem; font-weight: 600; display: flex; justify-content: space-between;
+		}
+		.gb-accordion__toggle:hover { background: #f8fafc; }
+		.gb-accordion__content { padding: 0 20px 16px; }
+
+		/* Marquee */
+		.gb-marquee-infinite-scroll {
+			overflow: hidden; white-space: nowrap;
+			background: #1e293b; color: white;
+			padding: 12px 0; font-size: 1.1rem;
+		}
+		.gb-marquee-wrapper { display: flex; white-space: nowrap; }
+		.gb-marquee-copy { display: inline-block; padding-right: 3em; }
+
+		/* Section spacing */
+		.wp-section { margin-bottom: 60px; }
+		.wp-section h2 { font-size: 1.5rem; margin-bottom: 20px; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+		.stats-grid { display: flex; gap: 24px; }
+		.stat-card { flex: 1; background: #eff6ff; border-radius: 8px; padding: 24px; }
+	</style>
+</head>
+<body>
+
+<!-- ============================================================
+     WordPress site-header (rendered by GeneratePress theme)
+     ============================================================ -->
+<header class="site-header">
+	<a href="/" style="color:white;text-decoration:none;font-weight:700;font-size:1.25rem;">My WordPress Site</a>
+	<nav style="display:inline-block;margin-left:32px;">
+		<a href="/" style="color:#94a3b8;text-decoration:none;margin-right:16px;">Home</a>
+		<a href="/about" style="color:#94a3b8;text-decoration:none;margin-right:16px;">About</a>
+		<a href="/contact" style="color:#94a3b8;text-decoration:none;">Contact</a>
+	</nav>
+</header>
+
+<!-- ============================================================
+     Main content (rendered by WordPress/Gutenberg)
+     ============================================================ -->
+<main class="site-content">
+<article class="entry-content" id="post-1">
+
+	<!-- Hero marquee – rendered by Headline.php + gb text block -->
+	<section class="wp-section" id="section-marquee" style="margin-bottom:0;">
+		<div id="marquee-hero"
+			class="gb-element gb-marquee-infinite-scroll"
+			data-marquee-speed="medium"
+			style="margin: 0 -24px 40px;">
+			<span class="gb-headline-text">FrontBlocks · Gutenberg Blocks for GeneratePress · FrontBlocks · Gutenberg Blocks for GeneratePress ·</span>
+		</div>
+	</section>
+
+	<!-- ── Stats with animated counters ──────────────────────────── -->
+	<section class="wp-section" id="section-counters">
+		<h2>Our Numbers</h2>
+		<!--
+			Rendered by Counter.php: adds class="frontblocks-counter-active"
+			and data-counter-* attributes to gb/text block first tag.
+		-->
+		<div class="stats-grid">
+			<div class="stat-card">
+				<p id="counter-clients"
+					class="stat-number frontblocks-counter-active"
+					data-counter-target="1200"
+					data-counter-start="0"
+					data-counter-duration="1500"
+					data-counter-suffix="+"
+				>0+</p>
+				<p class="stat-label">Happy clients</p>
+			</div>
+			<div class="stat-card">
+				<p id="counter-projects"
+					class="stat-number frontblocks-counter-active"
+					data-counter-target="340"
+					data-counter-start="0"
+					data-counter-duration="1500"
+					data-counter-prefix=""
+					data-counter-suffix=" projects"
+				>0 projects</p>
+				<p class="stat-label">Completed</p>
+			</div>
+			<div class="stat-card">
+				<p id="counter-years"
+					class="stat-number frontblocks-counter-active"
+					data-counter-target="10"
+					data-counter-start="0"
+					data-counter-duration="1000"
+					data-counter-suffix=" yrs"
+				>0 yrs</p>
+				<p class="stat-label">In business</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- ── Carousel of featured posts ───────────────────────────── -->
+	<section class="wp-section" id="section-carousel" style="padding: 0 20px;">
+		<h2>Featured Articles</h2>
+		<!--
+			Rendered by Carousel.php: adds `frontblocks-carousel` class and
+			data-* attributes to the gb-grid-wrapper element.
+		-->
+		<div id="carousel-featured"
+			class="gb-grid-wrapper frontblocks-carousel"
+			data-type="carousel"
+			data-view="3"
+			data-laptop-view="2"
+			data-tablet-view="2"
+			data-mobile-view="1"
+			data-autoplay=""
+			data-gap="16"
+			data-buttons="arrows"
+			data-buttons-color="#ffffff"
+			data-buttons-background-color="rgba(30,41,59,0.75)"
+			data-buttons-position="side"
+			data-disable-on-desktop="false"
+		>
+			<div class="gb-grid-column"><strong>Article 1</strong><br>Lorem ipsum dolor sit amet.</div>
+			<div class="gb-grid-column"><strong>Article 2</strong><br>Consectetur adipiscing elit.</div>
+			<div class="gb-grid-column"><strong>Article 3</strong><br>Sed do eiusmod tempor.</div>
+			<div class="gb-grid-column"><strong>Article 4</strong><br>Incididunt ut labore et dolore.</div>
+			<div class="gb-grid-column"><strong>Article 5</strong><br>Magna aliqua ut enim.</div>
+		</div>
+	</section>
+
+	<!-- ── Two-column layout: main + sticky sidebar ──────────────── -->
+	<section class="wp-section" id="section-sticky" style="min-height:1200px;">
+		<h2>Long Content with Sticky Sidebar</h2>
+		<!--
+			Rendered by StickyColumn.php: adds `frontblocks-sticky-wrapper`
+			and data-sticky-* attributes to the gb-grid-wrapper.
+		-->
+		<div class="gb-grid-wrapper frontblocks-sticky-wrapper"
+			id="sticky-layout"
+			data-sticky-enabled="true"
+			data-sticky-offset="20"
+			data-sticky-column-index="1"
+		>
+			<!-- Main content column -->
+			<div class="gb-grid-column" style="flex:2;">
+				<p>This is the main article content. It is very long so the sidebar can stick next to it as you scroll.</p>
+				<p style="margin-top:600px;">You are now in the middle of the article…</p>
+				<p style="margin-top:400px;">Almost at the end of the long content section.</p>
+			</div>
+			<!-- Sticky sidebar column (index=1) -->
+			<div class="gb-grid-column" id="sidebar-col" style="flex:1;">
+				<div class="gb-container">
+					<div class="sidebar-box">
+						<h3>Related Links</h3>
+						<ul>
+							<li><a href="#">Link one</a></li>
+							<li><a href="#">Link two</a></li>
+							<li><a href="#">Link three</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- ── FAQ Accordion ─────────────────────────────────────────── -->
+	<section class="wp-section" id="section-accordion">
+		<h2>Frequently Asked Questions</h2>
+		<!--
+			GenerateBlocks accordion block output.
+			The accordion JS handles open/close via .gb-accordion__item-open class.
+		-->
+		<div class="gb-accordion" id="faq-accordion">
+			<div class="gb-accordion__item" id="faq-1">
+				<button class="gb-accordion__toggle" aria-expanded="false">
+					What is FrontBlocks?
+					<span aria-hidden="true">+</span>
+				</button>
+				<div class="gb-accordion__content">
+					<p>FrontBlocks is a WordPress plugin that extends Gutenberg and GeneratePress with additional frontend features and block enhancements.</p>
+				</div>
+			</div>
+			<div class="gb-accordion__item" id="faq-2">
+				<button class="gb-accordion__toggle" aria-expanded="false">
+					Does it work with any theme?
+					<span aria-hidden="true">+</span>
+				</button>
+				<div class="gb-accordion__content">
+					<p>FrontBlocks is optimised for GeneratePress and GenerateBlocks, but many features work with any block-based theme.</p>
+				</div>
+			</div>
+			<div class="gb-accordion__item gb-accordion__item-open" id="faq-3">
+				<button class="gb-accordion__toggle" aria-expanded="true">
+					Is it free?
+					<span aria-hidden="true">−</span>
+				</button>
+				<div class="gb-accordion__content">
+					<p>Yes! The core plugin is free and available on WordPress.org. A PRO version with advanced WooCommerce features is also available.</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+</article>
+</main>
+
+<!-- ============================================================
+     WordPress footer (wp_footer hooks rendered here)
+     ============================================================ -->
+<footer class="site-footer">
+	<p>© 2025 My WordPress Site · Powered by WordPress & FrontBlocks</p>
+</footer>
+
+<!--
+	Reading progress bar – injected by ReadingProgress::render() via wp_footer.
+	Mirrors includes/Frontend/ReadingProgress.php output exactly.
+-->
+<div class="frbl-reading-progress-bar"
+	role="progressbar"
+	aria-label="Reading progress"
+	aria-valuenow="0"
+	aria-valuemin="0"
+	aria-valuemax="100"
+>
+	<div class="frbl-reading-progress-fill" id="progress-fill"></div>
+</div>
+
+<!--
+	Back button – injected by BackButton::render_button() via wp_footer.
+	Mirrors includes/Frontend/BackButton.php output exactly.
+-->
+<button
+	id="frbl-back-button"
+	class="frbl-back-button"
+	aria-label="Go back to previous page"
+	title="Go back"
+>
+	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+		fill="none" stroke="currentColor" stroke-width="2"
+		stroke-linecap="round" stroke-linejoin="round">
+		<line x1="19" y1="12" x2="5" y2="12"></line>
+		<polyline points="12 19 5 12 12 5"></polyline>
+	</svg>
+</button>
+
+<!-- Plugin scripts (enqueued by wp_enqueue_scripts) -->
+<script src="/assets/carousel/glide.min.js"></script>
+<script src="/assets/carousel/frontblocks-carousel.js"></script>
+<script src="/assets/counter/frontblocks-counter-runtime.js"></script>
+<script src="/assets/reading-progress/frontblocks-reading-progress.js"></script>
+<script src="/assets/back-button/frontblocks-back-button.js"></script>
+<script src="/assets/accordion/frontblocks-accordion.js"></script>
+<script src="/assets/headline/frontblocks-headline-marquee.js"></script>
+<script src="/assets/sticky-column/frontblocks-sticky-column.js"></script>
+
+</body>
+</html>

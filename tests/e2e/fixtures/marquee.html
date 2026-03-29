@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Marquee fixture – FrontBlocks</title>
+	<style>
+		body { margin: 0; font-family: sans-serif; padding: 20px; }
+
+		/* Container must have a defined width for the script to calculate copies */
+		.gb-marquee-infinite-scroll {
+			overflow: hidden;
+			white-space: nowrap;
+			width: 600px;
+			border: 1px solid #e5e7eb;
+			padding: 8px 0;
+		}
+		.gb-marquee-wrapper {
+			display: flex;
+			white-space: nowrap;
+		}
+		.gb-marquee-copy {
+			display: inline-block;
+			padding-right: 2em;
+		}
+
+		/* Pause animation on hover */
+		.gb-marquee-infinite-scroll:hover .gb-marquee-wrapper {
+			animation-play-state: paused !important;
+		}
+	</style>
+</head>
+<body>
+
+	<!--
+		Mirrors the HTML rendered by Headline.php on a GenerateBlocks text block
+		when the marquee/infinite-scroll option is enabled.
+		The PHP class adds `gb-marquee-infinite-scroll` and `data-marquee-speed`.
+	-->
+
+	<!-- Medium speed (20s default) -->
+	<div id="marquee-medium"
+		class="gb-element gb-marquee-infinite-scroll"
+		data-marquee-speed="medium">
+		<span class="gb-headline-text">FrontBlocks — Gutenberg enhancements for GeneratePress ★</span>
+	</div>
+
+	<br>
+
+	<!-- Fast speed preset -->
+	<div id="marquee-fast"
+		class="gb-element gb-marquee-infinite-scroll"
+		data-marquee-speed="fast">
+		<span class="gb-headline-text">Fast scrolling text — FrontBlocks ★ Fast scrolling text — FrontBlocks ★</span>
+	</div>
+
+	<br>
+
+	<!-- Slow speed preset -->
+	<div id="marquee-slow"
+		class="gb-element gb-marquee-infinite-scroll"
+		data-marquee-speed="slow">
+		<span class="gb-headline-text">Slow marquee text here ★</span>
+	</div>
+
+	<script src="/assets/headline/frontblocks-headline-marquee.js"></script>
+</body>
+</html>

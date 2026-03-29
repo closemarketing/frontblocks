@@ -1,5 +1,4 @@
 import { defineConfig, devices } from '@playwright/test';
-import path from 'path';
 
 /**
  * Playwright E2E configuration for FrontBlocks plugin.
@@ -18,12 +17,15 @@ export default defineConfig({
 		['list'],
 	],
 
+	outputDir: 'tests/e2e/test-results',
+
 	use: {
 		// Serve fixtures from the repo root so tests can reference assets with
 		// relative paths like /assets/accordion/frontblocks-accordion.js
 		baseURL: 'http://localhost:3737',
 		trace: 'on-first-retry',
 		screenshot: 'only-on-failure',
+		video: 'retain-on-failure',
 	},
 
 	// Static file server — serves the whole repo (fixtures + assets).
