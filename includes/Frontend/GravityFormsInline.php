@@ -34,26 +34,26 @@ class GravityFormsInline {
 	 * @return void
 	 */
 	private function init_hooks() {
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 99 );
+		add_action( 'init', array( $this, 'register_scripts' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		add_filter( 'render_block', array( $this, 'add_inline_attributes_to_gf_block' ), 10, 2 );
 		add_action( 'init', array( $this, 'register_custom_attributes' ), 5 );
 	}
 
 	/**
-	 * Enqueue scripts and styles.
+	 * Register frontend scripts and styles for conditional enqueueing.
 	 *
 	 * @return void
 	 */
-	public function enqueue_scripts() {
-		wp_enqueue_style(
+	public function register_scripts() {
+		wp_register_style(
 			'frontblocks-gf-inline',
 			FRBL_PLUGIN_URL . 'assets/gravityforms-inline/frontblocks-gf-inline.css',
 			array(),
 			FRBL_VERSION
 		);
 
-		wp_enqueue_script(
+		wp_register_script(
 			'frontblocks-gf-inline-runtime',
 			FRBL_PLUGIN_URL . 'assets/gravityforms-inline/frontblocks-gf-inline.js',
 			array(),
@@ -110,6 +110,13 @@ class GravityFormsInline {
 
 		// Add inline class and attributes if enabled.
 		if ( $inline_enabled ) {
+			// Enqueue frontend assets only when the GF inline feature is active.
+			if ( ! wp_style_is( 'frontblocks-gf-inline', 'enqueued' ) ) {
+				wp_enqueue_style( 'frontblocks-gf-inline' );
+			}
+			if ( ! wp_script_is( 'frontblocks-gf-inline-runtime', 'enqueued' ) ) {
+				wp_enqueue_script( 'frontblocks-gf-inline-runtime' );
+			}
 			// Try multiple approaches to add the class.
 			// Method 1: Add to wp-block-gravityforms-form wrapper.
 			if ( strpos( $block_content, 'wp-block-gravityforms-form' ) !== false ) {

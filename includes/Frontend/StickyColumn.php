@@ -32,27 +32,26 @@ class StickyColumn {
 	 * @return void
 	 */
 	private function init_hooks() {
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 99 );
+		add_action( 'init', array( $this, 'register_scripts' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		add_filter( 'render_block_generateblocks/grid', array( $this, 'add_sticky_attributes_to_grid_block' ), 10, 2 );
 		add_action( 'init', array( $this, 'register_custom_attributes' ), 5 );
 	}
 
 	/**
-	 * Enqueue scripts and styles.
+	 * Register frontend scripts and styles for conditional enqueueing.
 	 *
 	 * @return void
 	 */
-	public function enqueue_scripts() {
-
-		wp_enqueue_style(
+	public function register_scripts() {
+		wp_register_style(
 			'frontblocks-sticky-column',
 			FRBL_PLUGIN_URL . 'assets/sticky-column/frontblocks-sticky-column.css',
 			array(),
 			FRBL_VERSION
 		);
 
-		wp_enqueue_script(
+		wp_register_script(
 			'frontblocks-sticky-column-custom',
 			FRBL_PLUGIN_URL . 'assets/sticky-column/frontblocks-sticky-column.js',
 			array(),
@@ -107,6 +106,14 @@ class StickyColumn {
 				$block_content,
 				1 // Only replace the first occurrence.
 			);
+
+			// Enqueue frontend assets only when a sticky column block is detected.
+			if ( ! wp_style_is( 'frontblocks-sticky-column', 'enqueued' ) ) {
+				wp_enqueue_style( 'frontblocks-sticky-column' );
+			}
+			if ( ! wp_script_is( 'frontblocks-sticky-column-custom', 'enqueued' ) ) {
+				wp_enqueue_script( 'frontblocks-sticky-column-custom' );
+			}
 		}
 
 		return $block_content;

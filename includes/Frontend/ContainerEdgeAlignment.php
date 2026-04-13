@@ -25,8 +25,8 @@ class ContainerEdgeAlignment {
 	 * Constructor.
 	 */
 	public function __construct() {
+		add_action( 'init', array( $this, 'register_frontend_assets' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_assets' ) );
 		add_filter( 'render_block', array( $this, 'add_edge_alignment_classes' ), 10, 2 );
 	}
 
@@ -59,20 +59,19 @@ class ContainerEdgeAlignment {
 	}
 
 	/**
-	 * Enqueue frontend assets.
+	 * Register frontend assets for conditional enqueueing.
 	 *
 	 * @return void
 	 */
-	public function enqueue_frontend_assets() {
-		wp_enqueue_style(
+	public function register_frontend_assets() {
+		wp_register_style(
 			'frbl-edge-alignment',
 			FRBL_PLUGIN_URL . 'assets/container-edge-alignment/frontblocks-edge-alignment.css',
 			array(),
 			FRBL_VERSION
 		);
 
-		// Add inline script to calculate margins dynamically.
-		wp_enqueue_script(
+		wp_register_script(
 			'frbl-edge-alignment-js',
 			FRBL_PLUGIN_URL . 'assets/container-edge-alignment/frontblocks-edge-alignment-frontend.js',
 			array(),
@@ -114,6 +113,14 @@ class ContainerEdgeAlignment {
 		// If no valid alignment, return.
 		if ( empty( $class_string ) ) {
 			return $block_content;
+		}
+
+		// Enqueue frontend assets only when an edge-aligned block is detected.
+		if ( ! wp_style_is( 'frbl-edge-alignment', 'enqueued' ) ) {
+			wp_enqueue_style( 'frbl-edge-alignment' );
+		}
+		if ( ! wp_script_is( 'frbl-edge-alignment-js', 'enqueued' ) ) {
+			wp_enqueue_script( 'frbl-edge-alignment-js' );
 		}
 
 		// Add class to the block.

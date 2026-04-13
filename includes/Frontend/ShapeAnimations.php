@@ -34,27 +34,27 @@ class ShapeAnimations {
 	 * @return void
 	 */
 	private function init_hooks() {
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 100 );
+		add_action( 'init', array( $this, 'register_scripts' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ), 5 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'register_shape_animation_attributes' ), 15 );
 		add_filter( 'render_block', array( $this, 'add_animation_classes_to_shape' ), 10, 2 );
 	}
 
 	/**
-	 * Enqueue frontend scripts and styles.
+	 * Register frontend scripts and styles for conditional enqueueing.
 	 *
 	 * @return void
 	 */
-	public function enqueue_scripts() {
-		wp_enqueue_style(
+	public function register_scripts() {
+		wp_register_style(
 			'frontblocks-shape-animations',
 			FRBL_PLUGIN_URL . 'assets/shape-animations/frontblocks-shape-animations.css',
 			array(),
 			FRBL_VERSION
 		);
 
-		// Enqueue Lottie library from CDN.
-		wp_enqueue_script(
+		// Register Lottie library from CDN.
+		wp_register_script(
 			'lottie-player',
 			'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js',
 			array(),
@@ -62,7 +62,7 @@ class ShapeAnimations {
 			true
 		);
 
-		wp_enqueue_script(
+		wp_register_script(
 			'frontblocks-shape-animations',
 			FRBL_PLUGIN_URL . 'assets/shape-animations/frontblocks-shape-animations.js',
 			array( 'lottie-player' ),
@@ -181,6 +181,14 @@ class ShapeAnimations {
 
 		if ( empty( $attrs['frblCustomSvgAnimationJson'] ) ) {
 			return $block_content;
+		}
+
+		// Enqueue frontend assets only when a shape animation block is detected.
+		if ( ! wp_style_is( 'frontblocks-shape-animations', 'enqueued' ) ) {
+			wp_enqueue_style( 'frontblocks-shape-animations' );
+		}
+		if ( ! wp_script_is( 'frontblocks-shape-animations', 'enqueued' ) ) {
+			wp_enqueue_script( 'frontblocks-shape-animations' );
 		}
 
 		// Parse JSON data.

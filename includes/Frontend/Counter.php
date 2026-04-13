@@ -23,7 +23,6 @@ class Counter {
 		add_action( 'init', array( $this, 'register_assets' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
 		add_filter( 'render_block', array( $this, 'render_block_counter' ), 10, 2 );
-		add_action( 'wp_footer', array( $this, 'enqueue_counter_script' ) );
 	}
 
 	/**
@@ -96,6 +95,7 @@ class Counter {
 		$number_suffix      = isset( $attrs['numberSuffix'] ) ? $attrs['numberSuffix'] : '';
 
 		if ( $is_counter_active ) {
+			$this->enqueue_counter_script();
 			$class_to_add      = 'frontblocks-counter-active';
 			$target_value_full = '';
 

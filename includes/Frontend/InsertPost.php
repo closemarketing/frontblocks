@@ -32,7 +32,7 @@ class InsertPost {
 	 * @return void
 	 */
 	private function init_hooks() {
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 99 );
+		add_action( 'init', array( $this, 'register_scripts' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		add_action( 'wp_ajax_frbl_search_posts', array( $this, 'search_posts_callback' ) );
 		add_action( 'wp_ajax_nopriv_frbl_search_posts', array( $this, 'search_posts_callback' ) );
@@ -42,12 +42,12 @@ class InsertPost {
 	}
 
 	/**
-	 * Enqueue scripts and styles.
+	 * Register frontend scripts and styles for conditional enqueueing.
 	 *
 	 * @return void
 	 */
-	public function enqueue_scripts() {
-		wp_enqueue_style(
+	public function register_scripts() {
+		wp_register_style(
 			'frontblocks-insert-post',
 			FRBL_PLUGIN_URL . 'assets/insert-post/frontblocks-insert-post.css',
 			array(),
@@ -180,6 +180,11 @@ class InsertPost {
 	 * @return string HTML output.
 	 */
 	public function render_insert_post_block( $attributes ) {
+		// Enqueue frontend styles only when this block is rendered.
+		if ( ! wp_style_is( 'frontblocks-insert-post', 'enqueued' ) ) {
+			wp_enqueue_style( 'frontblocks-insert-post' );
+		}
+
 		$post_id = $attributes['selectedPostId'] ?? 0;
 
 		if ( ! $post_id ) {

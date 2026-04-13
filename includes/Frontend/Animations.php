@@ -32,27 +32,26 @@ class Animations {
 	 * @return void
 	 */
 	private function init_hooks() {
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 100 );
+		add_action( 'init', array( $this, 'register_scripts' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ), 5 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'register_animation_attributes' ), 15 );
 		add_filter( 'render_block', array( $this, 'add_animation_classes_to_blocks' ), 10, 2 );
 	}
 
 	/**
-	 * Enqueue scripts and styles.
+	 * Register frontend scripts and styles for conditional enqueueing.
 	 *
 	 * @return void
 	 */
-	public function enqueue_scripts() {
-		// Enqueue custom animations CSS.
-		wp_enqueue_style(
+	public function register_scripts() {
+		wp_register_style(
 			'frontblocks-animations',
 			FRBL_PLUGIN_URL . 'assets/animations/frontblocks-animations.css',
 			array(),
 			FRBL_VERSION
 		);
 
-		wp_enqueue_script(
+		wp_register_script(
 			'frontblocks-animations-custom',
 			FRBL_PLUGIN_URL . 'assets/animations/frontblocks-animations.js',
 			array(),
@@ -67,13 +66,8 @@ class Animations {
 	 * @return void
 	 */
 	public function enqueue_block_editor_assets() {
-		// Enqueue custom animations CSS for editor.
-		wp_enqueue_style(
-			'frontblocks-animations-editor',
-			FRBL_PLUGIN_URL . 'assets/animations/frontblocks-animations.css',
-			array(),
-			FRBL_VERSION
-		);
+		// Enqueue custom animations CSS for editor (reuse registered frontend style).
+		wp_enqueue_style( 'frontblocks-animations' );
 
 		// Enqueue custom block editor script.
 		wp_enqueue_script(
@@ -206,6 +200,14 @@ class Animations {
 
 		if ( ! $has_animation && ! $has_glass_effect && ! $has_hover_bg_scale ) {
 			return $block_content;
+		}
+
+		// Enqueue frontend assets only when a block with animation features is present.
+		if ( ! wp_style_is( 'frontblocks-animations', 'enqueued' ) ) {
+			wp_enqueue_style( 'frontblocks-animations' );
+		}
+		if ( ! wp_script_is( 'frontblocks-animations-custom', 'enqueued' ) ) {
+			wp_enqueue_script( 'frontblocks-animations-custom' );
 		}
 
 		$properties = array();
