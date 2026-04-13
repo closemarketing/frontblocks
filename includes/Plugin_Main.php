@@ -56,8 +56,6 @@ class Plugin_Main {
 
 		// Register scripts for conditional enqueueing.
 		add_action( 'init', array( $this, 'register_scripts' ) );
-		// Conditionally enqueue accordion script when an accordion block is rendered.
-		add_filter( 'render_block', array( $this, 'maybe_enqueue_accordion_script' ), 10, 2 );
 	}
 
 	/**
@@ -164,35 +162,5 @@ class Plugin_Main {
 			FRBL_VERSION,
 			true
 		);
-
-		// GenerateBlocks Accordion fix – registers script for conditional enqueueing.
-		wp_register_script(
-			'frontblocks-accordion',
-			FRBL_PLUGIN_URL . 'assets/accordion/frontblocks-accordion.js',
-			array(),
-			FRBL_VERSION,
-			true
-		);
-	}
-
-	/**
-	 * Enqueue accordion script only when an accordion block is present on the page.
-	 *
-	 * @param string $block_content Block content.
-	 * @param array  $block         Block data.
-	 * @return string
-	 */
-	public function maybe_enqueue_accordion_script( $block_content, $block ) {
-		if ( ! isset( $block['blockName'] ) ) {
-			return $block_content;
-		}
-
-		if ( false !== strpos( $block['blockName'], 'accordion' ) ) {
-			if ( ! wp_script_is( 'frontblocks-accordion', 'enqueued' ) ) {
-				wp_enqueue_script( 'frontblocks-accordion' );
-			}
-		}
-
-		return $block_content;
 	}
 }
