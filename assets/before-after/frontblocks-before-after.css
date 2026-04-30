@@ -64,6 +64,10 @@
 }
 
 /* Labels */
+.frbl-before-after__label:empty {
+	display: none;
+}
+
 .frbl-before-after__label {
 	position: absolute;
 	top: 16px;

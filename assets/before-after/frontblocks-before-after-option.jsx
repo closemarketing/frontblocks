@@ -184,18 +184,22 @@ function BeforeAfterEdit( props ) {
 					>
 						<div className="frbl-before-after__after">
 							<img src={ afterImageUrl } alt="" />
-							<span className="frbl-before-after__label frbl-before-after__label--after">
-								{ afterLabel }
-							</span>
+							{ afterLabel && (
+								<span className="frbl-before-after__label frbl-before-after__label--after">
+									{ afterLabel }
+								</span>
+							) }
 						</div>
 						<div
 							className="frbl-before-after__before"
 							style={ { clipPath: `inset(0 ${ 100 - initialPosition }% 0 0)` } }
 						>
 							<img src={ beforeImageUrl } alt="" />
-							<span className="frbl-before-after__label frbl-before-after__label--before">
-								{ beforeLabel }
-							</span>
+							{ beforeLabel && (
+								<span className="frbl-before-after__label frbl-before-after__label--before">
+									{ beforeLabel }
+								</span>
+							) }
 						</div>
 						<div
 							className="frbl-before-after__handle"

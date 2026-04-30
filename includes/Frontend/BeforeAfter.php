@@ -175,15 +175,19 @@ class BeforeAfter {
 		>
 			<div class="frbl-before-after__after">
 				<img src="<?php echo esc_url( $after_url ); ?>" alt="" loading="lazy">
+				<?php if ( ! empty( $after_label ) ) : ?>
 				<span class="frbl-before-after__label frbl-before-after__label--after">
 					<?php echo wp_kses_post( $after_label ); ?>
 				</span>
+				<?php endif; ?>
 			</div>
 			<div class="frbl-before-after__before">
 				<img src="<?php echo esc_url( $before_url ); ?>" alt="" loading="lazy">
+				<?php if ( ! empty( $before_label ) ) : ?>
 				<span class="frbl-before-after__label frbl-before-after__label--before">
 					<?php echo wp_kses_post( $before_label ); ?>
 				</span>
+				<?php endif; ?>
 			</div>
 			<div
 				class="frbl-before-after__handle"

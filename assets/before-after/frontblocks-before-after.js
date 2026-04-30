@@ -188,7 +188,7 @@ function BeforeAfterEdit(props) {
   }, /*#__PURE__*/React.createElement("img", {
     src: afterImageUrl,
     alt: ""
-  }), /*#__PURE__*/React.createElement("span", {
+  }), afterLabel && /*#__PURE__*/React.createElement("span", {
     className: "frbl-before-after__label frbl-before-after__label--after"
   }, afterLabel)), /*#__PURE__*/React.createElement("div", {
     className: "frbl-before-after__before",
@@ -198,7 +198,7 @@ function BeforeAfterEdit(props) {
   }, /*#__PURE__*/React.createElement("img", {
     src: beforeImageUrl,
     alt: ""
-  }), /*#__PURE__*/React.createElement("span", {
+  }), beforeLabel && /*#__PURE__*/React.createElement("span", {
     className: "frbl-before-after__label frbl-before-after__label--before"
   }, beforeLabel)), /*#__PURE__*/React.createElement("div", {
     className: "frbl-before-after__handle",
