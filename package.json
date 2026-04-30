@@ -48,7 +48,7 @@
     "build:edge-alignment": "babel assets/container-edge-alignment/frontblocks-edge-alignment-option.jsx --out-file assets/container-edge-alignment/frontblocks-edge-alignment.js",
     "build:shape-animations": "babel assets/shape-animations/frontblocks-shape-animation-option.jsx --out-file assets/shape-animations/frontblocks-shape-animation-option.js",
     "build:gf-inline": "babel assets/gravityforms-inline/frontblocks-gf-inline-option.jsx --out-file assets/gravityforms-inline/frontblocks-gf-inline-option.js",
-    "build:before-after": "babel blocks/before-after/edit.jsx --out-file blocks/before-after/edit.js",
+    "build:before-after": "babel assets/before-after/frontblocks-before-after-option.jsx --out-file assets/before-after/frontblocks-before-after.js",
 
     "build:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css",
     "watch:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css --watch",

@@ -1,19 +1,23 @@
 <?php
 /**
- * Before After Block
+ * Before After Block module for FrontBlocks.
  *
  * @package    FrontBlocks
  * @author     Closemarketing
  * @copyright  2025 Closemarketing
- * @version    1.0.0
+ * @version    1.0
  */
 
 namespace FrontBlocks\Frontend;
 
+use WP_Block_Type_Registry;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Registers and renders the Before After comparison block.
+ * BeforeAfter class.
+ *
+ * @since 1.0.0
  */
 class BeforeAfter {
 
@@ -21,59 +25,115 @@ class BeforeAfter {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'init', array( $this, 'register_block' ) );
+		add_action( 'init', array( $this, 'register_before_after_block' ), 20 );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_scripts' ) );
 	}
 
 	/**
-	 * Register block scripts, styles and the block type itself.
+	 * Enqueue frontend scripts and styles.
 	 *
 	 * @return void
 	 */
-	public function register_block() {
-		wp_register_script(
-			'frontblocks-before-after-editor',
-			FRBL_PLUGIN_URL . 'blocks/before-after/edit.js',
-			array(
-				'wp-blocks',
-				'wp-element',
-				'wp-block-editor',
-				'wp-components',
-				'wp-i18n',
-			),
-			FRBL_VERSION,
-			true
-		);
-
-		wp_register_script(
-			'frontblocks-before-after-view',
-			FRBL_PLUGIN_URL . 'blocks/before-after/view.js',
-			array(),
-			FRBL_VERSION,
-			true
-		);
-
+	public function enqueue_frontend_scripts() {
 		wp_register_style(
 			'frontblocks-before-after-style',
-			FRBL_PLUGIN_URL . 'blocks/before-after/style.css',
+			FRBL_PLUGIN_URL . 'assets/before-after/frontblocks-before-after.css',
 			array(),
 			FRBL_VERSION
 		);
 
-		register_block_type(
-			FRBL_PLUGIN_PATH . 'blocks/before-after',
-			array(
-				'render_callback' => array( $this, 'render_block' ),
-			)
+		wp_register_script(
+			'frontblocks-before-after-frontend',
+			FRBL_PLUGIN_URL . 'assets/before-after/frontblocks-before-after-frontend.js',
+			array(),
+			FRBL_VERSION,
+			true
+		);
+
+		if ( is_admin() || has_block( 'frontblocks/before-after' ) ) {
+			wp_enqueue_style( 'frontblocks-before-after-style' );
+			wp_enqueue_script( 'frontblocks-before-after-frontend' );
+		}
+	}
+
+	/**
+	 * Enqueue block editor assets.
+	 *
+	 * @return void
+	 */
+	public function enqueue_block_editor_assets() {
+		wp_enqueue_style(
+			'frontblocks-before-after-style',
+			FRBL_PLUGIN_URL . 'assets/before-after/frontblocks-before-after.css',
+			array(),
+			FRBL_VERSION
+		);
+
+		wp_enqueue_script(
+			'frontblocks-before-after-option',
+			FRBL_PLUGIN_URL . 'assets/before-after/frontblocks-before-after.js',
+			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-block-editor', 'wp-i18n' ),
+			FRBL_VERSION,
+			true
 		);
 	}
 
 	/**
-	 * Render the block on the frontend.
+	 * Register the Before After block.
+	 *
+	 * @return void
+	 */
+	public function register_before_after_block() {
+		if ( ! function_exists( 'register_block_type' ) ) {
+			return;
+		}
+
+		$args = array(
+			'editor_script'   => 'frontblocks-before-after-option',
+			'render_callback' => array( $this, 'render_before_after_block' ),
+			'attributes'      => array(
+				'beforeImageId'   => array(
+					'type' => 'integer',
+				),
+				'beforeImageUrl'  => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'afterImageId'    => array(
+					'type' => 'integer',
+				),
+				'afterImageUrl'   => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'beforeLabel'     => array(
+					'type'    => 'string',
+					'default' => 'Before',
+				),
+				'afterLabel'      => array(
+					'type'    => 'string',
+					'default' => 'After',
+				),
+				'initialPosition' => array(
+					'type'    => 'number',
+					'default' => 50,
+				),
+			),
+		);
+
+		if ( ! WP_Block_Type_Registry::get_instance()->is_registered( 'frontblocks/before-after' ) ) {
+			register_block_type( 'frontblocks/before-after', $args );
+		}
+	}
+
+	/**
+	 * Render the Before After block on the frontend.
 	 *
 	 * @param array $attributes Block attributes.
-	 * @return string Block HTML.
+	 * @return string HTML output.
 	 */
-	public function render_block( $attributes ) {
+	public function render_before_after_block( $attributes ) {
 		$before_url = isset( $attributes['beforeImageUrl'] ) ? $attributes['beforeImageUrl'] : '';
 		$after_url  = isset( $attributes['afterImageUrl'] ) ? $attributes['afterImageUrl'] : '';
 
@@ -84,14 +144,16 @@ class BeforeAfter {
 		$initial_position = isset( $attributes['initialPosition'] ) ? (int) $attributes['initialPosition'] : 50;
 		$before_label     = isset( $attributes['beforeLabel'] ) ? $attributes['beforeLabel'] : __( 'Before', 'frontblocks' );
 		$after_label      = isset( $attributes['afterLabel'] ) ? $attributes['afterLabel'] : __( 'After', 'frontblocks' );
-		$align            = isset( $attributes['align'] ) ? sanitize_html_class( 'align' . $attributes['align'] ) : '';
 
-		$classes = trim( 'wp-block-frontblocks-before-after frbl-before-after ' . $align );
+		$wrapper_class = 'frbl-before-after';
+		if ( ! empty( $attributes['className'] ) ) {
+			$wrapper_class .= ' ' . esc_attr( $attributes['className'] );
+		}
 
 		ob_start();
 		?>
 		<div
-			class="<?php echo esc_attr( $classes ); ?>"
+			class="<?php echo esc_attr( $wrapper_class ); ?>"
 			data-initial-position="<?php echo esc_attr( $initial_position ); ?>"
 		>
 			<div class="frbl-before-after__after">
@@ -117,11 +179,8 @@ class BeforeAfter {
 			>
 				<span class="frbl-before-after__handle-line"></span>
 				<span class="frbl-before-after__handle-thumb">
-					<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-						<polyline points="15 18 9 12 15 6"></polyline>
-						<polyline points="9 18 3 12 9 6"></polyline>
-						<polyline points="15 18 21 12 15 6"></polyline>
-						<polyline points="9 18 15 12 9 6"></polyline>
+					<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<path d="M7 4l-4 6 4 6M13 4l4 6-4 6"/>
 					</svg>
 				</span>
 				<span class="frbl-before-after__handle-line"></span>

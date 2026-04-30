@@ -2,10 +2,9 @@
 	'use strict';
 
 	function initBeforeAfterBlock( block ) {
-		var initialPosition =
-			parseFloat( block.dataset.initialPosition ) || 50;
-		var beforeEl = block.querySelector( '.frbl-before-after__before' );
-		var handle = block.querySelector( '.frbl-before-after__handle' );
+		var initialPosition = parseFloat( block.dataset.initialPosition ) || 50;
+		var beforeEl        = block.querySelector( '.frbl-before-after__before' );
+		var handle          = block.querySelector( '.frbl-before-after__handle' );
 
 		if ( ! beforeEl || ! handle ) {
 			return;
@@ -19,18 +18,14 @@
 
 		function setPosition( pos ) {
 			pos = clamp( pos, 0, 100 );
-			beforeEl.style.clipPath =
-				'inset(0 ' + ( 100 - pos ) + '% 0 0)';
-			handle.style.left = pos + '%';
+			beforeEl.style.clipPath  = 'inset(0 ' + ( 100 - pos ) + '% 0 0)';
+			handle.style.left        = pos + '%';
 			handle.setAttribute( 'aria-valuenow', Math.round( pos ) );
 		}
 
 		function getPositionFromEvent( e ) {
-			var rect = block.getBoundingClientRect();
-			var clientX =
-				e.touches && e.touches.length
-					? e.touches[ 0 ].clientX
-					: e.clientX;
+			var rect    = block.getBoundingClientRect();
+			var clientX = e.touches && e.touches.length ? e.touches[ 0 ].clientX : e.clientX;
 			return ( ( clientX - rect.left ) / rect.width ) * 100;
 		}
 
@@ -41,31 +36,19 @@
 			e.preventDefault();
 		} );
 
-		handle.addEventListener(
-			'touchstart',
-			function () {
-				isDragging = true;
-			},
-			{ passive: true }
-		);
+		handle.addEventListener( 'touchstart', function () {
+			isDragging = true;
+		}, { passive: true } );
 
 		document.addEventListener( 'mousemove', function ( e ) {
-			if ( ! isDragging ) {
-				return;
-			}
+			if ( ! isDragging ) { return; }
 			setPosition( getPositionFromEvent( e ) );
 		} );
 
-		document.addEventListener(
-			'touchmove',
-			function ( e ) {
-				if ( ! isDragging ) {
-					return;
-				}
-				setPosition( getPositionFromEvent( e ) );
-			},
-			{ passive: true }
-		);
+		document.addEventListener( 'touchmove', function ( e ) {
+			if ( ! isDragging ) { return; }
+			setPosition( getPositionFromEvent( e ) );
+		}, { passive: true } );
 
 		document.addEventListener( 'mouseup', function () {
 			isDragging = false;
@@ -75,7 +58,9 @@
 			isDragging = false;
 		} );
 
-		block.addEventListener( 'keydown', function ( e ) {
+		handle.setAttribute( 'tabindex', '0' );
+
+		handle.addEventListener( 'keydown', function ( e ) {
 			var current = parseFloat( handle.style.left ) || initialPosition;
 			if ( e.key === 'ArrowLeft' ) {
 				setPosition( current - 1 );
@@ -85,14 +70,10 @@
 				e.preventDefault();
 			}
 		} );
-
-		handle.setAttribute( 'tabindex', '0' );
 	}
 
 	function init() {
-		var blocks = document.querySelectorAll(
-			'.frbl-before-after:not(.frbl-before-after--editor)'
-		);
+		var blocks = document.querySelectorAll( '.frbl-before-after:not(.frbl-before-after--editor)' );
 		blocks.forEach( initBeforeAfterBlock );
 	}
 

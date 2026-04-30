@@ -116,10 +116,9 @@
 
 .frbl-before-after__handle-thumb svg {
 	display: block;
-	flex-shrink: 0;
 }
 
-/* Editor preview adjustments */
+/* Editor — disable interaction */
 .frbl-before-after--editor {
 	cursor: default;
 }
