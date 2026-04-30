@@ -178,7 +178,7 @@ function BeforeAfterEdit(props) {
     label: __('Before / After', 'frontblocks'),
     instructions: __('Select a "before" image and an "after" image from the sidebar.', 'frontblocks')
   }) : /*#__PURE__*/React.createElement("div", {
-    className: "frbl-before-after frbl-before-after--editor",
+    className: 'frbl-before-after frbl-before-after--editor' + (fixedHeight ? ' frbl-before-after--fixed-height' : ''),
     "data-initial-position": initialPosition,
     style: fixedHeight && blockHeight ? {
       height: blockHeight + 'px'

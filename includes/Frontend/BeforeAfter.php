@@ -157,6 +157,9 @@ class BeforeAfter {
 		$block_height  = isset( $attributes['blockHeight'] ) ? (int) $attributes['blockHeight'] : 400;
 
 		$wrapper_class = 'frbl-before-after';
+		if ( $fixed_height ) {
+			$wrapper_class .= ' frbl-before-after--fixed-height';
+		}
 		if ( ! empty( $attributes['className'] ) ) {
 			$wrapper_class .= ' ' . esc_attr( $attributes['className'] );
 		}

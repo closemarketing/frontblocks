@@ -27,14 +27,21 @@
 	pointer-events: none;
 }
 
-/* When a fixed height is set, images fill the container */
-.frbl-before-after[style*="height"] .frbl-before-after__after {
+/* Fixed height mode: images scale to fit without cropping */
+.frbl-before-after--fixed-height .frbl-before-after__after {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
 	height: 100%;
 }
 
-.frbl-before-after[style*="height"] .frbl-before-after__after img {
+.frbl-before-after--fixed-height .frbl-before-after__after img,
+.frbl-before-after--fixed-height .frbl-before-after__before img {
+	width: 100%;
 	height: 100%;
 	object-fit: cover;
+	object-position: center;
 }
 
 /* Before image — absolutely positioned on top, clipped from the right */
