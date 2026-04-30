@@ -34,6 +34,11 @@ jobs:
           php-version: '8.1'
           extensions: mbstring, xml, zip
 
+      - name: Install Composer
+        run: |
+          curl -sS https://getcomposer.org/installer | php
+          sudo mv composer.phar /usr/local/bin/composer
+
       - name: Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
