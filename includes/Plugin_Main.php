@@ -132,6 +132,9 @@ class Plugin_Main {
 
 		// Block Patterns module (WordPress block patterns registration).
 		new Frontend\BlockPatterns();
+
+		// Before After comparison block.
+		new Frontend\BeforeAfter();
 	}
 
 	/**
