@@ -147,10 +147,7 @@ jobs:
               `| **Plugin artifact** | [Download built ZIP ↗](${artifactUrl}) *(GitHub login required · expires in 7 days)* |`,
               ``,
               `> Installs Frontblocks from branch \`${branch}\` and opens the block editor ready to test.`,
-              `> GenerateBlocks is also pre-installed to test Accordion compatibility.`,
-              ``,
-              `---`,
-              `*Auto-generated · [View run](${artifactUrl})*`
+              `> GenerateBlocks is also pre-installed to test Accordion compatibility.`
             ].join('\n');
 
             // Remove previous bot preview comments to avoid clutter
