@@ -142,7 +142,7 @@ jobs:
               ``,
               `| | |`,
               `|---|---|`,
-              `| **Live preview** | [Open in WordPress Playground ↗](${playgroundUrl}) |`,
+              `| **Live preview** | <a href="${playgroundUrl}" target="_blank" rel="noopener noreferrer">Open in WordPress Playground ↗</a> |`,
               `| **Credentials** | Username: \`admin\` · Password: \`password\` |`,
               `| **Plugin artifact** | [Download built ZIP ↗](${artifactUrl}) *(GitHub login required · expires in 7 days)* |`,
               ``,
