@@ -1,7 +1,7 @@
 const { registerBlockType } = wp.blocks;
 const { Fragment } = wp.element;
 const { InspectorControls, MediaUpload, MediaUploadCheck, useBlockProps } = wp.blockEditor;
-const { PanelBody, RangeControl, Button, Placeholder, TextControl } = wp.components;
+const { PanelBody, RangeControl, Button, Placeholder, TextControl, ToggleControl } = wp.components;
 const { __ } = wp.i18n;
 
 /**
@@ -17,6 +17,8 @@ function BeforeAfterEdit( props ) {
 		beforeLabel,
 		afterLabel,
 		initialPosition,
+		blockHeight,
+		fixedHeight,
 	} = attributes;
 
 	const blockProps = useBlockProps();
@@ -146,6 +148,21 @@ function BeforeAfterEdit( props ) {
 						min={ 0 }
 						max={ 100 }
 					/>
+					<ToggleControl
+						label={ __( 'Fixed Height', 'frontblocks' ) }
+						checked={ fixedHeight }
+						onChange={ ( value ) => setAttributes( { fixedHeight: value } ) }
+					/>
+					{ fixedHeight && (
+						<RangeControl
+							label={ __( 'Height (px)', 'frontblocks' ) }
+							value={ blockHeight }
+							onChange={ ( value ) => setAttributes( { blockHeight: value } ) }
+							min={ 100 }
+							max={ 1000 }
+							step={ 10 }
+						/>
+					) }
 				</PanelBody>
 			</InspectorControls>
 
@@ -163,6 +180,7 @@ function BeforeAfterEdit( props ) {
 					<div
 						className="frbl-before-after frbl-before-after--editor"
 						data-initial-position={ initialPosition }
+						style={ fixedHeight && blockHeight ? { height: blockHeight + 'px' } : {} }
 					>
 						<div className="frbl-before-after__after">
 							<img src={ afterImageUrl } alt="" />
@@ -236,6 +254,14 @@ registerBlockType( 'frontblocks/before-after', {
 		initialPosition: {
 			type: 'number',
 			default: 50,
+		},
+		fixedHeight: {
+			type: 'boolean',
+			default: false,
+		},
+		blockHeight: {
+			type: 'number',
+			default: 400,
 		},
 	},
 	edit: BeforeAfterEdit,

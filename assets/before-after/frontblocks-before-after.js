@@ -12,7 +12,8 @@ var _wp$components = wp.components,
   RangeControl = _wp$components.RangeControl,
   Button = _wp$components.Button,
   Placeholder = _wp$components.Placeholder,
-  TextControl = _wp$components.TextControl;
+  TextControl = _wp$components.TextControl,
+  ToggleControl = _wp$components.ToggleControl;
 var __ = wp.i18n.__;
 
 /**
@@ -27,7 +28,9 @@ function BeforeAfterEdit(props) {
     afterImageUrl = attributes.afterImageUrl,
     beforeLabel = attributes.beforeLabel,
     afterLabel = attributes.afterLabel,
-    initialPosition = attributes.initialPosition;
+    initialPosition = attributes.initialPosition,
+    blockHeight = attributes.blockHeight,
+    fixedHeight = attributes.fixedHeight;
   var blockProps = useBlockProps();
   var hasImages = beforeImageUrl && afterImageUrl;
   return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
@@ -151,13 +154,35 @@ function BeforeAfterEdit(props) {
     },
     min: 0,
     max: 100
+  }), /*#__PURE__*/React.createElement(ToggleControl, {
+    label: __('Fixed Height', 'frontblocks'),
+    checked: fixedHeight,
+    onChange: function onChange(value) {
+      return setAttributes({
+        fixedHeight: value
+      });
+    }
+  }), fixedHeight && /*#__PURE__*/React.createElement(RangeControl, {
+    label: __('Height (px)', 'frontblocks'),
+    value: blockHeight,
+    onChange: function onChange(value) {
+      return setAttributes({
+        blockHeight: value
+      });
+    },
+    min: 100,
+    max: 1000,
+    step: 10
   }))), /*#__PURE__*/React.createElement("div", blockProps, !hasImages ? /*#__PURE__*/React.createElement(Placeholder, {
     icon: "image-flip-horizontal",
     label: __('Before / After', 'frontblocks'),
     instructions: __('Select a "before" image and an "after" image from the sidebar.', 'frontblocks')
   }) : /*#__PURE__*/React.createElement("div", {
     className: "frbl-before-after frbl-before-after--editor",
-    "data-initial-position": initialPosition
+    "data-initial-position": initialPosition,
+    style: fixedHeight && blockHeight ? {
+      height: blockHeight + 'px'
+    } : {}
   }, /*#__PURE__*/React.createElement("div", {
     className: "frbl-before-after__after"
   }, /*#__PURE__*/React.createElement("img", {
@@ -235,6 +260,14 @@ registerBlockType('frontblocks/before-after', {
     initialPosition: {
       type: 'number',
       default: 50
+    },
+    fixedHeight: {
+      type: 'boolean',
+      default: false
+    },
+    blockHeight: {
+      type: 'number',
+      default: 400
     }
   },
   edit: BeforeAfterEdit,

@@ -27,6 +27,16 @@
 	pointer-events: none;
 }
 
+/* When a fixed height is set, images fill the container */
+.frbl-before-after[style*="height"] .frbl-before-after__after {
+	height: 100%;
+}
+
+.frbl-before-after[style*="height"] .frbl-before-after__after img {
+	height: 100%;
+	object-fit: cover;
+}
+
 /* Before image — absolutely positioned on top, clipped from the right */
 .frbl-before-after__before {
 	position: absolute;

@@ -119,6 +119,14 @@ class BeforeAfter {
 					'type'    => 'number',
 					'default' => 50,
 				),
+				'fixedHeight'     => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+				'blockHeight'     => array(
+					'type'    => 'number',
+					'default' => 400,
+				),
 			),
 		);
 
@@ -145,16 +153,22 @@ class BeforeAfter {
 		$before_label     = isset( $attributes['beforeLabel'] ) ? $attributes['beforeLabel'] : __( 'Before', 'frontblocks' );
 		$after_label      = isset( $attributes['afterLabel'] ) ? $attributes['afterLabel'] : __( 'After', 'frontblocks' );
 
+		$fixed_height  = ! empty( $attributes['fixedHeight'] );
+		$block_height  = isset( $attributes['blockHeight'] ) ? (int) $attributes['blockHeight'] : 400;
+
 		$wrapper_class = 'frbl-before-after';
 		if ( ! empty( $attributes['className'] ) ) {
 			$wrapper_class .= ' ' . esc_attr( $attributes['className'] );
 		}
+
+		$wrapper_style = $fixed_height && $block_height ? ' style="height:' . esc_attr( $block_height ) . 'px"' : '';
 
 		ob_start();
 		?>
 		<div
 			class="<?php echo esc_attr( $wrapper_class ); ?>"
 			data-initial-position="<?php echo esc_attr( $initial_position ); ?>"
+			<?php echo $wrapper_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		>
 			<div class="frbl-before-after__after">
 				<img src="<?php echo esc_url( $after_url ); ?>" alt="" loading="lazy">
