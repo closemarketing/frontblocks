@@ -4,8 +4,8 @@ Tags: carrusel, slider, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 1.3.3
-Version: 1.3.3
+Stable tag: 1.3.4
+Version: 1.3.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -165,7 +165,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == next ==
 *   Added: Before/After Comparison block - Interactive drag-to-reveal image comparison block for Gutenberg.
-
+*   Enhanced: Implement conditional asset loading for improved performance.
 
 == 1.3.3 ==
 *   Fixed: Carousel bullets display and behavior.
