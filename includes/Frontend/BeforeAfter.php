@@ -153,8 +153,8 @@ class BeforeAfter {
 		$before_label     = isset( $attributes['beforeLabel'] ) ? $attributes['beforeLabel'] : __( 'Before', 'frontblocks' );
 		$after_label      = isset( $attributes['afterLabel'] ) ? $attributes['afterLabel'] : __( 'After', 'frontblocks' );
 
-		$fixed_height  = ! empty( $attributes['fixedHeight'] );
-		$block_height  = isset( $attributes['blockHeight'] ) ? (int) $attributes['blockHeight'] : 400;
+		$fixed_height = ! empty( $attributes['fixedHeight'] );
+		$block_height = isset( $attributes['blockHeight'] ) ? (int) $attributes['blockHeight'] : 400;
 
 		$wrapper_class = 'frbl-before-after';
 		if ( $fixed_height ) {
