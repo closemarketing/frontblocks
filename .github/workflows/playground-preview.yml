@@ -43,8 +43,10 @@ jobs:
         run: composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
       - name: Create plugin ZIP
+        env:
+          SLUG: ${{ github.event.repository.name }}
         run: |
-          mkdir -p /tmp/plugin/frontblocks
+          mkdir -p /tmp/plugin/$SLUG
           rsync -a \
             --exclude='.git' \
             --exclude='node_modules' \
@@ -70,16 +72,16 @@ jobs:
             --exclude='vendor/yoast' \
             --exclude='vendor/phpstan' \
             --exclude='vendor/szepeviktor' \
-            ./ /tmp/plugin/frontblocks/
+            ./ /tmp/plugin/$SLUG/
           cd /tmp/plugin
-          zip -r frontblocks.zip frontblocks/
-          echo "Plugin ZIP size: $(du -sh frontblocks.zip | cut -f1)"
+          zip -r $SLUG.zip $SLUG/
+          echo "Plugin ZIP size: $(du -sh $SLUG.zip | cut -f1)"
 
       - name: Upload plugin artifact
         uses: actions/upload-artifact@v4
         with:
-          name: frontblocks-pr-${{ github.event.pull_request.number }}-${{ github.run_id }}
-          path: /tmp/plugin/frontblocks.zip
+          name: ${{ github.event.repository.name }}-pr-${{ github.event.pull_request.number }}-${{ github.run_id }}
+          path: /tmp/plugin/${{ github.event.repository.name }}.zip
           retention-days: 7
 
       - name: Post Playground preview comment
