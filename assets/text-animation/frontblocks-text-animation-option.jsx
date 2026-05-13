@@ -107,20 +107,21 @@ function TextAnimationEdit( props ) {
 		letterSpacing,
 		textAlign,
 		textTransform,
-		textColor,
 		textColorCustom,
+		textColorHover,
 	} = attributes;
 
 	const blockProps = useBlockProps( {
 		style: {
-			fontSize:      fontSize ? `${ fontSize }${ fontSizeUnit || 'px' }` : undefined,
-			fontWeight:    fontWeight || undefined,
-			fontStyle:     fontStyle !== 'normal' ? fontStyle : undefined,
-			lineHeight:    lineHeight || undefined,
-			letterSpacing: letterSpacing ? `${ letterSpacing }em` : undefined,
-			textAlign:     textAlign !== 'left' ? textAlign : undefined,
-			textTransform: textTransform !== 'none' ? textTransform : undefined,
-			color:         textColorCustom || undefined,
+			fontSize:             fontSize ? `${ fontSize }${ fontSizeUnit || 'px' }` : undefined,
+			fontWeight:           fontWeight || undefined,
+			fontStyle:            fontStyle !== 'normal' ? fontStyle : undefined,
+			lineHeight:           lineHeight || undefined,
+			letterSpacing:        letterSpacing ? `${ letterSpacing }em` : undefined,
+			textAlign:            textAlign !== 'left' ? textAlign : undefined,
+			textTransform:        textTransform !== 'none' ? textTransform : undefined,
+			color:                textColorCustom || undefined,
+			'--frbl-color-hover': textColorHover || undefined,
 		},
 	} );
 
@@ -239,6 +240,11 @@ function TextAnimationEdit( props ) {
 							value: textColorCustom,
 							onChange: ( value ) => setAttributes( { textColorCustom: value || '' } ),
 						},
+						{
+							label: __( 'Text Color Hover', 'frontblocks' ),
+							value: textColorHover,
+							onChange: ( value ) => setAttributes( { textColorHover: value || '' } ),
+						},
 					] }
 				/>
 
@@ -323,6 +329,10 @@ registerBlockType( 'frontblocks/text-animation', {
 			type:    'string',
 			default: '',
 		},
+		textColorHover: {
+			type:    'string',
+			default: '',
+		},
 	},
 	edit: TextAnimationEdit,
 	save: function ( { attributes } ) {
@@ -338,17 +348,19 @@ registerBlockType( 'frontblocks/text-animation', {
 			textAlign,
 			textTransform,
 			textColorCustom,
+			textColorHover,
 		} = attributes;
 
 		const style = {};
-		if ( fontSize )                        style.fontSize      = `${ fontSize }${ fontSizeUnit || 'px' }`;
-		if ( fontWeight )                      style.fontWeight    = fontWeight;
-		if ( fontStyle && fontStyle !== 'normal' ) style.fontStyle = fontStyle;
-		if ( lineHeight )                      style.lineHeight    = lineHeight;
-		if ( letterSpacing )                   style.letterSpacing = `${ letterSpacing }em`;
-		if ( textAlign && textAlign !== 'left' ) style.textAlign   = textAlign;
+		if ( fontSize )                        style.fontSize             = `${ fontSize }${ fontSizeUnit || 'px' }`;
+		if ( fontWeight )                      style.fontWeight           = fontWeight;
+		if ( fontStyle && fontStyle !== 'normal' ) style.fontStyle        = fontStyle;
+		if ( lineHeight )                      style.lineHeight           = lineHeight;
+		if ( letterSpacing )                   style.letterSpacing        = `${ letterSpacing }em`;
+		if ( textAlign && textAlign !== 'left' ) style.textAlign          = textAlign;
 		if ( textTransform && textTransform !== 'none' ) style.textTransform = textTransform;
-		if ( textColorCustom )                 style.color         = textColorCustom;
+		if ( textColorCustom )                 style.color                = textColorCustom;
+		if ( textColorHover )                  style['--frbl-color-hover']= textColorHover;
 
 		const blockProps = wp.blockEditor.useBlockProps.save( {
 			className: 'frbl-text-animation',

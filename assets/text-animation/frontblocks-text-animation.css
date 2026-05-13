@@ -1,5 +1,10 @@
 .frbl-text-animation {
 	display: block;
+	transition: color 0.3s ease;
+}
+
+.frbl-text-animation:hover {
+	color: var(--frbl-color-hover);
 }
 
 span.frbl-text-animation {

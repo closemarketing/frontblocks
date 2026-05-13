@@ -199,8 +199,8 @@ function TextAnimationEdit(props) {
     letterSpacing = attributes.letterSpacing,
     textAlign = attributes.textAlign,
     textTransform = attributes.textTransform,
-    textColor = attributes.textColor,
-    textColorCustom = attributes.textColorCustom;
+    textColorCustom = attributes.textColorCustom,
+    textColorHover = attributes.textColorHover;
   var blockProps = useBlockProps({
     style: {
       fontSize: fontSize ? "".concat(fontSize).concat(fontSizeUnit || 'px') : undefined,
@@ -210,7 +210,8 @@ function TextAnimationEdit(props) {
       letterSpacing: letterSpacing ? "".concat(letterSpacing, "em") : undefined,
       textAlign: textAlign !== 'left' ? textAlign : undefined,
       textTransform: textTransform !== 'none' ? textTransform : undefined,
-      color: textColorCustom || undefined
+      color: textColorCustom || undefined,
+      '--frbl-color-hover': textColorHover || undefined
     }
   });
   return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
@@ -387,6 +388,14 @@ function TextAnimationEdit(props) {
           textColorCustom: value || ''
         });
       }
+    }, {
+      label: __('Text Color Hover', 'frontblocks'),
+      value: textColorHover,
+      onChange: function onChange(value) {
+        return setAttributes({
+          textColorHover: value || ''
+        });
+      }
     }]
   })), /*#__PURE__*/React.createElement(RichText, _extends({}, blockProps, {
     tagName: htmlTag,
@@ -461,6 +470,10 @@ registerBlockType('frontblocks/text-animation', {
     textColorCustom: {
       type: 'string',
       default: ''
+    },
+    textColorHover: {
+      type: 'string',
+      default: ''
     }
   },
   edit: TextAnimationEdit,
@@ -476,7 +489,8 @@ registerBlockType('frontblocks/text-animation', {
       letterSpacing = attributes.letterSpacing,
       textAlign = attributes.textAlign,
       textTransform = attributes.textTransform,
-      textColorCustom = attributes.textColorCustom;
+      textColorCustom = attributes.textColorCustom,
+      textColorHover = attributes.textColorHover;
     var style = {};
     if (fontSize) style.fontSize = "".concat(fontSize).concat(fontSizeUnit || 'px');
     if (fontWeight) style.fontWeight = fontWeight;
@@ -486,6 +500,7 @@ registerBlockType('frontblocks/text-animation', {
     if (textAlign && textAlign !== 'left') style.textAlign = textAlign;
     if (textTransform && textTransform !== 'none') style.textTransform = textTransform;
     if (textColorCustom) style.color = textColorCustom;
+    if (textColorHover) style['--frbl-color-hover'] = textColorHover;
     var blockProps = wp.blockEditor.useBlockProps.save({
       className: 'frbl-text-animation',
       style: style
