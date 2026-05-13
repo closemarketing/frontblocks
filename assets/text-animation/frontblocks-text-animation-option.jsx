@@ -11,6 +11,8 @@ const {
 	SelectControl,
 	RangeControl,
 	__experimentalNumberControl: NumberControl,
+	__experimentalToggleGroupControl: ToggleGroupControl,
+	__experimentalToggleGroupControlOptionIcon: ToggleGroupControlOptionIcon,
 } = wp.components;
 const { __ } = wp.i18n;
 
@@ -44,12 +46,26 @@ const FONT_WEIGHT_OPTIONS = [
 	{ label: __( 'Black (900)', 'frontblocks' ),       value: '900' },
 ];
 
-const TEXT_ALIGN_OPTIONS = [
-	{ label: __( 'Left', 'frontblocks' ),   value: 'left' },
-	{ label: __( 'Center', 'frontblocks' ), value: 'center' },
-	{ label: __( 'Right', 'frontblocks' ),  value: 'right' },
-	{ label: __( 'Justify', 'frontblocks' ),value: 'justify' },
-];
+const ALIGN_LEFT_ICON = (
+	<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+		<path d="M13 15H3v2h10v-2zm0-8H3v2h10V7zM3 13h18v-2H3v2zm0 8h18v-2H3v2zM3 3v2h18V3H3z"/>
+	</svg>
+);
+const ALIGN_CENTER_ICON = (
+	<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+		<path d="M7 15v2h10v-2H7zm-4 6h18v-2H3v2zm0-8h18v-2H3v2zm4-6v2h10V7H7zM3 3v2h18V3H3z"/>
+	</svg>
+);
+const ALIGN_RIGHT_ICON = (
+	<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+		<path d="M3 21h18v-2H3v2zm8-4h10v-2H11v2zm-8-4h18v-2H3v2zm8-4h10V7H11v2zM3 3v2h18V3H3z"/>
+	</svg>
+);
+const ALIGN_JUSTIFY_ICON = (
+	<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+		<path d="M3 21h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18V7H3v2zm0-6v2h18V3H3z"/>
+	</svg>
+);
 
 const TEXT_TRANSFORM_OPTIONS = [
 	{ label: __( 'None', 'frontblocks' ),       value: 'none' },
@@ -141,12 +157,17 @@ function TextAnimationEdit( props ) {
 						onChange={ ( value ) => setAttributes( { fontStyle: value } ) }
 					/>
 
-					<SelectControl
+					<ToggleGroupControl
 						label={ __( 'Text Align', 'frontblocks' ) }
 						value={ textAlign }
-						options={ TEXT_ALIGN_OPTIONS }
-						onChange={ ( value ) => setAttributes( { textAlign: value } ) }
-					/>
+						onChange={ ( value ) => setAttributes( { textAlign: value || 'left' } ) }
+						isBlock
+					>
+						<ToggleGroupControlOptionIcon value="left"    icon={ ALIGN_LEFT_ICON }    label={ __( 'Left', 'frontblocks' ) } />
+						<ToggleGroupControlOptionIcon value="center"  icon={ ALIGN_CENTER_ICON }  label={ __( 'Center', 'frontblocks' ) } />
+						<ToggleGroupControlOptionIcon value="right"   icon={ ALIGN_RIGHT_ICON }   label={ __( 'Right', 'frontblocks' ) } />
+						<ToggleGroupControlOptionIcon value="justify" icon={ ALIGN_JUSTIFY_ICON } label={ __( 'Justify', 'frontblocks' ) } />
+					</ToggleGroupControl>
 
 					<SelectControl
 						label={ __( 'Text Transform', 'frontblocks' ) }

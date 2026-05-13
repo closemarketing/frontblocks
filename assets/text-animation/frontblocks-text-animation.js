@@ -12,7 +12,9 @@ var _wp$components = wp.components,
   PanelBody = _wp$components.PanelBody,
   SelectControl = _wp$components.SelectControl,
   RangeControl = _wp$components.RangeControl,
-  NumberControl = _wp$components.__experimentalNumberControl;
+  NumberControl = _wp$components.__experimentalNumberControl,
+  ToggleGroupControl = _wp$components.__experimentalToggleGroupControl,
+  ToggleGroupControlOptionIcon = _wp$components.__experimentalToggleGroupControlOptionIcon;
 var __ = wp.i18n.__;
 var FONT_SIZE_UNITS = [{
   label: 'px',
@@ -80,19 +82,42 @@ var FONT_WEIGHT_OPTIONS = [{
   label: __('Black (900)', 'frontblocks'),
   value: '900'
 }];
-var TEXT_ALIGN_OPTIONS = [{
-  label: __('Left', 'frontblocks'),
-  value: 'left'
-}, {
-  label: __('Center', 'frontblocks'),
-  value: 'center'
-}, {
-  label: __('Right', 'frontblocks'),
-  value: 'right'
-}, {
-  label: __('Justify', 'frontblocks'),
-  value: 'justify'
-}];
+var ALIGN_LEFT_ICON = /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: "20",
+  height: "20",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true"
+}, /*#__PURE__*/React.createElement("path", {
+  d: "M13 15H3v2h10v-2zm0-8H3v2h10V7zM3 13h18v-2H3v2zm0 8h18v-2H3v2zM3 3v2h18V3H3z"
+}));
+var ALIGN_CENTER_ICON = /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: "20",
+  height: "20",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true"
+}, /*#__PURE__*/React.createElement("path", {
+  d: "M7 15v2h10v-2H7zm-4 6h18v-2H3v2zm0-8h18v-2H3v2zm4-6v2h10V7H7zM3 3v2h18V3H3z"
+}));
+var ALIGN_RIGHT_ICON = /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: "20",
+  height: "20",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true"
+}, /*#__PURE__*/React.createElement("path", {
+  d: "M3 21h18v-2H3v2zm8-4h10v-2H11v2zm-8-4h18v-2H3v2zm8-4h10V7H11v2zM3 3v2h18V3H3z"
+}));
+var ALIGN_JUSTIFY_ICON = /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: "20",
+  height: "20",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true"
+}, /*#__PURE__*/React.createElement("path", {
+  d: "M3 21h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18V7H3v2zm0-6v2h18V3H3z"
+}));
 var TEXT_TRANSFORM_OPTIONS = [{
   label: __('None', 'frontblocks'),
   value: 'none'
@@ -208,16 +233,32 @@ function TextAnimationEdit(props) {
         fontStyle: value
       });
     }
-  }), /*#__PURE__*/React.createElement(SelectControl, {
+  }), /*#__PURE__*/React.createElement(ToggleGroupControl, {
     label: __('Text Align', 'frontblocks'),
     value: textAlign,
-    options: TEXT_ALIGN_OPTIONS,
     onChange: function onChange(value) {
       return setAttributes({
-        textAlign: value
+        textAlign: value || 'left'
       });
-    }
-  }), /*#__PURE__*/React.createElement(SelectControl, {
+    },
+    isBlock: true
+  }, /*#__PURE__*/React.createElement(ToggleGroupControlOptionIcon, {
+    value: "left",
+    icon: ALIGN_LEFT_ICON,
+    label: __('Left', 'frontblocks')
+  }), /*#__PURE__*/React.createElement(ToggleGroupControlOptionIcon, {
+    value: "center",
+    icon: ALIGN_CENTER_ICON,
+    label: __('Center', 'frontblocks')
+  }), /*#__PURE__*/React.createElement(ToggleGroupControlOptionIcon, {
+    value: "right",
+    icon: ALIGN_RIGHT_ICON,
+    label: __('Right', 'frontblocks')
+  }), /*#__PURE__*/React.createElement(ToggleGroupControlOptionIcon, {
+    value: "justify",
+    icon: ALIGN_JUSTIFY_ICON,
+    label: __('Justify', 'frontblocks')
+  })), /*#__PURE__*/React.createElement(SelectControl, {
     label: __('Text Transform', 'frontblocks'),
     value: textTransform,
     options: TEXT_TRANSFORM_OPTIONS,
