@@ -199,15 +199,65 @@ var FONT_STYLE_OPTIONS = [{
   label: __('Italic', 'frontblocks'),
   value: 'italic'
 }];
+var ANIMATION_OPTIONS = [{
+  label: __('None', 'frontblocks'),
+  value: 'none'
+}, {
+  label: __('Fade In', 'frontblocks'),
+  value: 'fade-in'
+}];
+function stripHtml(html) {
+  return html ? html.replace(/<[^>]*>/g, '') : '';
+}
+function FadeInPreview(_ref) {
+  var text = _ref.text,
+    style = _ref.style,
+    Tag = _ref.Tag;
+  var _useState = useState(0),
+    _useState2 = _slicedToArray(_useState, 2),
+    key = _useState2[0],
+    setKey = _useState2[1];
+  var chars = text.split('');
+  var charDelay = 0.05;
+  var charDuration = 0.8;
+  var totalMs = (chars.length * charDelay + charDuration) * 1000 + 2500;
+  useState(function () {
+    var t = setTimeout(function () {
+      return setKey(function (k) {
+        return k + 1;
+      });
+    }, totalMs);
+    return function () {
+      return clearTimeout(t);
+    };
+  });
+  return /*#__PURE__*/React.createElement(Tag, {
+    style: style,
+    key: key
+  }, chars.map(function (char, i) {
+    return /*#__PURE__*/React.createElement("span", {
+      key: i,
+      style: {
+        display: 'inline-block',
+        whiteSpace: 'pre',
+        opacity: 0,
+        animation: "frblFadeIn ".concat(charDuration, "s forwards"),
+        animationDelay: "".concat(i * charDelay, "s")
+      }
+    }, char);
+  }));
+}
 function TextAnimationEdit(props) {
   var attributes = props.attributes,
-    setAttributes = props.setAttributes;
-  var _useState = useState(false),
-    _useState2 = _slicedToArray(_useState, 2),
-    isHovered = _useState2[0],
-    setIsHovered = _useState2[1];
+    setAttributes = props.setAttributes,
+    isSelected = props.isSelected;
+  var _useState3 = useState(false),
+    _useState4 = _slicedToArray(_useState3, 2),
+    isHovered = _useState4[0],
+    setIsHovered = _useState4[1];
   var content = attributes.content,
     htmlTag = attributes.htmlTag,
+    animationType = attributes.animationType,
     fontSize = attributes.fontSize,
     fontSizeUnit = attributes.fontSizeUnit,
     fontFamily = attributes.fontFamily,
@@ -269,9 +319,38 @@ function TextAnimationEdit(props) {
       return setIsHovered(false);
     }
   });
+  var hasAnimation = animationType && animationType !== 'none';
+  var showPreview = hasAnimation && !isSelected;
+  var previewStyle = {
+    fontSize: blockProps.style.fontSize,
+    fontFamily: blockProps.style.fontFamily,
+    fontWeight: blockProps.style.fontWeight,
+    fontStyle: blockProps.style.fontStyle,
+    lineHeight: blockProps.style.lineHeight,
+    letterSpacing: blockProps.style.letterSpacing,
+    textAlign: blockProps.style.textAlign,
+    textTransform: blockProps.style.textTransform,
+    color: blockProps.style.color || blockProps.style['--frbl-color'] || undefined,
+    width: blockProps.style.width,
+    height: blockProps.style.height,
+    marginLeft: 0,
+    marginRight: 'auto'
+  };
   return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
-    title: __('Typography', 'frontblocks'),
+    title: __('Animation', 'frontblocks'),
     initialOpen: true
+  }, /*#__PURE__*/React.createElement(SelectControl, {
+    label: __('Animation Type', 'frontblocks'),
+    value: animationType,
+    options: ANIMATION_OPTIONS,
+    onChange: function onChange(value) {
+      return setAttributes({
+        animationType: value
+      });
+    }
+  })), /*#__PURE__*/React.createElement(PanelBody, {
+    title: __('Typography', 'frontblocks'),
+    initialOpen: false
   }, /*#__PURE__*/React.createElement(SelectControl, {
     label: __('HTML Tag', 'frontblocks'),
     value: htmlTag,
@@ -608,7 +687,11 @@ function TextAnimationEdit(props) {
         });
       }
     }]
-  })), /*#__PURE__*/React.createElement(RichText, _extends({}, blockProps, {
+  })), showPreview ? /*#__PURE__*/React.createElement(FadeInPreview, {
+    text: stripHtml(content) || __('Write your text here…', 'frontblocks'),
+    style: previewStyle,
+    Tag: htmlTag
+  }) : /*#__PURE__*/React.createElement(RichText, _extends({}, blockProps, {
     tagName: htmlTag,
     value: content,
     onChange: function onChange(value) {
@@ -645,6 +728,10 @@ registerBlockType('frontblocks/text-animation', {
     htmlTag: {
       type: 'string',
       default: 'h2'
+    },
+    animationType: {
+      type: 'string',
+      default: 'none'
     },
     fontSize: {
       type: 'number',
@@ -708,10 +795,11 @@ registerBlockType('frontblocks/text-animation', {
     }
   },
   edit: TextAnimationEdit,
-  save: function save(_ref) {
-    var attributes = _ref.attributes;
+  save: function save(_ref2) {
+    var attributes = _ref2.attributes;
     var content = attributes.content,
       Tag = attributes.htmlTag,
+      animationType = attributes.animationType,
       fontSize = attributes.fontSize,
       fontSizeUnit = attributes.fontSizeUnit,
       fontFamily = attributes.fontFamily,
@@ -742,7 +830,8 @@ registerBlockType('frontblocks/text-animation', {
     if (height) style.height = "".concat(height).concat(heightUnit || 'px');
     var blockProps = wp.blockEditor.useBlockProps.save({
       className: 'frbl-text-animation',
-      style: style
+      style: style,
+      'data-animation': animationType && animationType !== 'none' ? animationType : undefined
     });
     return /*#__PURE__*/React.createElement(Tag, blockProps, /*#__PURE__*/React.createElement(RichText.Content, {
       value: content

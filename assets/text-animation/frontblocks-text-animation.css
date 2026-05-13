@@ -27,6 +27,18 @@ span.frbl-text-animation {
 	margin-bottom: 0 !important;
 }
 
+/* ── Animation: char base ── */
+.frbl-text-animation .frbl-char {
+	display: inline-block;
+	white-space: pre;
+}
+
+/* ── Fade In ── */
+@keyframes frblFadeIn {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
+
 /* Respect reduced motion */
 @media ( prefers-reduced-motion: reduce ) {
 	.frbl-text-animation,

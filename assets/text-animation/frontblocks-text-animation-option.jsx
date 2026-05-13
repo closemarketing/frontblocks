@@ -95,12 +95,52 @@ const FONT_STYLE_OPTIONS = [
 	{ label: __( 'Italic', 'frontblocks' ), value: 'italic' },
 ];
 
+const ANIMATION_OPTIONS = [
+	{ label: __( 'None', 'frontblocks' ),     value: 'none' },
+	{ label: __( 'Fade In', 'frontblocks' ),  value: 'fade-in' },
+];
+
+function stripHtml( html ) {
+	return html ? html.replace( /<[^>]*>/g, '' ) : '';
+}
+
+function FadeInPreview( { text, style, Tag } ) {
+	const [ key, setKey ] = useState( 0 );
+	const chars = text.split( '' );
+	const charDelay = 0.05;
+	const charDuration = 0.8;
+	const totalMs = ( chars.length * charDelay + charDuration ) * 1000 + 2500;
+
+	useState( () => {
+		const t = setTimeout( () => setKey( ( k ) => k + 1 ), totalMs );
+		return () => clearTimeout( t );
+	} );
+
+	return (
+		<Tag style={ style } key={ key }>
+			{ chars.map( ( char, i ) => (
+				<span
+					key={ i }
+					style={ {
+						display: 'inline-block',
+						whiteSpace: 'pre',
+						opacity: 0,
+						animation: `frblFadeIn ${ charDuration }s forwards`,
+						animationDelay: `${ i * charDelay }s`,
+					} }
+				>{ char }</span>
+			) ) }
+		</Tag>
+	);
+}
+
 function TextAnimationEdit( props ) {
-	const { attributes, setAttributes } = props;
+	const { attributes, setAttributes, isSelected } = props;
 	const [ isHovered, setIsHovered ] = useState( false );
 	const {
 		content,
 		htmlTag,
+		animationType,
 		fontSize,
 		fontSizeUnit,
 		fontFamily,
@@ -163,11 +203,39 @@ function TextAnimationEdit( props ) {
 		onMouseLeave: () => setIsHovered( false ),
 	} );
 
+	const hasAnimation = animationType && animationType !== 'none';
+	const showPreview  = hasAnimation && ! isSelected;
+
+	const previewStyle = {
+		fontSize:      blockProps.style.fontSize,
+		fontFamily:    blockProps.style.fontFamily,
+		fontWeight:    blockProps.style.fontWeight,
+		fontStyle:     blockProps.style.fontStyle,
+		lineHeight:    blockProps.style.lineHeight,
+		letterSpacing: blockProps.style.letterSpacing,
+		textAlign:     blockProps.style.textAlign,
+		textTransform: blockProps.style.textTransform,
+		color:         blockProps.style.color || blockProps.style['--frbl-color'] || undefined,
+		width:         blockProps.style.width,
+		height:        blockProps.style.height,
+		marginLeft:    0,
+		marginRight:   'auto',
+	};
+
 	return (
 		<Fragment>
 			<InspectorControls>
 
-				<PanelBody title={ __( 'Typography', 'frontblocks' ) } initialOpen={ true }>
+				<PanelBody title={ __( 'Animation', 'frontblocks' ) } initialOpen={ true }>
+					<SelectControl
+						label={ __( 'Animation Type', 'frontblocks' ) }
+						value={ animationType }
+						options={ ANIMATION_OPTIONS }
+						onChange={ ( value ) => setAttributes( { animationType: value } ) }
+					/>
+				</PanelBody>
+
+				<PanelBody title={ __( 'Typography', 'frontblocks' ) } initialOpen={ false }>
 
 					<SelectControl
 						label={ __( 'HTML Tag', 'frontblocks' ) }
@@ -369,14 +437,22 @@ function TextAnimationEdit( props ) {
 
 			</InspectorControls>
 
-			<RichText
-				{ ...blockProps }
-				tagName={ htmlTag }
-				value={ content }
-				onChange={ ( value ) => setAttributes( { content: value } ) }
-				placeholder={ __( 'Write your text here…', 'frontblocks' ) }
-				allowedFormats={ [ 'core/bold', 'core/italic', 'core/link', 'core/underline', 'core/strikethrough', 'core/code' ] }
-			/>
+			{ showPreview ? (
+				<FadeInPreview
+					text={ stripHtml( content ) || __( 'Write your text here…', 'frontblocks' ) }
+					style={ previewStyle }
+					Tag={ htmlTag }
+				/>
+			) : (
+				<RichText
+					{ ...blockProps }
+					tagName={ htmlTag }
+					value={ content }
+					onChange={ ( value ) => setAttributes( { content: value } ) }
+					placeholder={ __( 'Write your text here…', 'frontblocks' ) }
+					allowedFormats={ [ 'core/bold', 'core/italic', 'core/link', 'core/underline', 'core/strikethrough', 'core/code' ] }
+				/>
+			) }
 		</Fragment>
 	);
 }
@@ -411,6 +487,10 @@ registerBlockType( 'frontblocks/text-animation', {
 		htmlTag: {
 			type:    'string',
 			default: 'h2',
+		},
+		animationType: {
+			type:    'string',
+			default: 'none',
 		},
 		fontSize: {
 			type:    'number',
@@ -478,6 +558,7 @@ registerBlockType( 'frontblocks/text-animation', {
 		const {
 			content,
 			htmlTag: Tag,
+			animationType,
 			fontSize,
 			fontSizeUnit,
 			fontFamily,
@@ -512,6 +593,7 @@ registerBlockType( 'frontblocks/text-animation', {
 		const blockProps = wp.blockEditor.useBlockProps.save( {
 			className: 'frbl-text-animation',
 			style,
+			'data-animation': ( animationType && animationType !== 'none' ) ? animationType : undefined,
 		} );
 
 		return (

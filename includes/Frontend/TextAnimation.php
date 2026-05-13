@@ -25,6 +25,7 @@ class TextAnimation {
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_block' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
+		add_filter( 'render_block_frontblocks/text-animation', array( $this, 'maybe_enqueue_frontend_assets' ), 10, 2 );
 	}
 
 	/**
@@ -55,6 +56,14 @@ class TextAnimation {
 			FRBL_VERSION
 		);
 
+		wp_register_script(
+			'frontblocks-text-animation-frontend',
+			FRBL_PLUGIN_URL . 'assets/text-animation/frontblocks-text-animation-frontend.js',
+			array(),
+			FRBL_VERSION,
+			true
+		);
+
 		register_block_type(
 			'frontblocks/text-animation',
 			array(
@@ -63,6 +72,21 @@ class TextAnimation {
 				'style'         => 'frontblocks-text-animation',
 			)
 		);
+	}
+
+	/**
+	 * Enqueue frontend JS only when block with animation is on the page.
+	 *
+	 * @param string $block_content Block HTML.
+	 * @param array  $block         Block data.
+	 * @return string
+	 */
+	public function maybe_enqueue_frontend_assets( $block_content, $block ) {
+		$animation = $block['attrs']['animationType'] ?? 'none';
+		if ( 'none' !== $animation && ! wp_script_is( 'frontblocks-text-animation-frontend', 'enqueued' ) ) {
+			wp_enqueue_script( 'frontblocks-text-animation-frontend' );
+		}
+		return $block_content;
 	}
 
 	/**
