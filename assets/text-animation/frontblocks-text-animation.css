@@ -84,6 +84,12 @@ span.frbl-text-animation {
 	to   { transform: translateY( 0 );    opacity: 1; }
 }
 
+/* ── Slide Down ── */
+@keyframes frblSlideDown {
+	from { transform: translateY( -100% ); opacity: 0; }
+	to   { transform: translateY( 0 );     opacity: 1; }
+}
+
 /* Respect reduced motion */
 @media ( prefers-reduced-motion: reduce ) {
 	.frbl-text-animation,

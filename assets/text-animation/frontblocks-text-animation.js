@@ -222,6 +222,9 @@ var ANIMATION_OPTIONS = [{
   label: __('Slide Up', 'frontblocks'),
   value: 'slide-up'
 }, {
+  label: __('Slide Down', 'frontblocks'),
+  value: 'slide-down'
+}, {
   label: __('Scale In', 'frontblocks'),
   value: 'scale-in'
 }, {
@@ -475,15 +478,45 @@ var ANIMATION_PREVIEWS = {
       }));
     }
   },
-  'shuffle-text': {
+  'slide-down': {
     duration: function duration(text) {
-      return (text.replace(/ /g, '').length * 2 + 15) * 30;
+      return (text.length * 0.05 + 0.5) * 1000;
     },
-    render: function ShuffleTextRender(_ref9) {
+    render: function SlideDownRender(_ref9) {
       var text = _ref9.text,
         style = _ref9.style,
         Tag = _ref9.Tag,
         animKey = _ref9.animKey;
+      var CHAR_DURATION = 0.5;
+      var CHAR_DELAY = 0.05;
+      return /*#__PURE__*/React.createElement(Tag, {
+        style: _objectSpread(_objectSpread({}, style), {}, {
+          overflow: 'hidden'
+        }),
+        key: animKey
+      }, text.split('').map(function (char, i) {
+        return /*#__PURE__*/React.createElement("span", {
+          key: i,
+          style: {
+            display: 'inline-block',
+            whiteSpace: 'pre',
+            opacity: 0,
+            animation: "frblSlideDown ".concat(CHAR_DURATION, "s forwards"),
+            animationDelay: "".concat(i * CHAR_DELAY, "s")
+          }
+        }, char);
+      }));
+    }
+  },
+  'shuffle-text': {
+    duration: function duration(text) {
+      return (text.replace(/ /g, '').length * 2 + 15) * 30;
+    },
+    render: function ShuffleTextRender(_ref0) {
+      var text = _ref0.text,
+        style = _ref0.style,
+        Tag = _ref0.Tag,
+        animKey = _ref0.animKey;
       var _wp$element2 = wp.element,
         useEffect = _wp$element2.useEffect,
         useRef = _wp$element2.useRef;
@@ -550,11 +583,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return text.length * 80;
     },
-    render: function TypewriterRender(_ref0) {
-      var text = _ref0.text,
-        style = _ref0.style,
-        Tag = _ref0.Tag,
-        animKey = _ref0.animKey;
+    render: function TypewriterRender(_ref1) {
+      var text = _ref1.text,
+        style = _ref1.style,
+        Tag = _ref1.Tag,
+        animKey = _ref1.animKey;
       var _wp$element3 = wp.element,
         useEffect = _wp$element3.useEffect,
         useRef = _wp$element3.useRef;
@@ -586,11 +619,11 @@ var ANIMATION_PREVIEWS = {
     }
   }
 };
-function AnimationPreview(_ref1) {
-  var animationType = _ref1.animationType,
-    text = _ref1.text,
-    style = _ref1.style,
-    Tag = _ref1.Tag;
+function AnimationPreview(_ref10) {
+  var animationType = _ref10.animationType,
+    text = _ref10.text,
+    style = _ref10.style,
+    Tag = _ref10.Tag;
   var _useState = useState(0),
     _useState2 = _slicedToArray(_useState, 2),
     animKey = _useState2[0],
@@ -1196,8 +1229,8 @@ registerBlockType('frontblocks/text-animation', {
     }
   },
   edit: TextAnimationEdit,
-  save: function save(_ref10) {
-    var attributes = _ref10.attributes;
+  save: function save(_ref11) {
+    var attributes = _ref11.attributes;
     var content = attributes.content,
       Tag = attributes.htmlTag,
       animationType = attributes.animationType,
