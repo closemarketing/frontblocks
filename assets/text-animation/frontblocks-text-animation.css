@@ -39,6 +39,13 @@ span.frbl-text-animation {
 	to   { opacity: 1; }
 }
 
+/* ── Glow In ── */
+@keyframes frblGlowIn {
+	0%   { opacity: 0; text-shadow: 0 0 0px rgba(255,255,255,0); }
+	50%  { opacity: 1; text-shadow: 0 0 20px rgba(255,255,255,1); }
+	100% { opacity: 1; text-shadow: 0 0 0px rgba(255,255,255,0); }
+}
+
 /* ── Blur In ── */
 @keyframes frblBlurIn {
 	from { filter: blur( 12px ); opacity: 0; transform: scale( 1.1 ); }

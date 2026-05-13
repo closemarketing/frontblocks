@@ -104,6 +104,7 @@ const ANIMATION_OPTIONS = [
 	{ label: __( 'Slide Up', 'frontblocks' ),      value: 'slide-up' },
 	{ label: __( 'Scale In', 'frontblocks' ),      value: 'scale-in' },
 	{ label: __( 'Blur In', 'frontblocks' ),       value: 'blur-in' },
+	{ label: __( 'Glow In', 'frontblocks' ),       value: 'glow-in' },
 ];
 
 function stripHtml( html ) {
@@ -128,6 +129,26 @@ const ANIMATION_PREVIEWS = {
 							whiteSpace: 'pre',
 							opacity: 0,
 							animation: `frblFadeIn ${ CHAR_DURATION }s forwards`,
+							animationDelay: `${ i * CHAR_DELAY }s`,
+						} }>{ char }</span>
+					) ) }
+				</Tag>
+			);
+		},
+	},
+	'glow-in': {
+		duration: ( text ) => ( text.length * 0.05 + 1 ) * 1000,
+		render: function GlowInRender( { text, style, Tag, animKey } ) {
+			const CHAR_DURATION = 1;
+			const CHAR_DELAY    = 0.05;
+			return (
+				<Tag style={ style } key={ animKey }>
+					{ text.split( '' ).map( ( char, i ) => (
+						<span key={ i } style={ {
+							display: 'inline-block',
+							whiteSpace: 'pre',
+							opacity: 0,
+							animation: `frblGlowIn ${ CHAR_DURATION }s forwards`,
 							animationDelay: `${ i * CHAR_DELAY }s`,
 						} }>{ char }</span>
 					) ) }
