@@ -118,7 +118,8 @@ const ANIMATION_OPTIONS = [
 	{ label: __( 'Random Reveal', 'frontblocks' ), value: 'random-reveal' },
 	{ label: __( 'Flicker', 'frontblocks' ),       value: 'flicker' },
 	{ label: __( 'Block Reveal', 'frontblocks' ),    value: 'block-reveal' },
-	{ label: __( 'Tracking Expand', 'frontblocks' ), value: 'tracking-expand' },
+	{ label: __( 'Tracking Expand', 'frontblocks' ),  value: 'tracking-expand' },
+	{ label: __( 'Terminal Type', 'frontblocks' ),    value: 'terminal-type' },
 	{ label: __( 'Scale In', 'frontblocks' ),      value: 'scale-in' },
 	{ label: __( 'Blur In', 'frontblocks' ),       value: 'blur-in' },
 	{ label: __( 'Glow In', 'frontblocks' ),       value: 'glow-in' },
@@ -294,6 +295,43 @@ const ANIMATION_PREVIEWS = {
 					) ) }
 				</Tag>
 			);
+		},
+	},
+	'terminal-type': {
+		duration: ( text ) => text.length * 100,
+		render: function TerminalTypeRender( { text, style, Tag, animKey } ) {
+			const { useEffect, useRef } = wp.element;
+			const containerRef = useRef( null );
+
+			useEffect( () => {
+				const el = containerRef.current;
+				if ( ! el ) return;
+				el.innerHTML = '';
+
+				const textSpan         = document.createElement( 'span' );
+				const cursor           = document.createElement( 'span' );
+				cursor.style.cssText   = 'display:inline-block;width:0.6em;height:1.1em;background:currentColor;margin-left:4px;vertical-align:middle;animation:frblBlinkCursor 1s infinite;';
+
+				el.appendChild( textSpan );
+				el.appendChild( cursor );
+
+				const chars = text.split( '' );
+				let i = 0;
+				let timer;
+
+				function type() {
+					if ( i < chars.length ) {
+						textSpan.textContent += chars[ i ];
+						i++;
+						timer = setTimeout( type, 100 );
+					}
+				}
+
+				type();
+				return () => clearTimeout( timer );
+			}, [ animKey, text ] );
+
+			return <Tag ref={ containerRef } style={ style } key={ animKey } />;
 		},
 	},
 	'tracking-expand': {

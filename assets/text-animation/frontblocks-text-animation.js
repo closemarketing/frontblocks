@@ -273,6 +273,9 @@ var ANIMATION_OPTIONS = [{
   label: __('Tracking Expand', 'frontblocks'),
   value: 'tracking-expand'
 }, {
+  label: __('Terminal Type', 'frontblocks'),
+  value: 'terminal-type'
+}, {
   label: __('Scale In', 'frontblocks'),
   value: 'scale-in'
 }, {
@@ -526,15 +529,59 @@ var ANIMATION_PREVIEWS = {
       }));
     }
   },
-  'tracking-expand': {
-    duration: function duration() {
-      return 1200;
+  'terminal-type': {
+    duration: function duration(text) {
+      return text.length * 100;
     },
-    render: function TrackingExpandRender(_ref9) {
+    render: function TerminalTypeRender(_ref9) {
       var text = _ref9.text,
         style = _ref9.style,
         Tag = _ref9.Tag,
         animKey = _ref9.animKey;
+      var _wp$element2 = wp.element,
+        useEffect = _wp$element2.useEffect,
+        useRef = _wp$element2.useRef;
+      var containerRef = useRef(null);
+      useEffect(function () {
+        var el = containerRef.current;
+        if (!el) return;
+        el.innerHTML = '';
+        var textSpan = document.createElement('span');
+        var cursor = document.createElement('span');
+        cursor.style.cssText = 'display:inline-block;width:0.6em;height:1.1em;background:currentColor;margin-left:4px;vertical-align:middle;animation:frblBlinkCursor 1s infinite;';
+        el.appendChild(textSpan);
+        el.appendChild(cursor);
+        var chars = text.split('');
+        var i = 0;
+        var timer;
+        function type() {
+          if (i < chars.length) {
+            textSpan.textContent += chars[i];
+            i++;
+            timer = setTimeout(type, 100);
+          }
+        }
+        type();
+        return function () {
+          return clearTimeout(timer);
+        };
+      }, [animKey, text]);
+      return /*#__PURE__*/React.createElement(Tag, {
+        ref: containerRef,
+        style: style,
+        key: animKey
+      });
+    }
+  },
+  'tracking-expand': {
+    duration: function duration() {
+      return 1200;
+    },
+    render: function TrackingExpandRender(_ref0) {
+      var text = _ref0.text,
+        style = _ref0.style,
+        Tag = _ref0.Tag,
+        animKey = _ref0.animKey;
       return /*#__PURE__*/React.createElement(Tag, {
         style: style,
         key: animKey
@@ -551,14 +598,14 @@ var ANIMATION_PREVIEWS = {
     duration: function duration() {
       return 1200;
     },
-    render: function BlockRevealRender(_ref0) {
-      var text = _ref0.text,
-        style = _ref0.style,
-        Tag = _ref0.Tag,
-        animKey = _ref0.animKey;
-      var _wp$element2 = wp.element,
-        useEffect = _wp$element2.useEffect,
-        useRef = _wp$element2.useRef;
+    render: function BlockRevealRender(_ref1) {
+      var text = _ref1.text,
+        style = _ref1.style,
+        Tag = _ref1.Tag,
+        animKey = _ref1.animKey;
+      var _wp$element3 = wp.element,
+        useEffect = _wp$element3.useEffect,
+        useRef = _wp$element3.useRef;
       var containerRef = useRef(null);
       useEffect(function () {
         var el = containerRef.current;
@@ -597,11 +644,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.length * 0.05 + 1.2) * 1000;
     },
-    render: function FlickerRender(_ref1) {
-      var text = _ref1.text,
-        style = _ref1.style,
-        Tag = _ref1.Tag,
-        animKey = _ref1.animKey;
+    render: function FlickerRender(_ref10) {
+      var text = _ref10.text,
+        style = _ref10.style,
+        Tag = _ref10.Tag,
+        animKey = _ref10.animKey;
       var CHAR_DURATION = 1.2;
       var CHAR_DELAY = 0.05;
       return /*#__PURE__*/React.createElement(Tag, {
@@ -625,14 +672,14 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return text.replace(/ /g, '').length * 50;
     },
-    render: function RandomRevealRender(_ref10) {
-      var text = _ref10.text,
-        style = _ref10.style,
-        Tag = _ref10.Tag,
-        animKey = _ref10.animKey;
-      var _wp$element3 = wp.element,
-        useEffect = _wp$element3.useEffect,
-        useRef = _wp$element3.useRef;
+    render: function RandomRevealRender(_ref11) {
+      var text = _ref11.text,
+        style = _ref11.style,
+        Tag = _ref11.Tag,
+        animKey = _ref11.animKey;
+      var _wp$element4 = wp.element,
+        useEffect = _wp$element4.useEffect,
+        useRef = _wp$element4.useRef;
       var containerRef = useRef(null);
       useEffect(function () {
         var el = containerRef.current;
@@ -677,11 +724,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.length * 0.1 + 0.4) * 1000;
     },
-    render: function GlitchRender(_ref11) {
-      var text = _ref11.text,
-        style = _ref11.style,
-        Tag = _ref11.Tag,
-        animKey = _ref11.animKey;
+    render: function GlitchRender(_ref12) {
+      var text = _ref12.text,
+        style = _ref12.style,
+        Tag = _ref12.Tag,
+        animKey = _ref12.animKey;
       var CHAR_DURATION = 0.4;
       var CHAR_DELAY = 0.1;
       return /*#__PURE__*/React.createElement(Tag, {
@@ -705,11 +752,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.length * 0.05 + 0.6) * 1000;
     },
-    render: function RollInRender(_ref12) {
-      var text = _ref12.text,
-        style = _ref12.style,
-        Tag = _ref12.Tag,
-        animKey = _ref12.animKey;
+    render: function RollInRender(_ref13) {
+      var text = _ref13.text,
+        style = _ref13.style,
+        Tag = _ref13.Tag,
+        animKey = _ref13.animKey;
       var CHAR_DURATION = 0.6;
       var CHAR_DELAY = 0.05;
       return /*#__PURE__*/React.createElement(Tag, {
@@ -735,11 +782,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.length * 0.05 + 0.5) * 1000;
     },
-    render: function SqueezeRender(_ref13) {
-      var text = _ref13.text,
-        style = _ref13.style,
-        Tag = _ref13.Tag,
-        animKey = _ref13.animKey;
+    render: function SqueezeRender(_ref14) {
+      var text = _ref14.text,
+        style = _ref14.style,
+        Tag = _ref14.Tag,
+        animKey = _ref14.animKey;
       var CHAR_DURATION = 0.5;
       var CHAR_DELAY = 0.05;
       return /*#__PURE__*/React.createElement(Tag, {
@@ -763,11 +810,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.length * 0.05 + 0.5) * 1000;
     },
-    render: function StretchRender(_ref14) {
-      var text = _ref14.text,
-        style = _ref14.style,
-        Tag = _ref14.Tag,
-        animKey = _ref14.animKey;
+    render: function StretchRender(_ref15) {
+      var text = _ref15.text,
+        style = _ref15.style,
+        Tag = _ref15.Tag,
+        animKey = _ref15.animKey;
       var CHAR_DURATION = 0.5;
       var CHAR_DELAY = 0.05;
       return /*#__PURE__*/React.createElement(Tag, {
@@ -791,11 +838,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.length * 0.08 + 0.6) * 1000;
     },
-    render: function WaveRender(_ref15) {
-      var text = _ref15.text,
-        style = _ref15.style,
-        Tag = _ref15.Tag,
-        animKey = _ref15.animKey;
+    render: function WaveRender(_ref16) {
+      var text = _ref16.text,
+        style = _ref16.style,
+        Tag = _ref16.Tag,
+        animKey = _ref16.animKey;
       var CHAR_DURATION = 0.6;
       var CHAR_DELAY = 0.08;
       return /*#__PURE__*/React.createElement(Tag, {
@@ -819,11 +866,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.length * 0.05 + 0.8) * 1000;
     },
-    render: function RubberBandRender(_ref16) {
-      var text = _ref16.text,
-        style = _ref16.style,
-        Tag = _ref16.Tag,
-        animKey = _ref16.animKey;
+    render: function RubberBandRender(_ref17) {
+      var text = _ref17.text,
+        style = _ref17.style,
+        Tag = _ref17.Tag,
+        animKey = _ref17.animKey;
       var CHAR_DURATION = 0.8;
       var CHAR_DELAY = 0.05;
       return /*#__PURE__*/React.createElement(Tag, {
@@ -847,11 +894,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.length * 0.05 + 1) * 1000;
     },
-    render: function FlashRender(_ref17) {
-      var text = _ref17.text,
-        style = _ref17.style,
-        Tag = _ref17.Tag,
-        animKey = _ref17.animKey;
+    render: function FlashRender(_ref18) {
+      var text = _ref18.text,
+        style = _ref18.style,
+        Tag = _ref18.Tag,
+        animKey = _ref18.animKey;
       var CHAR_DURATION = 1;
       var CHAR_DELAY = 0.05;
       return /*#__PURE__*/React.createElement(Tag, {
@@ -875,11 +922,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.length * 0.05 + 0.5) * 1000;
     },
-    render: function PulseRender(_ref18) {
-      var text = _ref18.text,
-        style = _ref18.style,
-        Tag = _ref18.Tag,
-        animKey = _ref18.animKey;
+    render: function PulseRender(_ref19) {
+      var text = _ref19.text,
+        style = _ref19.style,
+        Tag = _ref19.Tag,
+        animKey = _ref19.animKey;
       var CHAR_DURATION = 0.5;
       var CHAR_DELAY = 0.05;
       return /*#__PURE__*/React.createElement(Tag, {
@@ -903,11 +950,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.length * 0.05 + 0.8) * 1000;
     },
-    render: function SwingRender(_ref19) {
-      var text = _ref19.text,
-        style = _ref19.style,
-        Tag = _ref19.Tag,
-        animKey = _ref19.animKey;
+    render: function SwingRender(_ref20) {
+      var text = _ref20.text,
+        style = _ref20.style,
+        Tag = _ref20.Tag,
+        animKey = _ref20.animKey;
       var CHAR_DURATION = 0.8;
       var CHAR_DELAY = 0.05;
       return /*#__PURE__*/React.createElement(Tag, {
@@ -932,11 +979,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.length * 0.06 + 0.6) * 1000;
     },
-    render: function DropInRender(_ref20) {
-      var text = _ref20.text,
-        style = _ref20.style,
-        Tag = _ref20.Tag,
-        animKey = _ref20.animKey;
+    render: function DropInRender(_ref21) {
+      var text = _ref21.text,
+        style = _ref21.style,
+        Tag = _ref21.Tag,
+        animKey = _ref21.animKey;
       var CHAR_DURATION = 0.6;
       var CHAR_DELAY = 0.06;
       return /*#__PURE__*/React.createElement(Tag, {
@@ -962,11 +1009,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.length * 0.05 + 0.5) * 1000;
     },
-    render: function SlideRightRender(_ref21) {
-      var text = _ref21.text,
-        style = _ref21.style,
-        Tag = _ref21.Tag,
-        animKey = _ref21.animKey;
+    render: function SlideRightRender(_ref22) {
+      var text = _ref22.text,
+        style = _ref22.style,
+        Tag = _ref22.Tag,
+        animKey = _ref22.animKey;
       var CHAR_DURATION = 0.5;
       var CHAR_DELAY = 0.05;
       return /*#__PURE__*/React.createElement(Tag, {
@@ -992,11 +1039,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.length * 0.05 + 0.5) * 1000;
     },
-    render: function SlideLeftRender(_ref22) {
-      var text = _ref22.text,
-        style = _ref22.style,
-        Tag = _ref22.Tag,
-        animKey = _ref22.animKey;
+    render: function SlideLeftRender(_ref23) {
+      var text = _ref23.text,
+        style = _ref23.style,
+        Tag = _ref23.Tag,
+        animKey = _ref23.animKey;
       var CHAR_DURATION = 0.5;
       var CHAR_DELAY = 0.05;
       return /*#__PURE__*/React.createElement(Tag, {
@@ -1022,11 +1069,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.length * 0.05 + 0.5) * 1000;
     },
-    render: function SlideDownRender(_ref23) {
-      var text = _ref23.text,
-        style = _ref23.style,
-        Tag = _ref23.Tag,
-        animKey = _ref23.animKey;
+    render: function SlideDownRender(_ref24) {
+      var text = _ref24.text,
+        style = _ref24.style,
+        Tag = _ref24.Tag,
+        animKey = _ref24.animKey;
       var CHAR_DURATION = 0.5;
       var CHAR_DELAY = 0.05;
       return /*#__PURE__*/React.createElement(Tag, {
@@ -1052,14 +1099,14 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.replace(/ /g, '').length * 2 + 15) * 30;
     },
-    render: function ShuffleTextRender(_ref24) {
-      var text = _ref24.text,
-        style = _ref24.style,
-        Tag = _ref24.Tag,
-        animKey = _ref24.animKey;
-      var _wp$element4 = wp.element,
-        useEffect = _wp$element4.useEffect,
-        useRef = _wp$element4.useRef;
+    render: function ShuffleTextRender(_ref25) {
+      var text = _ref25.text,
+        style = _ref25.style,
+        Tag = _ref25.Tag,
+        animKey = _ref25.animKey;
+      var _wp$element5 = wp.element,
+        useEffect = _wp$element5.useEffect,
+        useRef = _wp$element5.useRef;
       var SYMBOLS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
       var containerRef = useRef(null);
       useEffect(function () {
@@ -1123,14 +1170,14 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return text.length * 80;
     },
-    render: function TypewriterRender(_ref25) {
-      var text = _ref25.text,
-        style = _ref25.style,
-        Tag = _ref25.Tag,
-        animKey = _ref25.animKey;
-      var _wp$element5 = wp.element,
-        useEffect = _wp$element5.useEffect,
-        useRef = _wp$element5.useRef;
+    render: function TypewriterRender(_ref26) {
+      var text = _ref26.text,
+        style = _ref26.style,
+        Tag = _ref26.Tag,
+        animKey = _ref26.animKey;
+      var _wp$element6 = wp.element,
+        useEffect = _wp$element6.useEffect,
+        useRef = _wp$element6.useRef;
       var containerRef = useRef(null);
       useEffect(function () {
         var el = containerRef.current;
@@ -1159,11 +1206,11 @@ var ANIMATION_PREVIEWS = {
     }
   }
 };
-function AnimationPreview(_ref26) {
-  var animationType = _ref26.animationType,
-    text = _ref26.text,
-    style = _ref26.style,
-    Tag = _ref26.Tag;
+function AnimationPreview(_ref27) {
+  var animationType = _ref27.animationType,
+    text = _ref27.text,
+    style = _ref27.style,
+    Tag = _ref27.Tag;
   var _useState = useState(0),
     _useState2 = _slicedToArray(_useState, 2),
     animKey = _useState2[0],
@@ -1769,8 +1816,8 @@ registerBlockType('frontblocks/text-animation', {
     }
   },
   edit: TextAnimationEdit,
-  save: function save(_ref27) {
-    var attributes = _ref27.attributes;
+  save: function save(_ref28) {
+    var attributes = _ref28.attributes;
     var content = attributes.content,
       Tag = attributes.htmlTag,
       animationType = attributes.animationType,

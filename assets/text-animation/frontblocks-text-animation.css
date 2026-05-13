@@ -110,6 +110,12 @@ span.frbl-text-animation {
 	100% { transform: translateY( 0 );     opacity: 1; }
 }
 
+/* ── Terminal Type cursor ── */
+@keyframes frblBlinkCursor {
+	0%, 100% { opacity: 1; }
+	50%       { opacity: 0; }
+}
+
 /* ── Tracking Expand ── */
 @keyframes frblTrackingExpand {
 	from { letter-spacing: -0.5em; opacity: 0; }
