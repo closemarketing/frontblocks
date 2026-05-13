@@ -484,7 +484,7 @@ function TextAnimationEdit(props) {
     marginRight: 'auto'
   };
   return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
-    title: __('Animation', 'frontblocks'),
+    title: __('FrontBlocks Animation Text', 'frontblocks'),
     initialOpen: true
   }, /*#__PURE__*/React.createElement(SelectControl, {
     label: __('Animation Type', 'frontblocks'),

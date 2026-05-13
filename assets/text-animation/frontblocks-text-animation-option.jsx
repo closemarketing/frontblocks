@@ -321,7 +321,7 @@ function TextAnimationEdit( props ) {
 		<Fragment>
 			<InspectorControls>
 
-				<PanelBody title={ __( 'Animation', 'frontblocks' ) } initialOpen={ true }>
+				<PanelBody title={ __( 'FrontBlocks Animation Text', 'frontblocks' ) } initialOpen={ true }>
 					<SelectControl
 						label={ __( 'Animation Type', 'frontblocks' ) }
 						value={ animationType }
