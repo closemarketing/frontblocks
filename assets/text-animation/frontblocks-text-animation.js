@@ -212,7 +212,11 @@ function TextAnimationEdit(props) {
     textAlign = attributes.textAlign,
     textTransform = attributes.textTransform,
     textColorCustom = attributes.textColorCustom,
-    textColorHover = attributes.textColorHover;
+    textColorHover = attributes.textColorHover,
+    width = attributes.width,
+    widthUnit = attributes.widthUnit,
+    height = attributes.height,
+    heightUnit = attributes.heightUnit;
   var blockProps = useBlockProps({
     className: 'frbl-text-animation',
     style: {
@@ -226,7 +230,9 @@ function TextAnimationEdit(props) {
       '--frbl-color': textColorCustom || undefined,
       '--frbl-color-hover': textColorHover || undefined,
       color: isHovered && textColorHover ? textColorHover : textColorCustom || undefined,
-      transition: 'color 0.3s ease'
+      transition: 'color 0.3s ease',
+      width: width ? "".concat(width).concat(widthUnit || 'px') : undefined,
+      height: height ? "".concat(height).concat(heightUnit || 'px') : undefined
     },
     onMouseEnter: function onMouseEnter() {
       return setIsHovered(true);
@@ -398,7 +404,145 @@ function TextAnimationEdit(props) {
     initialPosition: 0,
     allowReset: true,
     resetFallbackValue: undefined
-  })), /*#__PURE__*/React.createElement(PanelColorSettings, {
+  })), /*#__PURE__*/React.createElement(PanelBody, {
+    title: __('Dimensions', 'frontblocks'),
+    initialOpen: false
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: '16px'
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      marginTop: 0,
+      marginBottom: '8px',
+      fontSize: '11px',
+      fontWeight: '500',
+      textTransform: 'uppercase',
+      color: 'rgb(117, 117, 117)'
+    }
+  }, __('Width', 'frontblocks')), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '8px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement(NumberControl, {
+    value: width || '',
+    onChange: function onChange(value) {
+      return setAttributes({
+        width: value ? parseFloat(value) : undefined
+      });
+    },
+    min: 0,
+    step: 1,
+    spinControls: "native",
+    hideLabelFromVision: true,
+    label: __('Width', 'frontblocks'),
+    placeholder: "auto"
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '80px',
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement(SelectControl, {
+    value: widthUnit,
+    options: [{
+      label: 'px',
+      value: 'px'
+    }, {
+      label: '%',
+      value: '%'
+    }, {
+      label: 'rem',
+      value: 'rem'
+    }, {
+      label: 'em',
+      value: 'em'
+    }, {
+      label: 'vw',
+      value: 'vw'
+    }, {
+      label: 'ch',
+      value: 'ch'
+    }],
+    onChange: function onChange(value) {
+      return setAttributes({
+        widthUnit: value
+      });
+    },
+    hideLabelFromVision: true,
+    label: __('Unit', 'frontblocks'),
+    __nextHasNoMarginBottom: true
+  })))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: '8px'
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      marginTop: 0,
+      marginBottom: '8px',
+      fontSize: '11px',
+      fontWeight: '500',
+      textTransform: 'uppercase',
+      color: 'rgb(117, 117, 117)'
+    }
+  }, __('Height', 'frontblocks')), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '8px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement(NumberControl, {
+    value: height || '',
+    onChange: function onChange(value) {
+      return setAttributes({
+        height: value ? parseFloat(value) : undefined
+      });
+    },
+    min: 0,
+    step: 1,
+    spinControls: "native",
+    hideLabelFromVision: true,
+    label: __('Height', 'frontblocks'),
+    placeholder: "auto"
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '80px',
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement(SelectControl, {
+    value: heightUnit,
+    options: [{
+      label: 'px',
+      value: 'px'
+    }, {
+      label: '%',
+      value: '%'
+    }, {
+      label: 'rem',
+      value: 'rem'
+    }, {
+      label: 'em',
+      value: 'em'
+    }, {
+      label: 'vh',
+      value: 'vh'
+    }],
+    onChange: function onChange(value) {
+      return setAttributes({
+        heightUnit: value
+      });
+    },
+    hideLabelFromVision: true,
+    label: __('Unit', 'frontblocks'),
+    __nextHasNoMarginBottom: true
+  }))))), /*#__PURE__*/React.createElement(PanelColorSettings, {
     title: __('Color', 'frontblocks'),
     initialOpen: false,
     colorSettings: [{
@@ -495,6 +639,22 @@ registerBlockType('frontblocks/text-animation', {
     textColorHover: {
       type: 'string',
       default: ''
+    },
+    width: {
+      type: 'number',
+      default: undefined
+    },
+    widthUnit: {
+      type: 'string',
+      default: 'px'
+    },
+    height: {
+      type: 'number',
+      default: undefined
+    },
+    heightUnit: {
+      type: 'string',
+      default: 'px'
     }
   },
   edit: TextAnimationEdit,
@@ -511,7 +671,11 @@ registerBlockType('frontblocks/text-animation', {
       textAlign = attributes.textAlign,
       textTransform = attributes.textTransform,
       textColorCustom = attributes.textColorCustom,
-      textColorHover = attributes.textColorHover;
+      textColorHover = attributes.textColorHover,
+      width = attributes.width,
+      widthUnit = attributes.widthUnit,
+      height = attributes.height,
+      heightUnit = attributes.heightUnit;
     var style = {};
     if (fontSize) style.fontSize = "".concat(fontSize).concat(fontSizeUnit || 'px');
     if (fontWeight) style.fontWeight = fontWeight;
@@ -522,6 +686,8 @@ registerBlockType('frontblocks/text-animation', {
     if (textTransform && textTransform !== 'none') style.textTransform = textTransform;
     if (textColorCustom) style['--frbl-color'] = textColorCustom;
     if (textColorHover) style['--frbl-color-hover'] = textColorHover;
+    if (width) style.width = "".concat(width).concat(widthUnit || 'px');
+    if (height) style.height = "".concat(height).concat(heightUnit || 'px');
     var blockProps = wp.blockEditor.useBlockProps.save({
       className: 'frbl-text-animation',
       style: style

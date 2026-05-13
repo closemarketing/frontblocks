@@ -110,6 +110,10 @@ function TextAnimationEdit( props ) {
 		textTransform,
 		textColorCustom,
 		textColorHover,
+		width,
+		widthUnit,
+		height,
+		heightUnit,
 	} = attributes;
 
 	const blockProps = useBlockProps( {
@@ -124,8 +128,10 @@ function TextAnimationEdit( props ) {
 			textTransform:        textTransform !== 'none' ? textTransform : undefined,
 			'--frbl-color':       textColorCustom || undefined,
 			'--frbl-color-hover': textColorHover || undefined,
-			color: ( isHovered && textColorHover ) ? textColorHover : ( textColorCustom || undefined ),
-			transition: 'color 0.3s ease',
+			color:                ( isHovered && textColorHover ) ? textColorHover : ( textColorCustom || undefined ),
+			transition:           'color 0.3s ease',
+			width:                width ? `${ width }${ widthUnit || 'px' }` : undefined,
+			height:               height ? `${ height }${ heightUnit || 'px' }` : undefined,
 		},
 		onMouseEnter: () => setIsHovered( true ),
 		onMouseLeave: () => setIsHovered( false ),
@@ -237,6 +243,70 @@ function TextAnimationEdit( props ) {
 
 				</PanelBody>
 
+				<PanelBody title={ __( 'Dimensions', 'frontblocks' ) } initialOpen={ false }>
+
+					<div style={ { marginBottom: '16px' } }>
+						<p style={ { marginTop: 0, marginBottom: '8px', fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', color: 'rgb(117, 117, 117)' } }>
+							{ __( 'Width', 'frontblocks' ) }
+						</p>
+						<div style={ { display: 'flex', gap: '8px' } }>
+							<div style={ { flex: 1 } }>
+								<NumberControl
+									value={ width || '' }
+									onChange={ ( value ) => setAttributes( { width: value ? parseFloat( value ) : undefined } ) }
+									min={ 0 }
+									step={ 1 }
+									spinControls="native"
+									hideLabelFromVision
+									label={ __( 'Width', 'frontblocks' ) }
+									placeholder="auto"
+								/>
+							</div>
+							<div style={ { width: '80px', flexShrink: 0 } }>
+								<SelectControl
+									value={ widthUnit }
+									options={ [ { label: 'px', value: 'px' }, { label: '%', value: '%' }, { label: 'rem', value: 'rem' }, { label: 'em', value: 'em' }, { label: 'vw', value: 'vw' }, { label: 'ch', value: 'ch' } ] }
+									onChange={ ( value ) => setAttributes( { widthUnit: value } ) }
+									hideLabelFromVision
+									label={ __( 'Unit', 'frontblocks' ) }
+									__nextHasNoMarginBottom
+								/>
+							</div>
+						</div>
+					</div>
+
+					<div style={ { marginBottom: '8px' } }>
+						<p style={ { marginTop: 0, marginBottom: '8px', fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', color: 'rgb(117, 117, 117)' } }>
+							{ __( 'Height', 'frontblocks' ) }
+						</p>
+						<div style={ { display: 'flex', gap: '8px' } }>
+							<div style={ { flex: 1 } }>
+								<NumberControl
+									value={ height || '' }
+									onChange={ ( value ) => setAttributes( { height: value ? parseFloat( value ) : undefined } ) }
+									min={ 0 }
+									step={ 1 }
+									spinControls="native"
+									hideLabelFromVision
+									label={ __( 'Height', 'frontblocks' ) }
+									placeholder="auto"
+								/>
+							</div>
+							<div style={ { width: '80px', flexShrink: 0 } }>
+								<SelectControl
+									value={ heightUnit }
+									options={ [ { label: 'px', value: 'px' }, { label: '%', value: '%' }, { label: 'rem', value: 'rem' }, { label: 'em', value: 'em' }, { label: 'vh', value: 'vh' } ] }
+									onChange={ ( value ) => setAttributes( { heightUnit: value } ) }
+									hideLabelFromVision
+									label={ __( 'Unit', 'frontblocks' ) }
+									__nextHasNoMarginBottom
+								/>
+							</div>
+						</div>
+					</div>
+
+				</PanelBody>
+
 				<PanelColorSettings
 					title={ __( 'Color', 'frontblocks' ) }
 					initialOpen={ false }
@@ -339,6 +409,22 @@ registerBlockType( 'frontblocks/text-animation', {
 			type:    'string',
 			default: '',
 		},
+		width: {
+			type:    'number',
+			default: undefined,
+		},
+		widthUnit: {
+			type:    'string',
+			default: 'px',
+		},
+		height: {
+			type:    'number',
+			default: undefined,
+		},
+		heightUnit: {
+			type:    'string',
+			default: 'px',
+		},
 	},
 	edit: TextAnimationEdit,
 	save: function ( { attributes } ) {
@@ -355,6 +441,10 @@ registerBlockType( 'frontblocks/text-animation', {
 			textTransform,
 			textColorCustom,
 			textColorHover,
+			width,
+			widthUnit,
+			height,
+			heightUnit,
 		} = attributes;
 
 		const style = {};
@@ -367,6 +457,8 @@ registerBlockType( 'frontblocks/text-animation', {
 		if ( textTransform && textTransform !== 'none' ) style.textTransform = textTransform;
 		if ( textColorCustom )                 style['--frbl-color']      = textColorCustom;
 		if ( textColorHover )                  style['--frbl-color-hover']= textColorHover;
+		if ( width )                           style.width                = `${ width }${ widthUnit || 'px' }`;
+		if ( height )                          style.height               = `${ height }${ heightUnit || 'px' }`;
 
 		const blockProps = wp.blockEditor.useBlockProps.save( {
 			className: 'frbl-text-animation',
