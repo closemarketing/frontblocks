@@ -67,12 +67,27 @@ const ALIGN_JUSTIFY_ICON = (
 	</svg>
 );
 
-const TEXT_TRANSFORM_OPTIONS = [
-	{ label: __( 'None', 'frontblocks' ),       value: 'none' },
-	{ label: __( 'Uppercase', 'frontblocks' ),  value: 'uppercase' },
-	{ label: __( 'Lowercase', 'frontblocks' ),  value: 'lowercase' },
-	{ label: __( 'Capitalize', 'frontblocks' ), value: 'capitalize' },
-];
+const TRANSFORM_NONE_ICON = (
+	<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+		<text x="4" y="17" fontFamily="serif" fontSize="14" fontWeight="bold" fill="currentColor">Ag</text>
+		<line x1="3" y1="21" x2="21" y2="3" stroke="currentColor" strokeWidth="1.5"/>
+	</svg>
+);
+const TRANSFORM_UPPERCASE_ICON = (
+	<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+		<text x="2" y="17" fontFamily="serif" fontSize="15" fontWeight="bold" fill="currentColor">AA</text>
+	</svg>
+);
+const TRANSFORM_LOWERCASE_ICON = (
+	<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+		<text x="2" y="17" fontFamily="serif" fontSize="15" fill="currentColor">aa</text>
+	</svg>
+);
+const TRANSFORM_CAPITALIZE_ICON = (
+	<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+		<text x="2" y="17" fontFamily="serif" fontSize="15" fill="currentColor">Aa</text>
+	</svg>
+);
 
 const FONT_STYLE_OPTIONS = [
 	{ label: __( 'Normal', 'frontblocks' ), value: 'normal' },
@@ -169,12 +184,17 @@ function TextAnimationEdit( props ) {
 						<ToggleGroupControlOptionIcon value="justify" icon={ ALIGN_JUSTIFY_ICON } label={ __( 'Justify', 'frontblocks' ) } />
 					</ToggleGroupControl>
 
-					<SelectControl
+					<ToggleGroupControl
 						label={ __( 'Text Transform', 'frontblocks' ) }
 						value={ textTransform }
-						options={ TEXT_TRANSFORM_OPTIONS }
-						onChange={ ( value ) => setAttributes( { textTransform: value } ) }
-					/>
+						onChange={ ( value ) => setAttributes( { textTransform: value || 'none' } ) }
+						isBlock
+					>
+						<ToggleGroupControlOptionIcon value="none"       icon={ TRANSFORM_NONE_ICON }       label={ __( 'None', 'frontblocks' ) } />
+						<ToggleGroupControlOptionIcon value="uppercase"  icon={ TRANSFORM_UPPERCASE_ICON }  label={ __( 'Uppercase', 'frontblocks' ) } />
+						<ToggleGroupControlOptionIcon value="lowercase"  icon={ TRANSFORM_LOWERCASE_ICON }  label={ __( 'Lowercase', 'frontblocks' ) } />
+						<ToggleGroupControlOptionIcon value="capitalize" icon={ TRANSFORM_CAPITALIZE_ICON } label={ __( 'Capitalize', 'frontblocks' ) } />
+					</ToggleGroupControl>
 
 					<RangeControl
 						label={ __( 'Line Height', 'frontblocks' ) }

@@ -118,19 +118,67 @@ var ALIGN_JUSTIFY_ICON = /*#__PURE__*/React.createElement("svg", {
 }, /*#__PURE__*/React.createElement("path", {
   d: "M3 21h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18V7H3v2zm0-6v2h18V3H3z"
 }));
-var TEXT_TRANSFORM_OPTIONS = [{
-  label: __('None', 'frontblocks'),
-  value: 'none'
-}, {
-  label: __('Uppercase', 'frontblocks'),
-  value: 'uppercase'
-}, {
-  label: __('Lowercase', 'frontblocks'),
-  value: 'lowercase'
-}, {
-  label: __('Capitalize', 'frontblocks'),
-  value: 'capitalize'
-}];
+var TRANSFORM_NONE_ICON = /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: "20",
+  height: "20",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true"
+}, /*#__PURE__*/React.createElement("text", {
+  x: "4",
+  y: "17",
+  fontFamily: "serif",
+  fontSize: "14",
+  fontWeight: "bold",
+  fill: "currentColor"
+}, "Ag"), /*#__PURE__*/React.createElement("line", {
+  x1: "3",
+  y1: "21",
+  x2: "21",
+  y2: "3",
+  stroke: "currentColor",
+  strokeWidth: "1.5"
+}));
+var TRANSFORM_UPPERCASE_ICON = /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: "20",
+  height: "20",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true"
+}, /*#__PURE__*/React.createElement("text", {
+  x: "2",
+  y: "17",
+  fontFamily: "serif",
+  fontSize: "15",
+  fontWeight: "bold",
+  fill: "currentColor"
+}, "AA"));
+var TRANSFORM_LOWERCASE_ICON = /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: "20",
+  height: "20",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true"
+}, /*#__PURE__*/React.createElement("text", {
+  x: "2",
+  y: "17",
+  fontFamily: "serif",
+  fontSize: "15",
+  fill: "currentColor"
+}, "aa"));
+var TRANSFORM_CAPITALIZE_ICON = /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: "20",
+  height: "20",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true"
+}, /*#__PURE__*/React.createElement("text", {
+  x: "2",
+  y: "17",
+  fontFamily: "serif",
+  fontSize: "15",
+  fill: "currentColor"
+}, "Aa"));
 var FONT_STYLE_OPTIONS = [{
   label: __('Normal', 'frontblocks'),
   value: 'normal'
@@ -258,16 +306,32 @@ function TextAnimationEdit(props) {
     value: "justify",
     icon: ALIGN_JUSTIFY_ICON,
     label: __('Justify', 'frontblocks')
-  })), /*#__PURE__*/React.createElement(SelectControl, {
+  })), /*#__PURE__*/React.createElement(ToggleGroupControl, {
     label: __('Text Transform', 'frontblocks'),
     value: textTransform,
-    options: TEXT_TRANSFORM_OPTIONS,
     onChange: function onChange(value) {
       return setAttributes({
-        textTransform: value
+        textTransform: value || 'none'
       });
-    }
-  }), /*#__PURE__*/React.createElement(RangeControl, {
+    },
+    isBlock: true
+  }, /*#__PURE__*/React.createElement(ToggleGroupControlOptionIcon, {
+    value: "none",
+    icon: TRANSFORM_NONE_ICON,
+    label: __('None', 'frontblocks')
+  }), /*#__PURE__*/React.createElement(ToggleGroupControlOptionIcon, {
+    value: "uppercase",
+    icon: TRANSFORM_UPPERCASE_ICON,
+    label: __('Uppercase', 'frontblocks')
+  }), /*#__PURE__*/React.createElement(ToggleGroupControlOptionIcon, {
+    value: "lowercase",
+    icon: TRANSFORM_LOWERCASE_ICON,
+    label: __('Lowercase', 'frontblocks')
+  }), /*#__PURE__*/React.createElement(ToggleGroupControlOptionIcon, {
+    value: "capitalize",
+    icon: TRANSFORM_CAPITALIZE_ICON,
+    label: __('Capitalize', 'frontblocks')
+  })), /*#__PURE__*/React.createElement(RangeControl, {
     label: __('Line Height', 'frontblocks'),
     value: lineHeight,
     onChange: function onChange(value) {
