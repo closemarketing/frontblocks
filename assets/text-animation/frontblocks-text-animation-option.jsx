@@ -1,31 +1,24 @@
 const { registerBlockType } = wp.blocks;
-const { Fragment, useState } = wp.element;
+const { Fragment } = wp.element;
 const {
 	InspectorControls,
 	useBlockProps,
 	RichText,
-	withColors,
 	PanelColorSettings,
-	FontSizePicker,
-	withFontSizes,
 } = wp.blockEditor;
 const {
 	PanelBody,
 	SelectControl,
 	RangeControl,
-	ToggleControl,
-	__experimentalUnitControl: UnitControl,
+	__experimentalNumberControl: NumberControl,
 } = wp.components;
 const { __ } = wp.i18n;
 
-const FONT_SIZES = [
-	{ name: __( 'Small', 'frontblocks' ),    slug: 'small',    size: 14 },
-	{ name: __( 'Normal', 'frontblocks' ),   slug: 'normal',   size: 16 },
-	{ name: __( 'Medium', 'frontblocks' ),   slug: 'medium',   size: 20 },
-	{ name: __( 'Large', 'frontblocks' ),    slug: 'large',    size: 28 },
-	{ name: __( 'X-Large', 'frontblocks' ),  slug: 'x-large',  size: 36 },
-	{ name: __( 'XX-Large', 'frontblocks' ), slug: 'xx-large', size: 48 },
-	{ name: __( 'Huge', 'frontblocks' ),     slug: 'huge',     size: 64 },
+const FONT_SIZE_UNITS = [
+	{ label: 'px',  value: 'px'  },
+	{ label: 'rem', value: 'rem' },
+	{ label: 'em',  value: 'em'  },
+	{ label: 'vw',  value: 'vw'  },
 ];
 
 const TAG_OPTIONS = [
@@ -113,16 +106,25 @@ function TextAnimationEdit( props ) {
 						onChange={ ( value ) => setAttributes( { htmlTag: value } ) }
 					/>
 
-					<div style={ { marginBottom: '16px' } }>
-						<p style={ { marginBottom: '8px', fontWeight: '500' } }>
-							{ __( 'Font Size', 'frontblocks' ) }
-						</p>
-						<FontSizePicker
-							fontSizes={ FONT_SIZES }
-							value={ fontSize }
-							onChange={ ( value ) => setAttributes( { fontSize: value || undefined } ) }
-							withSlider
-						/>
+					<div style={ { marginBottom: '16px', display: 'flex', gap: '8px', alignItems: 'flex-end' } }>
+						<div style={ { flex: 1 } }>
+							<NumberControl
+								label={ __( 'Font Size', 'frontblocks' ) }
+								value={ fontSize || '' }
+								onChange={ ( value ) => setAttributes( { fontSize: value ? parseFloat( value ) : undefined } ) }
+								min={ 1 }
+								step={ 1 }
+								spinControls="native"
+							/>
+						</div>
+						<div style={ { width: '72px' } }>
+							<SelectControl
+								label={ __( 'Unit', 'frontblocks' ) }
+								value={ fontSizeUnit }
+								options={ FONT_SIZE_UNITS }
+								onChange={ ( value ) => setAttributes( { fontSizeUnit: value } ) }
+							/>
+						</div>
 					</div>
 
 					<SelectControl

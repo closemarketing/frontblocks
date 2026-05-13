@@ -2,52 +2,30 @@
 
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 var registerBlockType = wp.blocks.registerBlockType;
-var _wp$element = wp.element,
-  Fragment = _wp$element.Fragment,
-  useState = _wp$element.useState;
+var Fragment = wp.element.Fragment;
 var _wp$blockEditor = wp.blockEditor,
   InspectorControls = _wp$blockEditor.InspectorControls,
   useBlockProps = _wp$blockEditor.useBlockProps,
   RichText = _wp$blockEditor.RichText,
-  withColors = _wp$blockEditor.withColors,
-  PanelColorSettings = _wp$blockEditor.PanelColorSettings,
-  FontSizePicker = _wp$blockEditor.FontSizePicker,
-  withFontSizes = _wp$blockEditor.withFontSizes;
+  PanelColorSettings = _wp$blockEditor.PanelColorSettings;
 var _wp$components = wp.components,
   PanelBody = _wp$components.PanelBody,
   SelectControl = _wp$components.SelectControl,
   RangeControl = _wp$components.RangeControl,
-  ToggleControl = _wp$components.ToggleControl,
-  UnitControl = _wp$components.__experimentalUnitControl;
+  NumberControl = _wp$components.__experimentalNumberControl;
 var __ = wp.i18n.__;
-var FONT_SIZES = [{
-  name: __('Small', 'frontblocks'),
-  slug: 'small',
-  size: 14
+var FONT_SIZE_UNITS = [{
+  label: 'px',
+  value: 'px'
 }, {
-  name: __('Normal', 'frontblocks'),
-  slug: 'normal',
-  size: 16
+  label: 'rem',
+  value: 'rem'
 }, {
-  name: __('Medium', 'frontblocks'),
-  slug: 'medium',
-  size: 20
+  label: 'em',
+  value: 'em'
 }, {
-  name: __('Large', 'frontblocks'),
-  slug: 'large',
-  size: 28
-}, {
-  name: __('X-Large', 'frontblocks'),
-  slug: 'x-large',
-  size: 36
-}, {
-  name: __('XX-Large', 'frontblocks'),
-  slug: 'xx-large',
-  size: 48
-}, {
-  name: __('Huge', 'frontblocks'),
-  slug: 'huge',
-  size: 64
+  label: 'vw',
+  value: 'vw'
 }];
 var TAG_OPTIONS = [{
   label: 'h1',
@@ -176,23 +154,40 @@ function TextAnimationEdit(props) {
     }
   }), /*#__PURE__*/React.createElement("div", {
     style: {
-      marginBottom: '16px'
+      marginBottom: '16px',
+      display: 'flex',
+      gap: '8px',
+      alignItems: 'flex-end'
     }
-  }, /*#__PURE__*/React.createElement("p", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
-      marginBottom: '8px',
-      fontWeight: '500'
+      flex: 1
     }
-  }, __('Font Size', 'frontblocks')), /*#__PURE__*/React.createElement(FontSizePicker, {
-    fontSizes: FONT_SIZES,
-    value: fontSize,
+  }, /*#__PURE__*/React.createElement(NumberControl, {
+    label: __('Font Size', 'frontblocks'),
+    value: fontSize || '',
     onChange: function onChange(value) {
       return setAttributes({
-        fontSize: value || undefined
+        fontSize: value ? parseFloat(value) : undefined
       });
     },
-    withSlider: true
-  })), /*#__PURE__*/React.createElement(SelectControl, {
+    min: 1,
+    step: 1,
+    spinControls: "native"
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '72px'
+    }
+  }, /*#__PURE__*/React.createElement(SelectControl, {
+    label: __('Unit', 'frontblocks'),
+    value: fontSizeUnit,
+    options: FONT_SIZE_UNITS,
+    onChange: function onChange(value) {
+      return setAttributes({
+        fontSizeUnit: value
+      });
+    }
+  }))), /*#__PURE__*/React.createElement(SelectControl, {
     label: __('Font Weight', 'frontblocks'),
     value: fontWeight,
     options: [{
