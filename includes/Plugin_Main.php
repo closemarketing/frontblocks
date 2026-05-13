@@ -135,7 +135,7 @@ class Plugin_Main {
 
 		// Text Animation block.
 		new Frontend\TextAnimation();
-    
+
 		// Before After comparison block.
 		new Frontend\BeforeAfter();
 	}
