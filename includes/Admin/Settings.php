@@ -198,7 +198,7 @@ class Settings {
 	 * @return void
 	 */
 	public function enqueue_admin_styles( $hook ) {
-		if ( 'toplevel_page_' . $this->page_slug !== $hook ) {
+		if ( 'appearance_page_' . $this->page_slug !== $hook ) {
 			return;
 		}
 
@@ -382,19 +382,12 @@ class Settings {
 	 * @return void
 	 */
 	public function register_menu() {
-		// Use SVG icon if available, otherwise fallback to dashicon.
-		$icon_url  = FRBL_PLUGIN_URL . 'assets/admin/icons/icon-menu.svg';
-		$icon_path = FRBL_PLUGIN_PATH . 'assets/admin/icons/icon-menu.svg';
-		$menu_icon = file_exists( $icon_path ) ? $icon_url : 'dashicons-block-default';
-
-		add_menu_page(
+		add_theme_page(
 			__( 'FrontBlocks Settings', 'frontblocks' ),
 			__( 'FrontBlocks', 'frontblocks' ),
 			'edit_theme_options',
 			$this->page_slug,
-			array( $this, 'render_page' ),
-			$menu_icon,
-			81
+			array( $this, 'render_page' )
 		);
 	}
 
