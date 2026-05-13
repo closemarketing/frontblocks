@@ -48,12 +48,13 @@
     "build:edge-alignment": "babel assets/container-edge-alignment/frontblocks-edge-alignment-option.jsx --out-file assets/container-edge-alignment/frontblocks-edge-alignment.js",
     "build:shape-animations": "babel assets/shape-animations/frontblocks-shape-animation-option.jsx --out-file assets/shape-animations/frontblocks-shape-animation-option.js",
     "build:gf-inline": "babel assets/gravityforms-inline/frontblocks-gf-inline-option.jsx --out-file assets/gravityforms-inline/frontblocks-gf-inline-option.js",
+    "build:text-animation": "babel assets/text-animation/frontblocks-text-animation-option.jsx --out-file assets/text-animation/frontblocks-text-animation.js",
     "build:before-after": "babel assets/before-after/frontblocks-before-after-option.jsx --out-file assets/before-after/frontblocks-before-after.js",
 
     "build:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css",
     "watch:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css --watch",
 
-    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:headline && npm run build:product-categories && npm run build:reading-time && npm run build:stacked-images && npm run build:edge-alignment && npm run build:shape-animations && npm run build:gf-inline && npm run build:before-after && npm run build:css"
+    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:headline && npm run build:product-categories && npm run build:reading-time && npm run build:stacked-images && npm run build:edge-alignment && npm run build:shape-animations && npm run build:gf-inline && npm run build:before-after && npm run build:text-animation && npm run build:css"
   },
   "dependencies": {
     "react": "^19.1.0",
