@@ -81,6 +81,14 @@ class TextAnimation {
 		);
 
 		wp_register_script(
+			'frontblocks-animation-bounce-in',
+			FRBL_PLUGIN_URL . 'assets/text-animation/animations/bounce-in.js',
+			array( 'frontblocks-text-animation-frontend' ),
+			FRBL_VERSION,
+			true
+		);
+
+		wp_register_script(
 			'frontblocks-animation-glow-in',
 			FRBL_PLUGIN_URL . 'assets/text-animation/animations/glow-in.js',
 			array( 'frontblocks-text-animation-frontend' ),
@@ -148,6 +156,7 @@ class TextAnimation {
 			'fade-in'      => 'frontblocks-animation-fade-in',
 			'blur-in'      => 'frontblocks-animation-blur-in',
 			'glow-in'      => 'frontblocks-animation-glow-in',
+			'bounce-in'    => 'frontblocks-animation-bounce-in',
 			'typewriter'   => 'frontblocks-animation-typewriter',
 			'shuffle-text' => 'frontblocks-animation-shuffle-text',
 			'slide-up'     => 'frontblocks-animation-slide-up',

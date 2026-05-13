@@ -105,6 +105,7 @@ const ANIMATION_OPTIONS = [
 	{ label: __( 'Scale In', 'frontblocks' ),      value: 'scale-in' },
 	{ label: __( 'Blur In', 'frontblocks' ),       value: 'blur-in' },
 	{ label: __( 'Glow In', 'frontblocks' ),       value: 'glow-in' },
+	{ label: __( 'Bounce In', 'frontblocks' ),     value: 'bounce-in' },
 ];
 
 function stripHtml( html ) {
@@ -129,6 +130,26 @@ const ANIMATION_PREVIEWS = {
 							whiteSpace: 'pre',
 							opacity: 0,
 							animation: `frblFadeIn ${ CHAR_DURATION }s forwards`,
+							animationDelay: `${ i * CHAR_DELAY }s`,
+						} }>{ char }</span>
+					) ) }
+				</Tag>
+			);
+		},
+	},
+	'bounce-in': {
+		duration: ( text ) => ( text.length * 0.08 + 0.6 ) * 1000,
+		render: function BounceInRender( { text, style, Tag, animKey } ) {
+			const CHAR_DURATION = 0.6;
+			const CHAR_DELAY    = 0.08;
+			return (
+				<Tag style={ style } key={ animKey }>
+					{ text.split( '' ).map( ( char, i ) => (
+						<span key={ i } style={ {
+							display: 'inline-block',
+							whiteSpace: 'pre',
+							opacity: 0,
+							animation: `frblBounceIn ${ CHAR_DURATION }s forwards`,
 							animationDelay: `${ i * CHAR_DELAY }s`,
 						} }>{ char }</span>
 					) ) }
