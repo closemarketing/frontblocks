@@ -313,6 +313,14 @@ class TextAnimation {
 		);
 
 		wp_register_script(
+			'frontblocks-animation-shadow-pop',
+			FRBL_PLUGIN_URL . 'assets/text-animation/animations/shadow-pop.js',
+			array( 'frontblocks-text-animation-frontend' ),
+			FRBL_VERSION,
+			true
+		);
+
+		wp_register_script(
 			'frontblocks-animation-shuffle-text',
 			FRBL_PLUGIN_URL . 'assets/text-animation/animations/shuffle-text.js',
 			array( 'frontblocks-text-animation-frontend' ),
@@ -376,6 +384,7 @@ class TextAnimation {
 			'glitch-rgb'        => 'frontblocks-animation-glitch-rgb',
 			'water-drop'        => 'frontblocks-animation-water-drop',
 			'pulse-neon'        => 'frontblocks-animation-pulse-neon',
+			'shadow-pop'        => 'frontblocks-animation-shadow-pop',
 			'scale-in'     => 'frontblocks-animation-scale-in',
 		);
 
