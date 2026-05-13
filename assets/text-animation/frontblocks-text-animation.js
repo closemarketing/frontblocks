@@ -224,6 +224,9 @@ var ANIMATION_OPTIONS = [{
 }, {
   label: __('Scale In', 'frontblocks'),
   value: 'scale-in'
+}, {
+  label: __('Blur In', 'frontblocks'),
+  value: 'blur-in'
 }];
 function stripHtml(html) {
   return html ? html.replace(/<[^>]*>/g, '') : '';
@@ -262,15 +265,43 @@ var ANIMATION_PREVIEWS = {
       }));
     }
   },
-  'scale-in': {
+  'blur-in': {
     duration: function duration(text) {
-      return (text.length * 0.05 + 0.5) * 1000;
+      return (text.length * 0.05 + 0.8) * 1000;
     },
-    render: function ScaleInRender(_ref2) {
+    render: function BlurInRender(_ref2) {
       var text = _ref2.text,
         style = _ref2.style,
         Tag = _ref2.Tag,
         animKey = _ref2.animKey;
+      var CHAR_DURATION = 0.8;
+      var CHAR_DELAY = 0.05;
+      return /*#__PURE__*/React.createElement(Tag, {
+        style: style,
+        key: animKey
+      }, text.split('').map(function (char, i) {
+        return /*#__PURE__*/React.createElement("span", {
+          key: i,
+          style: {
+            display: 'inline-block',
+            whiteSpace: 'pre',
+            opacity: 0,
+            animation: "frblBlurIn ".concat(CHAR_DURATION, "s forwards"),
+            animationDelay: "".concat(i * CHAR_DELAY, "s")
+          }
+        }, char);
+      }));
+    }
+  },
+  'scale-in': {
+    duration: function duration(text) {
+      return (text.length * 0.05 + 0.5) * 1000;
+    },
+    render: function ScaleInRender(_ref3) {
+      var text = _ref3.text,
+        style = _ref3.style,
+        Tag = _ref3.Tag,
+        animKey = _ref3.animKey;
       var CHAR_DURATION = 0.5;
       var CHAR_DELAY = 0.05;
       return /*#__PURE__*/React.createElement(Tag, {
@@ -294,11 +325,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.length * 0.05 + 0.5) * 1000;
     },
-    render: function SlideUpRender(_ref3) {
-      var text = _ref3.text,
-        style = _ref3.style,
-        Tag = _ref3.Tag,
-        animKey = _ref3.animKey;
+    render: function SlideUpRender(_ref4) {
+      var text = _ref4.text,
+        style = _ref4.style,
+        Tag = _ref4.Tag,
+        animKey = _ref4.animKey;
       var CHAR_DURATION = 0.5;
       var CHAR_DELAY = 0.05;
       return /*#__PURE__*/React.createElement(Tag, {
@@ -324,11 +355,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return (text.replace(/ /g, '').length * 2 + 15) * 30;
     },
-    render: function ShuffleTextRender(_ref4) {
-      var text = _ref4.text,
-        style = _ref4.style,
-        Tag = _ref4.Tag,
-        animKey = _ref4.animKey;
+    render: function ShuffleTextRender(_ref5) {
+      var text = _ref5.text,
+        style = _ref5.style,
+        Tag = _ref5.Tag,
+        animKey = _ref5.animKey;
       var _wp$element2 = wp.element,
         useEffect = _wp$element2.useEffect,
         useRef = _wp$element2.useRef;
@@ -395,11 +426,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return text.length * 80;
     },
-    render: function TypewriterRender(_ref5) {
-      var text = _ref5.text,
-        style = _ref5.style,
-        Tag = _ref5.Tag,
-        animKey = _ref5.animKey;
+    render: function TypewriterRender(_ref6) {
+      var text = _ref6.text,
+        style = _ref6.style,
+        Tag = _ref6.Tag,
+        animKey = _ref6.animKey;
       var _wp$element3 = wp.element,
         useEffect = _wp$element3.useEffect,
         useRef = _wp$element3.useRef;
@@ -431,11 +462,11 @@ var ANIMATION_PREVIEWS = {
     }
   }
 };
-function AnimationPreview(_ref6) {
-  var animationType = _ref6.animationType,
-    text = _ref6.text,
-    style = _ref6.style,
-    Tag = _ref6.Tag;
+function AnimationPreview(_ref7) {
+  var animationType = _ref7.animationType,
+    text = _ref7.text,
+    style = _ref7.style,
+    Tag = _ref7.Tag;
   var _useState = useState(0),
     _useState2 = _slicedToArray(_useState, 2),
     animKey = _useState2[0],
@@ -1041,8 +1072,8 @@ registerBlockType('frontblocks/text-animation', {
     }
   },
   edit: TextAnimationEdit,
-  save: function save(_ref7) {
-    var attributes = _ref7.attributes;
+  save: function save(_ref8) {
+    var attributes = _ref8.attributes;
     var content = attributes.content,
       Tag = attributes.htmlTag,
       animationType = attributes.animationType,

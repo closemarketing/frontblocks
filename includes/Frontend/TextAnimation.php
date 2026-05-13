@@ -81,6 +81,14 @@ class TextAnimation {
 		);
 
 		wp_register_script(
+			'frontblocks-animation-blur-in',
+			FRBL_PLUGIN_URL . 'assets/text-animation/animations/blur-in.js',
+			array( 'frontblocks-text-animation-frontend' ),
+			FRBL_VERSION,
+			true
+		);
+
+		wp_register_script(
 			'frontblocks-animation-scale-in',
 			FRBL_PLUGIN_URL . 'assets/text-animation/animations/scale-in.js',
 			array( 'frontblocks-text-animation-frontend' ),
@@ -130,6 +138,7 @@ class TextAnimation {
 
 		$script_map = array(
 			'fade-in'      => 'frontblocks-animation-fade-in',
+			'blur-in'      => 'frontblocks-animation-blur-in',
 			'typewriter'   => 'frontblocks-animation-typewriter',
 			'shuffle-text' => 'frontblocks-animation-shuffle-text',
 			'slide-up'     => 'frontblocks-animation-slide-up',

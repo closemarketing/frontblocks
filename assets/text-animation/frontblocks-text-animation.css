@@ -39,6 +39,12 @@ span.frbl-text-animation {
 	to   { opacity: 1; }
 }
 
+/* ── Blur In ── */
+@keyframes frblBlurIn {
+	from { filter: blur( 12px ); opacity: 0; transform: scale( 1.1 ); }
+	to   { filter: blur( 0 );    opacity: 1; transform: scale( 1 );   }
+}
+
 /* ── Scale In ── */
 @keyframes frblScaleIn {
 	from { transform: scale( 0 ); opacity: 0; }
