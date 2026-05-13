@@ -132,6 +132,9 @@ class Plugin_Main {
 
 		// Block Patterns module (WordPress block patterns registration).
 		new Frontend\BlockPatterns();
+
+		// Text Animation block.
+		new Frontend\TextAnimation();
 	}
 
 	/**

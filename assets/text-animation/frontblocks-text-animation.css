@@ -1,0 +1,16 @@
+.frbl-text-animation {
+	display: block;
+}
+
+span.frbl-text-animation {
+	display: inline;
+}
+
+/* Respect reduced motion */
+@media ( prefers-reduced-motion: reduce ) {
+	.frbl-text-animation,
+	.frbl-text-animation * {
+		animation: none !important;
+		transition: none !important;
+	}
+}
