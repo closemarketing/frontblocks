@@ -120,7 +120,7 @@ function TextAnimationEdit( props ) {
 			letterSpacing:        letterSpacing ? `${ letterSpacing }em` : undefined,
 			textAlign:            textAlign !== 'left' ? textAlign : undefined,
 			textTransform:        textTransform !== 'none' ? textTransform : undefined,
-			color:                textColorCustom || undefined,
+			'--frbl-color':       textColorCustom || undefined,
 			'--frbl-color-hover': textColorHover || undefined,
 		},
 	} );
@@ -359,7 +359,7 @@ registerBlockType( 'frontblocks/text-animation', {
 		if ( letterSpacing )                   style.letterSpacing        = `${ letterSpacing }em`;
 		if ( textAlign && textAlign !== 'left' ) style.textAlign          = textAlign;
 		if ( textTransform && textTransform !== 'none' ) style.textTransform = textTransform;
-		if ( textColorCustom )                 style.color                = textColorCustom;
+		if ( textColorCustom )                 style['--frbl-color']      = textColorCustom;
 		if ( textColorHover )                  style['--frbl-color-hover']= textColorHover;
 
 		const blockProps = wp.blockEditor.useBlockProps.save( {

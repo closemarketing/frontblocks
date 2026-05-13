@@ -1,9 +1,10 @@
 .frbl-text-animation {
 	display: block;
+	color: var(--frbl-color);
 	transition: color 0.3s ease;
 }
 
-.frbl-text-animation:hover {
+.wp-block-frontblocks-text-animation.frbl-text-animation:hover {
 	color: var(--frbl-color-hover);
 }
 
@@ -11,7 +12,7 @@ span.frbl-text-animation {
 	display: inline;
 }
 
-/* Editor: align font-size number + unit select to same height */
+/* Editor: align font-size number + unit select to same height */ 	
 .block-editor-block-inspector .frbl-fontsize-row {
 	display: flex;
 	gap: 8px;
