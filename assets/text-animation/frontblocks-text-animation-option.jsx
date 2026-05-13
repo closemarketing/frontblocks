@@ -120,6 +120,7 @@ const ANIMATION_OPTIONS = [
 	{ label: __( 'Block Reveal', 'frontblocks' ),    value: 'block-reveal' },
 	{ label: __( 'Tracking Expand', 'frontblocks' ),  value: 'tracking-expand' },
 	{ label: __( 'Terminal Type', 'frontblocks' ),    value: 'terminal-type' },
+	{ label: __( 'Solid Outline', 'frontblocks' ),   value: 'solid-outline' },
 	{ label: __( 'Scale In', 'frontblocks' ),      value: 'scale-in' },
 	{ label: __( 'Blur In', 'frontblocks' ),       value: 'blur-in' },
 	{ label: __( 'Glow In', 'frontblocks' ),       value: 'glow-in' },
@@ -290,6 +291,27 @@ const ANIMATION_PREVIEWS = {
 							whiteSpace: 'pre',
 							opacity: 0,
 							animation: `frblSlideUp ${ CHAR_DURATION }s forwards`,
+							animationDelay: `${ i * CHAR_DELAY }s`,
+						} }>{ char }</span>
+					) ) }
+				</Tag>
+			);
+		},
+	},
+	'solid-outline': {
+		duration: ( text ) => ( text.length * 0.05 + 0.8 ) * 1000,
+		render: function SolidOutlineRender( { text, style, Tag, animKey } ) {
+			const CHAR_DURATION = 0.8;
+			const CHAR_DELAY    = 0.05;
+			const strokeColor   = style.color || 'currentColor';
+			return (
+				<Tag style={ { ...style, '--frbl-stroke-color': strokeColor } } key={ animKey }>
+					{ text.split( '' ).map( ( char, i ) => (
+						<span key={ i } style={ {
+							display: 'inline-block',
+							whiteSpace: 'pre',
+							opacity: 0,
+							animation: `frblSolidOutline ${ CHAR_DURATION }s forwards`,
 							animationDelay: `${ i * CHAR_DELAY }s`,
 						} }>{ char }</span>
 					) ) }

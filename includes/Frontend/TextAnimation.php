@@ -281,6 +281,14 @@ class TextAnimation {
 		);
 
 		wp_register_script(
+			'frontblocks-animation-solid-outline',
+			FRBL_PLUGIN_URL . 'assets/text-animation/animations/solid-outline.js',
+			array( 'frontblocks-text-animation-frontend' ),
+			FRBL_VERSION,
+			true
+		);
+
+		wp_register_script(
 			'frontblocks-animation-shuffle-text',
 			FRBL_PLUGIN_URL . 'assets/text-animation/animations/shuffle-text.js',
 			array( 'frontblocks-text-animation-frontend' ),
@@ -340,6 +348,7 @@ class TextAnimation {
 			'block-reveal'      => 'frontblocks-animation-block-reveal',
 			'tracking-expand'   => 'frontblocks-animation-tracking-expand',
 			'terminal-type'     => 'frontblocks-animation-terminal-type',
+			'solid-outline'     => 'frontblocks-animation-solid-outline',
 			'scale-in'     => 'frontblocks-animation-scale-in',
 		);
 

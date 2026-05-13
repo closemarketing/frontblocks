@@ -110,6 +110,13 @@ span.frbl-text-animation {
 	100% { transform: translateY( 0 );     opacity: 1; }
 }
 
+/* ── Solid To Outline ── */
+@keyframes frblSolidOutline {
+	0%   { -webkit-text-stroke: 0px transparent;                    color: var( --frbl-stroke-color ); opacity: 0; }
+	50%  { -webkit-text-stroke: 0px transparent;                    color: var( --frbl-stroke-color ); opacity: 1; }
+	100% { -webkit-text-stroke: 1px var( --frbl-stroke-color );     color: transparent;                opacity: 1; }
+}
+
 /* ── Terminal Type cursor ── */
 @keyframes frblBlinkCursor {
 	0%, 100% { opacity: 1; }
