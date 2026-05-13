@@ -25,6 +25,7 @@ var _wp$components = wp.components,
   PanelBody = _wp$components.PanelBody,
   SelectControl = _wp$components.SelectControl,
   RangeControl = _wp$components.RangeControl,
+  Button = _wp$components.Button,
   NumberControl = _wp$components.__experimentalNumberControl,
   ToggleGroupControl = _wp$components.__experimentalToggleGroupControl,
   ToggleGroupControlOptionIcon = _wp$components.__experimentalToggleGroupControlOptionIcon;
@@ -249,12 +250,15 @@ function FadeInPreview(_ref) {
 }
 function TextAnimationEdit(props) {
   var attributes = props.attributes,
-    setAttributes = props.setAttributes,
-    isSelected = props.isSelected;
+    setAttributes = props.setAttributes;
   var _useState3 = useState(false),
     _useState4 = _slicedToArray(_useState3, 2),
     isHovered = _useState4[0],
     setIsHovered = _useState4[1];
+  var _useState5 = useState(false),
+    _useState6 = _slicedToArray(_useState5, 2),
+    isEditMode = _useState6[0],
+    setIsEditMode = _useState6[1];
   var content = attributes.content,
     htmlTag = attributes.htmlTag,
     animationType = attributes.animationType,
@@ -320,7 +324,7 @@ function TextAnimationEdit(props) {
     }
   });
   var hasAnimation = animationType && animationType !== 'none';
-  var showPreview = hasAnimation && !isSelected;
+  var showPreview = hasAnimation && !isEditMode;
   var previewStyle = {
     fontSize: blockProps.style.fontSize,
     fontFamily: blockProps.style.fontFamily,
@@ -344,11 +348,25 @@ function TextAnimationEdit(props) {
     value: animationType,
     options: ANIMATION_OPTIONS,
     onChange: function onChange(value) {
-      return setAttributes({
+      setAttributes({
         animationType: value
       });
+      setIsEditMode(false);
     }
-  })), /*#__PURE__*/React.createElement(PanelBody, {
+  }), hasAnimation && /*#__PURE__*/React.createElement(Button, {
+    variant: isEditMode ? 'primary' : 'secondary',
+    size: "small",
+    onClick: function onClick() {
+      return setIsEditMode(function (v) {
+        return !v;
+      });
+    },
+    style: {
+      marginTop: '8px',
+      width: '100%',
+      justifyContent: 'center'
+    }
+  }, isEditMode ? __('▶ Preview animation', 'frontblocks') : __('✎ Edit text', 'frontblocks'))), /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Typography', 'frontblocks'),
     initialOpen: false
   }, /*#__PURE__*/React.createElement(SelectControl, {

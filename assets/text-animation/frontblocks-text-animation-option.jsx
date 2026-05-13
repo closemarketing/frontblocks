@@ -11,6 +11,7 @@ const {
 	PanelBody,
 	SelectControl,
 	RangeControl,
+	Button,
 	__experimentalNumberControl: NumberControl,
 	__experimentalToggleGroupControl: ToggleGroupControl,
 	__experimentalToggleGroupControlOptionIcon: ToggleGroupControlOptionIcon,
@@ -135,8 +136,9 @@ function FadeInPreview( { text, style, Tag } ) {
 }
 
 function TextAnimationEdit( props ) {
-	const { attributes, setAttributes, isSelected } = props;
-	const [ isHovered, setIsHovered ] = useState( false );
+	const { attributes, setAttributes } = props;
+	const [ isHovered,  setIsHovered  ] = useState( false );
+	const [ isEditMode, setIsEditMode ] = useState( false );
 	const {
 		content,
 		htmlTag,
@@ -204,7 +206,7 @@ function TextAnimationEdit( props ) {
 	} );
 
 	const hasAnimation = animationType && animationType !== 'none';
-	const showPreview  = hasAnimation && ! isSelected;
+	const showPreview  = hasAnimation && ! isEditMode;
 
 	const previewStyle = {
 		fontSize:      blockProps.style.fontSize,
@@ -231,8 +233,24 @@ function TextAnimationEdit( props ) {
 						label={ __( 'Animation Type', 'frontblocks' ) }
 						value={ animationType }
 						options={ ANIMATION_OPTIONS }
-						onChange={ ( value ) => setAttributes( { animationType: value } ) }
+						onChange={ ( value ) => {
+							setAttributes( { animationType: value } );
+							setIsEditMode( false );
+						} }
 					/>
+					{ hasAnimation && (
+						<Button
+							variant={ isEditMode ? 'primary' : 'secondary' }
+							size="small"
+							onClick={ () => setIsEditMode( ( v ) => ! v ) }
+							style={ { marginTop: '8px', width: '100%', justifyContent: 'center' } }
+						>
+							{ isEditMode
+								? __( '▶ Preview animation', 'frontblocks' )
+								: __( '✎ Edit text', 'frontblocks' )
+							}
+						</Button>
+					) }
 				</PanelBody>
 
 				<PanelBody title={ __( 'Typography', 'frontblocks' ) } initialOpen={ false }>
