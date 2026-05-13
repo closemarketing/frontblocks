@@ -145,6 +145,14 @@ class TextAnimation {
 		);
 
 		wp_register_script(
+			'frontblocks-animation-slide-left',
+			FRBL_PLUGIN_URL . 'assets/text-animation/animations/slide-left.js',
+			array( 'frontblocks-text-animation-frontend' ),
+			FRBL_VERSION,
+			true
+		);
+
+		wp_register_script(
 			'frontblocks-animation-shuffle-text',
 			FRBL_PLUGIN_URL . 'assets/text-animation/animations/shuffle-text.js',
 			array( 'frontblocks-text-animation-frontend' ),
@@ -187,6 +195,7 @@ class TextAnimation {
 			'shuffle-text' => 'frontblocks-animation-shuffle-text',
 			'slide-up'     => 'frontblocks-animation-slide-up',
 			'slide-down'   => 'frontblocks-animation-slide-down',
+			'slide-left'   => 'frontblocks-animation-slide-left',
 			'scale-in'     => 'frontblocks-animation-scale-in',
 		);
 
