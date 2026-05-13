@@ -110,6 +110,16 @@ span.frbl-text-animation {
 	100% { transform: translateY( 0 );     opacity: 1; }
 }
 
+/* ── Glitch RGB ── */
+@keyframes frblGlitchRGB {
+	0%   { text-shadow: 2px 0 0 red,  -2px 0 0 blue; opacity: 0; }
+	20%  { text-shadow: -2px 0 0 red, 2px 0 0 blue;  opacity: 1; }
+	40%  { text-shadow: 2px 0 0 red,  -2px 0 0 blue; }
+	60%  { text-shadow: -2px 0 0 red, 2px 0 0 blue; }
+	80%  { text-shadow: 1px 0 0 red,  -1px 0 0 blue; }
+	100% { text-shadow: 0px 0 0 transparent;          opacity: 1; }
+}
+
 /* ── Solid To Outline ── */
 @keyframes frblSolidOutline {
 	0%   { -webkit-text-stroke: 0px transparent;                    color: var( --frbl-stroke-color ); opacity: 0; }

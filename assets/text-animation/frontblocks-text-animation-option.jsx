@@ -121,6 +121,7 @@ const ANIMATION_OPTIONS = [
 	{ label: __( 'Tracking Expand', 'frontblocks' ),  value: 'tracking-expand' },
 	{ label: __( 'Terminal Type', 'frontblocks' ),    value: 'terminal-type' },
 	{ label: __( 'Solid Outline', 'frontblocks' ),   value: 'solid-outline' },
+	{ label: __( 'Glitch RGB', 'frontblocks' ),      value: 'glitch-rgb' },
 	{ label: __( 'Scale In', 'frontblocks' ),      value: 'scale-in' },
 	{ label: __( 'Blur In', 'frontblocks' ),       value: 'blur-in' },
 	{ label: __( 'Glow In', 'frontblocks' ),       value: 'glow-in' },
@@ -291,6 +292,26 @@ const ANIMATION_PREVIEWS = {
 							whiteSpace: 'pre',
 							opacity: 0,
 							animation: `frblSlideUp ${ CHAR_DURATION }s forwards`,
+							animationDelay: `${ i * CHAR_DELAY }s`,
+						} }>{ char }</span>
+					) ) }
+				</Tag>
+			);
+		},
+	},
+	'glitch-rgb': {
+		duration: ( text ) => ( text.length * 0.1 + 0.4 ) * 1000,
+		render: function GlitchRGBRender( { text, style, Tag, animKey } ) {
+			const CHAR_DURATION = 0.4;
+			const CHAR_DELAY    = 0.1;
+			return (
+				<Tag style={ style } key={ animKey }>
+					{ text.split( '' ).map( ( char, i ) => (
+						<span key={ i } style={ {
+							display: 'inline-block',
+							whiteSpace: 'pre',
+							opacity: 0,
+							animation: `frblGlitchRGB ${ CHAR_DURATION }s forwards`,
 							animationDelay: `${ i * CHAR_DELAY }s`,
 						} }>{ char }</span>
 					) ) }
