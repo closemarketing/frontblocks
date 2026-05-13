@@ -231,7 +231,15 @@ function TextAnimationEdit( props ) {
 					<ToggleGroupControl
 						label={ __( 'Text Align', 'frontblocks' ) }
 						value={ textAlign }
-						onChange={ ( value ) => setAttributes( { textAlign: value || 'left' } ) }
+						onChange={ ( value ) => {
+							const newAlign = value || 'left';
+							const updates = { textAlign: newAlign };
+							if ( newAlign !== 'left' ) {
+								updates.width     = 100;
+								updates.widthUnit = '%';
+							}
+							setAttributes( updates );
+						} }
 						isBlock
 					>
 						<ToggleGroupControlOptionIcon value="left"    icon={ ALIGN_LEFT_ICON }    label={ __( 'Left', 'frontblocks' ) } />

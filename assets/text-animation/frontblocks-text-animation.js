@@ -370,9 +370,15 @@ function TextAnimationEdit(props) {
     label: __('Text Align', 'frontblocks'),
     value: textAlign,
     onChange: function onChange(value) {
-      return setAttributes({
-        textAlign: value || 'left'
-      });
+      var newAlign = value || 'left';
+      var updates = {
+        textAlign: newAlign
+      };
+      if (newAlign !== 'left') {
+        updates.width = 100;
+        updates.widthUnit = '%';
+      }
+      setAttributes(updates);
     },
     isBlock: true
   }, /*#__PURE__*/React.createElement(ToggleGroupControlOptionIcon, {
