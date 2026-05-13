@@ -6,6 +6,18 @@ span.frbl-text-animation {
 	display: inline;
 }
 
+/* Editor: align font-size number + unit select to same height */
+.block-editor-block-inspector .frbl-fontsize-row {
+	display: flex;
+	gap: 8px;
+	align-items: stretch;
+}
+
+.block-editor-block-inspector .frbl-fontsize-row .components-base-control,
+.block-editor-block-inspector .frbl-fontsize-row .components-select-control__input {
+	margin-bottom: 0 !important;
+}
+
 /* Respect reduced motion */
 @media ( prefers-reduced-motion: reduce ) {
 	.frbl-text-animation,

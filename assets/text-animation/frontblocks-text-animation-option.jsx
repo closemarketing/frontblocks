@@ -137,24 +137,32 @@ function TextAnimationEdit( props ) {
 						onChange={ ( value ) => setAttributes( { htmlTag: value } ) }
 					/>
 
-					<div style={ { marginBottom: '16px', display: 'flex', gap: '8px', alignItems: 'flex-end' } }>
-						<div style={ { flex: 1 } }>
-							<NumberControl
-								label={ __( 'Font Size', 'frontblocks' ) }
-								value={ fontSize || '' }
-								onChange={ ( value ) => setAttributes( { fontSize: value ? parseFloat( value ) : undefined } ) }
-								min={ 1 }
-								step={ 1 }
-								spinControls="native"
-							/>
-						</div>
-						<div style={ { width: '72px' } }>
-							<SelectControl
-								label={ __( 'Unit', 'frontblocks' ) }
-								value={ fontSizeUnit }
-								options={ FONT_SIZE_UNITS }
-								onChange={ ( value ) => setAttributes( { fontSizeUnit: value } ) }
-							/>
+					<div style={ { marginBottom: '16px' } }>
+						<p style={ { marginTop: 0, marginBottom: '8px', fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', color: 'rgb(117, 117, 117)' } }>
+							{ __( 'Font Size', 'frontblocks' ) }
+						</p>
+						<div style={ { display: 'flex', gap: '8px' } }>
+							<div style={ { flex: 1, marginBottom: 0 } }>
+								<NumberControl
+									value={ fontSize || '' }
+									onChange={ ( value ) => setAttributes( { fontSize: value ? parseFloat( value ) : undefined } ) }
+									min={ 1 }
+									step={ 1 }
+									spinControls="native"
+									hideLabelFromVision
+									label={ __( 'Font Size', 'frontblocks' ) }
+								/>
+							</div>
+							<div style={ { width: '80px', flexShrink: 0, marginBottom: 0 } }>
+								<SelectControl
+									value={ fontSizeUnit }
+									options={ FONT_SIZE_UNITS }
+									onChange={ ( value ) => setAttributes( { fontSizeUnit: value } ) }
+									hideLabelFromVision
+									label={ __( 'Unit', 'frontblocks' ) }
+									__nextHasNoMarginBottom
+								/>
+							</div>
 						</div>
 					</div>
 

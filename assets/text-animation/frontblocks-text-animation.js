@@ -227,17 +227,28 @@ function TextAnimationEdit(props) {
     }
   }), /*#__PURE__*/React.createElement("div", {
     style: {
-      marginBottom: '16px',
+      marginBottom: '16px'
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      marginTop: 0,
+      marginBottom: '8px',
+      fontSize: '11px',
+      fontWeight: '500',
+      textTransform: 'uppercase',
+      color: 'rgb(117, 117, 117)'
+    }
+  }, __('Font Size', 'frontblocks')), /*#__PURE__*/React.createElement("div", {
+    style: {
       display: 'flex',
-      gap: '8px',
-      alignItems: 'flex-end'
+      gap: '8px'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      flex: 1
+      flex: 1,
+      marginBottom: 0
     }
   }, /*#__PURE__*/React.createElement(NumberControl, {
-    label: __('Font Size', 'frontblocks'),
     value: fontSize || '',
     onChange: function onChange(value) {
       return setAttributes({
@@ -246,21 +257,27 @@ function TextAnimationEdit(props) {
     },
     min: 1,
     step: 1,
-    spinControls: "native"
+    spinControls: "native",
+    hideLabelFromVision: true,
+    label: __('Font Size', 'frontblocks')
   })), /*#__PURE__*/React.createElement("div", {
     style: {
-      width: '72px'
+      width: '80px',
+      flexShrink: 0,
+      marginBottom: 0
     }
   }, /*#__PURE__*/React.createElement(SelectControl, {
-    label: __('Unit', 'frontblocks'),
     value: fontSizeUnit,
     options: FONT_SIZE_UNITS,
     onChange: function onChange(value) {
       return setAttributes({
         fontSizeUnit: value
       });
-    }
-  }))), /*#__PURE__*/React.createElement(SelectControl, {
+    },
+    hideLabelFromVision: true,
+    label: __('Unit', 'frontblocks'),
+    __nextHasNoMarginBottom: true
+  })))), /*#__PURE__*/React.createElement(SelectControl, {
     label: __('Font Weight', 'frontblocks'),
     value: fontWeight,
     options: [{
