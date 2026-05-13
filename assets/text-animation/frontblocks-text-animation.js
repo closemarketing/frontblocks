@@ -1,5 +1,6 @@
 "use strict";
 
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -11,6 +12,11 @@ function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) 
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 var registerBlockType = wp.blocks.registerBlockType;
 var _wp$element = wp.element,
   Fragment = _wp$element.Fragment,
@@ -212,6 +218,9 @@ var ANIMATION_OPTIONS = [{
 }, {
   label: __('Shuffle Text', 'frontblocks'),
   value: 'shuffle-text'
+}, {
+  label: __('Slide Up', 'frontblocks'),
+  value: 'slide-up'
 }];
 function stripHtml(html) {
   return html ? html.replace(/<[^>]*>/g, '') : '';
@@ -250,15 +259,45 @@ var ANIMATION_PREVIEWS = {
       }));
     }
   },
-  'shuffle-text': {
+  'slide-up': {
     duration: function duration(text) {
-      return (text.replace(/ /g, '').length * 2 + 15) * 30;
+      return (text.length * 0.05 + 0.5) * 1000;
     },
-    render: function ShuffleTextRender(_ref2) {
+    render: function SlideUpRender(_ref2) {
       var text = _ref2.text,
         style = _ref2.style,
         Tag = _ref2.Tag,
         animKey = _ref2.animKey;
+      var CHAR_DURATION = 0.5;
+      var CHAR_DELAY = 0.05;
+      return /*#__PURE__*/React.createElement(Tag, {
+        style: _objectSpread(_objectSpread({}, style), {}, {
+          overflow: 'hidden'
+        }),
+        key: animKey
+      }, text.split('').map(function (char, i) {
+        return /*#__PURE__*/React.createElement("span", {
+          key: i,
+          style: {
+            display: 'inline-block',
+            whiteSpace: 'pre',
+            opacity: 0,
+            animation: "frblSlideUp ".concat(CHAR_DURATION, "s forwards"),
+            animationDelay: "".concat(i * CHAR_DELAY, "s")
+          }
+        }, char);
+      }));
+    }
+  },
+  'shuffle-text': {
+    duration: function duration(text) {
+      return (text.replace(/ /g, '').length * 2 + 15) * 30;
+    },
+    render: function ShuffleTextRender(_ref3) {
+      var text = _ref3.text,
+        style = _ref3.style,
+        Tag = _ref3.Tag,
+        animKey = _ref3.animKey;
       var _wp$element2 = wp.element,
         useEffect = _wp$element2.useEffect,
         useRef = _wp$element2.useRef;
@@ -325,11 +364,11 @@ var ANIMATION_PREVIEWS = {
     duration: function duration(text) {
       return text.length * 80;
     },
-    render: function TypewriterRender(_ref3) {
-      var text = _ref3.text,
-        style = _ref3.style,
-        Tag = _ref3.Tag,
-        animKey = _ref3.animKey;
+    render: function TypewriterRender(_ref4) {
+      var text = _ref4.text,
+        style = _ref4.style,
+        Tag = _ref4.Tag,
+        animKey = _ref4.animKey;
       var _wp$element3 = wp.element,
         useEffect = _wp$element3.useEffect,
         useRef = _wp$element3.useRef;
@@ -361,11 +400,11 @@ var ANIMATION_PREVIEWS = {
     }
   }
 };
-function AnimationPreview(_ref4) {
-  var animationType = _ref4.animationType,
-    text = _ref4.text,
-    style = _ref4.style,
-    Tag = _ref4.Tag;
+function AnimationPreview(_ref5) {
+  var animationType = _ref5.animationType,
+    text = _ref5.text,
+    style = _ref5.style,
+    Tag = _ref5.Tag;
   var _useState = useState(0),
     _useState2 = _slicedToArray(_useState, 2),
     animKey = _useState2[0],
@@ -971,8 +1010,8 @@ registerBlockType('frontblocks/text-animation', {
     }
   },
   edit: TextAnimationEdit,
-  save: function save(_ref5) {
-    var attributes = _ref5.attributes;
+  save: function save(_ref6) {
+    var attributes = _ref6.attributes;
     var content = attributes.content,
       Tag = attributes.htmlTag,
       animationType = attributes.animationType,
