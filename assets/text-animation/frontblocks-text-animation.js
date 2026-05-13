@@ -210,43 +210,70 @@ var ANIMATION_OPTIONS = [{
 function stripHtml(html) {
   return html ? html.replace(/<[^>]*>/g, '') : '';
 }
-function FadeInPreview(_ref) {
-  var text = _ref.text,
-    style = _ref.style,
-    Tag = _ref.Tag;
+
+/* ── Animation preview registry ─────────────────────────────
+   Each entry: { loop: bool, render( text, style, Tag, key ) → JSX }
+   Add a new entry for every new animation type.
+──────────────────────────────────────────────────────────── */
+var ANIMATION_PREVIEWS = {
+  'fade-in': {
+    duration: function duration(text) {
+      return (text.length * 0.05 + 0.8) * 1000 + 2500;
+    },
+    render: function FadeInRender(_ref) {
+      var text = _ref.text,
+        style = _ref.style,
+        Tag = _ref.Tag,
+        animKey = _ref.animKey;
+      var CHAR_DURATION = 0.8;
+      var CHAR_DELAY = 0.05;
+      return /*#__PURE__*/React.createElement(Tag, {
+        style: style,
+        key: animKey
+      }, text.split('').map(function (char, i) {
+        return /*#__PURE__*/React.createElement("span", {
+          key: i,
+          style: {
+            display: 'inline-block',
+            whiteSpace: 'pre',
+            opacity: 0,
+            animation: "frblFadeIn ".concat(CHAR_DURATION, "s forwards"),
+            animationDelay: "".concat(i * CHAR_DELAY, "s")
+          }
+        }, char);
+      }));
+    }
+  }
+};
+function AnimationPreview(_ref2) {
+  var animationType = _ref2.animationType,
+    text = _ref2.text,
+    style = _ref2.style,
+    Tag = _ref2.Tag;
   var _useState = useState(0),
     _useState2 = _slicedToArray(_useState, 2),
-    key = _useState2[0],
-    setKey = _useState2[1];
-  var chars = text.split('');
-  var charDelay = 0.05;
-  var charDuration = 0.8;
-  var totalMs = (chars.length * charDelay + charDuration) * 1000 + 2500;
+    animKey = _useState2[0],
+    setAnimKey = _useState2[1];
+  var entry = ANIMATION_PREVIEWS[animationType];
   useState(function () {
+    if (!entry) return;
+    var ms = entry.duration(text);
     var t = setTimeout(function () {
-      return setKey(function (k) {
+      return setAnimKey(function (k) {
         return k + 1;
       });
-    }, totalMs);
+    }, ms);
     return function () {
       return clearTimeout(t);
     };
   });
-  return /*#__PURE__*/React.createElement(Tag, {
+  if (!entry) return null;
+  return entry.render({
+    text: text,
     style: style,
-    key: key
-  }, chars.map(function (char, i) {
-    return /*#__PURE__*/React.createElement("span", {
-      key: i,
-      style: {
-        display: 'inline-block',
-        whiteSpace: 'pre',
-        opacity: 0,
-        animation: "frblFadeIn ".concat(charDuration, "s forwards"),
-        animationDelay: "".concat(i * charDelay, "s")
-      }
-    }, char);
-  }));
+    Tag: Tag,
+    animKey: animKey
+  });
 }
 function TextAnimationEdit(props) {
   var attributes = props.attributes,
@@ -705,7 +732,8 @@ function TextAnimationEdit(props) {
         });
       }
     }]
-  })), showPreview ? /*#__PURE__*/React.createElement(FadeInPreview, {
+  })), showPreview ? /*#__PURE__*/React.createElement(AnimationPreview, {
+    animationType: animationType,
     text: stripHtml(content) || __('Write your text here…', 'frontblocks'),
     style: previewStyle,
     Tag: htmlTag
@@ -813,8 +841,8 @@ registerBlockType('frontblocks/text-animation', {
     }
   },
   edit: TextAnimationEdit,
-  save: function save(_ref2) {
-    var attributes = _ref2.attributes;
+  save: function save(_ref3) {
+    var attributes = _ref3.attributes;
     var content = attributes.content,
       Tag = attributes.htmlTag,
       animationType = attributes.animationType,

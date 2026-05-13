@@ -64,6 +64,14 @@ class TextAnimation {
 			true
 		);
 
+		wp_register_script(
+			'frontblocks-animation-fade-in',
+			FRBL_PLUGIN_URL . 'assets/text-animation/animations/fade-in.js',
+			array( 'frontblocks-text-animation-frontend' ),
+			FRBL_VERSION,
+			true
+		);
+
 		register_block_type(
 			'frontblocks/text-animation',
 			array(
@@ -83,9 +91,23 @@ class TextAnimation {
 	 */
 	public function maybe_enqueue_frontend_assets( $block_content, $block ) {
 		$animation = $block['attrs']['animationType'] ?? 'none';
-		if ( 'none' !== $animation && ! wp_script_is( 'frontblocks-text-animation-frontend', 'enqueued' ) ) {
+
+		if ( 'none' === $animation ) {
+			return $block_content;
+		}
+
+		$script_map = array(
+			'fade-in' => 'frontblocks-animation-fade-in',
+		);
+
+		if ( ! wp_script_is( 'frontblocks-text-animation-frontend', 'enqueued' ) ) {
 			wp_enqueue_script( 'frontblocks-text-animation-frontend' );
 		}
+
+		if ( isset( $script_map[ $animation ] ) && ! wp_script_is( $script_map[ $animation ], 'enqueued' ) ) {
+			wp_enqueue_script( $script_map[ $animation ] );
+		}
+
 		return $block_content;
 	}
 

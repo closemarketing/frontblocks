@@ -105,34 +105,46 @@ function stripHtml( html ) {
 	return html ? html.replace( /<[^>]*>/g, '' ) : '';
 }
 
-function FadeInPreview( { text, style, Tag } ) {
-	const [ key, setKey ] = useState( 0 );
-	const chars = text.split( '' );
-	const charDelay = 0.05;
-	const charDuration = 0.8;
-	const totalMs = ( chars.length * charDelay + charDuration ) * 1000 + 2500;
+/* ── Animation preview registry ─────────────────────────────
+   Each entry: { loop: bool, render( text, style, Tag, key ) → JSX }
+   Add a new entry for every new animation type.
+──────────────────────────────────────────────────────────── */
+const ANIMATION_PREVIEWS = {
+	'fade-in': {
+		duration: ( text ) => ( text.length * 0.05 + 0.8 ) * 1000 + 2500,
+		render: function FadeInRender( { text, style, Tag, animKey } ) {
+			const CHAR_DURATION = 0.8;
+			const CHAR_DELAY    = 0.05;
+			return (
+				<Tag style={ style } key={ animKey }>
+					{ text.split( '' ).map( ( char, i ) => (
+						<span key={ i } style={ {
+							display: 'inline-block',
+							whiteSpace: 'pre',
+							opacity: 0,
+							animation: `frblFadeIn ${ CHAR_DURATION }s forwards`,
+							animationDelay: `${ i * CHAR_DELAY }s`,
+						} }>{ char }</span>
+					) ) }
+				</Tag>
+			);
+		},
+	},
+};
+
+function AnimationPreview( { animationType, text, style, Tag } ) {
+	const [ animKey, setAnimKey ] = useState( 0 );
+	const entry = ANIMATION_PREVIEWS[ animationType ];
 
 	useState( () => {
-		const t = setTimeout( () => setKey( ( k ) => k + 1 ), totalMs );
+		if ( ! entry ) return;
+		const ms = entry.duration( text );
+		const t  = setTimeout( () => setAnimKey( ( k ) => k + 1 ), ms );
 		return () => clearTimeout( t );
 	} );
 
-	return (
-		<Tag style={ style } key={ key }>
-			{ chars.map( ( char, i ) => (
-				<span
-					key={ i }
-					style={ {
-						display: 'inline-block',
-						whiteSpace: 'pre',
-						opacity: 0,
-						animation: `frblFadeIn ${ charDuration }s forwards`,
-						animationDelay: `${ i * charDelay }s`,
-					} }
-				>{ char }</span>
-			) ) }
-		</Tag>
-	);
+	if ( ! entry ) return null;
+	return entry.render( { text, style, Tag, animKey } );
 }
 
 function TextAnimationEdit( props ) {
@@ -456,7 +468,8 @@ function TextAnimationEdit( props ) {
 			</InspectorControls>
 
 			{ showPreview ? (
-				<FadeInPreview
+				<AnimationPreview
+					animationType={ animationType }
 					text={ stripHtml( content ) || __( 'Write your text here…', 'frontblocks' ) }
 					style={ previewStyle }
 					Tag={ htmlTag }
