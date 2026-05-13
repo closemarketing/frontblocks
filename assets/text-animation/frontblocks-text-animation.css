@@ -39,6 +39,12 @@ span.frbl-text-animation {
 	to   { opacity: 1; }
 }
 
+/* ── Scale In ── */
+@keyframes frblScaleIn {
+	from { transform: scale( 0 ); opacity: 0; }
+	to   { transform: scale( 1 ); opacity: 1; }
+}
+
 /* ── Slide Up ── */
 @keyframes frblSlideUp {
 	from { transform: translateY( 100% ); opacity: 0; }
