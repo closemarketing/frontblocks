@@ -132,6 +132,8 @@ function TextAnimationEdit( props ) {
 			transition:           'color 0.3s ease',
 			width:                width ? `${ width }${ widthUnit || 'px' }` : undefined,
 			height:               height ? `${ height }${ heightUnit || 'px' }` : undefined,
+			marginLeft:           0,
+			marginRight:          'auto',
 		},
 		onMouseEnter: () => setIsHovered( true ),
 		onMouseLeave: () => setIsHovered( false ),

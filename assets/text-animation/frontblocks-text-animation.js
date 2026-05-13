@@ -232,7 +232,9 @@ function TextAnimationEdit(props) {
       color: isHovered && textColorHover ? textColorHover : textColorCustom || undefined,
       transition: 'color 0.3s ease',
       width: width ? "".concat(width).concat(widthUnit || 'px') : undefined,
-      height: height ? "".concat(height).concat(heightUnit || 'px') : undefined
+      height: height ? "".concat(height).concat(heightUnit || 'px') : undefined,
+      marginLeft: 0,
+      marginRight: 'auto'
     },
     onMouseEnter: function onMouseEnter() {
       return setIsHovered(true);

@@ -1,6 +1,8 @@
 .frbl-text-animation {
 	display: block;
 	width: fit-content;
+	margin-left: 0;
+	margin-right: auto;
 	color: var(--frbl-color);
 	transition: color 0.3s ease;
 }
