@@ -218,7 +218,7 @@ function stripHtml(html) {
 var ANIMATION_PREVIEWS = {
   'fade-in': {
     duration: function duration(text) {
-      return (text.length * 0.05 + 0.8) * 1000 + 2500;
+      return (text.length * 0.05 + 0.8) * 1000;
     },
     render: function FadeInRender(_ref) {
       var text = _ref.text,
@@ -282,7 +282,7 @@ function TextAnimationEdit(props) {
     _useState4 = _slicedToArray(_useState3, 2),
     isHovered = _useState4[0],
     setIsHovered = _useState4[1];
-  var _useState5 = useState(false),
+  var _useState5 = useState(true),
     _useState6 = _slicedToArray(_useState5, 2),
     isEditMode = _useState6[0],
     setIsEditMode = _useState6[1];
@@ -378,22 +378,26 @@ function TextAnimationEdit(props) {
       setAttributes({
         animationType: value
       });
-      setIsEditMode(false);
+      setIsEditMode(true);
     }
   }), hasAnimation && /*#__PURE__*/React.createElement(Button, {
-    variant: isEditMode ? 'primary' : 'secondary',
+    variant: "secondary",
     size: "small",
     onClick: function onClick() {
-      return setIsEditMode(function (v) {
-        return !v;
-      });
+      var entry = ANIMATION_PREVIEWS[animationType];
+      var text = stripHtml(content) || __('Write your text here…', 'frontblocks');
+      var ms = entry ? entry.duration(text) : 2000;
+      setIsEditMode(false);
+      setTimeout(function () {
+        return setIsEditMode(true);
+      }, ms);
     },
     style: {
       marginTop: '8px',
       width: '100%',
       justifyContent: 'center'
     }
-  }, isEditMode ? __('▶ Preview animation', 'frontblocks') : __('✎ Edit text', 'frontblocks'))), /*#__PURE__*/React.createElement(PanelBody, {
+  }, __('▶ Preview animation', 'frontblocks'))), /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Typography', 'frontblocks'),
     initialOpen: false
   }, /*#__PURE__*/React.createElement(SelectControl, {

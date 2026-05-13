@@ -111,7 +111,7 @@ function stripHtml( html ) {
 ──────────────────────────────────────────────────────────── */
 const ANIMATION_PREVIEWS = {
 	'fade-in': {
-		duration: ( text ) => ( text.length * 0.05 + 0.8 ) * 1000 + 2500,
+		duration: ( text ) => ( text.length * 0.05 + 0.8 ) * 1000,
 		render: function FadeInRender( { text, style, Tag, animKey } ) {
 			const CHAR_DURATION = 0.8;
 			const CHAR_DELAY    = 0.05;
@@ -150,7 +150,7 @@ function AnimationPreview( { animationType, text, style, Tag } ) {
 function TextAnimationEdit( props ) {
 	const { attributes, setAttributes } = props;
 	const [ isHovered,  setIsHovered  ] = useState( false );
-	const [ isEditMode, setIsEditMode ] = useState( false );
+	const [ isEditMode, setIsEditMode ] = useState( true );
 	const {
 		content,
 		htmlTag,
@@ -247,20 +247,23 @@ function TextAnimationEdit( props ) {
 						options={ ANIMATION_OPTIONS }
 						onChange={ ( value ) => {
 							setAttributes( { animationType: value } );
-							setIsEditMode( false );
+							setIsEditMode( true );
 						} }
 					/>
 					{ hasAnimation && (
 						<Button
-							variant={ isEditMode ? 'primary' : 'secondary' }
+							variant="secondary"
 							size="small"
-							onClick={ () => setIsEditMode( ( v ) => ! v ) }
+							onClick={ () => {
+								const entry = ANIMATION_PREVIEWS[ animationType ];
+								const text  = stripHtml( content ) || __( 'Write your text here…', 'frontblocks' );
+								const ms    = entry ? entry.duration( text ) : 2000;
+								setIsEditMode( false );
+								setTimeout( () => setIsEditMode( true ), ms );
+							} }
 							style={ { marginTop: '8px', width: '100%', justifyContent: 'center' } }
 						>
-							{ isEditMode
-								? __( '▶ Preview animation', 'frontblocks' )
-								: __( '✎ Edit text', 'frontblocks' )
-							}
+							{ __( '▶ Preview animation', 'frontblocks' ) }
 						</Button>
 					) }
 				</PanelBody>
