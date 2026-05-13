@@ -99,7 +99,8 @@ const FONT_STYLE_OPTIONS = [
 const ANIMATION_OPTIONS = [
 	{ label: __( 'None', 'frontblocks' ),       value: 'none' },
 	{ label: __( 'Fade In', 'frontblocks' ),    value: 'fade-in' },
-	{ label: __( 'Typewriter', 'frontblocks' ), value: 'typewriter' },
+	{ label: __( 'Typewriter', 'frontblocks' ),    value: 'typewriter' },
+	{ label: __( 'Shuffle Text', 'frontblocks' ),  value: 'shuffle-text' },
 ];
 
 function stripHtml( html ) {
@@ -129,6 +130,58 @@ const ANIMATION_PREVIEWS = {
 					) ) }
 				</Tag>
 			);
+		},
+	},
+	'shuffle-text': {
+		duration: ( text ) => ( text.replace( / /g, '' ).length * 2 + 15 ) * 30,
+		render: function ShuffleTextRender( { text, style, Tag, animKey } ) {
+			const { useEffect, useRef } = wp.element;
+			const SYMBOLS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+			const containerRef = useRef( null );
+
+			useEffect( () => {
+				const el = containerRef.current;
+				if ( ! el ) return;
+				el.innerHTML = '';
+
+				const chars    = text.split( '' );
+				const spanList = chars.map( ( char ) => {
+					const span       = document.createElement( 'span' );
+					span.className   = 'frbl-char';
+					el.appendChild( span );
+					return { el: span, char, isSpace: char === ' ' };
+				} );
+
+				let frame  = 0;
+				let rafId;
+				let timerId;
+
+				function update() {
+					let allDone = true;
+					spanList.forEach( ( item, i ) => {
+						if ( item.isSpace ) { item.el.textContent = ' '; return; }
+						const startFrame = i * 2;
+						const endFrame   = startFrame + 15;
+						if ( frame < startFrame ) {
+							allDone = false; item.el.textContent = '';
+						} else if ( frame < endFrame ) {
+							allDone = false;
+							item.el.textContent = SYMBOLS[ Math.floor( Math.random() * SYMBOLS.length ) ];
+						} else {
+							item.el.textContent = item.char;
+						}
+					} );
+					frame++;
+					if ( ! allDone ) {
+						timerId = setTimeout( () => { rafId = requestAnimationFrame( update ); }, 30 );
+					}
+				}
+
+				rafId = requestAnimationFrame( update );
+				return () => { cancelAnimationFrame( rafId ); clearTimeout( timerId ); };
+			}, [ animKey, text ] );
+
+			return <Tag ref={ containerRef } style={ style } key={ animKey } />;
 		},
 	},
 	'typewriter': {

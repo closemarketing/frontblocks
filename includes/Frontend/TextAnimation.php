@@ -80,6 +80,14 @@ class TextAnimation {
 			true
 		);
 
+		wp_register_script(
+			'frontblocks-animation-shuffle-text',
+			FRBL_PLUGIN_URL . 'assets/text-animation/animations/shuffle-text.js',
+			array( 'frontblocks-text-animation-frontend' ),
+			FRBL_VERSION,
+			true
+		);
+
 		register_block_type(
 			'frontblocks/text-animation',
 			array(
@@ -105,8 +113,9 @@ class TextAnimation {
 		}
 
 		$script_map = array(
-			'fade-in'    => 'frontblocks-animation-fade-in',
-			'typewriter' => 'frontblocks-animation-typewriter',
+			'fade-in'      => 'frontblocks-animation-fade-in',
+			'typewriter'   => 'frontblocks-animation-typewriter',
+			'shuffle-text' => 'frontblocks-animation-shuffle-text',
 		);
 
 		if ( ! wp_script_is( 'frontblocks-text-animation-frontend', 'enqueued' ) ) {

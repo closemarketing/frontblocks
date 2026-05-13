@@ -209,6 +209,9 @@ var ANIMATION_OPTIONS = [{
 }, {
   label: __('Typewriter', 'frontblocks'),
   value: 'typewriter'
+}, {
+  label: __('Shuffle Text', 'frontblocks'),
+  value: 'shuffle-text'
 }];
 function stripHtml(html) {
   return html ? html.replace(/<[^>]*>/g, '') : '';
@@ -247,11 +250,11 @@ var ANIMATION_PREVIEWS = {
       }));
     }
   },
-  'typewriter': {
+  'shuffle-text': {
     duration: function duration(text) {
-      return text.length * 80;
+      return (text.replace(/ /g, '').length * 2 + 15) * 30;
     },
-    render: function TypewriterRender(_ref2) {
+    render: function ShuffleTextRender(_ref2) {
       var text = _ref2.text,
         style = _ref2.style,
         Tag = _ref2.Tag,
@@ -259,6 +262,77 @@ var ANIMATION_PREVIEWS = {
       var _wp$element2 = wp.element,
         useEffect = _wp$element2.useEffect,
         useRef = _wp$element2.useRef;
+      var SYMBOLS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+      var containerRef = useRef(null);
+      useEffect(function () {
+        var el = containerRef.current;
+        if (!el) return;
+        el.innerHTML = '';
+        var chars = text.split('');
+        var spanList = chars.map(function (char) {
+          var span = document.createElement('span');
+          span.className = 'frbl-char';
+          el.appendChild(span);
+          return {
+            el: span,
+            char: char,
+            isSpace: char === ' '
+          };
+        });
+        var frame = 0;
+        var rafId;
+        var timerId;
+        function update() {
+          var allDone = true;
+          spanList.forEach(function (item, i) {
+            if (item.isSpace) {
+              item.el.textContent = ' ';
+              return;
+            }
+            var startFrame = i * 2;
+            var endFrame = startFrame + 15;
+            if (frame < startFrame) {
+              allDone = false;
+              item.el.textContent = '';
+            } else if (frame < endFrame) {
+              allDone = false;
+              item.el.textContent = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+            } else {
+              item.el.textContent = item.char;
+            }
+          });
+          frame++;
+          if (!allDone) {
+            timerId = setTimeout(function () {
+              rafId = requestAnimationFrame(update);
+            }, 30);
+          }
+        }
+        rafId = requestAnimationFrame(update);
+        return function () {
+          cancelAnimationFrame(rafId);
+          clearTimeout(timerId);
+        };
+      }, [animKey, text]);
+      return /*#__PURE__*/React.createElement(Tag, {
+        ref: containerRef,
+        style: style,
+        key: animKey
+      });
+    }
+  },
+  'typewriter': {
+    duration: function duration(text) {
+      return text.length * 80;
+    },
+    render: function TypewriterRender(_ref3) {
+      var text = _ref3.text,
+        style = _ref3.style,
+        Tag = _ref3.Tag,
+        animKey = _ref3.animKey;
+      var _wp$element3 = wp.element,
+        useEffect = _wp$element3.useEffect,
+        useRef = _wp$element3.useRef;
       var containerRef = useRef(null);
       useEffect(function () {
         var el = containerRef.current;
@@ -287,11 +361,11 @@ var ANIMATION_PREVIEWS = {
     }
   }
 };
-function AnimationPreview(_ref3) {
-  var animationType = _ref3.animationType,
-    text = _ref3.text,
-    style = _ref3.style,
-    Tag = _ref3.Tag;
+function AnimationPreview(_ref4) {
+  var animationType = _ref4.animationType,
+    text = _ref4.text,
+    style = _ref4.style,
+    Tag = _ref4.Tag;
   var _useState = useState(0),
     _useState2 = _slicedToArray(_useState, 2),
     animKey = _useState2[0],
@@ -887,8 +961,8 @@ registerBlockType('frontblocks/text-animation', {
     }
   },
   edit: TextAnimationEdit,
-  save: function save(_ref4) {
-    var attributes = _ref4.attributes;
+  save: function save(_ref5) {
+    var attributes = _ref5.attributes;
     var content = attributes.content,
       Tag = attributes.htmlTag,
       animationType = attributes.animationType,
