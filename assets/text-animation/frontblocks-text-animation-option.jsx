@@ -328,7 +328,15 @@ function TextAnimationEdit( props ) {
 						options={ ANIMATION_OPTIONS }
 						onChange={ ( value ) => {
 							setAttributes( { animationType: value } );
-							setIsEditMode( true );
+							if ( value && value !== 'none' ) {
+								const entry = ANIMATION_PREVIEWS[ value ];
+								const text  = stripHtml( content ) || __( 'Write your text here…', 'frontblocks' );
+								const ms    = entry ? entry.duration( text ) : 2000;
+								setIsEditMode( false );
+								setTimeout( () => setIsEditMode( true ), ms );
+							} else {
+								setIsEditMode( true );
+							}
 						} }
 					/>
 					{ hasAnimation && (

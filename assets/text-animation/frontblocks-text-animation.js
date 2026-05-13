@@ -494,7 +494,17 @@ function TextAnimationEdit(props) {
       setAttributes({
         animationType: value
       });
-      setIsEditMode(true);
+      if (value && value !== 'none') {
+        var entry = ANIMATION_PREVIEWS[value];
+        var text = stripHtml(content) || __('Write your text here…', 'frontblocks');
+        var ms = entry ? entry.duration(text) : 2000;
+        setIsEditMode(false);
+        setTimeout(function () {
+          return setIsEditMode(true);
+        }, ms);
+      } else {
+        setIsEditMode(true);
+      }
     }
   }), hasAnimation && /*#__PURE__*/React.createElement(Button, {
     variant: "secondary",
