@@ -39,6 +39,12 @@ span.frbl-text-animation {
 	to   { opacity: 1; }
 }
 
+/* ── Flip In ── */
+@keyframes frblFlipIn {
+	from { transform: perspective( 400px ) rotateX( -90deg ); opacity: 0; transform-origin: bottom; }
+	to   { transform: perspective( 400px ) rotateX( 0deg );   opacity: 1; transform-origin: bottom; }
+}
+
 /* ── Bounce In ── */
 @keyframes frblBounceIn {
 	0%   { transform: translateY( -50px ); opacity: 0; animation-timing-function: cubic-bezier( 0.8, 0, 1, 1 ); }
