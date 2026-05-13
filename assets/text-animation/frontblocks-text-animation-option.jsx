@@ -1,5 +1,6 @@
 const { registerBlockType } = wp.blocks;
 const { Fragment, useState } = wp.element;
+const { useSelect } = wp.data;
 const {
 	InspectorControls,
 	useBlockProps,
@@ -102,6 +103,7 @@ function TextAnimationEdit( props ) {
 		htmlTag,
 		fontSize,
 		fontSizeUnit,
+		fontFamily,
 		fontWeight,
 		fontStyle,
 		lineHeight,
@@ -116,10 +118,32 @@ function TextAnimationEdit( props ) {
 		heightUnit,
 	} = attributes;
 
+	const fontFamilyOptions = useSelect( ( select ) => {
+		try {
+			const settings = select( 'core' ).getSettings();
+			const families = settings.fontFamilies || {};
+			const all = [
+				...( families.theme   || [] ),
+				...( families.custom  || [] ),
+				...( families.default || [] ),
+			];
+			const options = [];
+			all.forEach( ( f ) => {
+				if ( f && f.name && f.fontFamily ) {
+					options.push( { label: f.name, value: f.fontFamily } );
+				}
+			} );
+			return options;
+		} catch ( e ) {
+			return [];
+		}
+	}, [] );
+
 	const blockProps = useBlockProps( {
 		className: 'frbl-text-animation',
 		style: {
 			fontSize:             fontSize ? `${ fontSize }${ fontSizeUnit || 'px' }` : undefined,
+			fontFamily:           fontFamily || undefined,
 			fontWeight:           fontWeight || undefined,
 			fontStyle:            fontStyle !== 'normal' ? fontStyle : undefined,
 			lineHeight:           lineHeight || undefined,
@@ -151,6 +175,15 @@ function TextAnimationEdit( props ) {
 						options={ TAG_OPTIONS }
 						onChange={ ( value ) => setAttributes( { htmlTag: value } ) }
 					/>
+
+					{ fontFamilyOptions.length > 0 && (
+						<SelectControl
+							label={ __( 'Font Family', 'frontblocks' ) }
+							value={ fontFamily }
+							options={ [ { label: __( 'Default', 'frontblocks' ), value: '' }, ...fontFamilyOptions ] }
+							onChange={ ( value ) => setAttributes( { fontFamily: value } ) }
+						/>
+					) }
 
 					<div style={ { marginBottom: '16px' } }>
 						<p style={ { marginTop: 0, marginBottom: '8px', fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', color: 'rgb(117, 117, 117)' } }>
@@ -379,6 +412,10 @@ registerBlockType( 'frontblocks/text-animation', {
 			type:    'string',
 			default: 'px',
 		},
+		fontFamily: {
+			type:    'string',
+			default: '',
+		},
 		fontWeight: {
 			type:    'string',
 			default: '',
@@ -435,6 +472,7 @@ registerBlockType( 'frontblocks/text-animation', {
 			htmlTag: Tag,
 			fontSize,
 			fontSizeUnit,
+			fontFamily,
 			fontWeight,
 			fontStyle,
 			lineHeight,
@@ -451,6 +489,7 @@ registerBlockType( 'frontblocks/text-animation', {
 
 		const style = {};
 		if ( fontSize )                        style.fontSize             = `${ fontSize }${ fontSizeUnit || 'px' }`;
+		if ( fontFamily )                      style.fontFamily           = fontFamily;
 		if ( fontWeight )                      style.fontWeight           = fontWeight;
 		if ( fontStyle && fontStyle !== 'normal' ) style.fontStyle        = fontStyle;
 		if ( lineHeight )                      style.lineHeight           = lineHeight;

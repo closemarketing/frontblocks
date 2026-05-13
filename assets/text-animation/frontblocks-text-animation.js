@@ -1,6 +1,10 @@
 "use strict";
 
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -11,6 +15,7 @@ var registerBlockType = wp.blocks.registerBlockType;
 var _wp$element = wp.element,
   Fragment = _wp$element.Fragment,
   useState = _wp$element.useState;
+var useSelect = wp.data.useSelect;
 var _wp$blockEditor = wp.blockEditor,
   InspectorControls = _wp$blockEditor.InspectorControls,
   useBlockProps = _wp$blockEditor.useBlockProps,
@@ -205,6 +210,7 @@ function TextAnimationEdit(props) {
     htmlTag = attributes.htmlTag,
     fontSize = attributes.fontSize,
     fontSizeUnit = attributes.fontSizeUnit,
+    fontFamily = attributes.fontFamily,
     fontWeight = attributes.fontWeight,
     fontStyle = attributes.fontStyle,
     lineHeight = attributes.lineHeight,
@@ -217,10 +223,30 @@ function TextAnimationEdit(props) {
     widthUnit = attributes.widthUnit,
     height = attributes.height,
     heightUnit = attributes.heightUnit;
+  var fontFamilyOptions = useSelect(function (select) {
+    try {
+      var settings = select('core').getSettings();
+      var families = settings.fontFamilies || {};
+      var all = [].concat(_toConsumableArray(families.theme || []), _toConsumableArray(families.custom || []), _toConsumableArray(families.default || []));
+      var options = [];
+      all.forEach(function (f) {
+        if (f && f.name && f.fontFamily) {
+          options.push({
+            label: f.name,
+            value: f.fontFamily
+          });
+        }
+      });
+      return options;
+    } catch (e) {
+      return [];
+    }
+  }, []);
   var blockProps = useBlockProps({
     className: 'frbl-text-animation',
     style: {
       fontSize: fontSize ? "".concat(fontSize).concat(fontSizeUnit || 'px') : undefined,
+      fontFamily: fontFamily || undefined,
       fontWeight: fontWeight || undefined,
       fontStyle: fontStyle !== 'normal' ? fontStyle : undefined,
       lineHeight: lineHeight || undefined,
@@ -253,6 +279,18 @@ function TextAnimationEdit(props) {
     onChange: function onChange(value) {
       return setAttributes({
         htmlTag: value
+      });
+    }
+  }), fontFamilyOptions.length > 0 && /*#__PURE__*/React.createElement(SelectControl, {
+    label: __('Font Family', 'frontblocks'),
+    value: fontFamily,
+    options: [{
+      label: __('Default', 'frontblocks'),
+      value: ''
+    }].concat(_toConsumableArray(fontFamilyOptions)),
+    onChange: function onChange(value) {
+      return setAttributes({
+        fontFamily: value
       });
     }
   }), /*#__PURE__*/React.createElement("div", {
@@ -610,6 +648,10 @@ registerBlockType('frontblocks/text-animation', {
       type: 'string',
       default: 'px'
     },
+    fontFamily: {
+      type: 'string',
+      default: ''
+    },
     fontWeight: {
       type: 'string',
       default: ''
@@ -666,6 +708,7 @@ registerBlockType('frontblocks/text-animation', {
       Tag = attributes.htmlTag,
       fontSize = attributes.fontSize,
       fontSizeUnit = attributes.fontSizeUnit,
+      fontFamily = attributes.fontFamily,
       fontWeight = attributes.fontWeight,
       fontStyle = attributes.fontStyle,
       lineHeight = attributes.lineHeight,
@@ -680,6 +723,7 @@ registerBlockType('frontblocks/text-animation', {
       heightUnit = attributes.heightUnit;
     var style = {};
     if (fontSize) style.fontSize = "".concat(fontSize).concat(fontSizeUnit || 'px');
+    if (fontFamily) style.fontFamily = fontFamily;
     if (fontWeight) style.fontWeight = fontWeight;
     if (fontStyle && fontStyle !== 'normal') style.fontStyle = fontStyle;
     if (lineHeight) style.lineHeight = lineHeight;
