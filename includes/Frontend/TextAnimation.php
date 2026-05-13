@@ -297,6 +297,14 @@ class TextAnimation {
 		);
 
 		wp_register_script(
+			'frontblocks-animation-water-drop',
+			FRBL_PLUGIN_URL . 'assets/text-animation/animations/water-drop.js',
+			array( 'frontblocks-text-animation-frontend' ),
+			FRBL_VERSION,
+			true
+		);
+
+		wp_register_script(
 			'frontblocks-animation-shuffle-text',
 			FRBL_PLUGIN_URL . 'assets/text-animation/animations/shuffle-text.js',
 			array( 'frontblocks-text-animation-frontend' ),
@@ -358,6 +366,7 @@ class TextAnimation {
 			'terminal-type'     => 'frontblocks-animation-terminal-type',
 			'solid-outline'     => 'frontblocks-animation-solid-outline',
 			'glitch-rgb'        => 'frontblocks-animation-glitch-rgb',
+			'water-drop'        => 'frontblocks-animation-water-drop',
 			'scale-in'     => 'frontblocks-animation-scale-in',
 		);
 
