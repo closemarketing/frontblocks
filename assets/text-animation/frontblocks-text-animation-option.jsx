@@ -117,6 +117,7 @@ const ANIMATION_OPTIONS = [
 	{ label: __( 'Glitch', 'frontblocks' ),        value: 'glitch' },
 	{ label: __( 'Random Reveal', 'frontblocks' ), value: 'random-reveal' },
 	{ label: __( 'Flicker', 'frontblocks' ),       value: 'flicker' },
+	{ label: __( 'Block Reveal', 'frontblocks' ),  value: 'block-reveal' },
 	{ label: __( 'Scale In', 'frontblocks' ),      value: 'scale-in' },
 	{ label: __( 'Blur In', 'frontblocks' ),       value: 'blur-in' },
 	{ label: __( 'Glow In', 'frontblocks' ),       value: 'glow-in' },
@@ -292,6 +293,46 @@ const ANIMATION_PREVIEWS = {
 					) ) }
 				</Tag>
 			);
+		},
+	},
+	'block-reveal': {
+		duration: () => 1200,
+		render: function BlockRevealRender( { text, style, Tag, animKey } ) {
+			const { useEffect, useRef } = wp.element;
+			const containerRef = useRef( null );
+
+			useEffect( () => {
+				const el = containerRef.current;
+				if ( ! el ) return;
+
+				el.style.position = 'relative';
+				el.style.overflow = 'hidden';
+				el.innerHTML      = '';
+
+				const textSpan           = document.createElement( 'span' );
+				textSpan.textContent     = text;
+				textSpan.style.cssText   = 'display:inline-block;opacity:0;';
+
+				const block           = document.createElement( 'span' );
+				block.style.cssText   = 'position:absolute;top:0;left:0;width:100%;height:100%;background:currentColor;transform-origin:left;transform:scaleX(0);transition:transform 0.5s cubic-bezier(0.86,0,0.07,1);';
+
+				el.appendChild( textSpan );
+				el.appendChild( block );
+
+				const t1 = setTimeout( () => {
+					block.style.transform = 'scaleX(1)';
+				}, 50 );
+
+				const t2 = setTimeout( () => {
+					textSpan.style.opacity      = '1';
+					block.style.transformOrigin = 'right';
+					block.style.transform       = 'scaleX(0)';
+				}, 550 );
+
+				return () => { clearTimeout( t1 ); clearTimeout( t2 ); };
+			}, [ animKey, text ] );
+
+			return <Tag ref={ containerRef } style={ style } key={ animKey } />;
 		},
 	},
 	'flicker': {
