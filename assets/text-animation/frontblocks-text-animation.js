@@ -202,6 +202,7 @@ function TextAnimationEdit(props) {
     textColorCustom = attributes.textColorCustom,
     textColorHover = attributes.textColorHover;
   var blockProps = useBlockProps({
+    className: 'frbl-text-animation',
     style: {
       fontSize: fontSize ? "".concat(fontSize).concat(fontSizeUnit || 'px') : undefined,
       fontWeight: fontWeight || undefined,

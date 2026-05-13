@@ -112,6 +112,7 @@ function TextAnimationEdit( props ) {
 	} = attributes;
 
 	const blockProps = useBlockProps( {
+		className: 'frbl-text-animation',
 		style: {
 			fontSize:             fontSize ? `${ fontSize }${ fontSizeUnit || 'px' }` : undefined,
 			fontWeight:           fontWeight || undefined,
