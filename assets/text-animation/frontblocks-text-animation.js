@@ -477,26 +477,20 @@ registerBlockType('frontblocks/text-animation', {
       textAlign = attributes.textAlign,
       textTransform = attributes.textTransform,
       textColorCustom = attributes.textColorCustom;
-    var style = {
-      fontSize: fontSize ? "".concat(fontSize).concat(fontSizeUnit || 'px') : undefined,
-      fontWeight: fontWeight || undefined,
-      fontStyle: fontStyle !== 'normal' ? fontStyle : undefined,
-      lineHeight: lineHeight || undefined,
-      letterSpacing: letterSpacing ? "".concat(letterSpacing, "em") : undefined,
-      textAlign: textAlign !== 'left' ? textAlign : undefined,
-      textTransform: textTransform !== 'none' ? textTransform : undefined,
-      color: textColorCustom || undefined
-    };
-
-    // Remove undefined keys.
-    Object.keys(style).forEach(function (k) {
-      return style[k] === undefined && delete style[k];
-    });
-    var blockProps = wp.blockEditor.useBlockProps.save();
-    return /*#__PURE__*/React.createElement(Tag, _extends({}, blockProps, {
-      className: "".concat(blockProps.className || '', " frbl-text-animation").trim(),
+    var style = {};
+    if (fontSize) style.fontSize = "".concat(fontSize).concat(fontSizeUnit || 'px');
+    if (fontWeight) style.fontWeight = fontWeight;
+    if (fontStyle && fontStyle !== 'normal') style.fontStyle = fontStyle;
+    if (lineHeight) style.lineHeight = lineHeight;
+    if (letterSpacing) style.letterSpacing = "".concat(letterSpacing, "em");
+    if (textAlign && textAlign !== 'left') style.textAlign = textAlign;
+    if (textTransform && textTransform !== 'none') style.textTransform = textTransform;
+    if (textColorCustom) style.color = textColorCustom;
+    var blockProps = wp.blockEditor.useBlockProps.save({
+      className: 'frbl-text-animation',
       style: style
-    }), /*#__PURE__*/React.createElement(RichText.Content, {
+    });
+    return /*#__PURE__*/React.createElement(Tag, blockProps, /*#__PURE__*/React.createElement(RichText.Content, {
       value: content
     }));
   }
