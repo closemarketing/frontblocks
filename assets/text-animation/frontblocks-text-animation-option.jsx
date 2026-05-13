@@ -1,5 +1,5 @@
 const { registerBlockType } = wp.blocks;
-const { Fragment } = wp.element;
+const { Fragment, useState } = wp.element;
 const {
 	InspectorControls,
 	useBlockProps,
@@ -96,6 +96,7 @@ const FONT_STYLE_OPTIONS = [
 
 function TextAnimationEdit( props ) {
 	const { attributes, setAttributes } = props;
+	const [ isHovered, setIsHovered ] = useState( false );
 	const {
 		content,
 		htmlTag,
@@ -123,7 +124,11 @@ function TextAnimationEdit( props ) {
 			textTransform:        textTransform !== 'none' ? textTransform : undefined,
 			'--frbl-color':       textColorCustom || undefined,
 			'--frbl-color-hover': textColorHover || undefined,
+			color: ( isHovered && textColorHover ) ? textColorHover : ( textColorCustom || undefined ),
+			transition: 'color 0.3s ease',
 		},
+		onMouseEnter: () => setIsHovered( true ),
+		onMouseLeave: () => setIsHovered( false ),
 	} );
 
 	return (
