@@ -72,6 +72,14 @@ class TextAnimation {
 			true
 		);
 
+		wp_register_script(
+			'frontblocks-animation-typewriter',
+			FRBL_PLUGIN_URL . 'assets/text-animation/animations/typewriter.js',
+			array( 'frontblocks-text-animation-frontend' ),
+			FRBL_VERSION,
+			true
+		);
+
 		register_block_type(
 			'frontblocks/text-animation',
 			array(
@@ -97,7 +105,8 @@ class TextAnimation {
 		}
 
 		$script_map = array(
-			'fade-in' => 'frontblocks-animation-fade-in',
+			'fade-in'    => 'frontblocks-animation-fade-in',
+			'typewriter' => 'frontblocks-animation-typewriter',
 		);
 
 		if ( ! wp_script_is( 'frontblocks-text-animation-frontend', 'enqueued' ) ) {

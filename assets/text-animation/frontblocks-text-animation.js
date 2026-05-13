@@ -206,6 +206,9 @@ var ANIMATION_OPTIONS = [{
 }, {
   label: __('Fade In', 'frontblocks'),
   value: 'fade-in'
+}, {
+  label: __('Typewriter', 'frontblocks'),
+  value: 'typewriter'
 }];
 function stripHtml(html) {
   return html ? html.replace(/<[^>]*>/g, '') : '';
@@ -243,13 +246,52 @@ var ANIMATION_PREVIEWS = {
         }, char);
       }));
     }
+  },
+  'typewriter': {
+    duration: function duration(text) {
+      return text.length * 80;
+    },
+    render: function TypewriterRender(_ref2) {
+      var text = _ref2.text,
+        style = _ref2.style,
+        Tag = _ref2.Tag,
+        animKey = _ref2.animKey;
+      var _wp$element2 = wp.element,
+        useEffect = _wp$element2.useEffect,
+        useRef = _wp$element2.useRef;
+      var containerRef = useRef(null);
+      useEffect(function () {
+        var el = containerRef.current;
+        if (!el) return;
+        el.textContent = '';
+        var chars = text.split('');
+        var i = 0;
+        var timer;
+        function type() {
+          if (i < chars.length) {
+            el.textContent += chars[i];
+            i++;
+            timer = setTimeout(type, 80);
+          }
+        }
+        type();
+        return function () {
+          return clearTimeout(timer);
+        };
+      }, [animKey, text]);
+      return /*#__PURE__*/React.createElement(Tag, {
+        ref: containerRef,
+        style: style,
+        key: animKey
+      });
+    }
   }
 };
-function AnimationPreview(_ref2) {
-  var animationType = _ref2.animationType,
-    text = _ref2.text,
-    style = _ref2.style,
-    Tag = _ref2.Tag;
+function AnimationPreview(_ref3) {
+  var animationType = _ref3.animationType,
+    text = _ref3.text,
+    style = _ref3.style,
+    Tag = _ref3.Tag;
   var _useState = useState(0),
     _useState2 = _slicedToArray(_useState, 2),
     animKey = _useState2[0],
@@ -845,8 +887,8 @@ registerBlockType('frontblocks/text-animation', {
     }
   },
   edit: TextAnimationEdit,
-  save: function save(_ref3) {
-    var attributes = _ref3.attributes;
+  save: function save(_ref4) {
+    var attributes = _ref4.attributes;
     var content = attributes.content,
       Tag = attributes.htmlTag,
       animationType = attributes.animationType,

@@ -97,8 +97,9 @@ const FONT_STYLE_OPTIONS = [
 ];
 
 const ANIMATION_OPTIONS = [
-	{ label: __( 'None', 'frontblocks' ),     value: 'none' },
-	{ label: __( 'Fade In', 'frontblocks' ),  value: 'fade-in' },
+	{ label: __( 'None', 'frontblocks' ),       value: 'none' },
+	{ label: __( 'Fade In', 'frontblocks' ),    value: 'fade-in' },
+	{ label: __( 'Typewriter', 'frontblocks' ), value: 'typewriter' },
 ];
 
 function stripHtml( html ) {
@@ -128,6 +129,33 @@ const ANIMATION_PREVIEWS = {
 					) ) }
 				</Tag>
 			);
+		},
+	},
+	'typewriter': {
+		duration: ( text ) => text.length * 80,
+		render: function TypewriterRender( { text, style, Tag, animKey } ) {
+			const { useEffect, useRef } = wp.element;
+			const containerRef = useRef( null );
+
+			useEffect( () => {
+				const el = containerRef.current;
+				if ( ! el ) return;
+				el.textContent = '';
+				const chars = text.split( '' );
+				let i = 0;
+				let timer;
+				function type() {
+					if ( i < chars.length ) {
+						el.textContent += chars[ i ];
+						i++;
+						timer = setTimeout( type, 80 );
+					}
+				}
+				type();
+				return () => clearTimeout( timer );
+			}, [ animKey, text ] );
+
+			return <Tag ref={ containerRef } style={ style } key={ animKey } />;
 		},
 	},
 };
