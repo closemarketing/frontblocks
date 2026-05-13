@@ -115,6 +115,7 @@ const ANIMATION_OPTIONS = [
 	{ label: __( 'Squeeze', 'frontblocks' ),       value: 'squeeze' },
 	{ label: __( 'Roll In', 'frontblocks' ),       value: 'roll-in' },
 	{ label: __( 'Glitch', 'frontblocks' ),        value: 'glitch' },
+	{ label: __( 'Random Reveal', 'frontblocks' ), value: 'random-reveal' },
 	{ label: __( 'Scale In', 'frontblocks' ),      value: 'scale-in' },
 	{ label: __( 'Blur In', 'frontblocks' ),       value: 'blur-in' },
 	{ label: __( 'Glow In', 'frontblocks' ),       value: 'glow-in' },
@@ -290,6 +291,47 @@ const ANIMATION_PREVIEWS = {
 					) ) }
 				</Tag>
 			);
+		},
+	},
+	'random-reveal': {
+		duration: ( text ) => text.replace( / /g, '' ).length * 50,
+		render: function RandomRevealRender( { text, style, Tag, animKey } ) {
+			const { useEffect, useRef } = wp.element;
+			const containerRef = useRef( null );
+
+			useEffect( () => {
+				const el = containerRef.current;
+				if ( ! el ) return;
+				el.innerHTML = '';
+
+				const chars   = text.split( '' );
+				const indices = chars.map( ( _, i ) => i ).sort( () => Math.random() - 0.5 );
+
+				const spanList = chars.map( ( char ) => {
+					const span           = document.createElement( 'span' );
+					span.className       = 'frbl-char';
+					span.textContent     = char;
+					span.style.cssText   = 'display:inline-block;white-space:pre;opacity:0;';
+					el.appendChild( span );
+					return span;
+				} );
+
+				let i = 0;
+				let timer;
+
+				function reveal() {
+					if ( i < indices.length ) {
+						spanList[ indices[ i ] ].style.opacity = '1';
+						i++;
+						timer = setTimeout( reveal, 50 );
+					}
+				}
+
+				reveal();
+				return () => clearTimeout( timer );
+			}, [ animKey, text ] );
+
+			return <Tag ref={ containerRef } style={ style } key={ animKey } />;
 		},
 	},
 	'glitch': {
