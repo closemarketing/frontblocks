@@ -110,6 +110,12 @@ span.frbl-text-animation {
 	100% { transform: translateY( 0 );     opacity: 1; }
 }
 
+/* ── Tracking Expand ── */
+@keyframes frblTrackingExpand {
+	from { letter-spacing: -0.5em; opacity: 0; }
+	to   { letter-spacing: 0.05em; opacity: 1; }
+}
+
 /* ── Flicker ── */
 @keyframes frblFlicker {
 	0%, 2%, 4%, 8%, 12%, 16%, 20% { opacity: 0; }

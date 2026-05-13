@@ -117,7 +117,8 @@ const ANIMATION_OPTIONS = [
 	{ label: __( 'Glitch', 'frontblocks' ),        value: 'glitch' },
 	{ label: __( 'Random Reveal', 'frontblocks' ), value: 'random-reveal' },
 	{ label: __( 'Flicker', 'frontblocks' ),       value: 'flicker' },
-	{ label: __( 'Block Reveal', 'frontblocks' ),  value: 'block-reveal' },
+	{ label: __( 'Block Reveal', 'frontblocks' ),    value: 'block-reveal' },
+	{ label: __( 'Tracking Expand', 'frontblocks' ), value: 'tracking-expand' },
 	{ label: __( 'Scale In', 'frontblocks' ),      value: 'scale-in' },
 	{ label: __( 'Blur In', 'frontblocks' ),       value: 'blur-in' },
 	{ label: __( 'Glow In', 'frontblocks' ),       value: 'glow-in' },
@@ -291,6 +292,20 @@ const ANIMATION_PREVIEWS = {
 							animationDelay: `${ i * CHAR_DELAY }s`,
 						} }>{ char }</span>
 					) ) }
+				</Tag>
+			);
+		},
+	},
+	'tracking-expand': {
+		duration: () => 1200,
+		render: function TrackingExpandRender( { text, style, Tag, animKey } ) {
+			return (
+				<Tag style={ style } key={ animKey }>
+					<span style={ {
+						display: 'inline-block',
+						opacity: 0,
+						animation: `frblTrackingExpand 1.2s forwards`,
+					} }>{ text }</span>
 				</Tag>
 			);
 		},
