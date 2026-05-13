@@ -108,6 +108,22 @@ Simply enable "Fluid Typography" in FrontBlocks settings, and all your responsiv
 **Custom SVG Animations:**
 Add animated graphics to GenerateBlocks Shape blocks by importing JSON files. Supports two formats that are automatically detected: **Lottie/Bodymovin** (import JSON from After Effects or LottieFiles.com) and **Custom CSS** (SVG + @keyframes). 
 
+**Text Animation Block:**
+Add dynamic animated text effects to any page or post. Insert the block from the Gutenberg inserter under the FrontBlocks category and choose from 30+ animation types to make your headings and copy stand out.
+
+Animation types available:
+- Entrance effects: fade-in, blur-in, scale-in, bounce-in, drop-in, roll-in, flip-in, rotate-in, glow-in, slide-up, slide-down, slide-left, slide-right
+- Text reveals: typewriter, block-reveal, tracking-expand, terminal-type, random-reveal, shuffle-text
+- Attention effects: pulse, flash, rubber-band, wave, swing, stretch, squeeze
+- Creative effects: glitch, glitch-rgb, flicker, water-drop, shadow-pop, solid-outline
+
+Features:
+- Live animated preview directly in the Gutenberg editor.
+- Full typography controls: heading tag (H1–H6, p, span), font family, size, weight, style, and color.
+- Background color and padding/margin controls.
+- Max-width and text alignment options.
+- Speed control for each animation.
+
 **Before/After Comparison Block:**
 Display an interactive image comparison slider that lets visitors drag a handle to reveal the difference between two images. Perfect for showcasing makeovers, retouching results, renovation work, or any visual transformation. Add the block from the Gutenberg inserter under the FrontBlocks category.
 
@@ -163,9 +179,13 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Changelog ==
 
-== next ==
-*   Added: Before/After Comparison block - Interactive drag-to-reveal image comparison block for Gutenberg.
-*   Enhanced: Implement conditional asset loading for improved performance.
+== 1.3.4 ==
+*   Added: Text Animation block with 30+ animation types — fade-in, typewriter, shuffle-text, slide-up/down/left/right, drop-in, swing, pulse, flash, rubber-band, wave, stretch, squeeze, roll-in, glitch, glitch-rgb, random-reveal, flicker, block-reveal, tracking-expand, terminal-type, solid-outline, water-drop, shadow-pop, scale-in, blur-in, glow-in, bounce-in, flip-in, rotate-in.
+*   Added: Text Animation block — full typography controls (tag, font family, size, weight, style, color, background, alignment, padding, margin, max-width).
+*   Added: Text Animation block — live animated preview in the Gutenberg editor.
+*   Added: Before/After Comparison block — interactive drag-to-reveal image comparison with customizable labels, initial position, and fixed height mode.
+*   Added: Before/After block — keyboard-accessible draggable handle with left/right arrow indicators.
+*   Improved: Conditional asset loading for Carousel, Animations, Text Animation, and Before/After — scripts/styles only enqueue on pages where the feature is used.
 
 == 1.3.3 ==
 *   Fixed: Carousel bullets display and behavior.
