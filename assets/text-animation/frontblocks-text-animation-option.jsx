@@ -123,6 +123,7 @@ const ANIMATION_OPTIONS = [
 	{ label: __( 'Solid Outline', 'frontblocks' ),   value: 'solid-outline' },
 	{ label: __( 'Glitch RGB', 'frontblocks' ),      value: 'glitch-rgb' },
 	{ label: __( 'Water Drop', 'frontblocks' ),      value: 'water-drop' },
+	{ label: __( 'Pulse Neon', 'frontblocks' ),      value: 'pulse-neon' },
 	{ label: __( 'Scale In', 'frontblocks' ),      value: 'scale-in' },
 	{ label: __( 'Blur In', 'frontblocks' ),       value: 'blur-in' },
 	{ label: __( 'Glow In', 'frontblocks' ),       value: 'glow-in' },
@@ -293,6 +294,26 @@ const ANIMATION_PREVIEWS = {
 							whiteSpace: 'pre',
 							opacity: 0,
 							animation: `frblSlideUp ${ CHAR_DURATION }s forwards`,
+							animationDelay: `${ i * CHAR_DELAY }s`,
+						} }>{ char }</span>
+					) ) }
+				</Tag>
+			);
+		},
+	},
+	'pulse-neon': {
+		duration: ( text ) => ( text.length * 0.05 + 1.5 ) * 1000,
+		render: function PulseNeonRender( { text, style, Tag, animKey } ) {
+			const CHAR_DURATION = 1.5;
+			const CHAR_DELAY    = 0.05;
+			return (
+				<Tag style={ style } key={ animKey }>
+					{ text.split( '' ).map( ( char, i ) => (
+						<span key={ i } style={ {
+							display: 'inline-block',
+							whiteSpace: 'pre',
+							opacity: 0,
+							animation: `frblPulseNeon ${ CHAR_DURATION }s forwards`,
 							animationDelay: `${ i * CHAR_DELAY }s`,
 						} }>{ char }</span>
 					) ) }

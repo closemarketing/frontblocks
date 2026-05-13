@@ -110,6 +110,12 @@ span.frbl-text-animation {
 	100% { transform: translateY( 0 );     opacity: 1; }
 }
 
+/* ── Pulse Neon ── */
+@keyframes frblPulseNeon {
+	0%, 100% { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 20px #0ff; opacity: 1; }
+	50%       { text-shadow: 0 0 2px currentColor, 0 0 5px currentColor,  0 0 10px #0ff; opacity: 0.5; }
+}
+
 /* ── Water Drop ── */
 @keyframes frblWaterDrop {
 	0%   { transform: translateY( -100px ) scale( 0.1, 2 );   opacity: 0; }
