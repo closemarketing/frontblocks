@@ -38,6 +38,7 @@ class Carousel {
 		add_filter( 'render_block_generateblocks/grid', array( $this, 'add_custom_attributes_to_grid_block' ), 10, 2 );
 		add_filter( 'render_block_generateblocks/element', array( $this, 'add_custom_attributes_to_element_block' ), 10, 2 );
 		add_filter( 'render_block_core/group', array( $this, 'add_custom_attributes_to_core_group_block' ), 10, 2 );
+		add_filter( 'render_block_core/query', array( $this, 'add_custom_attributes_to_query_block' ), 10, 2 );
 		add_action( 'init', array( $this, 'register_custom_attributes' ), 5 );
 	}
 
@@ -298,6 +299,65 @@ class Carousel {
 	}
 
 	/**
+	 * Add custom attributes to core/query block.
+	 *
+	 * @param string $block_content Block content.
+	 * @param array  $block Block attributes.
+	 * @return string
+	 */
+	public function add_custom_attributes_to_query_block( $block_content, $block ) {
+		$attrs         = $block['attrs'] ?? array();
+		$custom_option = isset( $attrs['frblGridOption'] ) ? sanitize_text_field( $attrs['frblGridOption'] ) : '';
+
+		if ( 'carousel' !== $custom_option && 'slider' !== $custom_option ) {
+			return $block_content;
+		}
+
+		$items_to_view      = isset( $attrs['frblItemsToView'] ) ? (int) $attrs['frblItemsToView'] : 4;
+		$laptop_to_view     = isset( $attrs['frblLaptopToView'] ) ? (int) $attrs['frblLaptopToView'] : 3;
+		$tablet_to_view     = isset( $attrs['frblTabletToView'] ) ? (int) $attrs['frblTabletToView'] : 2;
+		$responsive_to_view = isset( $attrs['frblResponsiveToView'] ) ? (int) $attrs['frblResponsiveToView'] : 1;
+		$autoplay           = isset( $attrs['frblAutoplay'] ) ? ( (int) $attrs['frblAutoplay'] * 1000 ) : '';
+		$gap                = isset( $attrs['frblGap'] ) && '' !== $attrs['frblGap'] ? (int) $attrs['frblGap'] : 20;
+		$rewind             = isset( $attrs['frblRewind'] ) ? (bool) $attrs['frblRewind'] : true;
+		$buttons            = isset( $attrs['frblButtons'] ) ? sanitize_text_field( $attrs['frblButtons'] ) : 'arrows';
+		$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
+		$button_bg_color    = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
+		$buttons_position   = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
+		$disable_on_desktop = isset( $attrs['frblDisableOnDesktop'] ) ? (bool) $attrs['frblDisableOnDesktop'] : false;
+
+		$extra = '';
+		if ( 'slider' === $custom_option ) {
+			$extra .= ' data-rewind="' . esc_attr( $rewind ) . '"';
+		}
+
+		$block_content = preg_replace(
+			'/<ul([^>]*)class="([^"]*wp-block-post-template[^"]*)"([^>]*)>/',
+			'<ul$1class="$2 frontblocks-carousel"$3' .
+				' data-type="' . esc_attr( $custom_option ) . '"' .
+				' data-view="' . esc_attr( $items_to_view ) . '"' .
+				' data-laptop-view="' . esc_attr( $laptop_to_view ) . '"' .
+				' data-tablet-view="' . esc_attr( $tablet_to_view ) . '"' .
+				' data-mobile-view="' . esc_attr( $responsive_to_view ) . '"' .
+				' data-autoplay="' . esc_attr( $autoplay ) . '"' .
+				' data-gap="' . esc_attr( $gap ) . '"' .
+				' data-buttons="' . esc_attr( $buttons ) . '"' .
+				' data-buttons-color="' . esc_attr( $button_color ) . '"' .
+				' data-buttons-background-color="' . esc_attr( $button_bg_color ) . '"' .
+				' data-buttons-position="' . esc_attr( $buttons_position ) . '"' .
+				' data-disable-on-desktop="' . esc_attr( $disable_on_desktop ? 'true' : 'false' ) . '"' .
+				$extra .
+				'>',
+			$block_content,
+			1
+		);
+
+		$this->enqueue_carousel_assets();
+
+		return $block_content;
+	}
+
+	/**
 	 * Register custom attributes for blocks.
 	 *
 	 * @return void
@@ -310,6 +370,9 @@ class Carousel {
 			9,
 			2
 		);
+
+		// Register attributes for core/query block.
+		add_filter( 'register_block_type_args', array( $this, 'register_query_block_attributes' ), 10, 2 );
 
 		// Register attributes from frontend side too.
 		add_action(
@@ -387,6 +450,39 @@ class Carousel {
 	}
 
 	/**
+	 * Register custom attributes for core/query block.
+	 *
+	 * @param array  $args       Block type arguments.
+	 * @param string $block_type Block type name.
+	 * @return array
+	 */
+	public function register_query_block_attributes( $args, $block_type ) {
+		if ( 'core/query' !== $block_type ) {
+			return $args;
+		}
+
+		if ( ! isset( $args['attributes'] ) ) {
+			$args['attributes'] = array();
+		}
+
+		$args['attributes']['frblGridOption']       = array( 'type' => 'string', 'default' => 'none' );
+		$args['attributes']['frblItemsToView']      = array( 'type' => 'string', 'default' => '4' );
+		$args['attributes']['frblLaptopToView']     = array( 'type' => 'string', 'default' => '3' );
+		$args['attributes']['frblTabletToView']     = array( 'type' => 'string', 'default' => '2' );
+		$args['attributes']['frblResponsiveToView'] = array( 'type' => 'string', 'default' => '1' );
+		$args['attributes']['frblAutoplay']         = array( 'type' => 'string', 'default' => '' );
+		$args['attributes']['frblGap']              = array( 'type' => 'string', 'default' => '20' );
+		$args['attributes']['frblRewind']           = array( 'type' => 'boolean', 'default' => true );
+		$args['attributes']['frblButtons']          = array( 'type' => 'string', 'default' => 'arrows' );
+		$args['attributes']['frblButtonColor']      = array( 'type' => 'string', 'default' => '' );
+		$args['attributes']['frblButtonBgColor']    = array( 'type' => 'string', 'default' => '' );
+		$args['attributes']['frblButtonsPosition']  = array( 'type' => 'string', 'default' => 'side' );
+		$args['attributes']['frblDisableOnDesktop'] = array( 'type' => 'boolean', 'default' => false );
+
+		return $args;
+	}
+
+	/**
 	 * Add inline script for block attributes.
 	 *
 	 * @return void
@@ -399,7 +495,7 @@ class Carousel {
 				'blocks.registerBlockType',
 				'frontblocks/grid-attributes',
 				function( settings, name ) {
-					if ( name !== 'generateblocks/grid' && name !== 'generateblocks/element' && name !== 'core/group' ) {
+					if ( name !== 'generateblocks/grid' && name !== 'generateblocks/element' && name !== 'core/group' && name !== 'core/query' ) {
 						return settings;
 					}
 

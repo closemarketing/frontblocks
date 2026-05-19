@@ -270,3 +270,17 @@
   column-gap: 0 !important;
   gap: 0 !important;
 }
+
+/* core/query (wp-block-post-template) as carousel container */
+ul.frontblocks-carousel.wp-block-post-template,
+ul.frontblocks-carousel.wp-block-post-template.glide__slides {
+  list-style: none;
+  padding-left: 0;
+  margin-left: 0;
+  display: flex;
+}
+
+ul.frontblocks-carousel.wp-block-post-template > li.glide__slide {
+  display: block;
+  height: auto;
+}

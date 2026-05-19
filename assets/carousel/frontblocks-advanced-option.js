@@ -78,11 +78,14 @@ function findGridEl(blockEl, name) {
     // Walk up to 4 levels deep to find where the child blocks live.
     return findSlidesParent(blockEl, 4) || blockEl;
   }
+  if (name === 'core/query') {
+    return blockEl.querySelector('.wp-block-post-template') || null;
+  }
   return null;
 }
 function addCustomCarouselPanel(BlockEdit) {
   return function (props) {
-    if (props.name !== 'generateblocks/grid' && props.name !== 'generateblocks/element' && props.name !== 'core/group') {
+    if (props.name !== 'generateblocks/grid' && props.name !== 'generateblocks/element' && props.name !== 'core/group' && props.name !== 'core/query') {
       return /*#__PURE__*/React.createElement(BlockEdit, props);
     }
     if (props.name === 'generateblocks/element') {
