@@ -465,19 +465,58 @@ class Carousel {
 			$args['attributes'] = array();
 		}
 
-		$args['attributes']['frblGridOption']       = array( 'type' => 'string', 'default' => 'none' );
-		$args['attributes']['frblItemsToView']      = array( 'type' => 'string', 'default' => '4' );
-		$args['attributes']['frblLaptopToView']     = array( 'type' => 'string', 'default' => '3' );
-		$args['attributes']['frblTabletToView']     = array( 'type' => 'string', 'default' => '2' );
-		$args['attributes']['frblResponsiveToView'] = array( 'type' => 'string', 'default' => '1' );
-		$args['attributes']['frblAutoplay']         = array( 'type' => 'string', 'default' => '' );
-		$args['attributes']['frblGap']              = array( 'type' => 'string', 'default' => '20' );
-		$args['attributes']['frblRewind']           = array( 'type' => 'boolean', 'default' => true );
-		$args['attributes']['frblButtons']          = array( 'type' => 'string', 'default' => 'arrows' );
-		$args['attributes']['frblButtonColor']      = array( 'type' => 'string', 'default' => '' );
-		$args['attributes']['frblButtonBgColor']    = array( 'type' => 'string', 'default' => '' );
-		$args['attributes']['frblButtonsPosition']  = array( 'type' => 'string', 'default' => 'side' );
-		$args['attributes']['frblDisableOnDesktop'] = array( 'type' => 'boolean', 'default' => false );
+		$args['attributes']['frblGridOption']       = array(
+			'type'    => 'string',
+			'default' => 'none',
+		);
+		$args['attributes']['frblItemsToView']      = array(
+			'type'    => 'string',
+			'default' => '4',
+		);
+		$args['attributes']['frblLaptopToView']     = array(
+			'type'    => 'string',
+			'default' => '3',
+		);
+		$args['attributes']['frblTabletToView']     = array(
+			'type'    => 'string',
+			'default' => '2',
+		);
+		$args['attributes']['frblResponsiveToView'] = array(
+			'type'    => 'string',
+			'default' => '1',
+		);
+		$args['attributes']['frblAutoplay']         = array(
+			'type'    => 'string',
+			'default' => '',
+		);
+		$args['attributes']['frblGap']              = array(
+			'type'    => 'string',
+			'default' => '20',
+		);
+		$args['attributes']['frblRewind']           = array(
+			'type'    => 'boolean',
+			'default' => true,
+		);
+		$args['attributes']['frblButtons']          = array(
+			'type'    => 'string',
+			'default' => 'arrows',
+		);
+		$args['attributes']['frblButtonColor']      = array(
+			'type'    => 'string',
+			'default' => '',
+		);
+		$args['attributes']['frblButtonBgColor']    = array(
+			'type'    => 'string',
+			'default' => '',
+		);
+		$args['attributes']['frblButtonsPosition']  = array(
+			'type'    => 'string',
+			'default' => 'side',
+		);
+		$args['attributes']['frblDisableOnDesktop'] = array(
+			'type'    => 'boolean',
+			'default' => false,
+		);
 
 		return $args;
 	}
