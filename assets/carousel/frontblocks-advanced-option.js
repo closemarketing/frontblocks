@@ -158,12 +158,18 @@ function addCustomCarouselPanel(BlockEdit) {
 
         // Restore gridEl styles.
         try {
+          var preventScroll = stateRef.current.preventScroll;
+          if (preventScroll) {
+            gridEl.removeEventListener('wheel', preventScroll);
+            gridEl.removeEventListener('touchstart', preventScroll);
+            gridEl.removeEventListener('touchmove', preventScroll);
+          }
           gridEl.classList.remove('frbl-carousel-noscrollbar');
-          ['display', 'flex-wrap', 'gap', 'overflow-x', 'scroll-behavior', 'padding-left', 'padding-right'].forEach(function (p) {
+          ['display', 'flex-wrap', 'gap', 'overflow-x', 'scroll-behavior', 'padding-left', 'padding-right', 'max-width', 'grid-template-columns'].forEach(function (p) {
             return gridEl.style.removeProperty(p);
           });
           slides.forEach(function (slide) {
-            ['flex-shrink', 'width', 'min-width', 'margin-left', 'margin-right', 'grid-column'].forEach(function (p) {
+            ['flex-shrink', 'width', 'min-width', 'margin-left', 'margin-right', 'grid-column', 'grid-row'].forEach(function (p) {
               return slide.style.removeProperty(p);
             });
           });
@@ -185,8 +191,12 @@ function addCustomCarouselPanel(BlockEdit) {
         var gridEl = findGridEl(blockEl, props.name);
         if (!gridEl) return;
 
-        // Slides = direct children that are real blocks (UUID data-block).
-        var slides = Array.from(gridEl.children).filter(function (el) {
+        // For core/query, <li> items don't have data-block UUIDs (server-rendered).
+        // For other blocks, filter by UUID data-block attribute.
+        var isQueryLoop = props.name === 'core/query';
+        var slides = isQueryLoop ? Array.from(gridEl.children).filter(function (el) {
+          return el.tagName === 'LI';
+        }) : Array.from(gridEl.children).filter(function (el) {
           return UUID_RE.test(el.dataset.block || '');
         });
         if (slides.length === 0) return;
@@ -194,6 +204,16 @@ function addCustomCarouselPanel(BlockEdit) {
         var gap = Math.max(0, parseInt(frblGap) || 20);
         var btnColor = frblButtonColor || '#fff';
         var btnBg = frblButtonBgColor || 'rgba(0,0,0,0.45)';
+
+        // For core/query, force flex via setProperty to beat WP's grid CSS.
+        if (isQueryLoop) {
+          gridEl.style.setProperty('display', 'flex', 'important');
+          gridEl.style.setProperty('flex-wrap', 'nowrap', 'important');
+          gridEl.style.setProperty('max-width', 'none', 'important');
+          gridEl.style.setProperty('grid-template-columns', 'none', 'important');
+          gridEl.style.setProperty('list-style', 'none', 'important');
+          gridEl.style.setProperty('padding-left', '0', 'important');
+        }
 
         // Measure content-box width before any style changes.
         var editorWin = editorDoc.defaultView || window;
@@ -209,15 +229,17 @@ function addCustomCarouselPanel(BlockEdit) {
         // ── Apply scroll-based layout directly to gridEl ─────────────
         // No DOM restructuring → no React reconciliation conflicts.
         gridEl.classList.add('frbl-carousel-noscrollbar');
-        gridEl.style.display = 'flex';
-        gridEl.style.flexWrap = 'nowrap';
+        if (!isQueryLoop) {
+          gridEl.style.display = 'flex';
+          gridEl.style.flexWrap = 'nowrap';
+          gridEl.style.paddingLeft = ARROW_W + 'px';
+        } else {
+          // paddingLeft already set via setProperty above; override with arrow offset.
+          gridEl.style.setProperty('padding-left', ARROW_W + 'px', 'important');
+        }
         gridEl.style.gap = gap + 'px';
         gridEl.style.overflowX = 'scroll';
         gridEl.style.scrollBehavior = 'smooth';
-        // paddingLeft creates left space for the prev arrow.
-        // paddingRight is NOT used because Chrome ignores it in scroll extent;
-        // a spacer flex child is appended instead to guarantee right-side space.
-        gridEl.style.paddingLeft = ARROW_W + 'px';
         gridEl.style.paddingRight = '0';
         slides.forEach(function (slide) {
           slide.style.flexShrink = '0';
@@ -226,6 +248,7 @@ function addCustomCarouselPanel(BlockEdit) {
           slide.style.marginLeft = '0';
           slide.style.marginRight = '0';
           slide.style.gridColumn = 'unset';
+          slide.style.gridRow = 'unset';
         });
 
         // Right-side spacer: Chrome does not include padding-right in horizontal
@@ -236,12 +259,26 @@ function addCustomCarouselPanel(BlockEdit) {
         spacer.style.cssText = "display:block;flex-shrink:0;width:".concat(ARROW_W, "px;min-width:").concat(ARROW_W, "px;");
         gridEl.insertBefore(spacer, appender || null);
 
-        // ── Navigation (scrollLeft, infinite loop) ───────────────────
+        // Prevent manual scroll — only arrows drive navigation.
+        var preventScroll = function preventScroll(e) {
+          return e.preventDefault();
+        };
+        gridEl.addEventListener('wheel', preventScroll, {
+          passive: false
+        });
+        gridEl.addEventListener('touchstart', preventScroll, {
+          passive: false
+        });
+        gridEl.addEventListener('touchmove', preventScroll, {
+          passive: false
+        });
+
+        // ── Navigation (scrollLeft, item-by-item) ────────────────────
         var idx = 0;
+        var lastIdx = Math.max(0, slides.length - perView);
         function scrollTo(n) {
-          var total = slides.length;
-          if (n >= total) {
-            // Forward past last: instant snap to 0 then continue.
+          if (n > lastIdx) {
+            // Wrap forward to start.
             gridEl.style.scrollBehavior = 'auto';
             gridEl.scrollLeft = 0;
             void gridEl.offsetWidth;
@@ -250,12 +287,12 @@ function addCustomCarouselPanel(BlockEdit) {
             return;
           }
           if (n < 0) {
-            // Back past first: instant snap to last.
+            // Wrap back to end.
             gridEl.style.scrollBehavior = 'auto';
-            gridEl.scrollLeft = Math.round((total - 1) * step);
+            gridEl.scrollLeft = Math.round(lastIdx * step);
             void gridEl.offsetWidth;
             gridEl.style.scrollBehavior = 'smooth';
-            idx = total - 1;
+            idx = lastIdx;
             return;
           }
           idx = n;
@@ -313,7 +350,8 @@ function addCustomCarouselPanel(BlockEdit) {
           prevBtn: prevBtn,
           nextBtn: nextBtn,
           resizeObs: resizeObs,
-          scrollFn: scrollFn
+          scrollFn: scrollFn,
+          preventScroll: preventScroll
         };
       }
       if (frblGridOption !== 'none') {
