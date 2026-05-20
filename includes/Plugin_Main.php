@@ -135,7 +135,7 @@ class Plugin_Main {
 
 		// FAQ Schema module (FAQPage JSON-LD for core/details and GB accordion).
 		new Frontend\FaqSchema();
-    
+
 		// Text Animation block.
 		new Frontend\TextAnimation();
 
