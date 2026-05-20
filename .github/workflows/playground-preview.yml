@@ -1,0 +1,99 @@
+name: WordPress Playground Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  playground-preview:
+    name: Post Playground Preview
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Post Playground preview comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const { owner, repo } = context.repo;
+            const sha = context.payload.pull_request.head.sha.slice(0, 7);
+            const branch = context.payload.pull_request.head.ref;
+
+            // GitHub provides a public zip of any PR for public repos.
+            // Built JS assets are committed, so no CI build step needed.
+            const pluginZipUrl =
+              `https://github.com/${owner}/${repo}/archive/refs/pull/${prNumber}/head.zip`;
+
+            const blueprint = {
+              $schema: 'https://playground.wordpress.net/blueprint-schema.json',
+              landingPage: '/wp-admin/post-new.php',
+              preferredVersions: { wp: 'latest', php: '8.2' },
+              features: { networking: true },
+              steps: [
+                { step: 'login', username: 'admin', password: 'password' },
+                {
+                  step: 'installPlugin',
+                  pluginZipFile: {
+                    resource: 'wordpress.org/plugins',
+                    slug: 'generateblocks',
+                  },
+                },
+                {
+                  step: 'installPlugin',
+                  pluginZipFile: { resource: 'url', url: pluginZipUrl },
+                },
+              ],
+            };
+
+            const encoded = encodeURIComponent(JSON.stringify(blueprint));
+            const playgroundUrl = `https://playground.wordpress.net/#${encoded}`;
+
+            const body = [
+              '## 🎪 WordPress Playground Preview',
+              '',
+              `**Branch:** \`${branch}\` · **Commit:** \`${sha}\``,
+              '',
+              `🔗 **[Open Preview in WordPress Playground](${playgroundUrl})**`,
+              '',
+              '**Lo que encontrarás:**',
+              '- WordPress con GenerateBlocks y FrontBlocks cargados desde esta PR',
+              '- Usuario: `admin` · Contraseña: `password`',
+              '- Empieza en el editor de bloques (`/wp-admin/post-new.php`)',
+              '',
+              '> **Nota:** si has modificado archivos `.jsx`, asegúrate de subir también los `.js` compilados para que los cambios se reflejen aquí.',
+              '',
+              '<sub>Este comentario se actualiza automáticamente con cada push.</sub>',
+            ].join('\n');
+
+            // Find existing bot comment to update instead of creating duplicates.
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number: prNumber,
+            });
+
+            const existing = comments.find(
+              (c) =>
+                c.user.type === 'Bot' &&
+                c.body.includes('WordPress Playground Preview'),
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body,
+              });
+            }
