@@ -4,8 +4,8 @@ Tags: carrusel, slider, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 1.3.3
-Version: 1.3.3
+Stable tag: 1.3.4
+Version: 1.3.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -46,7 +46,7 @@ The animations are based on [Animate.css](https://animate.style/): Attention see
 **Container Effects**
 Apply glassmorphism effects to any block with customizable blur intensity. In the block settings, open the 'Container Effects' panel to enable the glass effect and adjust the blur level (0-50px) for a modern, frosted glass appearance. The effect includes a semi-transparent background, subtle border, and soft shadow, creating a beautiful layered design. Perfect for hero sections, cards, and overlays.
 
-**FrontBlocks Hover Effects**
+**Hover Effects**
 Add smooth zoom effects to background images when users hover over elements. Perfect for post grids, galleries, and cards. In the block settings, open the 'FrontBlocks Hover Effects' panel to enable background scaling. Features:
 - Compatible with GenerateBlocks Query Loop (--inline-bg-image)
 - Works with standard CSS background-image
@@ -108,6 +108,32 @@ Simply enable "Fluid Typography" in FrontBlocks settings, and all your responsiv
 **Custom SVG Animations:**
 Add animated graphics to GenerateBlocks Shape blocks by importing JSON files. Supports two formats that are automatically detected: **Lottie/Bodymovin** (import JSON from After Effects or LottieFiles.com) and **Custom CSS** (SVG + @keyframes). 
 
+**Text Animation Block:**
+Add dynamic animated text effects to any page or post. Insert the block from the Gutenberg inserter under the FrontBlocks category and choose from 30+ animation types to make your headings and copy stand out.
+
+Animation types available:
+- Entrance effects: fade-in, blur-in, scale-in, bounce-in, drop-in, roll-in, flip-in, rotate-in, glow-in, slide-up, slide-down, slide-left, slide-right
+- Text reveals: typewriter, block-reveal, tracking-expand, terminal-type, random-reveal, shuffle-text
+- Attention effects: pulse, flash, rubber-band, wave, swing, stretch, squeeze
+- Creative effects: glitch, glitch-rgb, flicker, water-drop, shadow-pop, solid-outline
+
+Features:
+- Live animated preview directly in the Gutenberg editor.
+- Full typography controls: heading tag (H1–H6, p, span), font family, size, weight, style, and color.
+- Background color and padding/margin controls.
+- Max-width and text alignment options.
+- Speed control for each animation.
+
+**Before/After Comparison Block:**
+Display an interactive image comparison slider that lets visitors drag a handle to reveal the difference between two images. Perfect for showcasing makeovers, retouching results, renovation work, or any visual transformation. Add the block from the Gutenberg inserter under the FrontBlocks category.
+
+Features:
+- Upload separate "Before" and "After" images from the WordPress media library.
+- Draggable handle with left/right arrows — also controllable via keyboard for accessibility.
+- Customizable labels displayed over each image (default: "Before" / "After").
+- Initial slider position control (0–100%) to choose how much of each image is revealed on load.
+- Fixed height mode with a configurable pixel value, keeping the block compact regardless of image proportions.
+
 **Gravity Forms Inline Layout:**
 Display Gravity Forms with fields and buttons on the same line. Perfect for newsletter signup forms (email + subscribe button) or search forms (input + search button). 
 
@@ -152,6 +178,14 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 2. Go to Settings > FrontBlocks > Features and enable the features you want to use.
 
 == Changelog ==
+
+== 1.3.4 ==
+*   Added: Text Animation block with 30+ animation types — fade-in, typewriter, shuffle-text, slide-up/down/left/right, drop-in, swing, pulse, flash, rubber-band, wave, stretch, squeeze, roll-in, glitch, glitch-rgb, random-reveal, flicker, block-reveal, tracking-expand, terminal-type, solid-outline, water-drop, shadow-pop, scale-in, blur-in, glow-in, bounce-in, flip-in, rotate-in.
+*   Added: Text Animation block — full typography controls (tag, font family, size, weight, style, color, background, alignment, padding, margin, max-width).
+*   Added: Text Animation block — live animated preview in the Gutenberg editor.
+*   Added: Before/After Comparison block — interactive drag-to-reveal image comparison with customizable labels, initial position, and fixed height mode.
+*   Added: Before/After block — keyboard-accessible draggable handle with left/right arrow indicators.
+*   Improved: Conditional asset loading for Carousel, Animations, Text Animation, and Before/After — scripts/styles only enqueue on pages where the feature is used.
 
 == 1.3.3 ==
 *   Fixed: Carousel bullets display and behavior.

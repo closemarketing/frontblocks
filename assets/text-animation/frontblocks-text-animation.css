@@ -1,0 +1,261 @@
+.frbl-text-animation {
+	display: block;
+	width: fit-content;
+	margin-left: 0;
+	margin-right: auto;
+	color: var(--frbl-color);
+	transition: color 0.3s ease;
+}
+
+.wp-block-frontblocks-text-animation.frbl-text-animation:hover {
+	color: var(--frbl-color-hover);
+}
+
+span.frbl-text-animation {
+	display: inline;
+}
+
+/* Editor: align font-size number + unit select to same height */ 	
+.block-editor-block-inspector .frbl-fontsize-row {
+	display: flex;
+	gap: 8px;
+	align-items: stretch;
+}
+
+.block-editor-block-inspector .frbl-fontsize-row .components-base-control,
+.block-editor-block-inspector .frbl-fontsize-row .components-select-control__input {
+	margin-bottom: 0 !important;
+}
+
+/* ── Animation: char base ── */
+.frbl-text-animation .frbl-char {
+	display: inline-block;
+	white-space: pre;
+}
+
+/* ── Fade In ── */
+@keyframes frblFadeIn {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
+
+/* ── Rotate In ── */
+@keyframes frblRotateIn {
+	from { transform: rotate( -180deg ) scale( 0 ); opacity: 0; }
+	to   { transform: rotate( 0deg )    scale( 1 ); opacity: 1; }
+}
+
+/* ── Flip In ── */
+@keyframes frblFlipIn {
+	from { transform: perspective( 400px ) rotateY( -90deg ); opacity: 0; transform-origin: left; }
+	to   { transform: perspective( 400px ) rotateY( 0deg );   opacity: 1; transform-origin: left; }
+}
+
+/* ── Bounce In ── */
+@keyframes frblBounceIn {
+	0%   { transform: translateY( -50px ); opacity: 0; animation-timing-function: cubic-bezier( 0.8, 0, 1, 1 ); }
+	50%  { transform: translateY( 15px );  opacity: 1; animation-timing-function: cubic-bezier( 0, 0, 0.2, 1 ); }
+	75%  { transform: translateY( -5px );  opacity: 1; animation-timing-function: cubic-bezier( 0.8, 0, 1, 1 ); }
+	100% { transform: translateY( 0 );     opacity: 1; }
+}
+
+/* ── Glow In ── */
+@keyframes frblGlowIn {
+	0%   { opacity: 0; text-shadow: 0 0 0px transparent; }
+	50%  { opacity: 1; text-shadow: 0 0 20px currentColor; }
+	100% { opacity: 1; text-shadow: 0 0 0px transparent; }
+}
+
+/* ── Blur In ── */
+@keyframes frblBlurIn {
+	from { filter: blur( 12px ); opacity: 0; transform: scale( 1.1 ); }
+	to   { filter: blur( 0 );    opacity: 1; transform: scale( 1 );   }
+}
+
+/* ── Scale In ── */
+@keyframes frblScaleIn {
+	from { transform: scale( 0 ); opacity: 0; }
+	to   { transform: scale( 1 ); opacity: 1; }
+}
+
+/* ── Slide Up ── */
+@keyframes frblSlideUp {
+	from { transform: translateY( 100% ); opacity: 0; }
+	to   { transform: translateY( 0 );    opacity: 1; }
+}
+
+/* ── Slide Down ── */
+@keyframes frblSlideDown {
+	from { transform: translateY( -100% ); opacity: 0; }
+	to   { transform: translateY( 0 );     opacity: 1; }
+}
+
+/* ── Slide Left ── */
+@keyframes frblSlideLeft {
+	from { transform: translateX( -100% ); opacity: 0; }
+	to   { transform: translateX( 0 );     opacity: 1; }
+}
+
+/* ── Slide Right ── */
+@keyframes frblSlideRight {
+	from { transform: translateX( 100% ); opacity: 0; }
+	to   { transform: translateX( 0 );    opacity: 1; }
+}
+
+/* ── Drop In ── */
+@keyframes frblDropIn {
+	0%   { transform: translateY( -200% ); opacity: 0; }
+	60%  { transform: translateY( 20% );   opacity: 1; }
+	80%  { transform: translateY( -10% );  opacity: 1; }
+	100% { transform: translateY( 0 );     opacity: 1; }
+}
+
+/* ── Shadow Pop ── */
+@keyframes frblShadowPop {
+	0%   {
+		text-shadow: 0 0 rgba( 0,0,0,0 );
+		transform: translateX( 0 ) translateY( 0 );
+		opacity: 0;
+	}
+	100% {
+		text-shadow:
+			1px 1px rgba( 0,0,0,0.35 ),
+			2px 2px rgba( 0,0,0,0.35 ),
+			3px 3px rgba( 0,0,0,0.35 ),
+			4px 4px rgba( 0,0,0,0.35 );
+		transform: translateX( -4px ) translateY( -4px );
+		opacity: 1;
+	}
+}
+
+/* ── Pulse Neon ── */
+@keyframes frblPulseNeon {
+	0%, 100% { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 20px #0ff; opacity: 1; }
+	50%       { text-shadow: 0 0 2px currentColor, 0 0 5px currentColor,  0 0 10px #0ff; opacity: 0.5; }
+}
+
+/* ── Water Drop ── */
+@keyframes frblWaterDrop {
+	0%   { transform: translateY( -100px ) scale( 0.1, 2 );   opacity: 0; }
+	50%  { transform: translateY( 0 )      scale( 1.5, 0.5 ); opacity: 1; }
+	100% { transform: translateY( 0 )      scale( 1, 1 );     opacity: 1; }
+}
+
+/* ── Glitch RGB ── */
+@keyframes frblGlitchRGB {
+	0%   { text-shadow: 2px 0 0 red,  -2px 0 0 blue; opacity: 0; }
+	20%  { text-shadow: -2px 0 0 red, 2px 0 0 blue;  opacity: 1; }
+	40%  { text-shadow: 2px 0 0 red,  -2px 0 0 blue; }
+	60%  { text-shadow: -2px 0 0 red, 2px 0 0 blue; }
+	80%  { text-shadow: 1px 0 0 red,  -1px 0 0 blue; }
+	100% { text-shadow: 0px 0 0 transparent;          opacity: 1; }
+}
+
+/* ── Solid To Outline ── */
+@keyframes frblSolidOutline {
+	0%   { -webkit-text-stroke: 0px transparent;                    color: var( --frbl-stroke-color ); opacity: 0; }
+	50%  { -webkit-text-stroke: 0px transparent;                    color: var( --frbl-stroke-color ); opacity: 1; }
+	100% { -webkit-text-stroke: 1px var( --frbl-stroke-color );     color: transparent;                opacity: 1; }
+}
+
+/* ── Terminal Type cursor ── */
+@keyframes frblBlinkCursor {
+	0%, 100% { opacity: 1; }
+	50%       { opacity: 0; }
+}
+
+/* ── Tracking Expand ── */
+@keyframes frblTrackingExpand {
+	from { letter-spacing: -0.5em; opacity: 0; }
+	to   { letter-spacing: 0.05em; opacity: 1; }
+}
+
+/* ── Flicker ── */
+@keyframes frblFlicker {
+	0%, 2%, 4%, 8%, 12%, 16%, 20% { opacity: 0; }
+	1%, 3%, 5%, 9%, 13%, 17%, 21%, 100% { opacity: 1; }
+}
+
+/* ── Glitch ── */
+@keyframes frblGlitch {
+	0%   { transform: translate( 0 );           opacity: 0; }
+	10%  { transform: translate( -2px, 2px );   opacity: 1; }
+	20%  { transform: translate( -2px, -2px );  opacity: 1; }
+	30%  { transform: translate( 2px, 2px );    opacity: 1; }
+	40%  { transform: translate( 2px, -2px );   opacity: 1; }
+	50%  { transform: translate( -2px, 2px );   opacity: 1; }
+	60%  { transform: translate( -2px, -2px );  opacity: 1; }
+	70%  { transform: translate( 2px, 2px );    opacity: 1; }
+	80%  { transform: translate( 2px, -2px );   opacity: 1; }
+	90%  { transform: translate( -2px, 2px );   opacity: 1; }
+	100% { transform: translate( 0 );           opacity: 1; }
+}
+
+/* ── Roll In ── */
+@keyframes frblRollIn {
+	from { transform: translateX( -100% ) rotate( -120deg ); opacity: 0; }
+	to   { transform: translateX( 0 )     rotate( 0deg );    opacity: 1; }
+}
+
+/* ── Squeeze ── */
+@keyframes frblSqueeze {
+	0%   { transform: scaleY( 1 );   opacity: 0; }
+	50%  { transform: scaleY( 0.5 ); opacity: 1; }
+	100% { transform: scaleY( 1 );   opacity: 1; }
+}
+
+/* ── Stretch ── */
+@keyframes frblStretch {
+	0%   { transform: scaleX( 1 );   opacity: 0; }
+	50%  { transform: scaleX( 1.5 ); opacity: 1; }
+	100% { transform: scaleX( 1 );   opacity: 1; }
+}
+
+/* ── Wave ── */
+@keyframes frblWave {
+	0%,  100% { transform: translateY( 0 );     opacity: 1; }
+	50%        { transform: translateY( -15px ); opacity: 1; }
+}
+
+/* ── Rubber Band ── */
+@keyframes frblRubberBand {
+	0%   { transform: scale( 1 );                        opacity: 0; }
+	30%  { transform: scaleX( 1.25 ) scaleY( 0.75 );    opacity: 1; }
+	40%  { transform: scaleX( 0.75 ) scaleY( 1.25 );    opacity: 1; }
+	50%  { transform: scaleX( 1.15 ) scaleY( 0.85 );    opacity: 1; }
+	65%  { transform: scaleX( 0.95 ) scaleY( 1.05 );    opacity: 1; }
+	75%  { transform: scaleX( 1.05 ) scaleY( 0.95 );    opacity: 1; }
+	100% { transform: scale( 1 );                        opacity: 1; }
+}
+
+/* ── Flash ── */
+@keyframes frblFlash {
+	0%,  50%, 100% { opacity: 1; }
+	25%, 75%        { opacity: 0; }
+}
+
+/* ── Pulse ── */
+@keyframes frblPulse {
+	0%   { transform: scale( 1 );   opacity: 0; }
+	50%  { transform: scale( 1.2 ); opacity: 1; }
+	100% { transform: scale( 1 );   opacity: 1; }
+}
+
+/* ── Swing ── */
+@keyframes frblSwing {
+	0%   { opacity: 0; transform: rotate( 15deg ); }
+	20%  { opacity: 1; transform: rotate( 15deg ); }
+	40%  { opacity: 1; transform: rotate( -10deg ); }
+	60%  { opacity: 1; transform: rotate( 5deg ); }
+	80%  { opacity: 1; transform: rotate( -5deg ); }
+	100% { opacity: 1; transform: rotate( 0deg ); }
+}
+
+/* Respect reduced motion */
+@media ( prefers-reduced-motion: reduce ) {
+	.frbl-text-animation,
+	.frbl-text-animation * {
+		animation: none !important;
+		transition: none !important;
+	}
+}
