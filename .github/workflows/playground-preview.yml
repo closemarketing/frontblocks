@@ -6,7 +6,7 @@ on:
 
 permissions:
   pull-requests: write
-  contents: read
+  contents: write
 
 jobs:
   playground-preview:
@@ -14,19 +14,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout PR
         uses: actions/checkout@v4
 
-      # ── Prepare plugin directory ─────────────────────────────────────────────
-      # The artifact must contain frontblocks/ as a subdirectory so nightly.link
-      # serves a zip with frontblocks/frontblocks.php inside — the structure
-      # WordPress plugin installer expects.
-      # Compiled JS assets are committed to git; no build step needed.
-      # composer require is empty (only dev deps), so no vendor/ needed either.
-      - name: Prepare plugin for artifact
+      # ── Build plugin zip ─────────────────────────────────────────────────────
+      # Compiled JS assets are committed to git; no npm build step needed.
+      # No production Composer deps (require: {}), so no vendor/ needed.
+      - name: Create plugin zip
         run: |
-          mkdir -p /tmp/artifact/frontblocks
-          rsync -av . /tmp/artifact/frontblocks/ \
+          mkdir -p /tmp/plugin/frontblocks
+          rsync -av . /tmp/plugin/frontblocks/ \
             --exclude='.git' \
             --exclude='.github' \
             --exclude='.wordpress-playground' \
@@ -42,20 +39,45 @@ jobs:
             --exclude='tailwind.config.js' \
             --exclude='postcss.config.js' \
             --exclude='*.zip'
+          cd /tmp/plugin
+          zip -r frontblocks.zip frontblocks/
 
-      # Upload the /tmp/artifact/ directory (NOT a pre-made zip).
-      # upload-artifact preserves the frontblocks/ subdirectory structure.
-      # nightly.link will serve the resulting artifact zip, which contains
-      # frontblocks/ at the root — exactly what WordPress needs.
-      - name: Upload plugin artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontblocks
-          path: /tmp/artifact/
-          if-no-files-found: error
-          retention-days: 7
+      # ── Serve zip via playground-previews branch ─────────────────────────────
+      # raw.githubusercontent.com is a public, auth-free URL for public repos.
+      # WordPress Playground can fetch it directly without any proxy service.
+      - name: Push zip to playground-previews branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
 
-      # ── Post PR comment with Playground link ─────────────────────────────────
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+          # Clone playground-previews branch if it exists, otherwise create it orphan.
+          if git ls-remote --exit-code --heads "$REPO_URL" playground-previews > /dev/null 2>&1; then
+            git clone --branch playground-previews --depth 1 "$REPO_URL" /tmp/preview-branch
+          else
+            git clone --depth 1 "$REPO_URL" /tmp/preview-branch
+            cd /tmp/preview-branch
+            git checkout --orphan playground-previews
+            git rm -rf . > /dev/null 2>&1 || true
+            echo "# Playground Preview Artifacts" > README.md
+            git add README.md
+            git commit -m "init: playground-previews branch"
+          fi
+
+          # Copy the built zip into the PR slot.
+          mkdir -p /tmp/preview-branch/pr-${PR_NUMBER}
+          cp /tmp/plugin/frontblocks.zip /tmp/preview-branch/pr-${PR_NUMBER}/frontblocks.zip
+
+          cd /tmp/preview-branch
+          git add pr-${PR_NUMBER}/frontblocks.zip
+          git commit -m "Preview: PR #${PR_NUMBER} — ${{ github.event.pull_request.head.sha }}" || echo "Nothing to commit"
+          git push "$REPO_URL" HEAD:playground-previews
+
+      # ── Post PR comment ──────────────────────────────────────────────────────
       - name: Post Playground preview comment
         uses: actions/github-script@v7
         with:
@@ -63,15 +85,13 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
             const prNumber  = context.payload.pull_request.number;
-            const runId     = context.runId;
             const sha       = context.payload.pull_request.head.sha.slice(0, 7);
             const branch    = context.payload.pull_request.head.ref;
 
-            // nightly.link makes GitHub Actions artifacts publicly downloadable.
-            // Because we uploaded a directory (not a zip), the artifact zip
-            // contains frontblocks/ at the root — correct plugin structure.
+            // raw.githubusercontent.com serves binary files from public repos
+            // without authentication — Playground fetches it directly.
             const pluginZipUrl =
-              `https://nightly.link/${owner}/${repo}/actions/runs/${runId}/frontblocks.zip`;
+              `https://raw.githubusercontent.com/${owner}/${repo}/playground-previews/pr-${prNumber}/frontblocks.zip`;
 
             const blueprint = {
               $schema: 'https://playground.wordpress.net/blueprint-schema.json',
@@ -96,7 +116,6 @@ jobs:
 
             const encoded       = encodeURIComponent(JSON.stringify(blueprint));
             const playgroundUrl = `https://playground.wordpress.net/#${encoded}`;
-            const artifactUrl   = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
 
             const body = [
               '## 🎪 WordPress Playground Preview',
@@ -109,8 +128,6 @@ jobs:
               '- WordPress con GenerateBlocks + FrontBlocks desde esta PR',
               '- Usuario: `admin` · Contraseña: `password`',
               '- Aterriza en el editor de bloques (`/wp-admin/post-new.php`)',
-              '',
-              `📦 [Descargar artefacto ZIP](${artifactUrl})`,
               '',
               '<sub>Este comentario se actualiza automáticamente con cada push.</sub>',
             ].join('\n');
