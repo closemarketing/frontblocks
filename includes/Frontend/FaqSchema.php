@@ -63,7 +63,7 @@ class FaqSchema {
 		// Extract answer: everything inside <details> excluding the <summary>.
 		$answer = '';
 		if ( preg_match( '/<details[^>]*>(.*?)<\/details>/is', $block_content, $outer ) ) {
-			$inner = preg_replace( '/<summary[^>]*>.*?<\/summary>/is', '', $outer[1] );
+			$inner  = preg_replace( '/<summary[^>]*>.*?<\/summary>/is', '', $outer[1] );
 			$answer = wp_strip_all_tags( $inner );
 		}
 
