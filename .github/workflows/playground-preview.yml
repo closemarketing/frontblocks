@@ -6,27 +6,88 @@ on:
 
 permissions:
   pull-requests: write
+  contents: read
 
 jobs:
-  playground-preview:
-    name: Post Playground Preview
+  build-and-preview:
+    name: Build plugin & post Playground link
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── PHP build ────────────────────────────────────────────────────────────
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies (no dev)
+        run: composer install --no-dev --ignore-platform-reqs -o
+
+      # ── JS build ─────────────────────────────────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install npm dependencies and build
+        run: npm ci && npm run build
+
+      # ── Create zip with correct plugin directory structure ───────────────────
+      - name: Create plugin zip
+        run: |
+          mkdir -p /tmp/build/frontblocks
+          rsync -av . /tmp/build/frontblocks/ \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.wordpress-playground' \
+            --exclude='node_modules' \
+            --exclude='tests' \
+            --exclude='phpcs.xml.dist' \
+            --exclude='phpstan.neon.dist' \
+            --exclude='package.json' \
+            --exclude='package-lock.json' \
+            --exclude='composer.json' \
+            --exclude='composer.lock' \
+            --exclude='tailwind.config.js' \
+            --exclude='postcss.config.js' \
+            --exclude='*.zip'
+          cd /tmp/build && zip -r frontblocks.zip frontblocks/
+
+      - name: Upload plugin artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontblocks
+          path: /tmp/build/frontblocks.zip
+          retention-days: 7
+
+      # ── Post PR comment with Playground link ─────────────────────────────────
       - name: Post Playground preview comment
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const prNumber = context.payload.pull_request.number;
             const { owner, repo } = context.repo;
-            const sha = context.payload.pull_request.head.sha.slice(0, 7);
-            const branch = context.payload.pull_request.head.ref;
+            const prNumber  = context.payload.pull_request.number;
+            const runId     = context.runId;
+            const sha       = context.payload.pull_request.head.sha.slice(0, 7);
+            const branch    = context.payload.pull_request.head.ref;
 
-            // GitHub provides a public zip of any PR for public repos.
-            // Built JS assets are committed, so no CI build step needed.
+            // nightly.link converts GitHub Actions artifacts into public URLs
+            // so WordPress Playground can fetch the zip without authentication.
             const pluginZipUrl =
-              `https://github.com/${owner}/${repo}/archive/refs/pull/${prNumber}/head.zip`;
+              `https://nightly.link/${owner}/${repo}/actions/runs/${runId}/frontblocks.zip`;
 
             const blueprint = {
               $schema: 'https://playground.wordpress.net/blueprint-schema.json',
@@ -49,8 +110,9 @@ jobs:
               ],
             };
 
-            const encoded = encodeURIComponent(JSON.stringify(blueprint));
+            const encoded      = encodeURIComponent(JSON.stringify(blueprint));
             const playgroundUrl = `https://playground.wordpress.net/#${encoded}`;
+            const artifactUrl   = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
 
             const body = [
               '## 🎪 WordPress Playground Preview',
@@ -60,16 +122,16 @@ jobs:
               `🔗 **[Open Preview in WordPress Playground](${playgroundUrl})**`,
               '',
               '**Lo que encontrarás:**',
-              '- WordPress con GenerateBlocks y FrontBlocks cargados desde esta PR',
+              '- WordPress con GenerateBlocks + FrontBlocks (esta PR, con Composer build incluido)',
               '- Usuario: `admin` · Contraseña: `password`',
-              '- Empieza en el editor de bloques (`/wp-admin/post-new.php`)',
+              '- Aterriza en el editor de bloques (`/wp-admin/post-new.php`)',
               '',
-              '> **Nota:** si has modificado archivos `.jsx`, asegúrate de subir también los `.js` compilados para que los cambios se reflejen aquí.',
+              `📦 [Descargar artefacto ZIP](${artifactUrl})`,
               '',
               '<sub>Este comentario se actualiza automáticamente con cada push.</sub>',
             ].join('\n');
 
-            // Find existing bot comment to update instead of creating duplicates.
+            // Update existing bot comment instead of creating duplicates.
             const { data: comments } = await github.rest.issues.listComments({
               owner,
               repo,
