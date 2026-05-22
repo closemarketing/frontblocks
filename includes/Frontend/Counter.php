@@ -82,7 +82,8 @@ class Counter {
 	 * @return string Modified block content with counter functionality.
 	 */
 	public function render_block_counter( $block_content, $block ) {
-		if ( 'generateblocks/text' !== $block['blockName'] ) {
+		$supported = array( 'generateblocks/text', 'generateblocks/headline', 'core/heading', 'core/paragraph' );
+		if ( ! in_array( $block['blockName'], $supported, true ) ) {
 			return $block_content;
 		}
 
