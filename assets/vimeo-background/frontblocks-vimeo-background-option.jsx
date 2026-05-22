@@ -63,7 +63,7 @@ function VimeoBackgroundEdit( { attributes, setAttributes } ) {
 	const innerBlocksProps = useInnerBlocksProps(
 		{
 			className: 'frbl-vimeo-bg__content',
-			style: contentStyle( justifyContent, alignItems, contentMaxWidth ),
+			style: { ...contentStyle( justifyContent, alignItems, contentMaxWidth ), position: 'relative', zIndex: 2 },
 		},
 		{ renderAppender: InnerBlocks.ButtonBlockAppender }
 	);
@@ -148,7 +148,7 @@ function VimeoBackgroundEdit( { attributes, setAttributes } ) {
 			</InspectorControls>
 
 			<div { ...blockProps }>
-				<div className="frbl-vimeo-bg__media">
+				<div className="frbl-vimeo-bg__media" style={ { position: 'absolute', inset: '0', overflow: 'hidden', zIndex: 0, pointerEvents: 'none' } }>
 					{ ( () => {
 						const videoId = extractVimeoId( vimeoUrl );
 						if ( videoId ) {
@@ -222,5 +222,5 @@ registerBlockType( 'frontblocks/vimeo-background', {
 		align:           { type: 'string', default: 'full' },
 	},
 	edit: VimeoBackgroundEdit,
-	save: () => null,
+	save: () => wp.element.createElement( InnerBlocks.Content, null ),
 } );
