@@ -1,6 +1,12 @@
 const { registerBlockType } = wp.blocks;
 const { Fragment } = wp.element;
 const { InspectorControls, InnerBlocks, useBlockProps, useInnerBlocksProps } = wp.blockEditor;
+
+function extractVimeoId( url ) {
+	if ( ! url ) return null;
+	const match = url.match( /(?:vimeo\.com\/(?:video\/)?|player\.vimeo\.com\/video\/)(\d+)/ );
+	return match ? match[ 1 ] : null;
+}
 const { PanelBody, TextControl, RangeControl, SelectControl, ColorPicker, __experimentalUnitControl: UnitControl } = wp.components;
 const { __ } = wp.i18n;
 
@@ -142,28 +148,37 @@ function VimeoBackgroundEdit( { attributes, setAttributes } ) {
 			</InspectorControls>
 
 			<div { ...blockProps }>
-				<div
-					className="frbl-vimeo-bg__media"
-					style={ {
-						position: 'absolute',
-						inset: '0',
-						background: 'repeating-linear-gradient(45deg,#e0e0e0 0,#e0e0e0 10px,#f5f5f5 10px,#f5f5f5 20px)',
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
-						zIndex: 0,
-					} }
-				>
-					{ vimeoUrl ? (
-						<p style={ { color: '#333', margin: 0, fontSize: '13px', padding: '20px', textAlign: 'center', background: 'rgba(255,255,255,0.7)', borderRadius: '4px' } }>
-							🎬 { vimeoUrl }<br />
-							<small>{ __( 'El vídeo se renderiza en el frontend', 'frontblocks' ) }</small>
-						</p>
-					) : (
-						<p style={ { color: '#555', margin: 0, background: 'rgba(255,255,255,0.7)', padding: '12px 16px', borderRadius: '4px' } }>
-							{ __( '← Añade una URL de Vimeo en el panel lateral', 'frontblocks' ) }
-						</p>
-					) }
+				<div className="frbl-vimeo-bg__media">
+					{ ( () => {
+						const videoId = extractVimeoId( vimeoUrl );
+						if ( videoId ) {
+							const src = 'https://player.vimeo.com/video/' + videoId + '?background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0';
+							return (
+								<iframe
+									className="frbl-vimeo-bg__iframe"
+									src={ src }
+									frameBorder="0"
+									allow="autoplay; fullscreen"
+									title=""
+									aria-hidden="true"
+								/>
+							);
+						}
+						return (
+							<div style={ {
+								position: 'absolute',
+								inset: '0',
+								background: 'repeating-linear-gradient(45deg,#e0e0e0 0,#e0e0e0 10px,#f5f5f5 10px,#f5f5f5 20px)',
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+							} }>
+								<p style={ { color: '#555', margin: 0, background: 'rgba(255,255,255,0.8)', padding: '12px 16px', borderRadius: '4px' } }>
+									{ __( '← Añade una URL de Vimeo en el panel lateral', 'frontblocks' ) }
+								</p>
+							</div>
+						);
+					} )() }
 				</div>
 
 				{ overlayOpacity > 0 && (

@@ -7,6 +7,11 @@ var _wp$blockEditor = wp.blockEditor,
   InnerBlocks = _wp$blockEditor.InnerBlocks,
   useBlockProps = _wp$blockEditor.useBlockProps,
   useInnerBlocksProps = _wp$blockEditor.useInnerBlocksProps;
+function extractVimeoId(url) {
+  if (!url) return null;
+  var match = url.match(/(?:vimeo\.com\/(?:video\/)?|player\.vimeo\.com\/video\/)(\d+)/);
+  return match ? match[1] : null;
+}
 var _wp$components = wp.components,
   PanelBody = _wp$components.PanelBody,
   TextControl = _wp$components.TextControl,
@@ -186,35 +191,39 @@ function VimeoBackgroundEdit(_ref) {
     },
     enableAlpha: false
   })))), /*#__PURE__*/React.createElement("div", blockProps, /*#__PURE__*/React.createElement("div", {
-    className: "frbl-vimeo-bg__media",
-    style: {
-      position: 'absolute',
-      inset: '0',
-      background: 'repeating-linear-gradient(45deg,#e0e0e0 0,#e0e0e0 10px,#f5f5f5 10px,#f5f5f5 20px)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 0
+    className: "frbl-vimeo-bg__media"
+  }, function () {
+    var videoId = extractVimeoId(vimeoUrl);
+    if (videoId) {
+      var src = 'https://player.vimeo.com/video/' + videoId + '?background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0';
+      return /*#__PURE__*/React.createElement("iframe", {
+        className: "frbl-vimeo-bg__iframe",
+        src: src,
+        frameBorder: "0",
+        allow: "autoplay; fullscreen",
+        title: "",
+        "aria-hidden": "true"
+      });
     }
-  }, vimeoUrl ? /*#__PURE__*/React.createElement("p", {
-    style: {
-      color: '#333',
-      margin: 0,
-      fontSize: '13px',
-      padding: '20px',
-      textAlign: 'center',
-      background: 'rgba(255,255,255,0.7)',
-      borderRadius: '4px'
-    }
-  }, "\uD83C\uDFAC ", vimeoUrl, /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("small", null, __('El vídeo se renderiza en el frontend', 'frontblocks'))) : /*#__PURE__*/React.createElement("p", {
-    style: {
-      color: '#555',
-      margin: 0,
-      background: 'rgba(255,255,255,0.7)',
-      padding: '12px 16px',
-      borderRadius: '4px'
-    }
-  }, __('← Añade una URL de Vimeo en el panel lateral', 'frontblocks'))), overlayOpacity > 0 && /*#__PURE__*/React.createElement("div", {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: 'absolute',
+        inset: '0',
+        background: 'repeating-linear-gradient(45deg,#e0e0e0 0,#e0e0e0 10px,#f5f5f5 10px,#f5f5f5 20px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }
+    }, /*#__PURE__*/React.createElement("p", {
+      style: {
+        color: '#555',
+        margin: 0,
+        background: 'rgba(255,255,255,0.8)',
+        padding: '12px 16px',
+        borderRadius: '4px'
+      }
+    }, __('← Añade una URL de Vimeo en el panel lateral', 'frontblocks')));
+  }()), overlayOpacity > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'absolute',
       inset: '0',
