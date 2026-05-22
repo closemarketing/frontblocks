@@ -33,7 +33,7 @@ class FaqSchema {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_filter( 'render_block_core/accordion-item', array( $this, 'collect_details_block' ), 10, 2 );
+		add_filter( 'render_block_core/accordion', array( $this, 'collect_details_block' ), 10, 2 );
 		add_action( 'wp_footer', array( $this, 'output_json_ld' ), 99 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
 	}
@@ -50,24 +50,19 @@ class FaqSchema {
 			return $block_content;
 		}
 
-		$question = '';
-		if ( preg_match( '/<span[^>]+class="[^"]*wp-block-accordion-heading__toggle-title[^"]*"[^>]*>(.*?)<\/span>/is', $block_content, $q ) ) {
-			$question = wp_strip_all_tags( $q[1] );
-		}
+		preg_match_all( '/<span[^>]+class="[^"]*wp-block-accordion-heading__toggle-title[^"]*"[^>]*>(.*?)<\/span>/is', $block_content, $questions );
+		preg_match_all( '/<div[^>]+class="[^"]*wp-block-accordion-panel[^"]*"[^>]*>(.*?)<\/div>\s*(?:<\/div>|$)/is', $block_content, $answers );
 
-		$answer = '';
-		if ( preg_match( '/<div[^>]+class="[^"]*wp-block-accordion-panel[^"]*"[^>]*>(.*?)<\/div>\s*<\/div>/is', $block_content, $a ) ) {
-			$answer = wp_strip_all_tags( $a[1] );
-		}
+		foreach ( $questions[1] as $i => $raw_question ) {
+			$question = trim( wp_strip_all_tags( $raw_question ) );
+			$answer   = isset( $answers[1][ $i ] ) ? trim( wp_strip_all_tags( $answers[1][ $i ] ) ) : '';
 
-		$question = trim( $question );
-		$answer   = trim( $answer );
-
-		if ( '' !== $question && '' !== $answer ) {
-			$this->faq_items[] = array(
-				'question' => $question,
-				'answer'   => $answer,
-			);
+			if ( '' !== $question && '' !== $answer ) {
+				$this->faq_items[] = array(
+					'question' => $question,
+					'answer'   => $answer,
+				);
+			}
 		}
 
 		return $block_content;
