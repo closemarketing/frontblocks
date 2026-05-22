@@ -1,0 +1,25 @@
+/* Vimeo/embed cover: fill container without black bars or white borders */
+.wp-block-cover.alignfull,
+.wp-block-cover {
+	overflow: hidden !important;
+}
+
+.wp-block-cover .wp-block-cover__embed-background {
+	position: absolute !important;
+	inset: 0 !important;
+	overflow: hidden !important;
+	background: transparent !important;
+}
+
+.wp-block-cover .wp-block-cover__embed-background iframe {
+	position: absolute !important;
+	top: 50% !important;
+	left: 50% !important;
+	/* max() ensures iframe fills viewport regardless of aspect ratio */
+	width: max(100vw, calc(100vh * 16 / 9)) !important;
+	height: max(100vh, calc(100vw * 9 / 16)) !important;
+	transform: translate(-50%, -50%) !important;
+	border: none !important;
+	background: transparent !important;
+	pointer-events: none !important;
+}

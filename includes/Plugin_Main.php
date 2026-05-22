@@ -56,6 +56,9 @@ class Plugin_Main {
 
 		// Register scripts for conditional enqueueing.
 		add_action( 'init', array( $this, 'register_scripts' ) );
+
+		// Enqueue global frontend styles.
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_global_styles' ) );
 	}
 
 	/**
@@ -130,8 +133,25 @@ class Plugin_Main {
 		// Stacked Images module.
 		new Frontend\StackedImages();
 
+		// Vimeo Background block.
+		new Frontend\VimeoBackground();
+
 		// Block Patterns module (WordPress block patterns registration).
 		new Frontend\BlockPatterns();
+	}
+
+	/**
+	 * Enqueue global frontend styles (always loaded).
+	 *
+	 * @return void
+	 */
+	public function enqueue_global_styles() {
+		wp_enqueue_style(
+			'frontblocks-global',
+			FRBL_PLUGIN_URL . 'assets/global/frontblocks-global.css',
+			array(),
+			FRBL_VERSION
+		);
 	}
 
 	/**

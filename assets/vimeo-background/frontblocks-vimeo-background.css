@@ -1,0 +1,38 @@
+.frbl-vimeo-bg {
+	position: relative;
+	overflow: hidden;
+	width: 100%;
+}
+
+.frbl-vimeo-bg__media {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	z-index: 0;
+	pointer-events: none;
+}
+
+.frbl-vimeo-bg__iframe {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 100vw;
+	height: 56.25vw;   /* 16:9 based on viewport width */
+	min-height: 100%;
+	min-width: 177.78vh; /* 16:9 based on viewport height */
+	transform: translate(-50%, -50%);
+	border: 0;
+	pointer-events: none;
+}
+
+.frbl-vimeo-bg__overlay {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	pointer-events: none;
+}
+
+.frbl-vimeo-bg__content {
+	position: relative;
+	z-index: 2;
+}
