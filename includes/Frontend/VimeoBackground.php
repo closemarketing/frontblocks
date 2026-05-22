@@ -40,13 +40,16 @@ class VimeoBackground {
 				'editor_script'   => 'frontblocks-vimeo-background-editor',
 				'render_callback' => array( $this, 'render' ),
 				'attributes'      => array(
-					'vimeoUrl'       => array( 'type' => 'string',  'default' => '' ),
-					'minHeight'      => array( 'type' => 'number',  'default' => 100 ),
-					'minHeightUnit'  => array( 'type' => 'string',  'default' => 'vh' ),
-					'overlayColor'   => array( 'type' => 'string',  'default' => '#000000' ),
-					'overlayOpacity' => array( 'type' => 'number',  'default' => 0 ),
-					'align'          => array( 'type' => 'string',  'default' => 'full' ),
-					'className'      => array( 'type' => 'string',  'default' => '' ),
+					'vimeoUrl'        => array( 'type' => 'string',  'default' => '' ),
+					'minHeight'       => array( 'type' => 'number',  'default' => 100 ),
+					'minHeightUnit'   => array( 'type' => 'string',  'default' => 'vh' ),
+					'overlayColor'    => array( 'type' => 'string',  'default' => '#000000' ),
+					'overlayOpacity'  => array( 'type' => 'number',  'default' => 0 ),
+					'justifyContent'  => array( 'type' => 'string',  'default' => 'center' ),
+					'alignItems'      => array( 'type' => 'string',  'default' => 'center' ),
+					'contentMaxWidth' => array( 'type' => 'string',  'default' => '' ),
+					'align'           => array( 'type' => 'string',  'default' => 'full' ),
+					'className'       => array( 'type' => 'string',  'default' => '' ),
 				),
 			)
 		);
@@ -87,9 +90,12 @@ class VimeoBackground {
 		$min_height      = absint( $attributes['minHeight'] ?? 100 );
 		$unit            = in_array( $attributes['minHeightUnit'] ?? 'vh', array( 'vh', 'px' ), true ) ? $attributes['minHeightUnit'] : 'vh';
 		$overlay_color   = sanitize_hex_color( $attributes['overlayColor'] ?? '#000000' ) ?: '#000000';
-		$overlay_opacity = min( 100, max( 0, absint( $attributes['overlayOpacity'] ?? 0 ) ) );
-		$align           = sanitize_text_field( $attributes['align'] ?? 'full' );
-		$class_name      = sanitize_text_field( $attributes['className'] ?? '' );
+		$overlay_opacity   = min( 100, max( 0, absint( $attributes['overlayOpacity'] ?? 0 ) ) );
+		$align             = sanitize_text_field( $attributes['align'] ?? 'full' );
+		$class_name        = sanitize_text_field( $attributes['className'] ?? '' );
+		$justify_content   = sanitize_text_field( $attributes['justifyContent'] ?? 'center' );
+		$align_items       = sanitize_text_field( $attributes['alignItems'] ?? 'center' );
+		$content_max_width = sanitize_text_field( $attributes['contentMaxWidth'] ?? '' );
 
 		if ( empty( $vimeo_url ) ) {
 			return '';
@@ -114,8 +120,15 @@ class VimeoBackground {
 			'https://player.vimeo.com/video/' . $video_id
 		);
 
-		$classes = trim( 'frbl-vimeo-bg' . ( $align ? ' align' . $align : '' ) . ( $class_name ? ' ' . $class_name : '' ) );
-		$style   = 'min-height:' . $min_height . $unit . ';';
+		$classes        = trim( 'frbl-vimeo-bg' . ( $align ? ' align' . $align : '' ) . ( $class_name ? ' ' . $class_name : '' ) );
+		$wrapper_style  = 'min-height:' . $min_height . $unit . ';';
+
+		$content_style  = 'display:flex;flex-direction:column;';
+		$content_style .= 'justify-content:' . $justify_content . ';';
+		$content_style .= 'align-items:' . $align_items . ';';
+		if ( $content_max_width ) {
+			$content_style .= 'max-width:' . $content_max_width . ';margin-left:auto;margin-right:auto;';
+		}
 
 		$overlay_html = '';
 		if ( $overlay_opacity > 0 ) {
@@ -128,7 +141,7 @@ class VimeoBackground {
 
 		ob_start();
 		?>
-		<div class="<?php echo esc_attr( $classes ); ?>" style="<?php echo esc_attr( $style ); ?>">
+		<div class="<?php echo esc_attr( $classes ); ?>" style="<?php echo esc_attr( $wrapper_style ); ?>">
 			<div class="frbl-vimeo-bg__media">
 				<iframe
 					class="frbl-vimeo-bg__iframe"
@@ -141,7 +154,7 @@ class VimeoBackground {
 				></iframe>
 			</div>
 			<?php echo $overlay_html; ?>
-			<div class="frbl-vimeo-bg__content">
+			<div class="frbl-vimeo-bg__content" style="<?php echo esc_attr( $content_style ); ?>">
 				<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 			</div>
 		</div>

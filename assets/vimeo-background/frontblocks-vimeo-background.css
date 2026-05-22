@@ -35,4 +35,7 @@
 .frbl-vimeo-bg__content {
 	position: relative;
 	z-index: 2;
+	width: 100%;
+	min-height: inherit;
+	box-sizing: border-box;
 }

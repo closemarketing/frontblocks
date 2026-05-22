@@ -1,11 +1,48 @@
 const { registerBlockType } = wp.blocks;
 const { Fragment } = wp.element;
 const { InspectorControls, InnerBlocks, useBlockProps, useInnerBlocksProps } = wp.blockEditor;
-const { PanelBody, TextControl, RangeControl, SelectControl, ColorPicker, __experimentalDivider: Divider } = wp.components;
+const { PanelBody, TextControl, RangeControl, SelectControl, ColorPicker, __experimentalUnitControl: UnitControl } = wp.components;
 const { __ } = wp.i18n;
 
+const CONTENT_JUSTIFY = [
+	{ label: __( 'Izquierda',  'frontblocks' ), value: 'flex-start' },
+	{ label: __( 'Centro',     'frontblocks' ), value: 'center' },
+	{ label: __( 'Derecha',    'frontblocks' ), value: 'flex-end' },
+	{ label: __( 'Stretch',    'frontblocks' ), value: 'stretch' },
+];
+
+const CONTENT_ALIGN = [
+	{ label: __( 'Arriba',   'frontblocks' ), value: 'flex-start' },
+	{ label: __( 'Centro',   'frontblocks' ), value: 'center' },
+	{ label: __( 'Abajo',    'frontblocks' ), value: 'flex-end' },
+	{ label: __( 'Stretch',  'frontblocks' ), value: 'stretch' },
+];
+
+function contentStyle( justifyContent, alignItems, contentMaxWidth ) {
+	const style = {
+		display: 'flex',
+		flexDirection: 'column',
+		justifyContent: justifyContent || 'center',
+		alignItems: alignItems || 'center',
+		width: '100%',
+		height: '100%',
+	};
+	if ( contentMaxWidth ) {
+		style.maxWidth = contentMaxWidth;
+		style.marginLeft = 'auto';
+		style.marginRight = 'auto';
+	}
+	return style;
+}
+
 function VimeoBackgroundEdit( { attributes, setAttributes } ) {
-	const { vimeoUrl, minHeight, minHeightUnit, overlayColor, overlayOpacity } = attributes;
+	const {
+		vimeoUrl,
+		minHeight, minHeightUnit,
+		overlayColor, overlayOpacity,
+		justifyContent, alignItems,
+		contentMaxWidth,
+	} = attributes;
 
 	const blockProps = useBlockProps( {
 		className: 'frbl-vimeo-bg',
@@ -17,7 +54,10 @@ function VimeoBackgroundEdit( { attributes, setAttributes } ) {
 	} );
 
 	const innerBlocksProps = useInnerBlocksProps(
-		{ className: 'frbl-vimeo-bg__content' },
+		{
+			className: 'frbl-vimeo-bg__content',
+			style: contentStyle( justifyContent, alignItems, contentMaxWidth ),
+		},
 		{ renderAppender: InnerBlocks.ButtonBlockAppender }
 	);
 
@@ -34,7 +74,7 @@ function VimeoBackgroundEdit( { attributes, setAttributes } ) {
 					/>
 				</PanelBody>
 
-				<PanelBody title={ __( 'Altura', 'frontblocks' ) } initialOpen={ false }>
+				<PanelBody title={ __( 'Dimensiones', 'frontblocks' ) } initialOpen={ false }>
 					<RangeControl
 						label={ __( 'Altura mínima', 'frontblocks' ) }
 						value={ minHeight }
@@ -44,13 +84,35 @@ function VimeoBackgroundEdit( { attributes, setAttributes } ) {
 						step={ 1 }
 					/>
 					<SelectControl
-						label={ __( 'Unidad', 'frontblocks' ) }
+						label={ __( 'Unidad altura', 'frontblocks' ) }
 						value={ minHeightUnit }
 						options={ [
 							{ label: 'vh (% viewport)', value: 'vh' },
 							{ label: 'px', value: 'px' },
 						] }
 						onChange={ ( val ) => setAttributes( { minHeightUnit: val } ) }
+					/>
+					<TextControl
+						label={ __( 'Ancho máximo del contenido', 'frontblocks' ) }
+						value={ contentMaxWidth }
+						onChange={ ( val ) => setAttributes( { contentMaxWidth: val } ) }
+						placeholder="1200px / 80% / vacío = sin límite"
+						help={ __( 'Limita el ancho del contenido interior. Vacío = ancho completo.', 'frontblocks' ) }
+					/>
+				</PanelBody>
+
+				<PanelBody title={ __( 'Alineación del contenido', 'frontblocks' ) } initialOpen={ false }>
+					<SelectControl
+						label={ __( 'Horizontal', 'frontblocks' ) }
+						value={ justifyContent }
+						options={ CONTENT_JUSTIFY }
+						onChange={ ( val ) => setAttributes( { justifyContent: val } ) }
+					/>
+					<SelectControl
+						label={ __( 'Vertical', 'frontblocks' ) }
+						value={ alignItems }
+						options={ CONTENT_ALIGN }
+						onChange={ ( val ) => setAttributes( { alignItems: val } ) }
 					/>
 				</PanelBody>
 
@@ -133,12 +195,15 @@ registerBlockType( 'frontblocks/vimeo-background', {
 		html: false,
 	},
 	attributes: {
-		vimeoUrl:       { type: 'string',  default: '' },
-		minHeight:      { type: 'number',  default: 100 },
-		minHeightUnit:  { type: 'string',  default: 'vh' },
-		overlayColor:   { type: 'string',  default: '#000000' },
-		overlayOpacity: { type: 'number',  default: 0 },
-		align:          { type: 'string',  default: 'full' },
+		vimeoUrl:        { type: 'string', default: '' },
+		minHeight:       { type: 'number', default: 100 },
+		minHeightUnit:   { type: 'string', default: 'vh' },
+		overlayColor:    { type: 'string', default: '#000000' },
+		overlayOpacity:  { type: 'number', default: 0 },
+		justifyContent:  { type: 'string', default: 'center' },
+		alignItems:      { type: 'string', default: 'center' },
+		contentMaxWidth: { type: 'string', default: '' },
+		align:           { type: 'string', default: 'full' },
 	},
 	edit: VimeoBackgroundEdit,
 	save: () => null,

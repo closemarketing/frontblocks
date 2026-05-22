@@ -13,8 +13,50 @@ var _wp$components = wp.components,
   RangeControl = _wp$components.RangeControl,
   SelectControl = _wp$components.SelectControl,
   ColorPicker = _wp$components.ColorPicker,
-  Divider = _wp$components.__experimentalDivider;
+  UnitControl = _wp$components.__experimentalUnitControl;
 var __ = wp.i18n.__;
+var CONTENT_JUSTIFY = [{
+  label: __('Izquierda', 'frontblocks'),
+  value: 'flex-start'
+}, {
+  label: __('Centro', 'frontblocks'),
+  value: 'center'
+}, {
+  label: __('Derecha', 'frontblocks'),
+  value: 'flex-end'
+}, {
+  label: __('Stretch', 'frontblocks'),
+  value: 'stretch'
+}];
+var CONTENT_ALIGN = [{
+  label: __('Arriba', 'frontblocks'),
+  value: 'flex-start'
+}, {
+  label: __('Centro', 'frontblocks'),
+  value: 'center'
+}, {
+  label: __('Abajo', 'frontblocks'),
+  value: 'flex-end'
+}, {
+  label: __('Stretch', 'frontblocks'),
+  value: 'stretch'
+}];
+function contentStyle(justifyContent, alignItems, contentMaxWidth) {
+  var style = {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: justifyContent || 'center',
+    alignItems: alignItems || 'center',
+    width: '100%',
+    height: '100%'
+  };
+  if (contentMaxWidth) {
+    style.maxWidth = contentMaxWidth;
+    style.marginLeft = 'auto';
+    style.marginRight = 'auto';
+  }
+  return style;
+}
 function VimeoBackgroundEdit(_ref) {
   var attributes = _ref.attributes,
     setAttributes = _ref.setAttributes;
@@ -22,7 +64,10 @@ function VimeoBackgroundEdit(_ref) {
     minHeight = attributes.minHeight,
     minHeightUnit = attributes.minHeightUnit,
     overlayColor = attributes.overlayColor,
-    overlayOpacity = attributes.overlayOpacity;
+    overlayOpacity = attributes.overlayOpacity,
+    justifyContent = attributes.justifyContent,
+    alignItems = attributes.alignItems,
+    contentMaxWidth = attributes.contentMaxWidth;
   var blockProps = useBlockProps({
     className: 'frbl-vimeo-bg',
     style: {
@@ -32,7 +77,8 @@ function VimeoBackgroundEdit(_ref) {
     }
   });
   var innerBlocksProps = useInnerBlocksProps({
-    className: 'frbl-vimeo-bg__content'
+    className: 'frbl-vimeo-bg__content',
+    style: contentStyle(justifyContent, alignItems, contentMaxWidth)
   }, {
     renderAppender: InnerBlocks.ButtonBlockAppender
   });
@@ -50,7 +96,7 @@ function VimeoBackgroundEdit(_ref) {
     placeholder: "https://vimeo.com/123456789",
     help: __('URL del vídeo de Vimeo que se usará como fondo.', 'frontblocks')
   })), /*#__PURE__*/React.createElement(PanelBody, {
-    title: __('Altura', 'frontblocks'),
+    title: __('Dimensiones', 'frontblocks'),
     initialOpen: false
   }, /*#__PURE__*/React.createElement(RangeControl, {
     label: __('Altura mínima', 'frontblocks'),
@@ -64,7 +110,7 @@ function VimeoBackgroundEdit(_ref) {
     max: minHeightUnit === 'vh' ? 100 : 1200,
     step: 1
   }), /*#__PURE__*/React.createElement(SelectControl, {
-    label: __('Unidad', 'frontblocks'),
+    label: __('Unidad altura', 'frontblocks'),
     value: minHeightUnit,
     options: [{
       label: 'vh (% viewport)',
@@ -76,6 +122,37 @@ function VimeoBackgroundEdit(_ref) {
     onChange: function onChange(val) {
       return setAttributes({
         minHeightUnit: val
+      });
+    }
+  }), /*#__PURE__*/React.createElement(TextControl, {
+    label: __('Ancho máximo del contenido', 'frontblocks'),
+    value: contentMaxWidth,
+    onChange: function onChange(val) {
+      return setAttributes({
+        contentMaxWidth: val
+      });
+    },
+    placeholder: "1200px / 80% / vac\xEDo = sin l\xEDmite",
+    help: __('Limita el ancho del contenido interior. Vacío = ancho completo.', 'frontblocks')
+  })), /*#__PURE__*/React.createElement(PanelBody, {
+    title: __('Alineación del contenido', 'frontblocks'),
+    initialOpen: false
+  }, /*#__PURE__*/React.createElement(SelectControl, {
+    label: __('Horizontal', 'frontblocks'),
+    value: justifyContent,
+    options: CONTENT_JUSTIFY,
+    onChange: function onChange(val) {
+      return setAttributes({
+        justifyContent: val
+      });
+    }
+  }), /*#__PURE__*/React.createElement(SelectControl, {
+    label: __('Vertical', 'frontblocks'),
+    value: alignItems,
+    options: CONTENT_ALIGN,
+    onChange: function onChange(val) {
+      return setAttributes({
+        alignItems: val
       });
     }
   })), /*#__PURE__*/React.createElement(PanelBody, {
@@ -175,6 +252,18 @@ registerBlockType('frontblocks/vimeo-background', {
     overlayOpacity: {
       type: 'number',
       default: 0
+    },
+    justifyContent: {
+      type: 'string',
+      default: 'center'
+    },
+    alignItems: {
+      type: 'string',
+      default: 'center'
+    },
+    contentMaxWidth: {
+      type: 'string',
+      default: ''
     },
     align: {
       type: 'string',
