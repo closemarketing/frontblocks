@@ -4,7 +4,7 @@ const { InspectorControls } = wp.blockEditor;
 const { PanelBody, ToggleControl } = wp.components;
 const { __ } = wp.i18n;
 
-const FAQ_BLOCKS = [ 'core/details', 'generateblocks/accordion' ];
+const FAQ_BLOCKS = [ 'core/accordion' ];
 
 // Register frblFaqSchema attribute on supported blocks.
 addFilter(

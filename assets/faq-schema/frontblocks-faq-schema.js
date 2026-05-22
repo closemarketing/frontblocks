@@ -7,7 +7,7 @@ var _wp$components = wp.components,
   PanelBody = _wp$components.PanelBody,
   ToggleControl = _wp$components.ToggleControl;
 var __ = wp.i18n.__;
-var FAQ_BLOCKS = ['core/details', 'generateblocks/accordion'];
+var FAQ_BLOCKS = ['core/accordion-item'];
 
 // Register frblFaqSchema attribute on supported blocks.
 addFilter('blocks.registerBlockType', 'frontblocks/faq-schema-attribute', function (settings, name) {
