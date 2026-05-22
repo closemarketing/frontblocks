@@ -45,7 +45,7 @@ class VimeoBackground {
 					'minHeightUnit'   => array( 'type' => 'string',  'default' => 'vh' ),
 					'overlayColor'    => array( 'type' => 'string',  'default' => '#000000' ),
 					'overlayOpacity'  => array( 'type' => 'number',  'default' => 0 ),
-					'justifyContent'  => array( 'type' => 'string',  'default' => 'center' ),
+					'justifyContent'  => array( 'type' => 'string',  'default' => 'stretch' ),
 					'alignItems'      => array( 'type' => 'string',  'default' => 'center' ),
 					'contentMaxWidth' => array( 'type' => 'string',  'default' => '' ),
 					'align'           => array( 'type' => 'string',  'default' => 'full' ),
@@ -123,9 +123,9 @@ class VimeoBackground {
 		$classes        = trim( 'frbl-vimeo-bg' . ( $align ? ' align' . $align : '' ) . ( $class_name ? ' ' . $class_name : '' ) );
 		$wrapper_style  = 'min-height:' . $min_height . $unit . ';';
 
-		$content_style  = 'display:flex;flex-direction:column;';
-		$content_style .= 'justify-content:' . $justify_content . ';';
-		$content_style .= 'align-items:' . $align_items . ';';
+		$content_style  = 'display:flex;flex-direction:column;width:100%;box-sizing:border-box;';
+		$content_style .= 'justify-content:' . $align_items . ';';   /* vertical  = main axis */
+		$content_style .= 'align-items:' . $justify_content . ';';    /* horizontal = cross axis */
 		if ( $content_max_width ) {
 			$content_style .= 'max-width:' . $content_max_width . ';margin-left:auto;margin-right:auto;';
 		}

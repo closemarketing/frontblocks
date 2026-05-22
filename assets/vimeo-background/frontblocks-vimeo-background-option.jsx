@@ -18,14 +18,15 @@ const CONTENT_ALIGN = [
 	{ label: __( 'Stretch',  'frontblocks' ), value: 'stretch' },
 ];
 
-function contentStyle( justifyContent, alignItems, contentMaxWidth ) {
+function contentStyle( hAlign, vAlign, contentMaxWidth ) {
 	const style = {
 		display: 'flex',
 		flexDirection: 'column',
-		justifyContent: justifyContent || 'center',
-		alignItems: alignItems || 'center',
+		justifyContent: vAlign || 'center',   /* vertical  = main axis in column */
+		alignItems: hAlign || 'stretch',       /* horizontal = cross axis in column */
 		width: '100%',
 		height: '100%',
+		boxSizing: 'border-box',
 	};
 	if ( contentMaxWidth ) {
 		style.maxWidth = contentMaxWidth;
@@ -200,7 +201,7 @@ registerBlockType( 'frontblocks/vimeo-background', {
 		minHeightUnit:   { type: 'string', default: 'vh' },
 		overlayColor:    { type: 'string', default: '#000000' },
 		overlayOpacity:  { type: 'number', default: 0 },
-		justifyContent:  { type: 'string', default: 'center' },
+		justifyContent:  { type: 'string', default: 'stretch' },
 		alignItems:      { type: 'string', default: 'center' },
 		contentMaxWidth: { type: 'string', default: '' },
 		align:           { type: 'string', default: 'full' },
