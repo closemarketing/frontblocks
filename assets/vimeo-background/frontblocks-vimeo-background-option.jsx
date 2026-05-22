@@ -7,7 +7,7 @@ function extractVimeoId( url ) {
 	const match = url.match( /(?:vimeo\.com\/(?:video\/)?|player\.vimeo\.com\/video\/)(\d+)/ );
 	return match ? match[ 1 ] : null;
 }
-const { PanelBody, TextControl, RangeControl, SelectControl, ColorPicker, __experimentalUnitControl: UnitControl } = wp.components;
+const { PanelBody, TextControl, RangeControl, SelectControl, ColorPicker, ColorIndicator, Dropdown, Button } = wp.components;
 const { __ } = wp.i18n;
 
 const CONTENT_JUSTIFY = [
@@ -133,16 +133,24 @@ function VimeoBackgroundEdit( { attributes, setAttributes } ) {
 						step={ 5 }
 					/>
 					{ overlayOpacity > 0 && (
-						<>
-							<p style={ { marginBottom: '8px', fontSize: '12px' } }>
-								{ __( 'Color del overlay', 'frontblocks' ) }
-							</p>
-							<ColorPicker
-								color={ overlayColor }
-								onChange={ ( val ) => setAttributes( { overlayColor: val } ) }
-								enableAlpha={ false }
+						<div style={ { display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' } }>
+							<span style={ { fontSize: '12px' } }>{ __( 'Color', 'frontblocks' ) }</span>
+							<Dropdown
+								renderToggle={ ( { isOpen, onToggle } ) => (
+									<Button onClick={ onToggle } aria-expanded={ isOpen } style={ { padding: 0, minWidth: 0 } }>
+										<ColorIndicator colorValue={ overlayColor } />
+									</Button>
+								) }
+								renderContent={ () => (
+									<ColorPicker
+										color={ overlayColor }
+										onChange={ ( val ) => setAttributes( { overlayColor: val } ) }
+										enableAlpha={ false }
+									/>
+								) }
 							/>
-						</>
+							<span style={ { fontSize: '12px', color: '#757575' } }>{ overlayColor }</span>
+						</div>
 					) }
 				</PanelBody>
 			</InspectorControls>

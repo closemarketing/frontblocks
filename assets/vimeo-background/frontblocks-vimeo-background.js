@@ -24,7 +24,9 @@ var _wp$components = wp.components,
   RangeControl = _wp$components.RangeControl,
   SelectControl = _wp$components.SelectControl,
   ColorPicker = _wp$components.ColorPicker,
-  UnitControl = _wp$components.__experimentalUnitControl;
+  ColorIndicator = _wp$components.ColorIndicator,
+  Dropdown = _wp$components.Dropdown,
+  Button = _wp$components.Button;
 var __ = wp.i18n.__;
 var CONTENT_JUSTIFY = [{
   label: __('Izquierda', 'frontblocks'),
@@ -186,20 +188,49 @@ function VimeoBackgroundEdit(_ref) {
     min: 0,
     max: 100,
     step: 5
-  }), overlayOpacity > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+  }), overlayOpacity > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
-      marginBottom: '8px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      marginTop: '8px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
       fontSize: '12px'
     }
-  }, __('Color del overlay', 'frontblocks')), /*#__PURE__*/React.createElement(ColorPicker, {
-    color: overlayColor,
-    onChange: function onChange(val) {
-      return setAttributes({
-        overlayColor: val
-      });
+  }, __('Color', 'frontblocks')), /*#__PURE__*/React.createElement(Dropdown, {
+    renderToggle: function renderToggle(_ref2) {
+      var isOpen = _ref2.isOpen,
+        onToggle = _ref2.onToggle;
+      return /*#__PURE__*/React.createElement(Button, {
+        onClick: onToggle,
+        "aria-expanded": isOpen,
+        style: {
+          padding: 0,
+          minWidth: 0
+        }
+      }, /*#__PURE__*/React.createElement(ColorIndicator, {
+        colorValue: overlayColor
+      }));
     },
-    enableAlpha: false
-  })))), /*#__PURE__*/React.createElement("div", blockProps, /*#__PURE__*/React.createElement("div", {
+    renderContent: function renderContent() {
+      return /*#__PURE__*/React.createElement(ColorPicker, {
+        color: overlayColor,
+        onChange: function onChange(val) {
+          return setAttributes({
+            overlayColor: val
+          });
+        },
+        enableAlpha: false
+      });
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: '12px',
+      color: '#757575'
+    }
+  }, overlayColor)))), /*#__PURE__*/React.createElement("div", blockProps, /*#__PURE__*/React.createElement("div", {
     className: "frbl-vimeo-bg__media",
     style: {
       position: 'absolute',
