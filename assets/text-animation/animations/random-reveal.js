@@ -19,6 +19,7 @@
 			el.appendChild( span );
 		} );
 
+		if ( window.FrblWordWrap ) { window.FrblWordWrap( el ); }
 		var spans = el.querySelectorAll( '.frbl-char' );
 		var i     = 0;
 
@@ -29,6 +30,7 @@
 				setTimeout( reveal, INTERVAL );
 			} else {
 				el._frblLoop && setTimeout( function () { play( el ); }, 2500 );
+
 			}
 		}
 
