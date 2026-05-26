@@ -6,6 +6,7 @@
 			var type    = el.getAttribute( 'data-animation' );
 			var handler = window.FrblAnimations && window.FrblAnimations[ type ];
 			if ( typeof handler === 'function' ) {
+				el._frblLoop = el.getAttribute( 'data-animation-loop' ) === '1';
 				handler( el );
 			}
 		} );

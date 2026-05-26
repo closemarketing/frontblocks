@@ -32,6 +32,7 @@ var _wp$components = wp.components,
   SelectControl = _wp$components.SelectControl,
   RangeControl = _wp$components.RangeControl,
   Button = _wp$components.Button,
+  ToggleControl = _wp$components.ToggleControl,
   NumberControl = _wp$components.__experimentalNumberControl,
   ToggleGroupControl = _wp$components.__experimentalToggleGroupControl,
   ToggleGroupControlOptionIcon = _wp$components.__experimentalToggleGroupControlOptionIcon;
@@ -2017,3 +2018,115 @@ registerBlockType('frontblocks/text-animation', {
     }));
   }
 });
+
+// ── Extend core/paragraph and core/heading with text animation panel ─────────
+
+var FRBL_TA_ATTR = {
+  frblTextAnimation: {
+    type: 'string',
+    default: 'none'
+  },
+  frblTextAnimationLoop: {
+    type: 'boolean',
+    default: false
+  }
+};
+
+// Filter for blocks registered after our script (future-proof).
+wp.hooks.addFilter('blocks.registerBlockType', 'frontblocks/text-animation-native-attrs', function (settings, name) {
+  if ('core/paragraph' !== name && 'core/heading' !== name) {
+    return settings;
+  }
+  settings.attributes = Object.assign({}, settings.attributes, FRBL_TA_ATTR);
+  return settings;
+});
+
+// Patch already-registered blocks: core blocks register before plugin scripts run,
+// so the filter above misses them. addBlockTypes merges into the existing block type
+// definition so the serializer includes frblTextAnimation when saving.
+wp.domReady(function () {
+  ['core/paragraph', 'core/heading'].forEach(function (blockName) {
+    try {
+      var blockType = wp.data.select('core/blocks').getBlockType(blockName);
+      if (blockType && !blockType.attributes.frblTextAnimation) {
+        wp.data.dispatch('core/blocks').addBlockTypes(Object.assign({}, blockType, {
+          attributes: Object.assign({}, blockType.attributes, FRBL_TA_ATTR)
+        }));
+      }
+    } catch (e) {}
+  });
+});
+function addTextAnimationPanelToNativeBlocks(BlockEdit) {
+  return function (props) {
+    if (props.name !== 'core/paragraph' && props.name !== 'core/heading') {
+      return /*#__PURE__*/React.createElement(BlockEdit, props);
+    }
+    var _props$attributes = props.attributes,
+      _props$attributes$frb = _props$attributes.frblTextAnimation,
+      frblTextAnimation = _props$attributes$frb === void 0 ? 'none' : _props$attributes$frb,
+      _props$attributes$frb2 = _props$attributes.frblTextAnimationLoop,
+      frblTextAnimationLoop = _props$attributes$frb2 === void 0 ? false : _props$attributes$frb2;
+    var _useState7 = useState(true),
+      _useState8 = _slicedToArray(_useState7, 2),
+      isEditMode = _useState8[0],
+      setIsEditMode = _useState8[1];
+    var hasAnimation = frblTextAnimation && 'none' !== frblTextAnimation;
+    var showPreview = hasAnimation && !isEditMode;
+    var Tag = 'core/heading' === props.name ? 'h' + (props.attributes.level || 2) : 'p';
+    var rawText = stripHtml(props.attributes.content || '') || __('Write your text here…', 'frontblocks');
+    var playPreview = function playPreview(value) {
+      var entry = ANIMATION_PREVIEWS[value];
+      var ms = entry ? entry.duration(rawText) : 2000;
+      setIsEditMode(false);
+      setTimeout(function () {
+        return setIsEditMode(true);
+      }, ms);
+    };
+    return /*#__PURE__*/React.createElement(Fragment, null, showPreview ? /*#__PURE__*/React.createElement(AnimationPreview, {
+      animationType: frblTextAnimation,
+      text: rawText,
+      style: {},
+      Tag: Tag
+    }) : /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
+      title: __('FrontBlocks Text Animation', 'frontblocks'),
+      initialOpen: false
+    }, /*#__PURE__*/React.createElement(SelectControl, {
+      label: __('Animation Type', 'frontblocks'),
+      value: frblTextAnimation,
+      options: ANIMATION_OPTIONS,
+      onChange: function onChange(value) {
+        props.setAttributes({
+          frblTextAnimation: value
+        });
+        if (value && 'none' !== value) {
+          playPreview(value);
+        } else {
+          setIsEditMode(true);
+        }
+      }
+    }), hasAnimation && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(ToggleControl, {
+      label: __('Loop animation', 'frontblocks'),
+      checked: frblTextAnimationLoop,
+      onChange: function onChange(value) {
+        return props.setAttributes({
+          frblTextAnimationLoop: value
+        });
+      },
+      style: {
+        marginTop: '8px'
+      }
+    }), /*#__PURE__*/React.createElement(Button, {
+      variant: "secondary",
+      size: "small",
+      onClick: function onClick() {
+        return playPreview(frblTextAnimation);
+      },
+      style: {
+        marginTop: '4px',
+        width: '100%',
+        justifyContent: 'center'
+      }
+    }, __('▶ Preview animation', 'frontblocks'))))));
+  };
+}
+wp.hooks.addFilter('editor.BlockEdit', 'frontblocks/text-animation-native-panel', addTextAnimationPanelToNativeBlocks);

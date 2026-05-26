@@ -15,7 +15,7 @@
 
 		el.appendChild( span );
 
-		setTimeout( function () { play( el ); }, DURATION * 1000 + 2500 );
+		el._frblLoop && setTimeout( function () { play( el ); }, DURATION * 1000 + 2500 );
 	}
 
 	window.FrblAnimations = window.FrblAnimations || {};

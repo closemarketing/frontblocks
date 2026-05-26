@@ -48,7 +48,7 @@
 			if ( ! allDone ) {
 				setTimeout( function () { requestAnimationFrame( update ); }, FRAME_DELAY );
 			} else {
-				setTimeout( function () { play( el ); }, 2500 );
+				el._frblLoop && setTimeout( function () { play( el ); }, 2500 );
 			}
 		}
 

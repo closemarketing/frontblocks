@@ -20,7 +20,7 @@
 		} );
 
 		var totalMs = ( text.length * DELAY + DURATION ) * 1000 + 2500;
-		setTimeout( function () { play( el ); }, totalMs );
+		el._frblLoop && setTimeout( function () { play( el ); }, totalMs );
 	}
 
 	window.FrblAnimations = window.FrblAnimations || {};

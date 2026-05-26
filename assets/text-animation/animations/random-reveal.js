@@ -28,7 +28,7 @@
 				i++;
 				setTimeout( reveal, INTERVAL );
 			} else {
-				setTimeout( function () { play( el ); }, 2500 );
+				el._frblLoop && setTimeout( function () { play( el ); }, 2500 );
 			}
 		}
 

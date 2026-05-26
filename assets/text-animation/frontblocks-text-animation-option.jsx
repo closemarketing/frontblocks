@@ -12,6 +12,7 @@ const {
 	SelectControl,
 	RangeControl,
 	Button,
+	ToggleControl,
 	__experimentalNumberControl: NumberControl,
 	__experimentalToggleGroupControl: ToggleGroupControl,
 	__experimentalToggleGroupControlOptionIcon: ToggleGroupControlOptionIcon,
@@ -1410,3 +1411,126 @@ registerBlockType( 'frontblocks/text-animation', {
 		);
 	},
 } );
+
+// ── Extend core/paragraph and core/heading with text animation panel ─────────
+
+const FRBL_TA_ATTR = {
+	frblTextAnimation:     { type: 'string',  default: 'none'  },
+	frblTextAnimationLoop: { type: 'boolean', default: false   },
+};
+
+// Filter for blocks registered after our script (future-proof).
+wp.hooks.addFilter(
+	'blocks.registerBlockType',
+	'frontblocks/text-animation-native-attrs',
+	function ( settings, name ) {
+		if ( 'core/paragraph' !== name && 'core/heading' !== name ) {
+			return settings;
+		}
+		settings.attributes = Object.assign( {}, settings.attributes, FRBL_TA_ATTR );
+		return settings;
+	}
+);
+
+// Patch already-registered blocks: core blocks register before plugin scripts run,
+// so the filter above misses them. addBlockTypes merges into the existing block type
+// definition so the serializer includes frblTextAnimation when saving.
+wp.domReady( function () {
+	[ 'core/paragraph', 'core/heading' ].forEach( function ( blockName ) {
+		try {
+			var blockType = wp.data.select( 'core/blocks' ).getBlockType( blockName );
+			if ( blockType && ! blockType.attributes.frblTextAnimation ) {
+				wp.data.dispatch( 'core/blocks' ).addBlockTypes(
+					Object.assign( {}, blockType, {
+						attributes: Object.assign( {}, blockType.attributes, FRBL_TA_ATTR ),
+					} )
+				);
+			}
+		} catch ( e ) {}
+	} );
+} );
+
+function addTextAnimationPanelToNativeBlocks( BlockEdit ) {
+	return ( props ) => {
+		if ( props.name !== 'core/paragraph' && props.name !== 'core/heading' ) {
+			return <BlockEdit { ...props } />;
+		}
+
+		const { frblTextAnimation = 'none', frblTextAnimationLoop = false } = props.attributes;
+		const [ isEditMode, setIsEditMode ] = useState( true );
+
+		const hasAnimation = frblTextAnimation && 'none' !== frblTextAnimation;
+		const showPreview  = hasAnimation && ! isEditMode;
+
+		const Tag     = 'core/heading' === props.name
+			? 'h' + ( props.attributes.level || 2 )
+			: 'p';
+		const rawText = stripHtml( props.attributes.content || '' )
+			|| __( 'Write your text here…', 'frontblocks' );
+
+		const playPreview = ( value ) => {
+			const entry = ANIMATION_PREVIEWS[ value ];
+			const ms    = entry ? entry.duration( rawText ) : 2000;
+			setIsEditMode( false );
+			setTimeout( () => setIsEditMode( true ), ms );
+		};
+
+		return (
+			<Fragment>
+				{ showPreview
+					? <AnimationPreview
+						animationType={ frblTextAnimation }
+						text={ rawText }
+						style={ {} }
+						Tag={ Tag }
+					/>
+					: <BlockEdit { ...props } />
+				}
+				<InspectorControls>
+					<PanelBody
+						title={ __( 'FrontBlocks Text Animation', 'frontblocks' ) }
+						initialOpen={ false }
+					>
+						<SelectControl
+							label={ __( 'Animation Type', 'frontblocks' ) }
+							value={ frblTextAnimation }
+							options={ ANIMATION_OPTIONS }
+							onChange={ ( value ) => {
+								props.setAttributes( { frblTextAnimation: value } );
+								if ( value && 'none' !== value ) {
+									playPreview( value );
+								} else {
+									setIsEditMode( true );
+								}
+							} }
+						/>
+						{ hasAnimation && (
+							<>
+								<ToggleControl
+									label={ __( 'Loop animation', 'frontblocks' ) }
+									checked={ frblTextAnimationLoop }
+									onChange={ ( value ) => props.setAttributes( { frblTextAnimationLoop: value } ) }
+									style={ { marginTop: '8px' } }
+								/>
+								<Button
+									variant="secondary"
+									size="small"
+									onClick={ () => playPreview( frblTextAnimation ) }
+									style={ { marginTop: '4px', width: '100%', justifyContent: 'center' } }
+								>
+									{ __( '▶ Preview animation', 'frontblocks' ) }
+								</Button>
+							</>
+						) }
+					</PanelBody>
+				</InspectorControls>
+			</Fragment>
+		);
+	};
+}
+
+wp.hooks.addFilter(
+	'editor.BlockEdit',
+	'frontblocks/text-animation-native-panel',
+	addTextAnimationPanelToNativeBlocks
+);

@@ -20,7 +20,7 @@
 				i++;
 				setTimeout( type, CHAR_INTERVAL );
 			} else {
-				setTimeout( function () { play( el ); }, 2500 );
+				el._frblLoop && setTimeout( function () { play( el ); }, 2500 );
 			}
 		}
 
