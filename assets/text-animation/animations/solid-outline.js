@@ -24,6 +24,7 @@
 		} );
 
 		var totalMs = ( text.length * DELAY + DURATION ) * 1000 + 2500;
+		if ( window.FrblWordWrap ) { window.FrblWordWrap( el ); }
 		el._frblLoop && setTimeout( function () { play( el ); }, totalMs );
 	}
 

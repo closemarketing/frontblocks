@@ -15,11 +15,14 @@
 
 		var chars    = text.split( '' );
 		var spanList = chars.map( function ( char ) {
-			var span       = document.createElement( 'span' );
-			span.className = 'frbl-char';
+			var span          = document.createElement( 'span' );
+			span.className    = 'frbl-char';
+			span.dataset.char = char;
 			el.appendChild( span );
 			return { el: span, char: char, isSpace: char === ' ' };
 		} );
+
+		if ( window.FrblWordWrap ) { window.FrblWordWrap( el ); }
 
 		var frame = 0;
 
