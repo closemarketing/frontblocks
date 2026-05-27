@@ -165,63 +165,63 @@ class ProductCategories {
 			'editor_script'   => 'frontblocks-product-categories-option',
 			'render_callback' => array( $this, 'render_product_categories_block' ),
 			'attributes'      => array(
-				'count'            => array(
+				'count'               => array(
 					'type'    => 'number',
 					'default' => 5,
 				),
-				'orderby'          => array(
+				'orderby'             => array(
 					'type'    => 'string',
 					'default' => 'count',
 				),
-				'order'            => array(
+				'order'               => array(
 					'type'    => 'string',
 					'default' => 'DESC',
 				),
-				'hideEmpty'        => array(
+				'hideEmpty'           => array(
 					'type'    => 'boolean',
 					'default' => false,
 				),
-				'showCount'        => array(
+				'showCount'           => array(
 					'type'    => 'boolean',
 					'default' => true,
 				),
-				'className'        => array(
+				'className'           => array(
 					'type'    => 'string',
 					'default' => '',
 				),
-				'columns'          => array(
+				'columns'             => array(
 					'type'    => 'number',
 					'default' => 2,
 				),
-				'bgColor'          => array(
+				'bgColor'             => array(
 					'type'    => 'string',
 					'default' => 'rgba(255, 255, 255, 0.5)',
 				),
-				'borderColor'      => array(
+				'borderColor'         => array(
 					'type'    => 'string',
 					'default' => '#dddddd',
 				),
-				'borderWidth'      => array(
+				'borderWidth'         => array(
 					'type'    => 'number',
 					'default' => 1,
 				),
-				'borderRadius'     => array(
+				'borderRadius'        => array(
 					'type'    => 'number',
 					'default' => 20,
 				),
-				'textColor'        => array(
+				'textColor'           => array(
 					'type'    => 'string',
 					'default' => 'inherit',
 				),
-				'hoverBgColor'     => array(
+				'hoverBgColor'        => array(
 					'type'    => 'string',
 					'default' => 'rgba(255, 255, 255, 0.7)',
 				),
-				'hoverBorderColor' => array(
+				'hoverBorderColor'    => array(
 					'type'    => 'string',
 					'default' => '#555555',
 				),
-				'hoverTextColor'   => array(
+				'hoverTextColor'      => array(
 					'type'    => 'string',
 					'default' => 'inherit',
 				),
@@ -306,26 +306,26 @@ class ProductCategories {
 		$show_count = $attributes['showCount'] ?? true;
 		$columns    = absint( $attributes['columns'] ?? 2 );
 
-		$bg_color           = sanitize_text_field( $attributes['bgColor'] ?? 'rgba(255, 255, 255, 0.5)' );
-		$border_color       = sanitize_text_field( $attributes['borderColor'] ?? '#dddddd' );
-		$border_width       = absint( $attributes['borderWidth'] ?? 1 );
-		$border_radius      = absint( $attributes['borderRadius'] ?? 20 );
-		$text_color         = sanitize_text_field( $attributes['textColor'] ?? 'inherit' );
-		$hover_bg_color     = sanitize_text_field( $attributes['hoverBgColor'] ?? 'rgba(255, 255, 255, 0.7)' );
-		$hover_border_color = sanitize_text_field( $attributes['hoverBorderColor'] ?? '#555555' );
-		$hover_text_color   = sanitize_text_field( $attributes['hoverTextColor'] ?? 'inherit' );
-		$show_button           = ! empty( $attributes['showButton'] );
-		$button_text           = sanitize_text_field( $attributes['buttonText'] ?? '' );
-		$btn_bg_color          = sanitize_text_field( $attributes['btnBgColor'] ?? 'transparent' );
-		$btn_text_color        = sanitize_text_field( $attributes['btnTextColor'] ?? '' );
-		$btn_border_color      = sanitize_text_field( $attributes['btnBorderColor'] ?? '' );
-		$btn_border_width      = absint( $attributes['btnBorderWidth'] ?? 2 );
-		$btn_border_radius     = absint( $attributes['btnBorderRadius'] ?? 4 );
-		$btn_font_size         = absint( $attributes['btnFontSize'] ?? 14 );
-		$btn_padding_v         = absint( $attributes['btnPaddingV'] ?? 10 );
-		$btn_padding_h         = absint( $attributes['btnPaddingH'] ?? 20 );
-		$btn_hover_bg_color    = sanitize_text_field( $attributes['btnHoverBgColor'] ?? '' );
-		$btn_hover_text_color  = sanitize_text_field( $attributes['btnHoverTextColor'] ?? '' );
+		$bg_color               = sanitize_text_field( $attributes['bgColor'] ?? 'rgba(255, 255, 255, 0.5)' );
+		$border_color           = sanitize_text_field( $attributes['borderColor'] ?? '#dddddd' );
+		$border_width           = absint( $attributes['borderWidth'] ?? 1 );
+		$border_radius          = absint( $attributes['borderRadius'] ?? 20 );
+		$text_color             = sanitize_text_field( $attributes['textColor'] ?? 'inherit' );
+		$hover_bg_color         = sanitize_text_field( $attributes['hoverBgColor'] ?? 'rgba(255, 255, 255, 0.7)' );
+		$hover_border_color     = sanitize_text_field( $attributes['hoverBorderColor'] ?? '#555555' );
+		$hover_text_color       = sanitize_text_field( $attributes['hoverTextColor'] ?? 'inherit' );
+		$show_button            = ! empty( $attributes['showButton'] );
+		$button_text            = sanitize_text_field( $attributes['buttonText'] ?? '' );
+		$btn_bg_color           = sanitize_text_field( $attributes['btnBgColor'] ?? 'transparent' );
+		$btn_text_color         = sanitize_text_field( $attributes['btnTextColor'] ?? '' );
+		$btn_border_color       = sanitize_text_field( $attributes['btnBorderColor'] ?? '' );
+		$btn_border_width       = absint( $attributes['btnBorderWidth'] ?? 2 );
+		$btn_border_radius      = absint( $attributes['btnBorderRadius'] ?? 4 );
+		$btn_font_size          = absint( $attributes['btnFontSize'] ?? 14 );
+		$btn_padding_v          = absint( $attributes['btnPaddingV'] ?? 10 );
+		$btn_padding_h          = absint( $attributes['btnPaddingH'] ?? 20 );
+		$btn_hover_bg_color     = sanitize_text_field( $attributes['btnHoverBgColor'] ?? '' );
+		$btn_hover_text_color   = sanitize_text_field( $attributes['btnHoverTextColor'] ?? '' );
 		$btn_hover_border_color = sanitize_text_field( $attributes['btnHoverBorderColor'] ?? '' );
 
 		/**
