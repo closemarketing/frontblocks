@@ -1,5 +1,5 @@
 const { registerBlockType } = wp.blocks;
-const { Fragment, useState, useEffect, useRef } = wp.element;
+const { Fragment, useEffect, useRef } = wp.element;
 const { InspectorControls, MediaUpload, MediaUploadCheck, useBlockProps } = wp.blockEditor;
 const { PanelBody, RangeControl, Button, Placeholder, TextControl, ToggleControl } = wp.components;
 const { __ } = wp.i18n;
@@ -24,38 +24,57 @@ function BeforeAfterEdit( props ) {
 	const blockProps = useBlockProps();
 
 	const hasImages = beforeImageUrl && afterImageUrl;
-
-	const [ editorPosition, setEditorPosition ] = useState( initialPosition );
-	const isDragging = useRef( false );
 	const containerRef = useRef( null );
 
+	// Imperative drag logic — mirrors frontend JS, uses ownerDocument for iframe support.
 	useEffect( () => {
-		setEditorPosition( initialPosition );
-	}, [ initialPosition ] );
+		if ( ! containerRef.current || ! hasImages ) { return; }
 
-	function clamp( value, min, max ) {
-		return Math.max( min, Math.min( max, value ) );
-	}
+		const block    = containerRef.current;
+		const beforeEl = block.querySelector( '.frbl-before-after__before' );
+		const handle   = block.querySelector( '.frbl-before-after__handle' );
 
-	function getPosFromEvent( e ) {
-		const rect    = containerRef.current.getBoundingClientRect();
-		const clientX = e.touches && e.touches.length ? e.touches[ 0 ].clientX : e.clientX;
-		return clamp( ( ( clientX - rect.left ) / rect.width ) * 100, 0, 100 );
-	}
+		if ( ! beforeEl || ! handle ) { return; }
 
-	function handleMouseDown( e ) {
-		isDragging.current = true;
-		e.preventDefault();
-	}
+		let dragging = false;
+		const doc    = block.ownerDocument;
 
-	function handleMouseMove( e ) {
-		if ( ! isDragging.current ) { return; }
-		setEditorPosition( getPosFromEvent( e ) );
-	}
+		function setPos( pos ) {
+			pos = Math.max( 0, Math.min( 100, pos ) );
+			beforeEl.style.clipPath = 'inset(0 ' + ( 100 - pos ) + '% 0 0)';
+			handle.style.left       = pos + '%';
+		}
 
-	function handleMouseUp() {
-		isDragging.current = false;
-	}
+		function getPos( e ) {
+			const rect = block.getBoundingClientRect();
+			return ( ( e.clientX - rect.left ) / rect.width ) * 100;
+		}
+
+		setPos( initialPosition );
+
+		function onMouseDown( e ) {
+			dragging = true;
+			e.preventDefault();
+			e.stopPropagation();
+		}
+		function onMouseMove( e ) {
+			if ( ! dragging ) { return; }
+			setPos( getPos( e ) );
+		}
+		function onMouseUp() {
+			dragging = false;
+		}
+
+		handle.addEventListener( 'mousedown', onMouseDown );
+		doc.addEventListener( 'mousemove', onMouseMove );
+		doc.addEventListener( 'mouseup', onMouseUp );
+
+		return () => {
+			handle.removeEventListener( 'mousedown', onMouseDown );
+			doc.removeEventListener( 'mousemove', onMouseMove );
+			doc.removeEventListener( 'mouseup', onMouseUp );
+		};
+	}, [ hasImages, beforeImageUrl, afterImageUrl, initialPosition ] );
 
 	return (
 		<Fragment>
@@ -214,9 +233,6 @@ function BeforeAfterEdit( props ) {
 						className={ 'frbl-before-after frbl-before-after--editor' + ( fixedHeight ? ' frbl-before-after--fixed-height' : '' ) }
 						data-initial-position={ initialPosition }
 						style={ fixedHeight && blockHeight ? { height: blockHeight + 'px' } : {} }
-						onMouseMove={ handleMouseMove }
-						onMouseUp={ handleMouseUp }
-						onMouseLeave={ handleMouseUp }
 					>
 						<div className="frbl-before-after__after">
 							<img src={ afterImageUrl } alt="" />
@@ -228,7 +244,7 @@ function BeforeAfterEdit( props ) {
 						</div>
 						<div
 							className="frbl-before-after__before"
-							style={ { clipPath: `inset(0 ${ 100 - editorPosition }% 0 0)` } }
+							style={ { clipPath: `inset(0 ${ 100 - initialPosition }% 0 0)` } }
 						>
 							<img src={ beforeImageUrl } alt="" />
 							{ beforeLabel && (
@@ -239,8 +255,7 @@ function BeforeAfterEdit( props ) {
 						</div>
 						<div
 							className="frbl-before-after__handle"
-							style={ { left: `${ editorPosition }%` } }
-							onMouseDown={ handleMouseDown }
+							style={ { left: `${ initialPosition }%` } }
 						>
 							<span className="frbl-before-after__handle-line"></span>
 							<span className="frbl-before-after__handle-thumb">

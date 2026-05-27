@@ -1,15 +1,8 @@
 "use strict";
 
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 var registerBlockType = wp.blocks.registerBlockType;
 var _wp$element = wp.element,
   Fragment = _wp$element.Fragment,
-  useState = _wp$element.useState,
   useEffect = _wp$element.useEffect,
   useRef = _wp$element.useRef;
 var _wp$blockEditor = wp.blockEditor,
@@ -43,36 +36,54 @@ function BeforeAfterEdit(props) {
     fixedHeight = attributes.fixedHeight;
   var blockProps = useBlockProps();
   var hasImages = beforeImageUrl && afterImageUrl;
-  var _useState = useState(initialPosition),
-    _useState2 = _slicedToArray(_useState, 2),
-    editorPosition = _useState2[0],
-    setEditorPosition = _useState2[1];
-  var isDragging = useRef(false);
   var containerRef = useRef(null);
+
+  // Imperative drag logic — mirrors frontend JS, uses ownerDocument for iframe support.
   useEffect(function () {
-    setEditorPosition(initialPosition);
-  }, [initialPosition]);
-  function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
-  }
-  function getPosFromEvent(e) {
-    var rect = containerRef.current.getBoundingClientRect();
-    var clientX = e.touches && e.touches.length ? e.touches[0].clientX : e.clientX;
-    return clamp((clientX - rect.left) / rect.width * 100, 0, 100);
-  }
-  function handleMouseDown(e) {
-    isDragging.current = true;
-    e.preventDefault();
-  }
-  function handleMouseMove(e) {
-    if (!isDragging.current) {
+    if (!containerRef.current || !hasImages) {
       return;
     }
-    setEditorPosition(getPosFromEvent(e));
-  }
-  function handleMouseUp() {
-    isDragging.current = false;
-  }
+    var block = containerRef.current;
+    var beforeEl = block.querySelector('.frbl-before-after__before');
+    var handle = block.querySelector('.frbl-before-after__handle');
+    if (!beforeEl || !handle) {
+      return;
+    }
+    var dragging = false;
+    var doc = block.ownerDocument;
+    function setPos(pos) {
+      pos = Math.max(0, Math.min(100, pos));
+      beforeEl.style.clipPath = 'inset(0 ' + (100 - pos) + '% 0 0)';
+      handle.style.left = pos + '%';
+    }
+    function getPos(e) {
+      var rect = block.getBoundingClientRect();
+      return (e.clientX - rect.left) / rect.width * 100;
+    }
+    setPos(initialPosition);
+    function onMouseDown(e) {
+      dragging = true;
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    function onMouseMove(e) {
+      if (!dragging) {
+        return;
+      }
+      setPos(getPos(e));
+    }
+    function onMouseUp() {
+      dragging = false;
+    }
+    handle.addEventListener('mousedown', onMouseDown);
+    doc.addEventListener('mousemove', onMouseMove);
+    doc.addEventListener('mouseup', onMouseUp);
+    return function () {
+      handle.removeEventListener('mousedown', onMouseDown);
+      doc.removeEventListener('mousemove', onMouseMove);
+      doc.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [hasImages, beforeImageUrl, afterImageUrl, initialPosition]);
   return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Before Image', 'frontblocks'),
     initialOpen: true
@@ -223,10 +234,7 @@ function BeforeAfterEdit(props) {
     "data-initial-position": initialPosition,
     style: fixedHeight && blockHeight ? {
       height: blockHeight + 'px'
-    } : {},
-    onMouseMove: handleMouseMove,
-    onMouseUp: handleMouseUp,
-    onMouseLeave: handleMouseUp
+    } : {}
   }, /*#__PURE__*/React.createElement("div", {
     className: "frbl-before-after__after"
   }, /*#__PURE__*/React.createElement("img", {
@@ -237,7 +245,7 @@ function BeforeAfterEdit(props) {
   }, afterLabel)), /*#__PURE__*/React.createElement("div", {
     className: "frbl-before-after__before",
     style: {
-      clipPath: "inset(0 ".concat(100 - editorPosition, "% 0 0)")
+      clipPath: "inset(0 ".concat(100 - initialPosition, "% 0 0)")
     }
   }, /*#__PURE__*/React.createElement("img", {
     src: beforeImageUrl,
@@ -247,9 +255,8 @@ function BeforeAfterEdit(props) {
   }, beforeLabel)), /*#__PURE__*/React.createElement("div", {
     className: "frbl-before-after__handle",
     style: {
-      left: "".concat(editorPosition, "%")
-    },
-    onMouseDown: handleMouseDown
+      left: "".concat(initialPosition, "%")
+    }
   }, /*#__PURE__*/React.createElement("span", {
     className: "frbl-before-after__handle-line"
   }), /*#__PURE__*/React.createElement("span", {
