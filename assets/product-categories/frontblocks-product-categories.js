@@ -94,6 +94,17 @@ function ProductCategoriesEdit(props) {
     hoverTextColor = attributes.hoverTextColor,
     showButton = attributes.showButton,
     buttonText = attributes.buttonText,
+    btnBgColor = attributes.btnBgColor,
+    btnTextColor = attributes.btnTextColor,
+    btnBorderColor = attributes.btnBorderColor,
+    btnBorderWidth = attributes.btnBorderWidth,
+    btnBorderRadius = attributes.btnBorderRadius,
+    btnFontSize = attributes.btnFontSize,
+    btnPaddingV = attributes.btnPaddingV,
+    btnPaddingH = attributes.btnPaddingH,
+    btnHoverBgColor = attributes.btnHoverBgColor,
+    btnHoverTextColor = attributes.btnHoverTextColor,
+    btnHoverBorderColor = attributes.btnHoverBorderColor,
     className = attributes.className;
   var _useState = useState([]),
     _useState2 = _slicedToArray(_useState, 2),
@@ -137,7 +148,18 @@ function ProductCategoriesEdit(props) {
     '--frbl-hover-bg-color': hoverBgColor,
     '--frbl-hover-border-color': hoverBorderColor,
     '--frbl-hover-text-color': hoverTextColor,
-    '--frbl-border-radius': "".concat(borderRadius, "px")
+    '--frbl-border-radius': "".concat(borderRadius, "px"),
+    '--frbl-btn-bg': btnBgColor || 'transparent',
+    '--frbl-btn-color': btnTextColor || 'currentColor',
+    '--frbl-btn-border-color': btnBorderColor || 'currentColor',
+    '--frbl-btn-border-width': "".concat(btnBorderWidth, "px"),
+    '--frbl-btn-border-radius': "".concat(btnBorderRadius, "px"),
+    '--frbl-btn-font-size': "".concat(btnFontSize, "px"),
+    '--frbl-btn-padding-v': "".concat(btnPaddingV, "px"),
+    '--frbl-btn-padding-h': "".concat(btnPaddingH, "px"),
+    '--frbl-btn-hover-bg': btnHoverBgColor || 'transparent',
+    '--frbl-btn-hover-color': btnHoverTextColor || 'currentColor',
+    '--frbl-btn-hover-border-color': btnHoverBorderColor || 'currentColor'
   };
   return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Product Categories Settings', 'frontblocks'),
@@ -327,6 +349,127 @@ function ProductCategoriesEdit(props) {
         }
       }));
     }
+  })), showButton && /*#__PURE__*/React.createElement(PanelBody, {
+    title: __('Button Style', 'frontblocks'),
+    initialOpen: false
+  }, /*#__PURE__*/React.createElement(RangeControl, {
+    label: __('Font Size (px)', 'frontblocks'),
+    value: btnFontSize,
+    onChange: function onChange(v) {
+      return setAttributes({
+        btnFontSize: v
+      });
+    },
+    min: 10,
+    max: 40
+  }), /*#__PURE__*/React.createElement(RangeControl, {
+    label: __('Padding Vertical (px)', 'frontblocks'),
+    value: btnPaddingV,
+    onChange: function onChange(v) {
+      return setAttributes({
+        btnPaddingV: v
+      });
+    },
+    min: 0,
+    max: 60
+  }), /*#__PURE__*/React.createElement(RangeControl, {
+    label: __('Padding Horizontal (px)', 'frontblocks'),
+    value: btnPaddingH,
+    onChange: function onChange(v) {
+      return setAttributes({
+        btnPaddingH: v
+      });
+    },
+    min: 0,
+    max: 100
+  }), /*#__PURE__*/React.createElement(RangeControl, {
+    label: __('Border Width (px)', 'frontblocks'),
+    value: btnBorderWidth,
+    onChange: function onChange(v) {
+      return setAttributes({
+        btnBorderWidth: v
+      });
+    },
+    min: 0,
+    max: 10
+  }), /*#__PURE__*/React.createElement(RangeControl, {
+    label: __('Border Radius (px)', 'frontblocks'),
+    value: btnBorderRadius,
+    onChange: function onChange(v) {
+      return setAttributes({
+        btnBorderRadius: v
+      });
+    },
+    min: 0,
+    max: 50
+  }), /*#__PURE__*/React.createElement(TabPanel, {
+    className: "frbl-style-tabs",
+    tabs: [{
+      name: 'normal',
+      title: __('Normal', 'frontblocks'),
+      className: 'tab-normal'
+    }, {
+      name: 'hover',
+      title: __('Hover', 'frontblocks'),
+      className: 'tab-hover'
+    }]
+  }, function (tab) {
+    if (tab.name === 'normal') {
+      return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Background', 'frontblocks'),
+        color: btnBgColor,
+        enableAlpha: true,
+        onChangeComplete: function onChangeComplete(v) {
+          return setAttributes({
+            btnBgColor: v.rgb ? "rgba(".concat(v.rgb.r, ",").concat(v.rgb.g, ",").concat(v.rgb.b, ",").concat(v.rgb.a, ")") : v.hex
+          });
+        }
+      }), /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Text Color', 'frontblocks'),
+        color: btnTextColor,
+        onChangeComplete: function onChangeComplete(v) {
+          return setAttributes({
+            btnTextColor: v.hex
+          });
+        }
+      }), /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Border Color', 'frontblocks'),
+        color: btnBorderColor,
+        onChangeComplete: function onChangeComplete(v) {
+          return setAttributes({
+            btnBorderColor: v.hex
+          });
+        }
+      }));
+    }
+    if (tab.name === 'hover') {
+      return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Background', 'frontblocks'),
+        color: btnHoverBgColor,
+        enableAlpha: true,
+        onChangeComplete: function onChangeComplete(v) {
+          return setAttributes({
+            btnHoverBgColor: v.rgb ? "rgba(".concat(v.rgb.r, ",").concat(v.rgb.g, ",").concat(v.rgb.b, ",").concat(v.rgb.a, ")") : v.hex
+          });
+        }
+      }), /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Text Color', 'frontblocks'),
+        color: btnHoverTextColor,
+        onChangeComplete: function onChangeComplete(v) {
+          return setAttributes({
+            btnHoverTextColor: v.hex
+          });
+        }
+      }), /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Border Color', 'frontblocks'),
+        color: btnHoverBorderColor,
+        onChangeComplete: function onChangeComplete(v) {
+          return setAttributes({
+            btnHoverBorderColor: v.hex
+          });
+        }
+      }));
+    }
   }))), /*#__PURE__*/React.createElement("div", blockProps, isLoading ? /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: 'center',
@@ -439,6 +582,50 @@ registerBlockType('frontblocks/product-categories', {
       default: false
     },
     buttonText: {
+      type: 'string',
+      default: ''
+    },
+    btnBgColor: {
+      type: 'string',
+      default: 'transparent'
+    },
+    btnTextColor: {
+      type: 'string',
+      default: ''
+    },
+    btnBorderColor: {
+      type: 'string',
+      default: ''
+    },
+    btnBorderWidth: {
+      type: 'number',
+      default: 2
+    },
+    btnBorderRadius: {
+      type: 'number',
+      default: 4
+    },
+    btnFontSize: {
+      type: 'number',
+      default: 14
+    },
+    btnPaddingV: {
+      type: 'number',
+      default: 10
+    },
+    btnPaddingH: {
+      type: 'number',
+      default: 20
+    },
+    btnHoverBgColor: {
+      type: 'string',
+      default: ''
+    },
+    btnHoverTextColor: {
+      type: 'string',
+      default: ''
+    },
+    btnHoverBorderColor: {
       type: 'string',
       default: ''
     }

@@ -225,11 +225,55 @@ class ProductCategories {
 					'type'    => 'string',
 					'default' => 'inherit',
 				),
-				'showButton'       => array(
+				'showButton'          => array(
 					'type'    => 'boolean',
 					'default' => false,
 				),
-				'buttonText'       => array(
+				'buttonText'          => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'btnBgColor'          => array(
+					'type'    => 'string',
+					'default' => 'transparent',
+				),
+				'btnTextColor'        => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'btnBorderColor'      => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'btnBorderWidth'      => array(
+					'type'    => 'number',
+					'default' => 2,
+				),
+				'btnBorderRadius'     => array(
+					'type'    => 'number',
+					'default' => 4,
+				),
+				'btnFontSize'         => array(
+					'type'    => 'number',
+					'default' => 14,
+				),
+				'btnPaddingV'         => array(
+					'type'    => 'number',
+					'default' => 10,
+				),
+				'btnPaddingH'         => array(
+					'type'    => 'number',
+					'default' => 20,
+				),
+				'btnHoverBgColor'     => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'btnHoverTextColor'   => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'btnHoverBorderColor' => array(
 					'type'    => 'string',
 					'default' => '',
 				),
@@ -270,8 +314,19 @@ class ProductCategories {
 		$hover_bg_color     = sanitize_text_field( $attributes['hoverBgColor'] ?? 'rgba(255, 255, 255, 0.7)' );
 		$hover_border_color = sanitize_text_field( $attributes['hoverBorderColor'] ?? '#555555' );
 		$hover_text_color   = sanitize_text_field( $attributes['hoverTextColor'] ?? 'inherit' );
-		$show_button        = ! empty( $attributes['showButton'] );
-		$button_text        = sanitize_text_field( $attributes['buttonText'] ?? '' );
+		$show_button           = ! empty( $attributes['showButton'] );
+		$button_text           = sanitize_text_field( $attributes['buttonText'] ?? '' );
+		$btn_bg_color          = sanitize_text_field( $attributes['btnBgColor'] ?? 'transparent' );
+		$btn_text_color        = sanitize_text_field( $attributes['btnTextColor'] ?? '' );
+		$btn_border_color      = sanitize_text_field( $attributes['btnBorderColor'] ?? '' );
+		$btn_border_width      = absint( $attributes['btnBorderWidth'] ?? 2 );
+		$btn_border_radius     = absint( $attributes['btnBorderRadius'] ?? 4 );
+		$btn_font_size         = absint( $attributes['btnFontSize'] ?? 14 );
+		$btn_padding_v         = absint( $attributes['btnPaddingV'] ?? 10 );
+		$btn_padding_h         = absint( $attributes['btnPaddingH'] ?? 20 );
+		$btn_hover_bg_color    = sanitize_text_field( $attributes['btnHoverBgColor'] ?? '' );
+		$btn_hover_text_color  = sanitize_text_field( $attributes['btnHoverTextColor'] ?? '' );
+		$btn_hover_border_color = sanitize_text_field( $attributes['btnHoverBorderColor'] ?? '' );
 
 		/**
 		 * Lógica para "Mostrar todas"
@@ -303,7 +358,7 @@ class ProductCategories {
 		}
 
 		$style_vars = sprintf(
-			'--frbl-grid-columns: %d; --frbl-bg-color: %s; --frbl-border-color: %s; --frbl-border-width: %dpx; --frbl-text-color: %s; --frbl-hover-bg-color: %s; --frbl-hover-border-color: %s; --frbl-hover-text-color: %s; --frbl-border-radius: %dpx;',
+			'--frbl-grid-columns:%d;--frbl-bg-color:%s;--frbl-border-color:%s;--frbl-border-width:%dpx;--frbl-text-color:%s;--frbl-hover-bg-color:%s;--frbl-hover-border-color:%s;--frbl-hover-text-color:%s;--frbl-border-radius:%dpx;--frbl-btn-bg:%s;--frbl-btn-color:%s;--frbl-btn-border-color:%s;--frbl-btn-border-width:%dpx;--frbl-btn-border-radius:%dpx;--frbl-btn-font-size:%dpx;--frbl-btn-padding-v:%dpx;--frbl-btn-padding-h:%dpx;--frbl-btn-hover-bg:%s;--frbl-btn-hover-color:%s;--frbl-btn-hover-border-color:%s;',
 			$columns,
 			$bg_color,
 			$border_color,
@@ -312,7 +367,18 @@ class ProductCategories {
 			$hover_bg_color,
 			$hover_border_color,
 			$hover_text_color,
-			$border_radius
+			$border_radius,
+			$btn_bg_color,
+			$btn_text_color ? $btn_text_color : 'currentColor',
+			$btn_border_color ? $btn_border_color : 'currentColor',
+			$btn_border_width,
+			$btn_border_radius,
+			$btn_font_size,
+			$btn_padding_v,
+			$btn_padding_h,
+			$btn_hover_bg_color ? $btn_hover_bg_color : 'transparent',
+			$btn_hover_text_color ? $btn_hover_text_color : 'currentColor',
+			$btn_hover_border_color ? $btn_hover_border_color : 'currentColor'
 		);
 
 		ob_start();

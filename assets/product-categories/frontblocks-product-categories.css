@@ -54,19 +54,21 @@
 .frbl-product-categories-grid .frbl-category-button {
     display: block;
     margin: 16px 0;
-    padding: 10px 20px;
-    border: 2px solid var(--frbl-text-color, currentColor);
-    border-radius: 4px;
-    font-size: 0.875em;
+    padding: var(--frbl-btn-padding-v, 10px) var(--frbl-btn-padding-h, 20px);
+    background-color: var(--frbl-btn-bg, transparent);
+    color: var(--frbl-btn-color, currentColor);
+    border: var(--frbl-btn-border-width, 2px) solid var(--frbl-btn-border-color, currentColor);
+    border-radius: var(--frbl-btn-border-radius, 4px);
+    font-size: var(--frbl-btn-font-size, 14px);
     font-weight: 600;
     text-align: center;
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .frbl-product-categories-grid .frbl-category-link:hover .frbl-category-button {
-    background-color: var(--frbl-hover-text-color, currentColor);
-    color: var(--frbl-hover-bg-color, #fff);
-    border-color: var(--frbl-hover-text-color, currentColor);
+    background-color: var(--frbl-btn-hover-bg, transparent);
+    color: var(--frbl-btn-hover-color, currentColor);
+    border-color: var(--frbl-btn-hover-border-color, currentColor);
 }
 
 html :where([style*=border-width]) {

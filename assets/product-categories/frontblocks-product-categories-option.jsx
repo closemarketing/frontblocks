@@ -64,6 +64,17 @@ function ProductCategoriesEdit(props) {
       hoverTextColor,
       showButton,
       buttonText,
+      btnBgColor,
+      btnTextColor,
+      btnBorderColor,
+      btnBorderWidth,
+      btnBorderRadius,
+      btnFontSize,
+      btnPaddingV,
+      btnPaddingH,
+      btnHoverBgColor,
+      btnHoverTextColor,
+      btnHoverBorderColor,
       className,
    } = attributes;
 
@@ -116,6 +127,17 @@ function ProductCategoriesEdit(props) {
       '--frbl-hover-border-color': hoverBorderColor,
       '--frbl-hover-text-color': hoverTextColor,
       '--frbl-border-radius': `${borderRadius}px`,
+      '--frbl-btn-bg': btnBgColor || 'transparent',
+      '--frbl-btn-color': btnTextColor || 'currentColor',
+      '--frbl-btn-border-color': btnBorderColor || 'currentColor',
+      '--frbl-btn-border-width': `${btnBorderWidth}px`,
+      '--frbl-btn-border-radius': `${btnBorderRadius}px`,
+      '--frbl-btn-font-size': `${btnFontSize}px`,
+      '--frbl-btn-padding-v': `${btnPaddingV}px`,
+      '--frbl-btn-padding-h': `${btnPaddingH}px`,
+      '--frbl-btn-hover-bg': btnHoverBgColor || 'transparent',
+      '--frbl-btn-hover-color': btnHoverTextColor || 'currentColor',
+      '--frbl-btn-hover-border-color': btnHoverBorderColor || 'currentColor',
    };
 
    return (
@@ -270,6 +292,96 @@ function ProductCategoriesEdit(props) {
                   }}
                </TabPanel>
             </PanelBody>
+
+            { showButton && (
+               <PanelBody title={ __( 'Button Style', 'frontblocks' ) } initialOpen={ false }>
+                  <RangeControl
+                     label={ __( 'Font Size (px)', 'frontblocks' ) }
+                     value={ btnFontSize }
+                     onChange={ (v) => setAttributes({ btnFontSize: v }) }
+                     min={ 10 } max={ 40 }
+                  />
+                  <RangeControl
+                     label={ __( 'Padding Vertical (px)', 'frontblocks' ) }
+                     value={ btnPaddingV }
+                     onChange={ (v) => setAttributes({ btnPaddingV: v }) }
+                     min={ 0 } max={ 60 }
+                  />
+                  <RangeControl
+                     label={ __( 'Padding Horizontal (px)', 'frontblocks' ) }
+                     value={ btnPaddingH }
+                     onChange={ (v) => setAttributes({ btnPaddingH: v }) }
+                     min={ 0 } max={ 100 }
+                  />
+                  <RangeControl
+                     label={ __( 'Border Width (px)', 'frontblocks' ) }
+                     value={ btnBorderWidth }
+                     onChange={ (v) => setAttributes({ btnBorderWidth: v }) }
+                     min={ 0 } max={ 10 }
+                  />
+                  <RangeControl
+                     label={ __( 'Border Radius (px)', 'frontblocks' ) }
+                     value={ btnBorderRadius }
+                     onChange={ (v) => setAttributes({ btnBorderRadius: v }) }
+                     min={ 0 } max={ 50 }
+                  />
+
+                  <TabPanel
+                     className="frbl-style-tabs"
+                     tabs={ [
+                        { name: 'normal', title: __( 'Normal', 'frontblocks' ), className: 'tab-normal' },
+                        { name: 'hover',  title: __( 'Hover',  'frontblocks' ), className: 'tab-hover'  },
+                     ] }
+                  >
+                     { (tab) => {
+                        if ( tab.name === 'normal' ) {
+                           return (
+                              <Fragment>
+                                 <CompactColorPicker
+                                    label={ __( 'Background', 'frontblocks' ) }
+                                    color={ btnBgColor }
+                                    enableAlpha={ true }
+                                    onChangeComplete={ (v) => setAttributes({ btnBgColor: v.rgb ? `rgba(${v.rgb.r},${v.rgb.g},${v.rgb.b},${v.rgb.a})` : v.hex }) }
+                                 />
+                                 <CompactColorPicker
+                                    label={ __( 'Text Color', 'frontblocks' ) }
+                                    color={ btnTextColor }
+                                    onChangeComplete={ (v) => setAttributes({ btnTextColor: v.hex }) }
+                                 />
+                                 <CompactColorPicker
+                                    label={ __( 'Border Color', 'frontblocks' ) }
+                                    color={ btnBorderColor }
+                                    onChangeComplete={ (v) => setAttributes({ btnBorderColor: v.hex }) }
+                                 />
+                              </Fragment>
+                           );
+                        }
+                        if ( tab.name === 'hover' ) {
+                           return (
+                              <Fragment>
+                                 <CompactColorPicker
+                                    label={ __( 'Background', 'frontblocks' ) }
+                                    color={ btnHoverBgColor }
+                                    enableAlpha={ true }
+                                    onChangeComplete={ (v) => setAttributes({ btnHoverBgColor: v.rgb ? `rgba(${v.rgb.r},${v.rgb.g},${v.rgb.b},${v.rgb.a})` : v.hex }) }
+                                 />
+                                 <CompactColorPicker
+                                    label={ __( 'Text Color', 'frontblocks' ) }
+                                    color={ btnHoverTextColor }
+                                    onChangeComplete={ (v) => setAttributes({ btnHoverTextColor: v.hex }) }
+                                 />
+                                 <CompactColorPicker
+                                    label={ __( 'Border Color', 'frontblocks' ) }
+                                    color={ btnHoverBorderColor }
+                                    onChangeComplete={ (v) => setAttributes({ btnHoverBorderColor: v.hex }) }
+                                 />
+                              </Fragment>
+                           );
+                        }
+                     } }
+                  </TabPanel>
+               </PanelBody>
+            ) }
          </InspectorControls>
 
          <div {...blockProps}>
@@ -346,8 +458,19 @@ registerBlockType('frontblocks/product-categories', {
       hoverBgColor: { type: 'string', default: 'rgba(255, 255, 255, 0.7)' },
       hoverBorderColor: { type: 'string', default: '#555555' },
       hoverTextColor: { type: 'string', default: 'inherit' },
-      showButton: { type: 'boolean', default: false },
-      buttonText: { type: 'string', default: '' },
+      showButton:         { type: 'boolean', default: false },
+      buttonText:         { type: 'string',  default: '' },
+      btnBgColor:         { type: 'string',  default: 'transparent' },
+      btnTextColor:       { type: 'string',  default: '' },
+      btnBorderColor:     { type: 'string',  default: '' },
+      btnBorderWidth:     { type: 'number',  default: 2 },
+      btnBorderRadius:    { type: 'number',  default: 4 },
+      btnFontSize:        { type: 'number',  default: 14 },
+      btnPaddingV:        { type: 'number',  default: 10 },
+      btnPaddingH:        { type: 'number',  default: 20 },
+      btnHoverBgColor:    { type: 'string',  default: '' },
+      btnHoverTextColor:  { type: 'string',  default: '' },
+      btnHoverBorderColor:{ type: 'string',  default: '' },
    },
    edit: ProductCategoriesEdit,
    save: () => null,
