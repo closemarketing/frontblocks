@@ -133,6 +133,9 @@ class Plugin_Main {
 		// Block Patterns module (WordPress block patterns registration).
 		new Frontend\BlockPatterns();
 
+		// FAQ Schema module (FAQPage JSON-LD for core/details and GB accordion).
+		new Frontend\FaqSchema();
+
 		// Text Animation block.
 		new Frontend\TextAnimation();
 

@@ -4,8 +4,8 @@ Tags: carrusel, slider, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 1.3.4
-Version: 1.3.4
+Stable tag: 1.3.5
+Version: 1.3.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,10 +16,10 @@ Plugin extending Gutenberg and GeneratePress with carousel, slider, animations, 
 **Container Edge Alignment for GenerateBlocks**
 Add custom controls to GenerateBlocks Container blocks to remove padding from the left or right side, creating edge-to-edge layouts. This feature only appears for containers using GeneratePress global max-width settings, perfect for creating asymmetric layouts where content extends to one browser edge while maintaining proper spacing on the other side.
 
-**Carousel/Slider for GenerateBlocks Grid**
-We have added options to Gutenberg blocks that enable you to create a carousel or slider using your preferred blocks.
+**Carousel/Slider for GenerateBlocks Grid and Query Loop**
+We have added options to Gutenberg blocks that enable you to create a carousel or slider using your preferred blocks. Supported blocks include GenerateBlocks Grid, GenerateBlocks Element, core/group, and the native WordPress Query Loop (core/query).
 
-To start using the carousel, go to the grid block and select the 'Carousel' or 'Slider' option in the 'FrontBlocks Grid Options' section.
+To start using the carousel, go to the grid block or Query Loop block and select the 'Carousel' or 'Slider' option in the 'FrontBlocks Grid Options' section.
 
 Carousel/Slider attributes:
 - Autoplay: automatically changes the slides after a certain amount of time (in seconds).
@@ -76,7 +76,7 @@ Add an infinite scrolling marquee effect to Headline/Text blocks. The text scrol
 Display product categories from WooCommerce. Choose the number of categories to display, the order by and the order. You can also choose to hide empty categories. You can also select the number of columns in which to display the categories. You can also customise the background colour, border colour, border width, border radius, text colour, hover background colour, hover border colour and hover text colour.
 
 **Counter Block:**
-Display a counter with a start value, end value and duration. The counter will increment from the start value to the end value within the specified time frame.
+Display a counter with a start value, end value and duration. The counter will increment from the start value to the end value within the specified time frame. Compatible with GenerateBlocks text and headline blocks, as well as native WordPress core/heading and core/paragraph blocks.
 
 **Testimonials:**
 Display testimonials from other posts, pages or custom post types. Search and select any published content to display its title as an H2 heading and its full content. This is perfect for creating dynamic content sections without duplicating content.
@@ -134,6 +134,9 @@ Features:
 - Initial slider position control (0–100%) to choose how much of each image is revealed on load.
 - Fixed height mode with a configurable pixel value, keeping the block compact regardless of image proportions.
 
+**FAQ Schema (JSON-LD):**
+Automatically generate FAQPage structured data for search engines. Enable the "FAQ Schema" toggle in any accordion block (core/details) to mark it as an FAQ item. FrontBlocks collects all enabled items on the page and outputs a valid FAQPage JSON-LD script in the footer, improving your chances of appearing as rich results in Google Search.
+
 **Gravity Forms Inline Layout:**
 Display Gravity Forms with fields and buttons on the same line. Perfect for newsletter signup forms (email + subscribe button) or search forms (input + search button). 
 
@@ -178,6 +181,11 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 2. Go to Settings > FrontBlocks > Features and enable the features you want to use.
 
 == Changelog ==
+
+== 1.3.5 ==
+*   Added: FAQ Schema — automatically generates FAQPage JSON-LD structured data from accordion blocks (core/details) marked as FAQ items, improving SEO visibility in search engines.
+*   Added: Carousel/Slider support for WordPress core Query Loop block (core/query) — use the FrontBlocks carousel options directly on native Query Loop blocks.
+*   Improved: Counter block now works with native WordPress blocks (core/heading, core/paragraph) in addition to GenerateBlocks text and headline blocks.
 
 == 1.3.4 ==
 *   Added: Text Animation block with 30+ animation types — fade-in, typewriter, shuffle-text, slide-up/down/left/right, drop-in, swing, pulse, flash, rubber-band, wave, stretch, squeeze, roll-in, glitch, glitch-rgb, random-reveal, flicker, block-reveal, tracking-expand, terminal-type, solid-outline, water-drop, shadow-pop, scale-in, blur-in, glow-in, bounce-in, flip-in, rotate-in.
