@@ -345,7 +345,7 @@ function addCustomCarouselPanel( BlockEdit ) {
 				<BlockEdit { ...props } />
 				<InspectorControls>
 					<PanelBody
-						title={ __( 'FrontBlocks: Carousel', 'frontblocks' ) }
+						title={ __( 'FrontBlocks - Carousel', 'frontblocks' ) }
 						initialOpen={ true }
 					>
 						<SelectControl

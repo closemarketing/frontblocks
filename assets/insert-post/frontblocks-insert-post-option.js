@@ -271,7 +271,7 @@ function InsertPostBlock(props) {
 // Register the custom block
 var registerBlockType = wp.blocks.registerBlockType;
 registerBlockType('frontblocks/insert-post', {
-  title: __('FrontBlocks: Insert Post', 'frontblocks'),
+  title: __('FrontBlocks - Insert Post', 'frontblocks'),
   description: __('Display content from another post or page', 'frontblocks'),
   category: 'generateblocks',
   icon: 'admin-post',
@@ -317,7 +317,7 @@ function addInsertPostPanel(BlockEdit) {
     var _props$attributes$frb = props.attributes.frblInsertPostEnabled,
       frblInsertPostEnabled = _props$attributes$frb === void 0 ? false : _props$attributes$frb;
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
-      title: __('FrontBlocks: Insert Post', 'frontblocks'),
+      title: __('FrontBlocks - Insert Post', 'frontblocks'),
       initialOpen: false
     }, /*#__PURE__*/React.createElement(ToggleControl, {
       label: __('Enable Insert Post Grid', 'frontblocks'),

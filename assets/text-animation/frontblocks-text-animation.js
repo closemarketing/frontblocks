@@ -1884,7 +1884,7 @@ function TextAnimationEdit(props) {
   })));
 }
 registerBlockType('frontblocks/text-animation', {
-  title: __('FrontBlocks: Text Animation', 'frontblocks'),
+  title: __('FrontBlocks - Text Animation', 'frontblocks'),
   description: __('Animated text block with typography controls. Add animation effects from the sidebar.', 'frontblocks'),
   category: 'text',
   icon: 'editor-textcolor',

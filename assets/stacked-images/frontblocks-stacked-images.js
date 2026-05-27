@@ -188,7 +188,7 @@ function StackedImagesEdit(props) {
 
 // Register the block.
 registerBlockType('frontblocks/stacked-images', {
-  title: __('FrontBlocks: Stacked Images', 'frontblocks'),
+  title: __('FrontBlocks - Stacked Images', 'frontblocks'),
   description: __('Display images with stacked animation effect from different directions.', 'frontblocks'),
   category: 'media',
   icon: 'format-gallery',
