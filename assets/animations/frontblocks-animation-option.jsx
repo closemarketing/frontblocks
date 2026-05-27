@@ -468,7 +468,7 @@ function addAnimationControls(BlockEdit) {
                 <BlockEdit {...props} />
                 <InspectorControls>
                     <PanelBody
-                        title={__('Animations', 'frontblocks')}
+                        title={__('FrontBlocks: Animations', 'frontblocks')}
                         initialOpen={false}
                     >
                         <SelectControl
@@ -535,7 +535,7 @@ function addAnimationControls(BlockEdit) {
                     </PanelBody>
 
                     <PanelBody
-                        title={__('Container Effects', 'frontblocks')}
+                        title={__('FrontBlocks: Container Effects', 'frontblocks')}
                         initialOpen={false}
                     >
                         <ToggleControl

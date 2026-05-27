@@ -32,7 +32,7 @@ addFilter('editor.BlockEdit', 'frontblocks/faq-schema-controls', function (Block
     var _props$attributes$frb = props.attributes.frblFaqSchema,
       frblFaqSchema = _props$attributes$frb === void 0 ? false : _props$attributes$frb;
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
-      title: __('FAQ Schema', 'frontblocks'),
+      title: __('FrontBlocks: FAQ Schema', 'frontblocks'),
       initialOpen: false
     }, /*#__PURE__*/React.createElement(ToggleControl, {
       label: __('Add FAQ Schema (JSON-LD)', 'frontblocks'),

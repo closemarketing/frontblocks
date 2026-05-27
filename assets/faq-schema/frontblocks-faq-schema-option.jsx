@@ -40,7 +40,7 @@ addFilter(
 				<BlockEdit { ...props } />
 				<InspectorControls>
 					<PanelBody
-						title={ __( 'FAQ Schema', 'frontblocks' ) }
+						title={ __( 'FrontBlocks: FAQ Schema', 'frontblocks' ) }
 						initialOpen={ false }
 					>
 						<ToggleControl

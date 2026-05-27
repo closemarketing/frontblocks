@@ -222,7 +222,7 @@ function BeforeAfterEdit( props ) {
 
 // Register the block.
 registerBlockType( 'frontblocks/before-after', {
-	title: __( 'Before After', 'frontblocks' ),
+	title: __( 'FrontBlocks: Before After', 'frontblocks' ),
 	description: __( 'Compare two images with a draggable before/after slider.', 'frontblocks' ),
 	category: 'media',
 	icon: 'image-flip-horizontal',
