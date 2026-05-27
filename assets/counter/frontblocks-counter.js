@@ -13,40 +13,38 @@ var _wp$data = wp.data,
   select = _wp$data.select,
   dispatch = _wp$data.dispatch;
 var __ = wp.i18n.__;
+var COUNTER_BLOCKS = ['generateblocks/text', 'generateblocks/headline', 'core/heading', 'core/paragraph'];
 wp.hooks.addFilter('blocks.registerBlockType', 'frontblocks/add-counter-attribute', function (settings, name) {
-  if (name === 'generateblocks/text' || name === 'generateblocks/headline') {
-    settings.attributes = Object.assign(settings.attributes, {
-      isCounterActive: {
-        type: 'boolean',
-        default: false
-      },
-      animationDuration: {
-        type: 'number',
-        default: 2000
-      },
-      startNumber: {
-        type: 'string',
-        default: '0'
-      },
-      finalNumber: {
-        type: 'string',
-        default: ''
-      },
-      numberPrefix: {
-        type: 'string',
-        default: ''
-      },
-      numberSuffix: {
-        type: 'string',
-        default: ''
-      }
-    });
+  if (!COUNTER_BLOCKS.includes(name)) {
+    return settings;
   }
+  settings.attributes = Object.assign(settings.attributes, {
+    isCounterActive: {
+      type: 'boolean',
+      default: false
+    },
+    animationDuration: {
+      type: 'number',
+      default: 2000
+    },
+    finalNumber: {
+      type: 'string',
+      default: ''
+    },
+    numberPrefix: {
+      type: 'string',
+      default: ''
+    },
+    numberSuffix: {
+      type: 'string',
+      default: ''
+    }
+  });
   return settings;
 });
-var withHeadlineCounterControl = createHigherOrderComponent(function (BlockEdit) {
+var withCounterControl = createHigherOrderComponent(function (BlockEdit) {
   return function (props) {
-    if (props.name !== BLOCK_NAME) {
+    if (!COUNTER_BLOCKS.includes(props.name)) {
       return /*#__PURE__*/React.createElement(BlockEdit, props);
     }
     var attributes = props.attributes,
@@ -54,29 +52,28 @@ var withHeadlineCounterControl = createHigherOrderComponent(function (BlockEdit)
       clientId = props.clientId;
     var isCounterActive = attributes.isCounterActive,
       animationDuration = attributes.animationDuration,
-      startNumber = attributes.startNumber,
       finalNumber = attributes.finalNumber,
       numberPrefix = attributes.numberPrefix,
       numberSuffix = attributes.numberSuffix;
     var durationInSeconds = animationDuration / 1000;
     useEffect(function () {
-      if (isCounterActive) {
+      if (isCounterActive && finalNumber) {
         var block = select('core/block-editor').getBlock(clientId);
         if (!block) return;
         var formattedNumber = "".concat(numberPrefix).concat(finalNumber).concat(numberSuffix);
-        if (finalNumber && block.attributes.content !== formattedNumber) {
+        if (block.attributes.content !== formattedNumber) {
           dispatch('core/block-editor').updateBlockAttributes(clientId, {
             content: formattedNumber
           });
         }
       }
-    }, [isCounterActive, startNumber, finalNumber, numberPrefix, numberSuffix, clientId]);
+    }, [isCounterActive, finalNumber, numberPrefix, numberSuffix, clientId]);
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
       title: __('FrontBlocks - Counter Effect', 'frontblocks'),
       initialOpen: false
     }, /*#__PURE__*/React.createElement(ToggleControl, {
       label: __('Activate Counter Effect', 'frontblocks'),
-      help: isCounterActive ? __('The number in the headline will animate on scroll.', 'frontblocks') : __('Enable to activate counting animation.', 'frontblocks'),
+      help: isCounterActive ? __('The number will animate on scroll.', 'frontblocks') : __('Enable to activate counting animation.', 'frontblocks'),
       checked: isCounterActive,
       onChange: function onChange(val) {
         return setAttributes({
@@ -84,15 +81,6 @@ var withHeadlineCounterControl = createHigherOrderComponent(function (BlockEdit)
         });
       }
     }), isCounterActive && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(TextControl, {
-      label: __('Start Number', 'frontblocks'),
-      value: startNumber,
-      onChange: function onChange(val) {
-        return setAttributes({
-          startNumber: val
-        });
-      },
-      help: __('The number to start counting from (e.g.: 0).', 'frontblocks')
-    }), /*#__PURE__*/React.createElement(TextControl, {
       label: __('Final Number', 'frontblocks'),
       value: finalNumber,
       onChange: function onChange(val) {
@@ -100,7 +88,7 @@ var withHeadlineCounterControl = createHigherOrderComponent(function (BlockEdit)
           finalNumber: val
         });
       },
-      help: __('The number to count up to (e.g.: 100).', 'frontblocks')
+      help: __('Number to count up to (e.g.: 100).', 'frontblocks')
     }), /*#__PURE__*/React.createElement(TextControl, {
       label: __('Number Prefix', 'frontblocks'),
       value: numberPrefix,
@@ -109,7 +97,7 @@ var withHeadlineCounterControl = createHigherOrderComponent(function (BlockEdit)
           numberPrefix: val
         });
       },
-      help: __('Text to display before the number (e.g.: $, €).', 'frontblocks')
+      help: __('Text before the number (e.g.: $, €).', 'frontblocks')
     }), /*#__PURE__*/React.createElement(TextControl, {
       label: __('Number Suffix', 'frontblocks'),
       value: numberSuffix,
@@ -118,7 +106,7 @@ var withHeadlineCounterControl = createHigherOrderComponent(function (BlockEdit)
           numberSuffix: val
         });
       },
-      help: __('Text to display after the number (e.g.: %, +).', 'frontblocks')
+      help: __('Text after the number (e.g.: %, +).', 'frontblocks')
     }), /*#__PURE__*/React.createElement(TextControl, {
       label: __('Animation Duration (seconds)', 'frontblocks'),
       value: durationInSeconds,
@@ -131,14 +119,14 @@ var withHeadlineCounterControl = createHigherOrderComponent(function (BlockEdit)
       },
       type: "number",
       step: "0.1",
-      help: __('Time in seconds for the animation.', 'frontblocks')
+      help: __('Duration of the animation.', 'frontblocks')
     })), /*#__PURE__*/React.createElement("p", {
       style: {
         marginTop: '10px',
         fontSize: '12px',
         color: '#777'
       }
-    }, /*#__PURE__*/React.createElement("small", null, __("Make sure the text begins with a number (e.g., '123', '+500', or '€100').", 'frontblocks'))))));
+    }, /*#__PURE__*/React.createElement("small", null, __("Text must begin with a number (e.g., '123', '+500', '€100').", 'frontblocks'))))));
   };
-}, 'withHeadlineCounterControl');
-wp.hooks.addFilter('editor.BlockEdit', 'frontblocks/headline-counter-control', withHeadlineCounterControl);
+}, 'withCounterControl');
+wp.hooks.addFilter('editor.BlockEdit', 'frontblocks/counter-control', withCounterControl);
