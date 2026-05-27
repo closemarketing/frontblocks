@@ -511,7 +511,7 @@ function ProductCategoriesEdit(props) {
   }))));
 }
 registerBlockType('frontblocks/product-categories', {
-  title: __('Product Categories', 'frontblocks'),
+  title: __('FrontBlocks: Product Categories', 'frontblocks'),
   description: __('Display a list of WooCommerce Product Categories.', 'frontblocks'),
   category: 'woocommerce',
   icon: 'store',
