@@ -1,17 +1,48 @@
 const { registerBlockType } = wp.blocks;
 const { Fragment, useState, useEffect } = wp.element;
 const { InspectorControls, useBlockProps } = wp.blockEditor;
-const { 
-   PanelBody, 
-   RangeControl, 
-   SelectControl, 
+const {
+   PanelBody,
+   RangeControl,
+   SelectControl,
    ToggleControl,
-   ColorPicker, 
+   ColorPicker,
+   ColorIndicator,
+   Dropdown,
+   Button,
    TabPanel,
    Spinner,
 } = wp.components;
 const { __ } = wp.i18n;
 const apiFetch = wp.apiFetch;
+
+function CompactColorPicker( { label, color, onChangeComplete, enableAlpha } ) {
+   return (
+      <div style={ { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' } }>
+         <span style={ { fontSize: '12px' } }>{ label }</span>
+         <Dropdown
+            renderToggle={ ( { isOpen, onToggle } ) => (
+               <Button
+                  onClick={ onToggle }
+                  aria-expanded={ isOpen }
+                  style={ { padding: 0, minWidth: 0, background: 'none', border: 'none', boxShadow: 'none' } }
+               >
+                  <ColorIndicator colorValue={ color || 'transparent' } />
+               </Button>
+            ) }
+            renderContent={ () => (
+               <div style={ { padding: '8px' } }>
+                  <ColorPicker
+                     color={ color }
+                     onChangeComplete={ onChangeComplete }
+                     disableAlpha={ ! enableAlpha }
+                  />
+               </div>
+            ) }
+         />
+      </div>
+   );
+}
 
 function ProductCategoriesEdit(props) {
    const { attributes, setAttributes } = props;
@@ -47,8 +78,6 @@ function ProductCategoriesEdit(props) {
    const countLabel = count === 999 ? 
       __('Number of Categories (All)', 'frontblocks') : 
       __('Number of Categories', 'frontblocks');
-
-   const colorPickerCompactStyle = { maxWidth: '250px' };
 
    // Load categories from API.
    useEffect(() => {
@@ -178,60 +207,44 @@ function ProductCategoriesEdit(props) {
                      if (tab.name === 'normal') {
                         return (
                            <Fragment>
-                              <h4 style={{marginTop: '15px'}}>{__('Background Color', 'frontblocks')}</h4>
-                              <div style={colorPickerCompactStyle}>
-                                 <ColorPicker
-                                    color={bgColor}
-                                    onChangeComplete={(value) => setAttributes({ bgColor: value.rgb ? `rgba(${value.rgb.r}, ${value.rgb.g}, ${value.rgb.b}, ${value.rgb.a})` : value.hex })}
-                                    disableAlpha={false}
-                                 />
-                              </div>
-
-                              <h4 style={{marginTop: '15px'}}>{__('Border Color', 'frontblocks')}</h4>
-                              <div style={colorPickerCompactStyle}>
-                                 <ColorPicker
-                                    color={borderColor}
-                                    onChangeComplete={(value) => setAttributes({ borderColor: value.hex })}
-                                 />
-                              </div>
-
-                              <h4 style={{marginTop: '15px'}}>{__('Text Color', 'frontblocks')}</h4>
-                              <div style={colorPickerCompactStyle}>
-                                 <ColorPicker
-                                    color={textColor}
-                                    onChangeComplete={(value) => setAttributes({ textColor: value.hex })}
-                                 />
-                              </div>
+                              <CompactColorPicker
+                                 label={ __( 'Background Color', 'frontblocks' ) }
+                                 color={ bgColor }
+                                 enableAlpha={ true }
+                                 onChangeComplete={ (value) => setAttributes({ bgColor: value.rgb ? `rgba(${value.rgb.r}, ${value.rgb.g}, ${value.rgb.b}, ${value.rgb.a})` : value.hex }) }
+                              />
+                              <CompactColorPicker
+                                 label={ __( 'Border Color', 'frontblocks' ) }
+                                 color={ borderColor }
+                                 onChangeComplete={ (value) => setAttributes({ borderColor: value.hex }) }
+                              />
+                              <CompactColorPicker
+                                 label={ __( 'Text Color', 'frontblocks' ) }
+                                 color={ textColor }
+                                 onChangeComplete={ (value) => setAttributes({ textColor: value.hex }) }
+                              />
                            </Fragment>
                         );
                      }
                      if (tab.name === 'hover') {
                         return (
                            <Fragment>
-                              <h4 style={{marginTop: '15px'}}>{__('Hover Background Color', 'frontblocks')}</h4>
-                              <div style={colorPickerCompactStyle}>
-                                 <ColorPicker
-                                    color={hoverBgColor}
-                                    onChangeComplete={(value) => setAttributes({ hoverBgColor: value.rgb ? `rgba(${value.rgb.r}, ${value.rgb.g}, ${value.rgb.b}, ${value.rgb.a})` : value.hex })}
-                                    disableAlpha={false}
-                                 />
-                              </div>
-
-                              <h4 style={{marginTop: '15px'}}>{__('Hover Border Color', 'frontblocks')}</h4>
-                              <div style={colorPickerCompactStyle}>
-                                 <ColorPicker
-                                    color={hoverBorderColor}
-                                    onChangeComplete={(value) => setAttributes({ hoverBorderColor: value.hex })}
-                                 />
-                              </div>
-
-                              <h4 style={{marginTop: '15px'}}>{__('Hover Text Color', 'frontblocks')}</h4>
-                              <div style={colorPickerCompactStyle}>
-                                 <ColorPicker
-                                    color={hoverTextColor}
-                                    onChangeComplete={(value) => setAttributes({ hoverTextColor: value.hex })}
-                                 />
-                              </div>
+                              <CompactColorPicker
+                                 label={ __( 'Hover Background Color', 'frontblocks' ) }
+                                 color={ hoverBgColor }
+                                 enableAlpha={ true }
+                                 onChangeComplete={ (value) => setAttributes({ hoverBgColor: value.rgb ? `rgba(${value.rgb.r}, ${value.rgb.g}, ${value.rgb.b}, ${value.rgb.a})` : value.hex }) }
+                              />
+                              <CompactColorPicker
+                                 label={ __( 'Hover Border Color', 'frontblocks' ) }
+                                 color={ hoverBorderColor }
+                                 onChangeComplete={ (value) => setAttributes({ hoverBorderColor: value.hex }) }
+                              />
+                              <CompactColorPicker
+                                 label={ __( 'Hover Text Color', 'frontblocks' ) }
+                                 color={ hoverTextColor }
+                                 onChangeComplete={ (value) => setAttributes({ hoverTextColor: value.hex }) }
+                              />
                            </Fragment>
                         );
                      }

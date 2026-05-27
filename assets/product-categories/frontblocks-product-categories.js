@@ -20,10 +20,60 @@ var _wp$components = wp.components,
   SelectControl = _wp$components.SelectControl,
   ToggleControl = _wp$components.ToggleControl,
   ColorPicker = _wp$components.ColorPicker,
+  ColorIndicator = _wp$components.ColorIndicator,
+  Dropdown = _wp$components.Dropdown,
+  Button = _wp$components.Button,
   TabPanel = _wp$components.TabPanel,
   Spinner = _wp$components.Spinner;
 var __ = wp.i18n.__;
 var apiFetch = wp.apiFetch;
+function CompactColorPicker(_ref) {
+  var label = _ref.label,
+    color = _ref.color,
+    onChangeComplete = _ref.onChangeComplete,
+    enableAlpha = _ref.enableAlpha;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: '12px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: '12px'
+    }
+  }, label), /*#__PURE__*/React.createElement(Dropdown, {
+    renderToggle: function renderToggle(_ref2) {
+      var isOpen = _ref2.isOpen,
+        onToggle = _ref2.onToggle;
+      return /*#__PURE__*/React.createElement(Button, {
+        onClick: onToggle,
+        "aria-expanded": isOpen,
+        style: {
+          padding: 0,
+          minWidth: 0,
+          background: 'none',
+          border: 'none',
+          boxShadow: 'none'
+        }
+      }, /*#__PURE__*/React.createElement(ColorIndicator, {
+        colorValue: color || 'transparent'
+      }));
+    },
+    renderContent: function renderContent() {
+      return /*#__PURE__*/React.createElement("div", {
+        style: {
+          padding: '8px'
+        }
+      }, /*#__PURE__*/React.createElement(ColorPicker, {
+        color: color,
+        onChangeComplete: onChangeComplete,
+        disableAlpha: !enableAlpha
+      }));
+    }
+  }));
+}
 function ProductCategoriesEdit(props) {
   var attributes = props.attributes,
     setAttributes = props.setAttributes;
@@ -55,9 +105,6 @@ function ProductCategoriesEdit(props) {
   });
   var countHelpText = count === 999 ? __('Currently set to show ALL categories.', 'frontblocks') : __('Number of categories shown. Set to 999 to show all.', 'frontblocks');
   var countLabel = count === 999 ? __('Number of Categories (All)', 'frontblocks') : __('Number of Categories', 'frontblocks');
-  var colorPickerCompactStyle = {
-    maxWidth: '250px'
-  };
 
   // Load categories from API.
   useEffect(function () {
@@ -204,90 +251,60 @@ function ProductCategoriesEdit(props) {
     }]
   }, function (tab) {
     if (tab.name === 'normal') {
-      return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement("h4", {
-        style: {
-          marginTop: '15px'
-        }
-      }, __('Background Color', 'frontblocks')), /*#__PURE__*/React.createElement("div", {
-        style: colorPickerCompactStyle
-      }, /*#__PURE__*/React.createElement(ColorPicker, {
+      return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Background Color', 'frontblocks'),
         color: bgColor,
+        enableAlpha: true,
         onChangeComplete: function onChangeComplete(value) {
           return setAttributes({
             bgColor: value.rgb ? "rgba(".concat(value.rgb.r, ", ").concat(value.rgb.g, ", ").concat(value.rgb.b, ", ").concat(value.rgb.a, ")") : value.hex
           });
-        },
-        disableAlpha: false
-      })), /*#__PURE__*/React.createElement("h4", {
-        style: {
-          marginTop: '15px'
         }
-      }, __('Border Color', 'frontblocks')), /*#__PURE__*/React.createElement("div", {
-        style: colorPickerCompactStyle
-      }, /*#__PURE__*/React.createElement(ColorPicker, {
+      }), /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Border Color', 'frontblocks'),
         color: borderColor,
         onChangeComplete: function onChangeComplete(value) {
           return setAttributes({
             borderColor: value.hex
           });
         }
-      })), /*#__PURE__*/React.createElement("h4", {
-        style: {
-          marginTop: '15px'
-        }
-      }, __('Text Color', 'frontblocks')), /*#__PURE__*/React.createElement("div", {
-        style: colorPickerCompactStyle
-      }, /*#__PURE__*/React.createElement(ColorPicker, {
+      }), /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Text Color', 'frontblocks'),
         color: textColor,
         onChangeComplete: function onChangeComplete(value) {
           return setAttributes({
             textColor: value.hex
           });
         }
-      })));
+      }));
     }
     if (tab.name === 'hover') {
-      return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement("h4", {
-        style: {
-          marginTop: '15px'
-        }
-      }, __('Hover Background Color', 'frontblocks')), /*#__PURE__*/React.createElement("div", {
-        style: colorPickerCompactStyle
-      }, /*#__PURE__*/React.createElement(ColorPicker, {
+      return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Hover Background Color', 'frontblocks'),
         color: hoverBgColor,
+        enableAlpha: true,
         onChangeComplete: function onChangeComplete(value) {
           return setAttributes({
             hoverBgColor: value.rgb ? "rgba(".concat(value.rgb.r, ", ").concat(value.rgb.g, ", ").concat(value.rgb.b, ", ").concat(value.rgb.a, ")") : value.hex
           });
-        },
-        disableAlpha: false
-      })), /*#__PURE__*/React.createElement("h4", {
-        style: {
-          marginTop: '15px'
         }
-      }, __('Hover Border Color', 'frontblocks')), /*#__PURE__*/React.createElement("div", {
-        style: colorPickerCompactStyle
-      }, /*#__PURE__*/React.createElement(ColorPicker, {
+      }), /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Hover Border Color', 'frontblocks'),
         color: hoverBorderColor,
         onChangeComplete: function onChangeComplete(value) {
           return setAttributes({
             hoverBorderColor: value.hex
           });
         }
-      })), /*#__PURE__*/React.createElement("h4", {
-        style: {
-          marginTop: '15px'
-        }
-      }, __('Hover Text Color', 'frontblocks')), /*#__PURE__*/React.createElement("div", {
-        style: colorPickerCompactStyle
-      }, /*#__PURE__*/React.createElement(ColorPicker, {
+      }), /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Hover Text Color', 'frontblocks'),
         color: hoverTextColor,
         onChangeComplete: function onChangeComplete(value) {
           return setAttributes({
             hoverTextColor: value.hex
           });
         }
-      })));
+      }));
     }
   }))), /*#__PURE__*/React.createElement("div", blockProps, isLoading ? /*#__PURE__*/React.createElement("div", {
     style: {
