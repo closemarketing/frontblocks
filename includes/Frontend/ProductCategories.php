@@ -225,6 +225,14 @@ class ProductCategories {
 					'type'    => 'string',
 					'default' => 'inherit',
 				),
+				'showButton'       => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+				'buttonText'       => array(
+					'type'    => 'string',
+					'default' => '',
+				),
 			),
 		);
 
@@ -262,6 +270,8 @@ class ProductCategories {
 		$hover_bg_color     = sanitize_text_field( $attributes['hoverBgColor'] ?? 'rgba(255, 255, 255, 0.7)' );
 		$hover_border_color = sanitize_text_field( $attributes['hoverBorderColor'] ?? '#555555' );
 		$hover_text_color   = sanitize_text_field( $attributes['hoverTextColor'] ?? 'inherit' );
+		$show_button        = ! empty( $attributes['showButton'] );
+		$button_text        = sanitize_text_field( $attributes['buttonText'] ?? '' );
 
 		/**
 		 * Lógica para "Mostrar todas"
@@ -334,6 +344,11 @@ class ProductCategories {
 						<h3 class="frbl-category-name">
 							<?php echo esc_html( $category->name ); ?><?php echo $show_count ? ' (' . esc_html( $category->count ) . ')' : ''; ?>
 						</h3>
+						<?php if ( $show_button ) : ?>
+							<span class="frbl-category-button">
+								<?php echo esc_html( $button_text ? $button_text : __( 'Shop now', 'frontblocks' ) ); ?>
+							</span>
+						<?php endif; ?>
 					</a>
 				</div>
 			<?php endforeach; ?>

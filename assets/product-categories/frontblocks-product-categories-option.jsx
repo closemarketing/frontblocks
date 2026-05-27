@@ -6,6 +6,7 @@ const {
    RangeControl,
    SelectControl,
    ToggleControl,
+   TextControl,
    ColorPicker,
    ColorIndicator,
    Dropdown,
@@ -46,10 +47,10 @@ function CompactColorPicker( { label, color, onChangeComplete, enableAlpha } ) {
 
 function ProductCategoriesEdit(props) {
    const { attributes, setAttributes } = props;
-   const { 
-      count, 
-      orderby, 
-      order, 
+   const {
+      count,
+      orderby,
+      order,
       hideEmpty,
       showCount,
       columns,
@@ -61,6 +62,8 @@ function ProductCategoriesEdit(props) {
       hoverBgColor,
       hoverBorderColor,
       hoverTextColor,
+      showButton,
+      buttonText,
       className,
    } = attributes;
 
@@ -174,6 +177,22 @@ function ProductCategoriesEdit(props) {
                   onChange={(newShowCount) => setAttributes({ showCount: newShowCount })}
                   help={__('Display the number of products in each category.', 'frontblocks')}
                />
+
+               <ToggleControl
+                  label={__('Show Button', 'frontblocks')}
+                  checked={showButton}
+                  onChange={(val) => setAttributes({ showButton: val })}
+                  help={__('Display a button at the bottom of each category card.', 'frontblocks')}
+               />
+
+               { showButton && (
+                  <TextControl
+                     label={__('Button Text', 'frontblocks')}
+                     value={buttonText}
+                     onChange={(val) => setAttributes({ buttonText: val })}
+                     placeholder={__('Shop now', 'frontblocks')}
+                  />
+               ) }
             </PanelBody>
 
             <PanelBody
@@ -275,8 +294,8 @@ function ProductCategoriesEdit(props) {
                         <div key={category.id} className={`frbl-category-item frbl-category-${category.slug}`}>
                            <div className="frbl-category-link">
                               <div className="frbl-category-image-wrap">
-                                 <img 
-                                    src={imageUrl} 
+                                 <img
+                                    src={imageUrl}
                                     alt={category.name}
                                     className="frbl-category-image"
                                  />
@@ -284,6 +303,11 @@ function ProductCategoriesEdit(props) {
                               <h3 className="frbl-category-name">
                                  {category.name}{showCount && ` (${category.count})`}
                               </h3>
+                              { showButton && (
+                                 <span className="frbl-category-button">
+                                    { buttonText || __( 'Shop now', 'frontblocks' ) }
+                                 </span>
+                              ) }
                            </div>
                         </div>
                      );
@@ -322,6 +346,8 @@ registerBlockType('frontblocks/product-categories', {
       hoverBgColor: { type: 'string', default: 'rgba(255, 255, 255, 0.7)' },
       hoverBorderColor: { type: 'string', default: '#555555' },
       hoverTextColor: { type: 'string', default: 'inherit' },
+      showButton: { type: 'boolean', default: false },
+      buttonText: { type: 'string', default: '' },
    },
    edit: ProductCategoriesEdit,
    save: () => null,

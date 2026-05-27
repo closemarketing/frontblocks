@@ -19,6 +19,7 @@ var _wp$components = wp.components,
   RangeControl = _wp$components.RangeControl,
   SelectControl = _wp$components.SelectControl,
   ToggleControl = _wp$components.ToggleControl,
+  TextControl = _wp$components.TextControl,
   ColorPicker = _wp$components.ColorPicker,
   ColorIndicator = _wp$components.ColorIndicator,
   Dropdown = _wp$components.Dropdown,
@@ -91,6 +92,8 @@ function ProductCategoriesEdit(props) {
     hoverBgColor = attributes.hoverBgColor,
     hoverBorderColor = attributes.hoverBorderColor,
     hoverTextColor = attributes.hoverTextColor,
+    showButton = attributes.showButton,
+    buttonText = attributes.buttonText,
     className = attributes.className;
   var _useState = useState([]),
     _useState2 = _slicedToArray(_useState, 2),
@@ -214,6 +217,24 @@ function ProductCategoriesEdit(props) {
       });
     },
     help: __('Display the number of products in each category.', 'frontblocks')
+  }), /*#__PURE__*/React.createElement(ToggleControl, {
+    label: __('Show Button', 'frontblocks'),
+    checked: showButton,
+    onChange: function onChange(val) {
+      return setAttributes({
+        showButton: val
+      });
+    },
+    help: __('Display a button at the bottom of each category card.', 'frontblocks')
+  }), showButton && /*#__PURE__*/React.createElement(TextControl, {
+    label: __('Button Text', 'frontblocks'),
+    value: buttonText,
+    onChange: function onChange(val) {
+      return setAttributes({
+        buttonText: val
+      });
+    },
+    placeholder: __('Shop now', 'frontblocks')
   })), /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Card Style Settings', 'frontblocks'),
     initialOpen: false
@@ -341,7 +362,9 @@ function ProductCategoriesEdit(props) {
       className: "frbl-category-image"
     })), /*#__PURE__*/React.createElement("h3", {
       className: "frbl-category-name"
-    }, category.name, showCount && " (".concat(category.count, ")"))));
+    }, category.name, showCount && " (".concat(category.count, ")")), showButton && /*#__PURE__*/React.createElement("span", {
+      className: "frbl-category-button"
+    }, buttonText || __('Shop now', 'frontblocks'))));
   }))));
 }
 registerBlockType('frontblocks/product-categories', {
@@ -410,6 +433,14 @@ registerBlockType('frontblocks/product-categories', {
     hoverTextColor: {
       type: 'string',
       default: 'inherit'
+    },
+    showButton: {
+      type: 'boolean',
+      default: false
+    },
+    buttonText: {
+      type: 'string',
+      default: ''
     }
   },
   edit: ProductCategoriesEdit,
