@@ -78,7 +78,7 @@ jobs:
           echo "Plugin ZIP size: $(du -sh $SLUG.zip | cut -f1)"
 
       - name: Upload plugin artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ github.event.repository.name }}-pr-${{ github.event.pull_request.number }}-${{ github.run_id }}
           path: /tmp/plugin/${{ github.event.repository.name }}.zip
