@@ -239,24 +239,6 @@ function ProductCategoriesEdit(props) {
       });
     },
     help: __('Display the number of products in each category.', 'frontblocks')
-  }), /*#__PURE__*/React.createElement(ToggleControl, {
-    label: __('Show Button', 'frontblocks'),
-    checked: showButton,
-    onChange: function onChange(val) {
-      return setAttributes({
-        showButton: val
-      });
-    },
-    help: __('Display a button at the bottom of each category card.', 'frontblocks')
-  }), showButton && /*#__PURE__*/React.createElement(TextControl, {
-    label: __('Button Text', 'frontblocks'),
-    value: buttonText,
-    onChange: function onChange(val) {
-      return setAttributes({
-        buttonText: val
-      });
-    },
-    placeholder: __('Shop now', 'frontblocks')
   })), /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Card Style Settings', 'frontblocks'),
     initialOpen: false
@@ -349,10 +331,28 @@ function ProductCategoriesEdit(props) {
         }
       }));
     }
-  })), showButton && /*#__PURE__*/React.createElement(PanelBody, {
+  })), /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Button Style', 'frontblocks'),
     initialOpen: false
-  }, /*#__PURE__*/React.createElement(RangeControl, {
+  }, /*#__PURE__*/React.createElement(ToggleControl, {
+    label: __('Show Button', 'frontblocks'),
+    checked: showButton,
+    onChange: function onChange(val) {
+      return setAttributes({
+        showButton: val
+      });
+    },
+    help: __('Display a button at the bottom of each category card.', 'frontblocks')
+  }), showButton && /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(TextControl, {
+    label: __('Button Text', 'frontblocks'),
+    value: buttonText,
+    onChange: function onChange(val) {
+      return setAttributes({
+        buttonText: val
+      });
+    },
+    placeholder: __('Shop now', 'frontblocks')
+  }), /*#__PURE__*/React.createElement(RangeControl, {
     label: __('Font Size (px)', 'frontblocks'),
     value: btnFontSize,
     onChange: function onChange(v) {
@@ -470,7 +470,7 @@ function ProductCategoriesEdit(props) {
         }
       }));
     }
-  }))), /*#__PURE__*/React.createElement("div", blockProps, isLoading ? /*#__PURE__*/React.createElement("div", {
+  })))), /*#__PURE__*/React.createElement("div", blockProps, isLoading ? /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: 'center',
       padding: '40px'

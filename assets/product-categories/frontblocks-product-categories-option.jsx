@@ -200,21 +200,6 @@ function ProductCategoriesEdit(props) {
                   help={__('Display the number of products in each category.', 'frontblocks')}
                />
 
-               <ToggleControl
-                  label={__('Show Button', 'frontblocks')}
-                  checked={showButton}
-                  onChange={(val) => setAttributes({ showButton: val })}
-                  help={__('Display a button at the bottom of each category card.', 'frontblocks')}
-               />
-
-               { showButton && (
-                  <TextControl
-                     label={__('Button Text', 'frontblocks')}
-                     value={buttonText}
-                     onChange={(val) => setAttributes({ buttonText: val })}
-                     placeholder={__('Shop now', 'frontblocks')}
-                  />
-               ) }
             </PanelBody>
 
             <PanelBody
@@ -293,8 +278,22 @@ function ProductCategoriesEdit(props) {
                </TabPanel>
             </PanelBody>
 
-            { showButton && (
-               <PanelBody title={ __( 'Button Style', 'frontblocks' ) } initialOpen={ false }>
+            <PanelBody title={ __( 'Button Style', 'frontblocks' ) } initialOpen={ false }>
+               <ToggleControl
+                  label={ __( 'Show Button', 'frontblocks' ) }
+                  checked={ showButton }
+                  onChange={ (val) => setAttributes({ showButton: val }) }
+                  help={ __( 'Display a button at the bottom of each category card.', 'frontblocks' ) }
+               />
+
+               { showButton && (
+               <Fragment>
+               <TextControl
+                  label={ __( 'Button Text', 'frontblocks' ) }
+                  value={ buttonText }
+                  onChange={ (val) => setAttributes({ buttonText: val }) }
+                  placeholder={ __( 'Shop now', 'frontblocks' ) }
+               />
                   <RangeControl
                      label={ __( 'Font Size (px)', 'frontblocks' ) }
                      value={ btnFontSize }
@@ -380,8 +379,9 @@ function ProductCategoriesEdit(props) {
                         }
                      } }
                   </TabPanel>
-               </PanelBody>
-            ) }
+               </Fragment>
+               ) }
+            </PanelBody>
          </InspectorControls>
 
          <div {...blockProps}>
