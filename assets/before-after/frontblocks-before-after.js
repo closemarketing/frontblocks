@@ -1,7 +1,17 @@
 "use strict";
 
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 var registerBlockType = wp.blocks.registerBlockType;
-var Fragment = wp.element.Fragment;
+var _wp$element = wp.element,
+  Fragment = _wp$element.Fragment,
+  useState = _wp$element.useState,
+  useEffect = _wp$element.useEffect,
+  useRef = _wp$element.useRef;
 var _wp$blockEditor = wp.blockEditor,
   InspectorControls = _wp$blockEditor.InspectorControls,
   MediaUpload = _wp$blockEditor.MediaUpload,
@@ -33,6 +43,36 @@ function BeforeAfterEdit(props) {
     fixedHeight = attributes.fixedHeight;
   var blockProps = useBlockProps();
   var hasImages = beforeImageUrl && afterImageUrl;
+  var _useState = useState(initialPosition),
+    _useState2 = _slicedToArray(_useState, 2),
+    editorPosition = _useState2[0],
+    setEditorPosition = _useState2[1];
+  var isDragging = useRef(false);
+  var containerRef = useRef(null);
+  useEffect(function () {
+    setEditorPosition(initialPosition);
+  }, [initialPosition]);
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+  function getPosFromEvent(e) {
+    var rect = containerRef.current.getBoundingClientRect();
+    var clientX = e.touches && e.touches.length ? e.touches[0].clientX : e.clientX;
+    return clamp((clientX - rect.left) / rect.width * 100, 0, 100);
+  }
+  function handleMouseDown(e) {
+    isDragging.current = true;
+    e.preventDefault();
+  }
+  function handleMouseMove(e) {
+    if (!isDragging.current) {
+      return;
+    }
+    setEditorPosition(getPosFromEvent(e));
+  }
+  function handleMouseUp() {
+    isDragging.current = false;
+  }
   return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Before Image', 'frontblocks'),
     initialOpen: true
@@ -178,11 +218,15 @@ function BeforeAfterEdit(props) {
     label: __('Before / After', 'frontblocks'),
     instructions: __('Select a "before" image and an "after" image from the sidebar.', 'frontblocks')
   }) : /*#__PURE__*/React.createElement("div", {
+    ref: containerRef,
     className: 'frbl-before-after frbl-before-after--editor' + (fixedHeight ? ' frbl-before-after--fixed-height' : ''),
     "data-initial-position": initialPosition,
     style: fixedHeight && blockHeight ? {
       height: blockHeight + 'px'
-    } : {}
+    } : {},
+    onMouseMove: handleMouseMove,
+    onMouseUp: handleMouseUp,
+    onMouseLeave: handleMouseUp
   }, /*#__PURE__*/React.createElement("div", {
     className: "frbl-before-after__after"
   }, /*#__PURE__*/React.createElement("img", {
@@ -193,7 +237,7 @@ function BeforeAfterEdit(props) {
   }, afterLabel)), /*#__PURE__*/React.createElement("div", {
     className: "frbl-before-after__before",
     style: {
-      clipPath: "inset(0 ".concat(100 - initialPosition, "% 0 0)")
+      clipPath: "inset(0 ".concat(100 - editorPosition, "% 0 0)")
     }
   }, /*#__PURE__*/React.createElement("img", {
     src: beforeImageUrl,
@@ -203,8 +247,9 @@ function BeforeAfterEdit(props) {
   }, beforeLabel)), /*#__PURE__*/React.createElement("div", {
     className: "frbl-before-after__handle",
     style: {
-      left: "".concat(initialPosition, "%")
-    }
+      left: "".concat(editorPosition, "%")
+    },
+    onMouseDown: handleMouseDown
   }, /*#__PURE__*/React.createElement("span", {
     className: "frbl-before-after__handle-line"
   }), /*#__PURE__*/React.createElement("span", {

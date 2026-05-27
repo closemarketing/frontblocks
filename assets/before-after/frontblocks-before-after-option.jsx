@@ -1,5 +1,5 @@
 const { registerBlockType } = wp.blocks;
-const { Fragment } = wp.element;
+const { Fragment, useState, useEffect, useRef } = wp.element;
 const { InspectorControls, MediaUpload, MediaUploadCheck, useBlockProps } = wp.blockEditor;
 const { PanelBody, RangeControl, Button, Placeholder, TextControl, ToggleControl } = wp.components;
 const { __ } = wp.i18n;
@@ -24,6 +24,38 @@ function BeforeAfterEdit( props ) {
 	const blockProps = useBlockProps();
 
 	const hasImages = beforeImageUrl && afterImageUrl;
+
+	const [ editorPosition, setEditorPosition ] = useState( initialPosition );
+	const isDragging = useRef( false );
+	const containerRef = useRef( null );
+
+	useEffect( () => {
+		setEditorPosition( initialPosition );
+	}, [ initialPosition ] );
+
+	function clamp( value, min, max ) {
+		return Math.max( min, Math.min( max, value ) );
+	}
+
+	function getPosFromEvent( e ) {
+		const rect    = containerRef.current.getBoundingClientRect();
+		const clientX = e.touches && e.touches.length ? e.touches[ 0 ].clientX : e.clientX;
+		return clamp( ( ( clientX - rect.left ) / rect.width ) * 100, 0, 100 );
+	}
+
+	function handleMouseDown( e ) {
+		isDragging.current = true;
+		e.preventDefault();
+	}
+
+	function handleMouseMove( e ) {
+		if ( ! isDragging.current ) { return; }
+		setEditorPosition( getPosFromEvent( e ) );
+	}
+
+	function handleMouseUp() {
+		isDragging.current = false;
+	}
 
 	return (
 		<Fragment>
@@ -178,9 +210,13 @@ function BeforeAfterEdit( props ) {
 					/>
 				) : (
 					<div
+						ref={ containerRef }
 						className={ 'frbl-before-after frbl-before-after--editor' + ( fixedHeight ? ' frbl-before-after--fixed-height' : '' ) }
 						data-initial-position={ initialPosition }
 						style={ fixedHeight && blockHeight ? { height: blockHeight + 'px' } : {} }
+						onMouseMove={ handleMouseMove }
+						onMouseUp={ handleMouseUp }
+						onMouseLeave={ handleMouseUp }
 					>
 						<div className="frbl-before-after__after">
 							<img src={ afterImageUrl } alt="" />
@@ -192,7 +228,7 @@ function BeforeAfterEdit( props ) {
 						</div>
 						<div
 							className="frbl-before-after__before"
-							style={ { clipPath: `inset(0 ${ 100 - initialPosition }% 0 0)` } }
+							style={ { clipPath: `inset(0 ${ 100 - editorPosition }% 0 0)` } }
 						>
 							<img src={ beforeImageUrl } alt="" />
 							{ beforeLabel && (
@@ -203,7 +239,8 @@ function BeforeAfterEdit( props ) {
 						</div>
 						<div
 							className="frbl-before-after__handle"
-							style={ { left: `${ initialPosition }%` } }
+							style={ { left: `${ editorPosition }%` } }
+							onMouseDown={ handleMouseDown }
 						>
 							<span className="frbl-before-after__handle-line"></span>
 							<span className="frbl-before-after__handle-thumb">
