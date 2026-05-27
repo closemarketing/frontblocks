@@ -1,0 +1,13 @@
+.frbl-user-text-editor {
+	border: 1px dashed #ccc;
+	padding: 12px;
+	position: relative;
+}
+
+.frbl-user-text-hint {
+	display: block;
+	font-size: 11px;
+	color: #999;
+	margin-top: 6px;
+	font-style: italic;
+}

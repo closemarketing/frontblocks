@@ -138,6 +138,9 @@ class Plugin_Main {
 
 		// Before After comparison block.
 		new Frontend\BeforeAfter();
+
+		// User Text block.
+		new Frontend\UserText();
 	}
 
 	/**
