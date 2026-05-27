@@ -270,3 +270,29 @@
   column-gap: 0 !important;
   gap: 0 !important;
 }
+
+/* core/query (wp-block-post-template) as carousel — override WP grid layout */
+.frontblocks ul.glide__slides.wp-block-post-template,
+.frontblocks ul.glide__slides.wp-block-post-template.is-layout-grid,
+.frontblocks ul.glide__slides.wp-block-post-template.is-layout-flex,
+.frontblocks ul.glide__slides.wp-block-post-template.is-layout-flow {
+  display: flex;
+  flex-wrap: nowrap;
+  grid-template-columns: unset;
+  grid-auto-rows: unset;
+  max-width: none;
+  list-style: none;
+  padding-left: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.frontblocks ul.glide__slides.wp-block-post-template > li.glide__slide,
+.frontblocks ul.glide__slides.wp-block-post-template > li.glide__slide.wp-block-post {
+  display: block;
+  height: auto;
+  grid-column: unset;
+  grid-row: unset;
+  float: none;
+  clear: none;
+}

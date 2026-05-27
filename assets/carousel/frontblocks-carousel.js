@@ -48,6 +48,16 @@ window.addEventListener('load', function (event) {
 
             // Add classes
             item.classList.add('glide__slides', 'glide-' + Math.floor(Math.random() * 1000));
+            // Force flex layout via inline style to beat WP grid CSS (columns-N, is-layout-grid).
+            if (item.classList.contains('wp-block-post-template')) {
+                item.style.setProperty('display', 'flex', 'important');
+                item.style.setProperty('flex-wrap', 'nowrap', 'important');
+                item.style.setProperty('max-width', 'none', 'important');
+                item.style.setProperty('grid-template-columns', 'none', 'important');
+                item.style.setProperty('list-style', 'none', 'important');
+                item.style.setProperty('padding-left', '0', 'important');
+                item.style.setProperty('margin-left', '0', 'important');
+            }
             for (const child of item.children) {
                 child.classList.add('glide__slide');
             }
