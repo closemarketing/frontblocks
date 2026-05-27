@@ -79,7 +79,7 @@ registerBlockType( 'frontblocks/user-text', {
 			textAlign:  textAlign  || undefined,
 		};
 
-		const blockProps = useBlockProps( { className: 'frbl-user-text-editor' } );
+		const blockProps = useBlockProps();
 		const Tag        = htmlTag || 'p';
 
 		return (
@@ -153,14 +153,9 @@ registerBlockType( 'frontblocks/user-text', {
 					/>
 				</InspectorControls>
 
-				<div { ...blockProps }>
-					<Tag style={ { ...inlineStyle, margin: 0 } }>
-						{ textPattern || __( 'Enter a text pattern in the sidebar…', 'frontblocks' ) }
-					</Tag>
-					<span className="frbl-user-text-hint">
-						{ __( 'Placeholders replaced with user data on frontend.', 'frontblocks' ) }
-					</span>
-				</div>
+				<Tag { ...blockProps } style={ { ...inlineStyle, margin: 0 } }>
+					{ textPattern || __( 'Enter a text pattern in the sidebar…', 'frontblocks' ) }
+				</Tag>
 			</Fragment>
 		);
 	},
