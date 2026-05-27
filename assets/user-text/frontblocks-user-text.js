@@ -18,6 +18,7 @@ var _wp$element = wp.element,
   Fragment = _wp$element.Fragment,
   useState = _wp$element.useState,
   useEffect = _wp$element.useEffect;
+var useSelect = wp.data.useSelect;
 var _wp$blockEditor = wp.blockEditor,
   InspectorControls = _wp$blockEditor.InspectorControls,
   useBlockProps = _wp$blockEditor.useBlockProps,
@@ -28,6 +29,7 @@ var _wp$components = wp.components,
   TextControl = _wp$components.TextControl,
   TextareaControl = _wp$components.TextareaControl;
 var __ = wp.i18n.__;
+var HEADING_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 var TAG_OPTIONS = [{
   label: 'p',
   value: 'p'
@@ -103,6 +105,18 @@ var TEXT_ALIGN_OPTIONS = [{
   label: __('Justify', 'frontblocks'),
   value: 'justify'
 }];
+
+/**
+ * Resolve a CSS var like "var(--wp--preset--font-size--large)" to a real value
+ * using computed styles on the document root.
+ */
+function resolveCssVar(value) {
+  if (!value || !value.startsWith('var(')) return value;
+  var match = value.match(/var\(\s*(--[^,)]+)/);
+  if (!match) return value;
+  var resolved = getComputedStyle(document.documentElement).getPropertyValue(match[1]).trim();
+  return resolved || value;
+}
 registerBlockType('frontblocks/user-text', {
   title: __('User Text', 'frontblocks'),
   description: __('Text pattern with logged-in user data placeholders.', 'frontblocks'),
@@ -161,6 +175,8 @@ registerBlockType('frontblocks/user-text', {
       fontWeight = attributes.fontWeight,
       textAlign = attributes.textAlign,
       loggedOutText = attributes.loggedOutText;
+
+    // ── Current user (with email, needs context=edit) ──────────────────
     var _useState = useState(null),
       _useState2 = _slicedToArray(_useState, 2),
       currentUser = _useState2[0],
@@ -168,10 +184,40 @@ registerBlockType('frontblocks/user-text', {
     useEffect(function () {
       wp.apiFetch({
         path: '/wp/v2/users/me?context=edit'
-      }).then(function (user) {
-        return setCurrentUser(user);
+      }).then(function (u) {
+        return setCurrentUser(u);
       }).catch(function () {});
     }, []);
+
+    // ── Theme global styles ─────────────────────────────────────────────
+    var _useState3 = useState({}),
+      _useState4 = _slicedToArray(_useState3, 2),
+      themeTypo = _useState4[0],
+      setThemeTypo = _useState4[1];
+    var themeSlug = useSelect(function (select) {
+      var _select$getCurrentThe;
+      return (_select$getCurrentThe = select('core').getCurrentTheme()) === null || _select$getCurrentThe === void 0 ? void 0 : _select$getCurrentThe.stylesheet;
+    });
+    useEffect(function () {
+      if (!themeSlug) return;
+      wp.apiFetch({
+        path: '/wp/v2/global-styles/themes/' + themeSlug
+      }).then(function (data) {
+        var elements = data && data.styles && data.styles.elements ? data.styles.elements : {};
+        // Merge heading base + specific tag (specific wins)
+        var base = HEADING_TAGS.includes(htmlTag) ? elements.heading && elements.heading.typography ? elements.heading.typography : {} : {};
+        var tagTypo = elements[htmlTag] && elements[htmlTag].typography ? elements[htmlTag].typography : {};
+        var merged = Object.assign({}, base, tagTypo);
+        // Resolve CSS vars to real values for display
+        var resolved = {};
+        Object.keys(merged).forEach(function (k) {
+          resolved[k] = resolveCssVar(merged[k]);
+        });
+        setThemeTypo(resolved);
+      }).catch(function () {});
+    }, [themeSlug, htmlTag]);
+
+    // ── Preview: replace placeholders with real user data ───────────────
     var previewText = function previewText(pattern) {
       if (!currentUser) return pattern;
       var nombre = currentUser.first_name || currentUser.name || '';
@@ -191,6 +237,8 @@ registerBlockType('frontblocks/user-text', {
         return str.split(key).join(val);
       }, pattern);
     };
+
+    // ── Inline styles: only explicit overrides ──────────────────────────
     var inlineStyle = {
       color: textColor || undefined,
       fontSize: fontSize || undefined,
@@ -200,6 +248,21 @@ registerBlockType('frontblocks/user-text', {
     };
     var blockProps = useBlockProps();
     var Tag = htmlTag || 'p';
+
+    // Helper: placeholder showing theme default when field is empty
+    var themePlaceholder = function themePlaceholder(key, fallback) {
+      if (!themeTypo[key]) return fallback;
+      return themeTypo[key] + ' (' + __('tema', 'frontblocks') + ')';
+    };
+
+    // For SelectControl (fontWeight): inject theme default into label
+    var weightOptions = FONT_WEIGHT_OPTIONS.map(function (opt) {
+      if (opt.value !== '') return opt;
+      var tw = themeTypo.fontWeight;
+      return _objectSpread(_objectSpread({}, opt), {}, {
+        label: tw ? __('Default', 'frontblocks') + ' — ' + tw : __('Default', 'frontblocks')
+      });
+    });
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
       title: __('Pattern & Data', 'frontblocks'),
       initialOpen: true
@@ -212,7 +275,7 @@ registerBlockType('frontblocks/user-text', {
         });
       },
       rows: 4,
-      help: __('Available placeholders: {nombre}, {apellido}, {display_name}, {email}, {username}, {bio}, {web}', 'frontblocks')
+      help: __('Placeholders: {nombre}, {apellido}, {display_name}, {email}, {username}, {bio}, {web}', 'frontblocks')
     }), /*#__PURE__*/React.createElement(TextControl, {
       label: __('Logged-out Fallback', 'frontblocks'),
       value: loggedOutText,
@@ -221,7 +284,7 @@ registerBlockType('frontblocks/user-text', {
           loggedOutText: val
         });
       },
-      help: __('Shown when no user is logged in. Leave empty to hide the block.', 'frontblocks')
+      help: __('Shown when no user is logged in. Leave empty to hide.', 'frontblocks')
     })), /*#__PURE__*/React.createElement(PanelBody, {
       title: __('Typography', 'frontblocks'),
       initialOpen: false
@@ -242,12 +305,12 @@ registerBlockType('frontblocks/user-text', {
           fontSize: val
         });
       },
-      placeholder: "16px, 1.5rem, 2em\u2026",
-      help: __('Any valid CSS size value.', 'frontblocks')
+      placeholder: themePlaceholder('fontSize', '16px, 1.5rem…'),
+      help: fontSize ? __('Custom override active. Clear to use theme default.', 'frontblocks') : __('Empty = theme default.', 'frontblocks')
     }), /*#__PURE__*/React.createElement(SelectControl, {
       label: __('Font Weight', 'frontblocks'),
       value: fontWeight,
-      options: FONT_WEIGHT_OPTIONS,
+      options: weightOptions,
       onChange: function onChange(val) {
         return setAttributes({
           fontWeight: val
@@ -261,7 +324,8 @@ registerBlockType('frontblocks/user-text', {
           fontFamily: val
         });
       },
-      placeholder: "Inter, sans-serif\u2026"
+      placeholder: themePlaceholder('fontFamily', 'Inter, sans-serif…'),
+      help: fontFamily ? __('Custom override active. Clear to use theme default.', 'frontblocks') : __('Empty = theme default.', 'frontblocks')
     }), /*#__PURE__*/React.createElement(SelectControl, {
       label: __('Text Align', 'frontblocks'),
       value: textAlign,

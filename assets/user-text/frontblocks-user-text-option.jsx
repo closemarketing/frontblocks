@@ -1,5 +1,6 @@
-const { registerBlockType }      = wp.blocks;
-const { Fragment, useState, useEffect } = wp.element;
+const { registerBlockType }               = wp.blocks;
+const { Fragment, useState, useEffect }   = wp.element;
+const { useSelect }                       = wp.data;
 const {
 	InspectorControls,
 	useBlockProps,
@@ -12,6 +13,8 @@ const {
 	TextareaControl,
 } = wp.components;
 const { __ } = wp.i18n;
+
+const HEADING_TAGS = [ 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' ];
 
 const TAG_OPTIONS = [
 	{ label: 'p',    value: 'p'    },
@@ -46,6 +49,20 @@ const TEXT_ALIGN_OPTIONS = [
 	{ label: __( 'Justify', 'frontblocks' ), value: 'justify' },
 ];
 
+/**
+ * Resolve a CSS var like "var(--wp--preset--font-size--large)" to a real value
+ * using computed styles on the document root.
+ */
+function resolveCssVar( value ) {
+	if ( ! value || ! value.startsWith( 'var(' ) ) return value;
+	const match = value.match( /var\(\s*(--[^,)]+)/ );
+	if ( ! match ) return value;
+	const resolved = getComputedStyle( document.documentElement )
+		.getPropertyValue( match[1] )
+		.trim();
+	return resolved || value;
+}
+
 registerBlockType( 'frontblocks/user-text', {
 	title:       __( 'User Text', 'frontblocks' ),
 	description: __( 'Text pattern with logged-in user data placeholders.', 'frontblocks' ),
@@ -71,14 +88,42 @@ registerBlockType( 'frontblocks/user-text', {
 			fontFamily, fontWeight, textAlign, loggedOutText,
 		} = attributes;
 
+		// ── Current user (with email, needs context=edit) ──────────────────
 		const [ currentUser, setCurrentUser ] = useState( null );
-
 		useEffect( () => {
 			wp.apiFetch( { path: '/wp/v2/users/me?context=edit' } )
-				.then( ( user ) => setCurrentUser( user ) )
+				.then( ( u ) => setCurrentUser( u ) )
 				.catch( () => {} );
 		}, [] );
 
+		// ── Theme global styles ─────────────────────────────────────────────
+		const [ themeTypo, setThemeTypo ] = useState( {} );
+		const themeSlug = useSelect( ( select ) => select( 'core' ).getCurrentTheme()?.stylesheet );
+
+		useEffect( () => {
+			if ( ! themeSlug ) return;
+			wp.apiFetch( { path: '/wp/v2/global-styles/themes/' + themeSlug } )
+				.then( ( data ) => {
+					const elements = ( data && data.styles && data.styles.elements ) ? data.styles.elements : {};
+					// Merge heading base + specific tag (specific wins)
+					const base    = HEADING_TAGS.includes( htmlTag )
+						? ( elements.heading && elements.heading.typography ? elements.heading.typography : {} )
+						: {};
+					const tagTypo = ( elements[ htmlTag ] && elements[ htmlTag ].typography )
+						? elements[ htmlTag ].typography
+						: {};
+					const merged = Object.assign( {}, base, tagTypo );
+					// Resolve CSS vars to real values for display
+					const resolved = {};
+					Object.keys( merged ).forEach( ( k ) => {
+						resolved[ k ] = resolveCssVar( merged[ k ] );
+					} );
+					setThemeTypo( resolved );
+				} )
+				.catch( () => {} );
+		}, [ themeSlug, htmlTag ] );
+
+		// ── Preview: replace placeholders with real user data ───────────────
 		const previewText = ( pattern ) => {
 			if ( ! currentUser ) return pattern;
 			const nombre = currentUser.first_name || currentUser.name || '';
@@ -97,6 +142,7 @@ registerBlockType( 'frontblocks/user-text', {
 			);
 		};
 
+		// ── Inline styles: only explicit overrides ──────────────────────────
 		const inlineStyle = {
 			color:      textColor  || undefined,
 			fontSize:   fontSize   || undefined,
@@ -108,6 +154,24 @@ registerBlockType( 'frontblocks/user-text', {
 		const blockProps = useBlockProps();
 		const Tag        = htmlTag || 'p';
 
+		// Helper: placeholder showing theme default when field is empty
+		const themePlaceholder = ( key, fallback ) => {
+			if ( ! themeTypo[ key ] ) return fallback;
+			return themeTypo[ key ] + ' (' + __( 'tema', 'frontblocks' ) + ')';
+		};
+
+		// For SelectControl (fontWeight): inject theme default into label
+		const weightOptions = FONT_WEIGHT_OPTIONS.map( ( opt ) => {
+			if ( opt.value !== '' ) return opt;
+			const tw = themeTypo.fontWeight;
+			return {
+				...opt,
+				label: tw
+					? __( 'Default', 'frontblocks' ) + ' — ' + tw
+					: __( 'Default', 'frontblocks' ),
+			};
+		} );
+
 		return (
 			<Fragment>
 				<InspectorControls>
@@ -117,13 +181,13 @@ registerBlockType( 'frontblocks/user-text', {
 							value={ textPattern }
 							onChange={ ( val ) => setAttributes( { textPattern: val } ) }
 							rows={ 4 }
-							help={ __( 'Available placeholders: {nombre}, {apellido}, {display_name}, {email}, {username}, {bio}, {web}', 'frontblocks' ) }
+							help={ __( 'Placeholders: {nombre}, {apellido}, {display_name}, {email}, {username}, {bio}, {web}', 'frontblocks' ) }
 						/>
 						<TextControl
 							label={ __( 'Logged-out Fallback', 'frontblocks' ) }
 							value={ loggedOutText }
 							onChange={ ( val ) => setAttributes( { loggedOutText: val } ) }
-							help={ __( 'Shown when no user is logged in. Leave empty to hide the block.', 'frontblocks' ) }
+							help={ __( 'Shown when no user is logged in. Leave empty to hide.', 'frontblocks' ) }
 						/>
 					</PanelBody>
 
@@ -138,20 +202,27 @@ registerBlockType( 'frontblocks/user-text', {
 							label={ __( 'Font Size', 'frontblocks' ) }
 							value={ fontSize }
 							onChange={ ( val ) => setAttributes( { fontSize: val } ) }
-							placeholder="16px, 1.5rem, 2em…"
-							help={ __( 'Any valid CSS size value.', 'frontblocks' ) }
+							placeholder={ themePlaceholder( 'fontSize', '16px, 1.5rem…' ) }
+							help={ fontSize
+								? __( 'Custom override active. Clear to use theme default.', 'frontblocks' )
+								: __( 'Empty = theme default.', 'frontblocks' )
+							}
 						/>
 						<SelectControl
 							label={ __( 'Font Weight', 'frontblocks' ) }
 							value={ fontWeight }
-							options={ FONT_WEIGHT_OPTIONS }
+							options={ weightOptions }
 							onChange={ ( val ) => setAttributes( { fontWeight: val } ) }
 						/>
 						<TextControl
 							label={ __( 'Font Family', 'frontblocks' ) }
 							value={ fontFamily }
 							onChange={ ( val ) => setAttributes( { fontFamily: val } ) }
-							placeholder="Inter, sans-serif…"
+							placeholder={ themePlaceholder( 'fontFamily', 'Inter, sans-serif…' ) }
+							help={ fontFamily
+								? __( 'Custom override active. Clear to use theme default.', 'frontblocks' )
+								: __( 'Empty = theme default.', 'frontblocks' )
+							}
 						/>
 						<SelectControl
 							label={ __( 'Text Align', 'frontblocks' ) }
