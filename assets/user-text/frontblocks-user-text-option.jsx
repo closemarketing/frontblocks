@@ -1,5 +1,5 @@
-const { registerBlockType } = wp.blocks;
-const { Fragment } = wp.element;
+const { registerBlockType }      = wp.blocks;
+const { Fragment, useState, useEffect } = wp.element;
 const {
 	InspectorControls,
 	useBlockProps,
@@ -70,6 +70,32 @@ registerBlockType( 'frontblocks/user-text', {
 			textPattern, htmlTag, textColor, hoverTextColor, fontSize,
 			fontFamily, fontWeight, textAlign, loggedOutText,
 		} = attributes;
+
+		const [ currentUser, setCurrentUser ] = useState( null );
+
+		useEffect( () => {
+			wp.apiFetch( { path: '/wp/v2/users/me?context=edit' } )
+				.then( ( user ) => setCurrentUser( user ) )
+				.catch( () => {} );
+		}, [] );
+
+		const previewText = ( pattern ) => {
+			if ( ! currentUser ) return pattern;
+			const nombre = currentUser.first_name || currentUser.name || '';
+			const map = {
+				'{nombre}':       nombre,
+				'{apellido}':     currentUser.last_name   || '',
+				'{display_name}': currentUser.name        || '',
+				'{email}':        currentUser.email       || '',
+				'{username}':     currentUser.slug        || '',
+				'{bio}':          currentUser.description || '',
+				'{web}':          currentUser.url         || '',
+			};
+			return Object.entries( map ).reduce(
+				( str, [ key, val ] ) => str.split( key ).join( val ),
+				pattern
+			);
+		};
 
 		const inlineStyle = {
 			color:      textColor  || undefined,
@@ -154,7 +180,7 @@ registerBlockType( 'frontblocks/user-text', {
 				</InspectorControls>
 
 				<Tag { ...blockProps } style={ { ...inlineStyle, margin: 0 } }>
-					{ textPattern || __( 'Enter a text pattern in the sidebar…', 'frontblocks' ) }
+					{ previewText( textPattern ) || __( 'Enter a text pattern in the sidebar…', 'frontblocks' ) }
 				</Tag>
 			</Fragment>
 		);
