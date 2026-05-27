@@ -54,19 +54,20 @@ registerBlockType( 'frontblocks/user-text', {
 	supports:    { html: false },
 
 	attributes: {
-		textPattern:  { type: 'string', default: __( 'Hello, {nombre}!', 'frontblocks' ) },
-		htmlTag:      { type: 'string', default: 'p'  },
-		textColor:    { type: 'string', default: ''   },
-		fontSize:     { type: 'string', default: ''   },
-		fontFamily:   { type: 'string', default: ''   },
-		fontWeight:   { type: 'string', default: ''   },
-		textAlign:    { type: 'string', default: ''   },
-		loggedOutText:{ type: 'string', default: ''   },
+		textPattern:    { type: 'string', default: __( 'Hello, {nombre}!', 'frontblocks' ) },
+		htmlTag:        { type: 'string', default: 'p'  },
+		textColor:      { type: 'string', default: ''   },
+		hoverTextColor: { type: 'string', default: ''   },
+		fontSize:       { type: 'string', default: ''   },
+		fontFamily:     { type: 'string', default: ''   },
+		fontWeight:     { type: 'string', default: ''   },
+		textAlign:      { type: 'string', default: ''   },
+		loggedOutText:  { type: 'string', default: ''   },
 	},
 
 	edit: ( { attributes, setAttributes } ) => {
 		const {
-			textPattern, htmlTag, textColor, fontSize,
+			textPattern, htmlTag, textColor, hoverTextColor, fontSize,
 			fontFamily, fontWeight, textAlign, loggedOutText,
 		} = attributes;
 
@@ -142,6 +143,11 @@ registerBlockType( 'frontblocks/user-text', {
 								value:    textColor,
 								onChange: ( val ) => setAttributes( { textColor: val || '' } ),
 								label:    __( 'Text Color', 'frontblocks' ),
+							},
+							{
+								value:    hoverTextColor,
+								onChange: ( val ) => setAttributes( { hoverTextColor: val || '' } ),
+								label:    __( 'Text Color on Hover', 'frontblocks' ),
 							},
 						] }
 					/>

@@ -65,8 +65,9 @@ class UserText {
 				'attributes'      => array(
 					'textPattern'   => array( 'type' => 'string',  'default' => '' ),
 					'htmlTag'       => array( 'type' => 'string',  'default' => 'p' ),
-					'textColor'     => array( 'type' => 'string',  'default' => '' ),
-					'fontSize'      => array( 'type' => 'string',  'default' => '' ),
+					'textColor'      => array( 'type' => 'string', 'default' => '' ),
+					'hoverTextColor' => array( 'type' => 'string', 'default' => '' ),
+					'fontSize'       => array( 'type' => 'string', 'default' => '' ),
 					'fontFamily'    => array( 'type' => 'string',  'default' => '' ),
 					'fontWeight'    => array( 'type' => 'string',  'default' => '' ),
 					'textAlign'     => array( 'type' => 'string',  'default' => '' ),
@@ -83,14 +84,15 @@ class UserText {
 	 * @return string
 	 */
 	public function render_block( $attrs ) {
-		$pattern        = isset( $attrs['textPattern'] )   ? $attrs['textPattern']   : '';
-		$tag            = isset( $attrs['htmlTag'] )       ? $attrs['htmlTag']       : 'p';
-		$text_color     = isset( $attrs['textColor'] )     ? $attrs['textColor']     : '';
-		$font_size      = isset( $attrs['fontSize'] )      ? $attrs['fontSize']      : '';
-		$font_family    = isset( $attrs['fontFamily'] )    ? $attrs['fontFamily']    : '';
-		$font_weight    = isset( $attrs['fontWeight'] )    ? $attrs['fontWeight']    : '';
-		$text_align     = isset( $attrs['textAlign'] )     ? $attrs['textAlign']     : '';
-		$logged_out_text = isset( $attrs['loggedOutText'] ) ? $attrs['loggedOutText'] : '';
+		$pattern         = isset( $attrs['textPattern'] )    ? $attrs['textPattern']    : '';
+		$tag             = isset( $attrs['htmlTag'] )        ? $attrs['htmlTag']        : 'p';
+		$text_color      = isset( $attrs['textColor'] )      ? $attrs['textColor']      : '';
+		$hover_color     = isset( $attrs['hoverTextColor'] ) ? $attrs['hoverTextColor'] : '';
+		$font_size       = isset( $attrs['fontSize'] )       ? $attrs['fontSize']       : '';
+		$font_family     = isset( $attrs['fontFamily'] )     ? $attrs['fontFamily']     : '';
+		$font_weight     = isset( $attrs['fontWeight'] )     ? $attrs['fontWeight']     : '';
+		$text_align      = isset( $attrs['textAlign'] )      ? $attrs['textAlign']      : '';
+		$logged_out_text = isset( $attrs['loggedOutText'] )  ? $attrs['loggedOutText']  : '';
 
 		// Allowed HTML tags.
 		$allowed_tags = array( 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'div' );
@@ -124,13 +126,23 @@ class UserText {
 			$style_parts[] = 'text-align:' . esc_attr( $text_align );
 		}
 
-		$style_attr = ! empty( $style_parts ) ? ' style="' . implode( ';', $style_parts ) . '"' : '';
+		$style_attr  = ! empty( $style_parts ) ? ' style="' . implode( ';', $style_parts ) . '"' : '';
+		$hover_style = '';
 
-		return sprintf(
-			'<%1$s class="frbl-user-text"%2$s>%3$s</%1$s>',
+		if ( '' !== $hover_color ) {
+			$uid         = 'frbl-ut-' . substr( md5( serialize( $attrs ) ), 0, 8 );
+			$hover_style = '<style>.frbl-user-text.' . esc_attr( $uid ) . ':hover{color:' . sanitize_hex_color( $hover_color ) . '}</style>';
+			$uid_class   = ' ' . $uid;
+		} else {
+			$uid_class = '';
+		}
+
+		return $hover_style . sprintf(
+			'<%1$s class="frbl-user-text%4$s"%2$s>%3$s</%1$s>',
 			$tag,
 			$style_attr,
-			wp_kses_post( $pattern )
+			wp_kses_post( $pattern ),
+			$uid_class
 		);
 	}
 

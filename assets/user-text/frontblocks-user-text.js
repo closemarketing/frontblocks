@@ -114,6 +114,10 @@ registerBlockType('frontblocks/user-text', {
       type: 'string',
       default: ''
     },
+    hoverTextColor: {
+      type: 'string',
+      default: ''
+    },
     fontSize: {
       type: 'string',
       default: ''
@@ -141,6 +145,7 @@ registerBlockType('frontblocks/user-text', {
     var textPattern = attributes.textPattern,
       htmlTag = attributes.htmlTag,
       textColor = attributes.textColor,
+      hoverTextColor = attributes.hoverTextColor,
       fontSize = attributes.fontSize,
       fontFamily = attributes.fontFamily,
       fontWeight = attributes.fontWeight,
@@ -239,6 +244,14 @@ registerBlockType('frontblocks/user-text', {
           });
         },
         label: __('Text Color', 'frontblocks')
+      }, {
+        value: hoverTextColor,
+        onChange: function onChange(val) {
+          return setAttributes({
+            hoverTextColor: val || ''
+          });
+        },
+        label: __('Text Color on Hover', 'frontblocks')
       }]
     })), /*#__PURE__*/React.createElement("div", blockProps, /*#__PURE__*/React.createElement(Tag, {
       style: _objectSpread(_objectSpread({}, inlineStyle), {}, {
