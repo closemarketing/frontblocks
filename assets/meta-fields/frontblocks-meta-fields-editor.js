@@ -269,9 +269,9 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
         padding: '6px 14px',
         fontSize: '13px',
         fontWeight: active ? '600' : '400',
-        border: '1px solid ' + (active ? '#007cba' : '#ddd'),
+        border: '1px solid ' + (active ? 'var(--wp-admin-theme-color)' : '#ddd'),
         borderRadius: '4px',
-        background: active ? '#007cba' : '#fff',
+        background: active ? 'var(--wp-admin-theme-color)' : '#fff',
         color: active ? '#fff' : '#555',
         cursor: 'pointer',
         transition: 'all 0.15s'
