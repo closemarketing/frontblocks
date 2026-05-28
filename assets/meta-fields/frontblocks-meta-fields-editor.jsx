@@ -38,11 +38,12 @@ const withMetaBindingPanel = createHigherOrderComponent( ( BlockEdit ) => {
 
 		const bindableAttrs = BINDABLE_BLOCKS[ name ];
 
-		// Resolve post type once per render (cheap selector).
-		const postType = useSelect( ( select ) => {
+		// Block context postType covers query loops; fall back to current post type for singles.
+		const editorPostType = useSelect( ( select ) => {
 			const editor = select( 'core/editor' );
 			return editor ? editor.getCurrentPostType() : null;
 		} );
+		const postType = ( props.context && props.context.postType ) || editorPostType;
 
 		if ( ! bindableAttrs || ! postType ) {
 			return <BlockEdit { ...props } />;
@@ -58,7 +59,7 @@ const withMetaBindingPanel = createHigherOrderComponent( ( BlockEdit ) => {
 
 		const fieldOptions = [
 			{ label: __( '— Ninguno —', 'frontblocks' ), value: '' },
-			...availableFields.map( ( f ) => ( { label: f.label, value: f.key } ) ),
+			...availableFields.map( ( f ) => ( { label: f.label + ' — ' + f.key, value: f.key } ) ),
 		];
 
 		function getFieldType( key ) {

@@ -52,11 +52,12 @@ var withMetaBindingPanel = createHigherOrderComponent(function (BlockEdit) {
       setAttributes = props.setAttributes;
     var bindableAttrs = BINDABLE_BLOCKS[name];
 
-    // Resolve post type once per render (cheap selector).
-    var postType = useSelect(function (select) {
+    // Block context postType covers query loops; fall back to current post type for singles.
+    var editorPostType = useSelect(function (select) {
       var editor = select('core/editor');
       return editor ? editor.getCurrentPostType() : null;
     });
+    var postType = props.context && props.context.postType || editorPostType;
     if (!bindableAttrs || !postType) {
       return /*#__PURE__*/React.createElement(BlockEdit, props);
     }
@@ -70,7 +71,7 @@ var withMetaBindingPanel = createHigherOrderComponent(function (BlockEdit) {
       value: ''
     }].concat(_toConsumableArray(availableFields.map(function (f) {
       return {
-        label: f.label,
+        label: f.label + ' — ' + f.key,
         value: f.key
       };
     })));
