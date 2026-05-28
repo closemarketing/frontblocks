@@ -331,6 +331,7 @@ class MetaFields {
 		}
 
 		update_post_meta( $post_id, $key, $value );
+		clean_post_cache( $post_id );
 
 		return rest_ensure_response( [ 'success' => true ] );
 	}

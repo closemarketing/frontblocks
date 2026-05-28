@@ -12,8 +12,8 @@ const {
 	FlexItem,
 	__experimentalText: Text,
 } = wp.components;
-const { useState, useEffect, Fragment } = wp.element;
-const { useSelect }                     = wp.data;
+const { useState, useEffect, useRef, Fragment } = wp.element;
+const { useSelect, useDispatch }                = wp.data;
 const { __ }                            = wp.i18n;
 const apiFetch                          = wp.apiFetch;
 
@@ -49,6 +49,22 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 			postType: select( 'core/editor' ).getCurrentPostType(),
 			postId:   select( 'core/editor' ).getCurrentPostId(),
 		} ) );
+
+		const { editPost } = useDispatch( 'core/editor' );
+		const didMount     = useRef( false );
+
+		// Sync direct rich-text edits to post meta so standard post save persists the value.
+		useEffect( () => {
+			if ( ! didMount.current ) {
+				didMount.current = true;
+				return;
+			}
+			if ( ! isAlreadyBound || ! boundKey ) {
+				return;
+			}
+			const plainValue = stripHtml( attributes[ attrName ] || '' );
+			editPost( { meta: { [ boundKey ]: plainValue } } );
+		}, [ attributes[ attrName ] ] );
 
 		const frblMeta       = ( attributes.metadata && attributes.metadata.frblMeta ) || {};
 		const isAlreadyBound = !! frblMeta[ attrName ];
