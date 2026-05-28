@@ -141,9 +141,6 @@ class Plugin_Main {
 
 		// Before After comparison block.
 		new Frontend\BeforeAfter();
-
-		// Meta Fields — Block Bindings dynamic data for native blocks.
-		new Frontend\MetaFields();
 	}
 
 	/**
