@@ -3,6 +3,8 @@
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
@@ -26,9 +28,11 @@ var _wp$components = wp.components,
   Modal = _wp$components.Modal,
   TextControl = _wp$components.TextControl,
   SelectControl = _wp$components.SelectControl,
-  RadioControl = _wp$components.RadioControl,
   Button = _wp$components.Button,
-  Spinner = _wp$components.Spinner;
+  Spinner = _wp$components.Spinner,
+  Flex = _wp$components.Flex,
+  FlexItem = _wp$components.FlexItem,
+  Text = _wp$components.__experimentalText;
 var _wp$element = wp.element,
   useState = _wp$element.useState,
   useEffect = _wp$element.useEffect,
@@ -68,30 +72,26 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
       _useState8 = _slicedToArray(_useState7, 2),
       metaLabel = _useState8[0],
       setMetaLabel = _useState8[1];
-    var _useState9 = useState('text'),
+    var _useState9 = useState(''),
       _useState0 = _slicedToArray(_useState9, 2),
-      metaType = _useState0[0],
-      setMetaType = _useState0[1];
-    var _useState1 = useState(''),
+      metaValue = _useState0[0],
+      setMetaValue = _useState0[1];
+    var _useState1 = useState([]),
       _useState10 = _slicedToArray(_useState1, 2),
-      metaValue = _useState10[0],
-      setMetaValue = _useState10[1];
-    var _useState11 = useState([]),
+      existingFields = _useState10[0],
+      setExistingFields = _useState10[1];
+    var _useState11 = useState(''),
       _useState12 = _slicedToArray(_useState11, 2),
-      existingFields = _useState12[0],
-      setExistingFields = _useState12[1];
-    var _useState13 = useState(''),
+      selectedExisting = _useState12[0],
+      setSelectedExisting = _useState12[1];
+    var _useState13 = useState(false),
       _useState14 = _slicedToArray(_useState13, 2),
-      selectedExisting = _useState14[0],
-      setSelectedExisting = _useState14[1];
-    var _useState15 = useState(false),
+      isLoading = _useState14[0],
+      setIsLoading = _useState14[1];
+    var _useState15 = useState(''),
       _useState16 = _slicedToArray(_useState15, 2),
-      isLoading = _useState16[0],
-      setIsLoading = _useState16[1];
-    var _useState17 = useState(''),
-      _useState18 = _slicedToArray(_useState17, 2),
-      errorMsg = _useState18[0],
-      setErrorMsg = _useState18[1];
+      errorMsg = _useState16[0],
+      setErrorMsg = _useState16[1];
     var _useSelect = useSelect(function (select) {
         return {
           postType: select('core/editor').getCurrentPostType(),
@@ -100,22 +100,19 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
       }),
       postType = _useSelect.postType,
       postId = _useSelect.postId;
-
-    // frblMeta is our namespace — does NOT trigger WP's binding label override.
     var frblMeta = attributes.metadata && attributes.metadata.frblMeta || {};
     var isAlreadyBound = !!frblMeta[attrName];
-    var boundKey = isAlreadyBound ? frblMeta[attrName].key : '';
     useEffect(function () {
       if (!isOpen || !postType) {
         return;
       }
       apiFetch({
-        url: frblMetaConfig.restUrl + '?post_type=' + postType,
-        headers: {
-          'X-WP-Nonce': frblMetaConfig.nonce
-        }
+        path: '/frontblocks/v1/meta-fields?post_type=' + postType
       }).then(function (fields) {
-        return setExistingFields(fields);
+        setExistingFields(fields);
+        if (fields.length > 0) {
+          setMode('existing');
+        }
       }).catch(function () {
         return setExistingFields([]);
       });
@@ -128,7 +125,6 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
       setMode('new');
       setMetaKey('');
       setMetaLabel('');
-      setMetaType('text');
       setMetaValue('');
       setSelectedExisting('');
       setErrorMsg('');
@@ -161,16 +157,13 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
             case 2:
               _context.n = 3;
               return apiFetch({
-                url: frblMetaConfig.restUrl,
+                path: '/frontblocks/v1/meta-fields',
                 method: 'POST',
                 data: {
                   post_type: postType,
                   key: metaKey.trim(),
                   label: metaLabel.trim() || metaKey.trim(),
-                  type: metaType
-                },
-                headers: {
-                  'X-WP-Nonce': frblMetaConfig.nonce
+                  type: 'text'
                 }
               });
             case 3:
@@ -199,20 +192,15 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
               }
               _context.n = 7;
               return apiFetch({
-                url: frblMetaConfig.saveMetaUrl,
+                path: '/frontblocks/v1/save-meta',
                 method: 'POST',
                 data: {
                   post_id: postId,
                   key: fieldKey,
                   value: metaValue.trim()
-                },
-                headers: {
-                  'X-WP-Nonce': frblMetaConfig.nonce
                 }
               });
             case 7:
-              // Store binding in metadata.frblMeta (not metadata.bindings) so WP
-              // never replaces the block content with its binding source label.
               newFrblMeta = Object.assign({}, frblMeta);
               newFrblMeta[attrName] = {
                 key: fieldKey,
@@ -222,7 +210,7 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
                 metadata: Object.assign({}, attributes.metadata || {}, {
                   frblMeta: newFrblMeta
                 })
-              }, attrName, metaValue.trim()));
+              }, attrName, metaValue.trim() || attributes[attrName]));
               setIsOpen(false);
               resetForm();
               _context.n = 9;
@@ -230,7 +218,7 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
             case 8:
               _context.p = 8;
               _t = _context.v;
-              setErrorMsg(__('Error al registrar. Inténtalo de nuevo.', 'frontblocks'));
+              setErrorMsg(__('Error al registrar el meta. Inténtalo de nuevo.', 'frontblocks'));
             case 9:
               setIsLoading(false);
             case 10:
@@ -241,14 +229,34 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
       return _handleConfirm.apply(this, arguments);
     }
     var existingOptions = [{
-      label: __('— Elegir —', 'frontblocks'),
+      label: __('— Elige un campo —', 'frontblocks'),
       value: ''
     }].concat(_toConsumableArray(existingFields.map(function (f) {
       return {
-        label: f.label + ' — ' + f.key,
+        label: (f.label || f.key) + '  ·  ' + f.key,
         value: f.key
       };
     })));
+    var tabStyle = function tabStyle(active) {
+      return {
+        padding: '6px 14px',
+        fontSize: '13px',
+        fontWeight: active ? '600' : '400',
+        border: '1px solid ' + (active ? '#007cba' : '#ddd'),
+        borderRadius: '4px',
+        background: active ? '#007cba' : '#fff',
+        color: active ? '#fff' : '#555',
+        cursor: 'pointer',
+        transition: 'all 0.15s'
+      };
+    };
+    var fieldGroupStyle = {
+      background: '#f9f9f9',
+      border: '1px solid #e5e5e5',
+      borderRadius: '6px',
+      padding: '16px',
+      marginBottom: '16px'
+    };
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), !isAlreadyBound && /*#__PURE__*/React.createElement(BlockControls, {
       group: "other"
     }, /*#__PURE__*/React.createElement(ToolbarButton, {
@@ -256,68 +264,116 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
       label: __('Convertir a meta', 'frontblocks'),
       onClick: openModal
     })), isOpen && /*#__PURE__*/React.createElement(Modal, {
-      title: __('Meta dinámico', 'frontblocks'),
+      title: __('Vincular a meta dinámica', 'frontblocks'),
       onRequestClose: function onRequestClose() {
         setIsOpen(false);
         resetForm();
       },
       style: {
-        maxWidth: '460px'
+        maxWidth: '480px',
+        width: '100%'
       }
-    }, existingFields.length > 0 && /*#__PURE__*/React.createElement(RadioControl, {
-      label: __('¿Qué quieres hacer?', 'frontblocks'),
-      selected: mode,
-      options: [{
-        label: __('Crear nuevo meta', 'frontblocks'),
-        value: 'new'
-      }, {
-        label: __('Usar meta existente', 'frontblocks'),
-        value: 'existing'
-      }],
-      onChange: setMode
-    }), 'new' === mode ? /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(TextControl, {
-      label: __('Nombre del campo (key)', 'frontblocks'),
-      value: metaKey,
-      onChange: setMetaKey,
-      placeholder: "fecha_proyecto",
-      help: __('Solo letras minúsculas, números y guiones bajos.', 'frontblocks')
-    }), /*#__PURE__*/React.createElement(TextControl, {
-      label: __('Etiqueta legible (opcional)', 'frontblocks'),
-      value: metaLabel,
-      onChange: setMetaLabel,
-      placeholder: __('Fecha del proyecto', 'frontblocks')
-    }), /*#__PURE__*/React.createElement(SelectControl, {
-      label: __('Tipo', 'frontblocks'),
-      value: metaType,
-      options: [{
-        label: __('Texto', 'frontblocks'),
-        value: 'text'
-      }],
-      onChange: setMetaType
-    })) : /*#__PURE__*/React.createElement(SelectControl, {
-      label: __('Meta existente', 'frontblocks'),
-      value: selectedExisting,
-      options: existingOptions,
-      onChange: setSelectedExisting
-    }), /*#__PURE__*/React.createElement(TextControl, {
-      label: __('Valor para este post', 'frontblocks'),
-      value: metaValue,
-      onChange: setMetaValue,
-      help: __('Se guardará como meta de este post y vinculará el bloque.', 'frontblocks')
-    }), !!errorMsg && /*#__PURE__*/React.createElement("p", {
-      style: {
-        color: '#cc1818',
-        margin: '8px 0 0'
-      }
-    }, errorMsg), /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("div", {
       style: {
         display: 'flex',
         gap: '8px',
-        justifyContent: 'flex-end',
-        marginTop: '20px'
+        marginBottom: '20px'
       }
+    }, /*#__PURE__*/React.createElement("button", {
+      style: tabStyle('new' === mode),
+      onClick: function onClick() {
+        return setMode('new');
+      }
+    }, __('+ Crear nuevo', 'frontblocks')), existingFields.length > 0 && /*#__PURE__*/React.createElement("button", {
+      style: tabStyle('existing' === mode),
+      onClick: function onClick() {
+        return setMode('existing');
+      }
+    }, __('Usar existente', 'frontblocks'))), 'new' === mode ? /*#__PURE__*/React.createElement("div", {
+      style: fieldGroupStyle
+    }, /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: '0 0 12px',
+        fontSize: '12px',
+        color: '#666',
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        fontWeight: '600'
+      }
+    }, __('Nuevo campo meta', 'frontblocks')), /*#__PURE__*/React.createElement(TextControl, {
+      label: __('Key (nombre interno)', 'frontblocks'),
+      value: metaKey,
+      onChange: setMetaKey,
+      placeholder: "fecha_proyecto",
+      help: __('Letras minúsculas, números y guiones bajos.', 'frontblocks'),
+      __nextHasNoMarginBottom: true
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: '12px'
+      }
+    }, /*#__PURE__*/React.createElement(TextControl, {
+      label: __('Etiqueta legible', 'frontblocks'),
+      value: metaLabel,
+      onChange: setMetaLabel,
+      placeholder: __('Fecha del proyecto', 'frontblocks'),
+      __nextHasNoMarginBottom: true
+    }))) : /*#__PURE__*/React.createElement("div", {
+      style: fieldGroupStyle
+    }, /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: '0 0 12px',
+        fontSize: '12px',
+        color: '#666',
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        fontWeight: '600'
+      }
+    }, __('Campo existente', 'frontblocks')), /*#__PURE__*/React.createElement(SelectControl, {
+      label: __('Selecciona un campo', 'frontblocks'),
+      value: selectedExisting,
+      options: existingOptions,
+      onChange: setSelectedExisting,
+      __nextHasNoMarginBottom: true
+    })), /*#__PURE__*/React.createElement("div", {
+      style: _objectSpread(_objectSpread({}, fieldGroupStyle), {}, {
+        background: '#fff'
+      })
+    }, /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: '0 0 12px',
+        fontSize: '12px',
+        color: '#666',
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        fontWeight: '600'
+      }
+    }, __('Valor para este post', 'frontblocks')), /*#__PURE__*/React.createElement(TextControl, {
+      label: __('Contenido', 'frontblocks'),
+      value: metaValue,
+      onChange: setMetaValue,
+      help: __('Se guardará en la base de datos y se mostrará en el editor.', 'frontblocks'),
+      __nextHasNoMarginBottom: true
+    })), !!errorMsg && /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: '#fff0f0',
+        border: '1px solid #fcc',
+        borderRadius: '4px',
+        padding: '10px 14px',
+        marginBottom: '12px',
+        color: '#cc1818',
+        fontSize: '13px'
+      }
+    }, errorMsg), /*#__PURE__*/React.createElement("div", {
+      style: _defineProperty({
+        display: 'flex',
+        gap: '8px',
+        justifyContent: 'flex-end',
+        paddingTop: '4px',
+        borderTop: '1px solid #eee',
+        marginTop: '4px'
+      }, "paddingTop", '16px')
     }, /*#__PURE__*/React.createElement(Button, {
-      variant: "secondary",
+      variant: "tertiary",
       onClick: function onClick() {
         setIsOpen(false);
         resetForm();
@@ -325,8 +381,11 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
     }, __('Cancelar', 'frontblocks')), /*#__PURE__*/React.createElement(Button, {
       variant: "primary",
       onClick: handleConfirm,
-      disabled: isLoading
-    }, isLoading ? /*#__PURE__*/React.createElement(Spinner, null) : __('Convertir', 'frontblocks')))));
+      disabled: isLoading,
+      style: {
+        minWidth: '100px'
+      }
+    }, isLoading ? /*#__PURE__*/React.createElement(Spinner, null) : __('Vincular', 'frontblocks')))));
   };
 }, 'withConvertToMeta');
 addFilter('editor.BlockEdit', 'frontblocks/convert-to-meta', withConvertToMeta);

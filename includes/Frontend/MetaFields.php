@@ -181,6 +181,32 @@ class MetaFields {
 	public function register_rest_routes(): void {
 		register_rest_route(
 			'frontblocks/v1',
+			'/save-meta',
+			[
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'rest_save_meta' ),
+				'permission_callback' => function () {
+					return current_user_can( 'edit_posts' );
+				},
+				'args'                => [
+					'post_id' => [
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					],
+					'key'     => [
+						'required'          => true,
+						'sanitize_callback' => 'sanitize_key',
+					],
+					'value'   => [
+						'required'          => true,
+						'sanitize_callback' => 'sanitize_text_field',
+					],
+				],
+			]
+		);
+
+		register_rest_route(
+			'frontblocks/v1',
 			'/meta-fields',
 			[
 				[
@@ -200,7 +226,7 @@ class MetaFields {
 					'methods'             => 'POST',
 					'callback'            => array( $this, 'rest_register_field' ),
 					'permission_callback' => function () {
-						return current_user_can( 'manage_options' );
+						return current_user_can( 'edit_posts' );
 					},
 					'args'                => [
 						'post_type' => [
@@ -290,6 +316,26 @@ class MetaFields {
 	}
 
 	/**
+	 * REST: POST /frontblocks/v1/save-meta
+	 *
+	 * @param  \WP_REST_Request $request  Request.
+	 * @return \WP_REST_Response
+	 */
+	public function rest_save_meta( \WP_REST_Request $request ): \WP_REST_Response {
+		$post_id = $request->get_param( 'post_id' );
+		$key     = $request->get_param( 'key' );
+		$value   = $request->get_param( 'value' );
+
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return new \WP_REST_Response( [ 'success' => false, 'error' => 'Forbidden' ], 403 );
+		}
+
+		update_post_meta( $post_id, $key, $value );
+
+		return rest_ensure_response( [ 'success' => true ] );
+	}
+
+	/**
 	 * Enqueue the editor plugin script.
 	 */
 	public function enqueue_editor_assets(): void {
@@ -305,8 +351,6 @@ class MetaFields {
 			'frontblocks-meta-fields-editor',
 			'frblMetaConfig',
 			[
-				'restUrl'   => rest_url( 'frontblocks/v1/meta-fields' ),
-				'nonce'     => wp_create_nonce( 'wp_rest' ),
 				'sourceKey' => 'frontblocks/post-meta',
 			]
 		);

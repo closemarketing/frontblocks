@@ -6,9 +6,11 @@ const {
 	Modal,
 	TextControl,
 	SelectControl,
-	RadioControl,
 	Button,
 	Spinner,
+	Flex,
+	FlexItem,
+	__experimentalText: Text,
 } = wp.components;
 const { useState, useEffect, Fragment } = wp.element;
 const { useSelect }                     = wp.data;
@@ -37,7 +39,6 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 		const [ mode,             setMode             ] = useState( 'new' );
 		const [ metaKey,          setMetaKey          ] = useState( '' );
 		const [ metaLabel,        setMetaLabel        ] = useState( '' );
-		const [ metaType,         setMetaType         ] = useState( 'text' );
 		const [ metaValue,        setMetaValue        ] = useState( '' );
 		const [ existingFields,   setExistingFields   ] = useState( [] );
 		const [ selectedExisting, setSelectedExisting ] = useState( '' );
@@ -49,18 +50,18 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 			postId:   select( 'core/editor' ).getCurrentPostId(),
 		} ) );
 
-		// frblMeta is our namespace — does NOT trigger WP's binding label override.
-		const frblMeta      = ( attributes.metadata && attributes.metadata.frblMeta ) || {};
+		const frblMeta       = ( attributes.metadata && attributes.metadata.frblMeta ) || {};
 		const isAlreadyBound = !! frblMeta[ attrName ];
-		const boundKey       = isAlreadyBound ? frblMeta[ attrName ].key : '';
 
 		useEffect( () => {
 			if ( ! isOpen || ! postType ) { return; }
-			apiFetch( {
-				url:     frblMetaConfig.restUrl + '?post_type=' + postType,
-				headers: { 'X-WP-Nonce': frblMetaConfig.nonce },
-			} )
-				.then( ( fields ) => setExistingFields( fields ) )
+			apiFetch( { path: '/frontblocks/v1/meta-fields?post_type=' + postType } )
+				.then( ( fields ) => {
+					setExistingFields( fields );
+					if ( fields.length > 0 ) {
+						setMode( 'existing' );
+					}
+				} )
 				.catch( () => setExistingFields( [] ) );
 		}, [ isOpen, postType ] );
 
@@ -73,7 +74,6 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 			setMode( 'new' );
 			setMetaKey( '' );
 			setMetaLabel( '' );
-			setMetaType( 'text' );
 			setMetaValue( '' );
 			setSelectedExisting( '' );
 			setErrorMsg( '' );
@@ -94,15 +94,14 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 						return;
 					}
 					const res = await apiFetch( {
-						url:     frblMetaConfig.restUrl,
-						method:  'POST',
-						data:    {
+						path:   '/frontblocks/v1/meta-fields',
+						method: 'POST',
+						data:   {
 							post_type: postType,
 							key:       metaKey.trim(),
 							label:     metaLabel.trim() || metaKey.trim(),
-							type:      metaType,
+							type:      'text',
 						},
-						headers: { 'X-WP-Nonce': frblMetaConfig.nonce },
 					} );
 					fieldKey  = res.field.key;
 					fieldType = res.field.type;
@@ -116,42 +115,58 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 					fieldType = ( existingFields.find( ( f ) => f.key === selectedExisting ) || {} ).type || 'text';
 				}
 
-				// Save meta value directly to DB.
 				if ( metaValue.trim() ) {
 					await apiFetch( {
-						url:     frblMetaConfig.saveMetaUrl,
-						method:  'POST',
-						data:    { post_id: postId, key: fieldKey, value: metaValue.trim() },
-						headers: { 'X-WP-Nonce': frblMetaConfig.nonce },
+						path:   '/frontblocks/v1/save-meta',
+						method: 'POST',
+						data:   { post_id: postId, key: fieldKey, value: metaValue.trim() },
 					} );
 				}
 
-				// Store binding in metadata.frblMeta (not metadata.bindings) so WP
-				// never replaces the block content with its binding source label.
 				const newFrblMeta = Object.assign( {}, frblMeta );
 				newFrblMeta[ attrName ] = { key: fieldKey, type: fieldType };
 
 				setAttributes( {
 					metadata:     Object.assign( {}, attributes.metadata || {}, { frblMeta: newFrblMeta } ),
-					[ attrName ]: metaValue.trim(), // show real value in editor
+					[ attrName ]: metaValue.trim() || attributes[ attrName ],
 				} );
 
 				setIsOpen( false );
 				resetForm();
 			} catch ( e ) {
-				setErrorMsg( __( 'Error al registrar. Inténtalo de nuevo.', 'frontblocks' ) );
+				setErrorMsg( __( 'Error al registrar el meta. Inténtalo de nuevo.', 'frontblocks' ) );
 			}
 
 			setIsLoading( false );
 		}
 
 		const existingOptions = [
-			{ label: __( '— Elegir —', 'frontblocks' ), value: '' },
+			{ label: __( '— Elige un campo —', 'frontblocks' ), value: '' },
 			...existingFields.map( ( f ) => ( {
-				label: f.label + ' — ' + f.key,
+				label: ( f.label || f.key ) + '  ·  ' + f.key,
 				value: f.key,
 			} ) ),
 		];
+
+		const tabStyle = ( active ) => ( {
+			padding:       '6px 14px',
+			fontSize:      '13px',
+			fontWeight:    active ? '600' : '400',
+			border:        '1px solid ' + ( active ? '#007cba' : '#ddd' ),
+			borderRadius:  '4px',
+			background:    active ? '#007cba' : '#fff',
+			color:         active ? '#fff' : '#555',
+			cursor:        'pointer',
+			transition:    'all 0.15s',
+		} );
+
+		const fieldGroupStyle = {
+			background:   '#f9f9f9',
+			border:       '1px solid #e5e5e5',
+			borderRadius: '6px',
+			padding:      '16px',
+			marginBottom: '16px',
+		};
 
 		return (
 			<Fragment>
@@ -169,75 +184,95 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 
 				{ isOpen && (
 					<Modal
-						title={ __( 'Meta dinámico', 'frontblocks' ) }
+						title={ __( 'Vincular a meta dinámica', 'frontblocks' ) }
 						onRequestClose={ () => { setIsOpen( false ); resetForm(); } }
-						style={ { maxWidth: '460px' } }
+						style={ { maxWidth: '480px', width: '100%' } }
 					>
-						{ existingFields.length > 0 && (
-							<RadioControl
-								label={ __( '¿Qué quieres hacer?', 'frontblocks' ) }
-								selected={ mode }
-								options={ [
-									{ label: __( 'Crear nuevo meta',    'frontblocks' ), value: 'new'      },
-									{ label: __( 'Usar meta existente', 'frontblocks' ), value: 'existing' },
-								] }
-								onChange={ setMode }
-							/>
-						) }
+						{ /* Tabs */ }
+						<div style={ { display: 'flex', gap: '8px', marginBottom: '20px' } }>
+							<button
+								style={ tabStyle( 'new' === mode ) }
+								onClick={ () => setMode( 'new' ) }
+							>
+								{ __( '+ Crear nuevo', 'frontblocks' ) }
+							</button>
+							{ existingFields.length > 0 && (
+								<button
+									style={ tabStyle( 'existing' === mode ) }
+									onClick={ () => setMode( 'existing' ) }
+								>
+									{ __( 'Usar existente', 'frontblocks' ) }
+								</button>
+							) }
+						</div>
 
 						{ 'new' === mode ? (
-							<Fragment>
+							<div style={ fieldGroupStyle }>
+								<p style={ { margin: '0 0 12px', fontSize: '12px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' } }>
+									{ __( 'Nuevo campo meta', 'frontblocks' ) }
+								</p>
 								<TextControl
-									label={ __( 'Nombre del campo (key)', 'frontblocks' ) }
+									label={ __( 'Key (nombre interno)', 'frontblocks' ) }
 									value={ metaKey }
 									onChange={ setMetaKey }
 									placeholder="fecha_proyecto"
-									help={ __( 'Solo letras minúsculas, números y guiones bajos.', 'frontblocks' ) }
+									help={ __( 'Letras minúsculas, números y guiones bajos.', 'frontblocks' ) }
+									__nextHasNoMarginBottom
 								/>
-								<TextControl
-									label={ __( 'Etiqueta legible (opcional)', 'frontblocks' ) }
-									value={ metaLabel }
-									onChange={ setMetaLabel }
-									placeholder={ __( 'Fecha del proyecto', 'frontblocks' ) }
-								/>
-								<SelectControl
-									label={ __( 'Tipo', 'frontblocks' ) }
-									value={ metaType }
-									options={ [
-										{ label: __( 'Texto', 'frontblocks' ), value: 'text' },
-									] }
-									onChange={ setMetaType }
-								/>
-							</Fragment>
+								<div style={ { marginTop: '12px' } }>
+									<TextControl
+										label={ __( 'Etiqueta legible', 'frontblocks' ) }
+										value={ metaLabel }
+										onChange={ setMetaLabel }
+										placeholder={ __( 'Fecha del proyecto', 'frontblocks' ) }
+										__nextHasNoMarginBottom
+									/>
+								</div>
+							</div>
 						) : (
-							<SelectControl
-								label={ __( 'Meta existente', 'frontblocks' ) }
-								value={ selectedExisting }
-								options={ existingOptions }
-								onChange={ setSelectedExisting }
-							/>
+							<div style={ fieldGroupStyle }>
+								<p style={ { margin: '0 0 12px', fontSize: '12px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' } }>
+									{ __( 'Campo existente', 'frontblocks' ) }
+								</p>
+								<SelectControl
+									label={ __( 'Selecciona un campo', 'frontblocks' ) }
+									value={ selectedExisting }
+									options={ existingOptions }
+									onChange={ setSelectedExisting }
+									__nextHasNoMarginBottom
+								/>
+							</div>
 						) }
 
-						<TextControl
-							label={ __( 'Valor para este post', 'frontblocks' ) }
-							value={ metaValue }
-							onChange={ setMetaValue }
-							help={ __( 'Se guardará como meta de este post y vinculará el bloque.', 'frontblocks' ) }
-						/>
+						{ /* Value */ }
+						<div style={ { ...fieldGroupStyle, background: '#fff' } }>
+							<p style={ { margin: '0 0 12px', fontSize: '12px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' } }>
+								{ __( 'Valor para este post', 'frontblocks' ) }
+							</p>
+							<TextControl
+								label={ __( 'Contenido', 'frontblocks' ) }
+								value={ metaValue }
+								onChange={ setMetaValue }
+								help={ __( 'Se guardará en la base de datos y se mostrará en el editor.', 'frontblocks' ) }
+								__nextHasNoMarginBottom
+							/>
+						</div>
 
 						{ !! errorMsg && (
-							<p style={ { color: '#cc1818', margin: '8px 0 0' } }>{ errorMsg }</p>
+							<div style={ { background: '#fff0f0', border: '1px solid #fcc', borderRadius: '4px', padding: '10px 14px', marginBottom: '12px', color: '#cc1818', fontSize: '13px' } }>
+								{ errorMsg }
+							</div>
 						) }
 
-						<div style={ { display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '20px' } }>
+						<div style={ { display: 'flex', gap: '8px', justifyContent: 'flex-end', paddingTop: '4px', borderTop: '1px solid #eee', marginTop: '4px', paddingTop: '16px' } }>
 							<Button
-								variant="secondary"
+								variant="tertiary"
 								onClick={ () => { setIsOpen( false ); resetForm(); } }
 							>
 								{ __( 'Cancelar', 'frontblocks' ) }
 							</Button>
-							<Button variant="primary" onClick={ handleConfirm } disabled={ isLoading }>
-								{ isLoading ? <Spinner /> : __( 'Convertir', 'frontblocks' ) }
+							<Button variant="primary" onClick={ handleConfirm } disabled={ isLoading } style={ { minWidth: '100px' } }>
+								{ isLoading ? <Spinner /> : __( 'Vincular', 'frontblocks' ) }
 							</Button>
 						</div>
 					</Modal>
