@@ -44,6 +44,7 @@ class MetaFields {
 		add_action( 'init', array( $this, 'load_and_register' ), 20 );
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
+		add_filter( 'render_block', array( $this, 'render_block_with_meta' ), 10, 3 );
 	}
 
 	/**
@@ -74,42 +75,28 @@ class MetaFields {
 			$this->fields[] = $field;
 		}
 
-		$this->register_block_bindings_source();
 		$this->register_post_meta_fields();
 	}
 
 	/**
-	 * Register block bindings source.
-	 */
-	public function register_block_bindings_source(): void {
-		if ( ! function_exists( 'register_block_bindings_source' ) ) {
-			return;
-		}
-
-		register_block_bindings_source(
-			'frontblocks/post-meta',
-			[
-				'label'              => __( 'FrontBlocks Meta', 'frontblocks' ),
-				'get_value_callback' => array( $this, 'get_binding_value' ),
-				'uses_context'       => [ 'postId', 'postType' ],
-			]
-		);
-	}
-
-	/**
-	 * Resolve a binding to its meta value.
+	 * Frontend: replace block content with live meta value.
 	 *
-	 * @param  array      $source_args     { key, type }.
-	 * @param  \WP_Block  $block_instance  Block instance.
-	 * @param  string     $attribute_name  Bound attribute.
-	 * @return mixed
+	 * Reads metadata.frblMeta (our namespace, not WP block bindings) so the
+	 * editor never shows the binding-source label — only the real value.
+	 *
+	 * @param  string    $block_content  Rendered HTML.
+	 * @param  array     $parsed_block   Parsed block data.
+	 * @param  \WP_Block $block_instance Block instance (has context for query loops).
+	 * @return string
 	 */
-	public function get_binding_value( array $source_args, \WP_Block $block_instance, string $attribute_name ) {
-		if ( empty( $source_args['key'] ) ) {
-			return null;
+	public function render_block_with_meta( string $block_content, array $parsed_block, \WP_Block $block_instance ): string {
+		$frbl_meta = $parsed_block['attrs']['metadata']['frblMeta'] ?? null;
+
+		if ( empty( $frbl_meta ) || ! is_array( $frbl_meta ) ) {
+			return $block_content;
 		}
 
-		// Query loops provide postId via context; single posts on classic themes rely on global $post.
+		// Resolve post ID — query loops provide context; singles fall back to global $post.
 		$post_id = isset( $block_instance->context['postId'] ) ? (int) $block_instance->context['postId'] : 0;
 
 		if ( ! $post_id ) {
@@ -118,21 +105,53 @@ class MetaFields {
 		}
 
 		if ( ! $post_id ) {
-			return null;
+			return $block_content;
 		}
 
-		$value = get_post_meta( $post_id, $source_args['key'], true );
+		$block_name = $parsed_block['blockName'] ?? '';
 
-		if ( '' === $value ) {
-			return null;
+		foreach ( $frbl_meta as $attr_name => $binding ) {
+			$key = $binding['key'] ?? '';
+			if ( ! $key ) {
+				continue;
+			}
+
+			$value = get_post_meta( $post_id, $key, true );
+			if ( '' === $value ) {
+				continue;
+			}
+
+			$block_content = $this->inject_value( $block_content, $block_name, $attr_name, (string) $value );
 		}
 
-		// Resolve image attachment ID → URL.
-		if ( 'image' === ( $source_args['type'] ?? '' ) && 'url' === $attribute_name && is_numeric( $value ) ) {
-			return wp_get_attachment_image_url( (int) $value, 'full' ) ?: null;
+		return $block_content;
+	}
+
+	/**
+	 * Replace the inner HTML of the matching tag.
+	 *
+	 * @param  string $html        Block HTML.
+	 * @param  string $block_name  Block name (core/paragraph, core/heading).
+	 * @param  string $attr_name   Attribute being replaced (content).
+	 * @param  string $value       Meta value.
+	 * @return string
+	 */
+	private function inject_value( string $html, string $block_name, string $attr_name, string $value ): string {
+		if ( 'content' !== $attr_name ) {
+			return $html;
 		}
 
-		return $value;
+		$safe = wp_kses_post( $value );
+
+		if ( 'core/paragraph' === $block_name ) {
+			return preg_replace( '/(<p[^>]*>).*?(<\/p>)/s', '$1' . $safe . '$2', $html, 1 ) ?? $html;
+		}
+
+		if ( 'core/heading' === $block_name ) {
+			return preg_replace( '/(<h[1-6][^>]*>).*?(<\/h[1-6]>)/s', '$1' . $safe . '$2', $html, 1 ) ?? $html;
+		}
+
+		return $html;
 	}
 
 	/**

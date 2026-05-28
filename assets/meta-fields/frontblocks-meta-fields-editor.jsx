@@ -11,28 +11,19 @@ const {
 	Spinner,
 } = wp.components;
 const { useState, useEffect, Fragment } = wp.element;
-const { useSelect, useDispatch }        = wp.data;
+const { useSelect }                     = wp.data;
 const { __ }                            = wp.i18n;
 const apiFetch                          = wp.apiFetch;
 
-/**
- * Blocks supported and which attribute they bind to.
- */
 const BINDABLE = {
 	'core/paragraph': 'content',
 	'core/heading':   'content',
 };
 
-/**
- * Strip HTML tags — used to get plain text for meta value from block content.
- */
 function stripHtml( html ) {
 	return html ? html.replace( /<[^>]+>/g, '' ) : '';
 }
 
-/**
- * HOC — adds "Convertir a meta" toolbar button to paragraph and heading blocks.
- */
 const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 	return function ConvertToMetaWrapper( props ) {
 		const { name, attributes, setAttributes } = props;
@@ -43,7 +34,7 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 		}
 
 		const [ isOpen,           setIsOpen           ] = useState( false );
-		const [ mode,             setMode             ] = useState( 'new' ); // 'new' | 'existing'
+		const [ mode,             setMode             ] = useState( 'new' );
 		const [ metaKey,          setMetaKey          ] = useState( '' );
 		const [ metaLabel,        setMetaLabel        ] = useState( '' );
 		const [ metaType,         setMetaType         ] = useState( 'text' );
@@ -58,9 +49,11 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 			postId:   select( 'core/editor' ).getCurrentPostId(),
 		} ) );
 
-		const { editEntityRecord } = useDispatch( 'core' );
+		// frblMeta is our namespace — does NOT trigger WP's binding label override.
+		const frblMeta      = ( attributes.metadata && attributes.metadata.frblMeta ) || {};
+		const isAlreadyBound = !! frblMeta[ attrName ];
+		const boundKey       = isAlreadyBound ? frblMeta[ attrName ].key : '';
 
-		// Load existing fields for this CPT when modal opens.
 		useEffect( () => {
 			if ( ! isOpen || ! postType ) { return; }
 			apiFetch( {
@@ -70,14 +63,6 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 				.then( ( fields ) => setExistingFields( fields ) )
 				.catch( () => setExistingFields( [] ) );
 		}, [ isOpen, postType ] );
-
-		const isAlreadyBound = !! (
-			attributes.metadata &&
-			attributes.metadata.bindings &&
-			attributes.metadata.bindings[ attrName ]
-		);
-
-		const boundKey = isAlreadyBound ? attributes.metadata.bindings[ attrName ].args.key : '';
 
 		function openModal() {
 			setMetaValue( stripHtml( attributes[ attrName ] || '' ) );
@@ -109,9 +94,9 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 						return;
 					}
 					const res = await apiFetch( {
-						url:    frblMetaConfig.restUrl,
-						method: 'POST',
-						data:   {
+						url:     frblMetaConfig.restUrl,
+						method:  'POST',
+						data:    {
 							post_type: postType,
 							key:       metaKey.trim(),
 							label:     metaLabel.trim() || metaKey.trim(),
@@ -131,24 +116,24 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 					fieldType = ( existingFields.find( ( f ) => f.key === selectedExisting ) || {} ).type || 'text';
 				}
 
-				// Save meta value for this post via Gutenberg entity store.
+				// Save meta value directly to DB.
 				if ( metaValue.trim() ) {
-					await editEntityRecord( 'postType', postType, postId, {
-						meta: { [ fieldKey ]: metaValue.trim() },
+					await apiFetch( {
+						url:     frblMetaConfig.saveMetaUrl,
+						method:  'POST',
+						data:    { post_id: postId, key: fieldKey, value: metaValue.trim() },
+						headers: { 'X-WP-Nonce': frblMetaConfig.nonce },
 					} );
 				}
 
-				// Apply binding to the block.
-				const bindings = Object.assign(
-					{},
-					( attributes.metadata && attributes.metadata.bindings ) || {}
-				);
-				bindings[ attrName ] = {
-					source: frblMetaConfig.sourceKey,
-					args:   { key: fieldKey, type: fieldType },
-				};
+				// Store binding in metadata.frblMeta (not metadata.bindings) so WP
+				// never replaces the block content with its binding source label.
+				const newFrblMeta = Object.assign( {}, frblMeta );
+				newFrblMeta[ attrName ] = { key: fieldKey, type: fieldType };
+
 				setAttributes( {
-					metadata: Object.assign( {}, attributes.metadata || {}, { bindings } ),
+					metadata:     Object.assign( {}, attributes.metadata || {}, { frblMeta: newFrblMeta } ),
+					[ attrName ]: metaValue.trim(), // show real value in editor
 				} );
 
 				setIsOpen( false );
@@ -158,23 +143,6 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 			}
 
 			setIsLoading( false );
-		}
-
-		function handleRemoveBinding() {
-			const bindings = Object.assign(
-				{},
-				( attributes.metadata && attributes.metadata.bindings ) || {}
-			);
-			delete bindings[ attrName ];
-			const metadata = Object.assign( {}, attributes.metadata || {} );
-			if ( 0 === Object.keys( bindings ).length ) {
-				delete metadata.bindings;
-			} else {
-				metadata.bindings = bindings;
-			}
-			setAttributes( { metadata } );
-			setIsOpen( false );
-			resetForm();
 		}
 
 		const existingOptions = [
@@ -189,18 +157,15 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 			<Fragment>
 				<BlockEdit { ...props } />
 
-				<BlockControls group="other">
-					<ToolbarButton
-						icon={ isAlreadyBound ? 'database' : 'database-add' }
-						label={
-							isAlreadyBound
-								? __( 'Meta vinculado: ', 'frontblocks' ) + boundKey
-								: __( 'Convertir a meta', 'frontblocks' )
-						}
-						onClick={ openModal }
-						isActive={ isAlreadyBound }
-					/>
-				</BlockControls>
+				{ ! isAlreadyBound && (
+					<BlockControls group="other">
+						<ToolbarButton
+							icon="database-add"
+							label={ __( 'Convertir a meta', 'frontblocks' ) }
+							onClick={ openModal }
+						/>
+					</BlockControls>
+				) }
 
 				{ isOpen && (
 					<Modal
@@ -213,7 +178,7 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 								label={ __( '¿Qué quieres hacer?', 'frontblocks' ) }
 								selected={ mode }
 								options={ [
-									{ label: __( 'Crear nuevo meta', 'frontblocks' ),    value: 'new'      },
+									{ label: __( 'Crear nuevo meta',    'frontblocks' ), value: 'new'      },
 									{ label: __( 'Usar meta existente', 'frontblocks' ), value: 'existing' },
 								] }
 								onChange={ setMode }
@@ -265,11 +230,6 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 						) }
 
 						<div style={ { display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '20px' } }>
-							{ isAlreadyBound && (
-								<Button variant="tertiary" isDestructive onClick={ handleRemoveBinding }>
-									{ __( 'Quitar vinculación', 'frontblocks' ) }
-								</Button>
-							) }
 							<Button
 								variant="secondary"
 								onClick={ () => { setIsOpen( false ); resetForm(); } }
