@@ -270,7 +270,7 @@ function InsertPostBlock(props) {
 const { registerBlockType } = wp.blocks;
 
 registerBlockType('frontblocks/insert-post', {
-	title: __('Insert Post', 'frontblocks'),
+	title: __('FrontBlocks - Insert Post', 'frontblocks'),
 	description: __('Display content from another post or page', 'frontblocks'),
 	category: 'generateblocks',
 	icon: 'admin-post',
@@ -324,7 +324,7 @@ function addInsertPostPanel(BlockEdit) {
 				<BlockEdit {...props} />
 				<InspectorControls>
 					<PanelBody
-						title={__('Insert Post Integration', 'frontblocks')}
+						title={__('FrontBlocks - Insert Post', 'frontblocks')}
 						initialOpen={false}
 					>
 						<ToggleControl
