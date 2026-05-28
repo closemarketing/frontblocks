@@ -46,6 +46,37 @@ class UI {
 	}
 
 	/**
+	 * Show a PRO info card for an upsell feature (no toggle, red styling).
+	 *
+	 * @param string $icon_slug   Icon slug from assets/admin/icons/.
+	 * @param string $title       Feature title.
+	 * @param string $description Feature description.
+	 * @return void
+	 */
+	public static function show_pro_info_card( $icon_slug, $title, $description ) {
+		$icon_path = FRBL_PLUGIN_PATH . 'assets/admin/icons/' . $icon_slug . '.svg';
+		$icon_svg  = file_exists( $icon_path ) ? file_get_contents( $icon_path ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		?>
+		<div class="frbl-feature-card frbl-feature-pro">
+			<div class="frbl-pro-badge">PRO</div>
+			<div class="frbl-feature-content">
+				<div class="frbl-feature-icon">
+					<?php echo $icon_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</div>
+				<div class="frbl-feature-info">
+					<h3 class="frbl-feature-title">
+						<?php echo esc_html( $title ); ?>
+					</h3>
+					<p class="frbl-feature-description">
+						<?php echo esc_html( $description ); ?>
+					</p>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Get the icon for a feature.
 	 *
 	 * @param string $icon_slug The slug of the icon.
