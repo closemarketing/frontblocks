@@ -266,7 +266,8 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
       style: {
         background: '#1e1e1e',
         color: '#fff',
-        borderRadius: '2px'
+        borderRadius: '2px',
+        alignSelf: 'stretch'
       }
     }) : /*#__PURE__*/React.createElement(ToolbarButton, {
       icon: "database-add",

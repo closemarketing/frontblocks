@@ -354,6 +354,11 @@ class MetaFields {
 				'sourceKey' => 'frontblocks/post-meta',
 			]
 		);
+
+		wp_add_inline_style(
+			'wp-components',
+			'.components-toolbar-group { padding-top: 4px; padding-bottom: 4px; }'
+		);
 	}
 
 	/**

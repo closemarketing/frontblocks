@@ -182,9 +182,7 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 								background:   '#1e1e1e',
 								color:        '#fff',
 								borderRadius: '2px',
-								padding:      '6px',
-								width:        'auto',
-								height:       'auto',
+								alignSelf:    'stretch',
 							} }
 						/>
 					) : (
