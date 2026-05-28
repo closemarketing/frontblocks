@@ -141,7 +141,6 @@ class Plugin_Main {
 
 		// Before After comparison block.
 		new Frontend\BeforeAfter();
-
 	}
 
 	/**
