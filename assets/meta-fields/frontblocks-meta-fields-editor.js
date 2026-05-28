@@ -102,6 +102,7 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
       postId = _useSelect.postId;
     var frblMeta = attributes.metadata && attributes.metadata.frblMeta || {};
     var isAlreadyBound = !!frblMeta[attrName];
+    var boundKey = isAlreadyBound ? frblMeta[attrName].key || '' : '';
     useEffect(function () {
       if (!isOpen || !postType) {
         return;
@@ -110,7 +111,8 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
         path: '/frontblocks/v1/meta-fields?post_type=' + postType
       }).then(function (fields) {
         setExistingFields(fields);
-        if (fields.length > 0) {
+        // Only auto-switch to existing when not already bound (bound blocks set mode in openModal).
+        if (fields.length > 0 && !isAlreadyBound) {
           setMode('existing');
         }
       }).catch(function () {
@@ -119,6 +121,10 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
     }, [isOpen, postType]);
     function openModal() {
       setMetaValue(stripHtml(attributes[attrName] || ''));
+      if (isAlreadyBound) {
+        setMode('existing');
+        setSelectedExisting(boundKey);
+      }
       setIsOpen(true);
     }
     function resetForm() {
@@ -261,14 +267,11 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
       group: "other"
     }, isAlreadyBound ? /*#__PURE__*/React.createElement(ToolbarButton, {
       icon: "database",
-      label: __('Meta vinculado: ' + (frblMeta[attrName] ? frblMeta[attrName].key : ''), 'frontblocks'),
-      onClick: openModal,
-      style: {
-        background: '#1e1e1e',
-        color: '#fff',
-        borderRadius: '2px',
-        alignSelf: 'stretch'
-      }
+      label: __('Meta vinculado: ' + boundKey, 'frontblocks'),
+      onClick: function onClick() {
+        return openModal();
+      },
+      className: "frbl-meta-bound-btn"
     }) : /*#__PURE__*/React.createElement(ToolbarButton, {
       icon: "database-add",
       label: __('Convertir a meta', 'frontblocks'),

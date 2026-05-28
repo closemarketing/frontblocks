@@ -53,12 +53,15 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 		const frblMeta       = ( attributes.metadata && attributes.metadata.frblMeta ) || {};
 		const isAlreadyBound = !! frblMeta[ attrName ];
 
+		const boundKey = isAlreadyBound ? ( frblMeta[ attrName ].key || '' ) : '';
+
 		useEffect( () => {
 			if ( ! isOpen || ! postType ) { return; }
 			apiFetch( { path: '/frontblocks/v1/meta-fields?post_type=' + postType } )
 				.then( ( fields ) => {
 					setExistingFields( fields );
-					if ( fields.length > 0 ) {
+					// Only auto-switch to existing when not already bound (bound blocks set mode in openModal).
+					if ( fields.length > 0 && ! isAlreadyBound ) {
 						setMode( 'existing' );
 					}
 				} )
@@ -67,6 +70,10 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 
 		function openModal() {
 			setMetaValue( stripHtml( attributes[ attrName ] || '' ) );
+			if ( isAlreadyBound ) {
+				setMode( 'existing' );
+				setSelectedExisting( boundKey );
+			}
 			setIsOpen( true );
 		}
 
@@ -176,14 +183,9 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 					{ isAlreadyBound ? (
 						<ToolbarButton
 							icon="database"
-							label={ __( 'Meta vinculado: ' + ( frblMeta[ attrName ] ? frblMeta[ attrName ].key : '' ), 'frontblocks' ) }
-							onClick={ openModal }
-							style={ {
-								background:   '#1e1e1e',
-								color:        '#fff',
-								borderRadius: '2px',
-								alignSelf:    'stretch',
-							} }
+							label={ __( 'Meta vinculado: ' + boundKey, 'frontblocks' ) }
+							onClick={ () => openModal() }
+							className="frbl-meta-bound-btn"
 						/>
 					) : (
 						<ToolbarButton
