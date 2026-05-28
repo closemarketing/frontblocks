@@ -142,8 +142,6 @@ class Plugin_Main {
 		// Before After comparison block.
 		new Frontend\BeforeAfter();
 
-		// Meta Fields — convert any paragraph/heading to a dynamic meta binding.
-		new Frontend\MetaFields();
 	}
 
 	/**

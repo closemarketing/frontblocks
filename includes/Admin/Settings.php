@@ -805,6 +805,8 @@ class Settings {
 				</form>
 
 				<?php
+				do_action( 'frontblocks_settings_after_form' );
+
 				// Render license section separately (outside main form) if PRO is active.
 				if ( frbl_is_pro_active() ) {
 					$this->render_license_section();
