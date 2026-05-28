@@ -1,0 +1,312 @@
+<?php
+/**
+ * Meta Fields — Dynamic block bindings with editor UI.
+ *
+ * Fields are stored in the `frbl_meta_fields_config` option as a flat array
+ * of { post_type, key, label, type }. A REST endpoint lets the editor
+ * register new fields on the fly without touching PHP files.
+ *
+ * Block bindings source: `frontblocks/post-meta`
+ * Bindable blocks: core/paragraph (content), core/heading (content)
+ *
+ * @package FrontBlocks
+ */
+
+namespace FrontBlocks\Frontend;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Class MetaFields
+ */
+class MetaFields {
+
+	const OPTION_KEY = 'frbl_meta_fields_config';
+
+	/**
+	 * All registered fields (stored + filter).
+	 *
+	 * @var array<int, array<string, string>>
+	 */
+	private array $fields = [];
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->init_hooks();
+	}
+
+	/**
+	 * Register hooks.
+	 */
+	private function init_hooks(): void {
+		add_action( 'init', array( $this, 'load_and_register' ), 20 );
+		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
+	}
+
+	/**
+	 * Load fields from option + developer filter, then register everything.
+	 */
+	public function load_and_register(): void {
+		$stored = (array) get_option( self::OPTION_KEY, [] );
+
+		// Merge fields from developer filter (backward compat).
+		$filter_fields = (array) apply_filters( 'frbl_meta_fields', [] );
+		foreach ( $filter_fields as $post_type => $type_fields ) {
+			foreach ( (array) $type_fields as $field ) {
+				if ( ! empty( $field['key'] ) ) {
+					$stored[] = array_merge( $field, [ 'post_type' => (string) $post_type ] );
+				}
+			}
+		}
+
+		// Deduplicate by post_type + key.
+		$seen         = [];
+		$this->fields = [];
+		foreach ( $stored as $field ) {
+			$id = ( $field['post_type'] ?? '' ) . '|' . ( $field['key'] ?? '' );
+			if ( isset( $seen[ $id ] ) || empty( $field['key'] ) || empty( $field['post_type'] ) ) {
+				continue;
+			}
+			$seen[ $id ]    = true;
+			$this->fields[] = $field;
+		}
+
+		$this->register_block_bindings_source();
+		$this->register_post_meta_fields();
+	}
+
+	/**
+	 * Register block bindings source.
+	 */
+	public function register_block_bindings_source(): void {
+		if ( ! function_exists( 'register_block_bindings_source' ) ) {
+			return;
+		}
+
+		register_block_bindings_source(
+			'frontblocks/post-meta',
+			[
+				'label'              => __( 'FrontBlocks Meta', 'frontblocks' ),
+				'get_value_callback' => array( $this, 'get_binding_value' ),
+				'uses_context'       => [ 'postId', 'postType' ],
+			]
+		);
+	}
+
+	/**
+	 * Resolve a binding to its meta value.
+	 *
+	 * @param  array      $source_args     { key, type }.
+	 * @param  \WP_Block  $block_instance  Block instance.
+	 * @param  string     $attribute_name  Bound attribute.
+	 * @return mixed
+	 */
+	public function get_binding_value( array $source_args, \WP_Block $block_instance, string $attribute_name ) {
+		if ( empty( $source_args['key'] ) ) {
+			return null;
+		}
+
+		// Query loops provide postId via context; single posts on classic themes rely on global $post.
+		$post_id = isset( $block_instance->context['postId'] ) ? (int) $block_instance->context['postId'] : 0;
+
+		if ( ! $post_id ) {
+			global $post;
+			$post_id = isset( $post->ID ) ? (int) $post->ID : (int) get_the_ID();
+		}
+
+		if ( ! $post_id ) {
+			return null;
+		}
+
+		$value = get_post_meta( $post_id, $source_args['key'], true );
+
+		if ( '' === $value ) {
+			return null;
+		}
+
+		// Resolve image attachment ID → URL.
+		if ( 'image' === ( $source_args['type'] ?? '' ) && 'url' === $attribute_name && is_numeric( $value ) ) {
+			return wp_get_attachment_image_url( (int) $value, 'full' ) ?: null;
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Register post meta for REST API access.
+	 */
+	private function register_post_meta_fields(): void {
+		foreach ( $this->fields as $field ) {
+			register_post_meta(
+				$field['post_type'],
+				$field['key'],
+				[
+					'show_in_rest'  => true,
+					'single'        => true,
+					'type'          => $this->wp_meta_type( $field['type'] ?? 'text' ),
+					'label'         => $field['label'] ?? $field['key'],
+					'auth_callback' => function () {
+						return current_user_can( 'edit_posts' );
+					},
+				]
+			);
+		}
+	}
+
+	/**
+	 * Register REST API routes.
+	 */
+	public function register_rest_routes(): void {
+		register_rest_route(
+			'frontblocks/v1',
+			'/meta-fields',
+			[
+				[
+					'methods'             => 'GET',
+					'callback'            => array( $this, 'rest_get_fields' ),
+					'permission_callback' => function () {
+						return current_user_can( 'edit_posts' );
+					},
+					'args'                => [
+						'post_type' => [
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_key',
+						],
+					],
+				],
+				[
+					'methods'             => 'POST',
+					'callback'            => array( $this, 'rest_register_field' ),
+					'permission_callback' => function () {
+						return current_user_can( 'manage_options' );
+					},
+					'args'                => [
+						'post_type' => [
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_key',
+						],
+						'key'       => [
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_key',
+						],
+						'label'     => [
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_text_field',
+						],
+						'type'      => [
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_key',
+							'default'           => 'text',
+						],
+					],
+				],
+			]
+		);
+	}
+
+	/**
+	 * REST: GET /frontblocks/v1/meta-fields
+	 *
+	 * @param  \WP_REST_Request $request  Request.
+	 * @return \WP_REST_Response
+	 */
+	public function rest_get_fields( \WP_REST_Request $request ): \WP_REST_Response {
+		$post_type = $request->get_param( 'post_type' );
+		$fields    = $this->fields;
+
+		if ( $post_type ) {
+			$fields = array_values(
+				array_filter( $fields, fn( $f ) => ( $f['post_type'] ?? '' ) === $post_type )
+			);
+		}
+
+		return rest_ensure_response( $fields );
+	}
+
+	/**
+	 * REST: POST /frontblocks/v1/meta-fields
+	 *
+	 * @param  \WP_REST_Request $request  Request.
+	 * @return \WP_REST_Response
+	 */
+	public function rest_register_field( \WP_REST_Request $request ): \WP_REST_Response {
+		$new_field = [
+			'post_type' => $request->get_param( 'post_type' ),
+			'key'       => $request->get_param( 'key' ),
+			'label'     => $request->get_param( 'label' ),
+			'type'      => $request->get_param( 'type' ) ?: 'text',
+		];
+
+		$stored = (array) get_option( self::OPTION_KEY, [] );
+
+		// Return existing if already registered.
+		foreach ( $stored as $existing ) {
+			if ( ( $existing['key'] ?? '' ) === $new_field['key'] && ( $existing['post_type'] ?? '' ) === $new_field['post_type'] ) {
+				return rest_ensure_response( [ 'success' => true, 'field' => $existing, 'existing' => true ] );
+			}
+		}
+
+		$stored[] = $new_field;
+		update_option( self::OPTION_KEY, $stored );
+
+		// Register immediately so the meta is writable in this same request cycle.
+		register_post_meta(
+			$new_field['post_type'],
+			$new_field['key'],
+			[
+				'show_in_rest'  => true,
+				'single'        => true,
+				'type'          => $this->wp_meta_type( $new_field['type'] ),
+				'label'         => $new_field['label'],
+				'auth_callback' => function () {
+					return current_user_can( 'edit_posts' );
+				},
+			]
+		);
+
+		return rest_ensure_response( [ 'success' => true, 'field' => $new_field ] );
+	}
+
+	/**
+	 * Enqueue the editor plugin script.
+	 */
+	public function enqueue_editor_assets(): void {
+		wp_enqueue_script(
+			'frontblocks-meta-fields-editor',
+			FRBL_PLUGIN_URL . 'assets/meta-fields/frontblocks-meta-fields-editor.js',
+			[ 'wp-blocks', 'wp-element', 'wp-components', 'wp-block-editor', 'wp-data', 'wp-hooks', 'wp-compose', 'wp-i18n', 'wp-api-fetch' ],
+			FRBL_VERSION,
+			true
+		);
+
+		wp_localize_script(
+			'frontblocks-meta-fields-editor',
+			'frblMetaConfig',
+			[
+				'restUrl'   => rest_url( 'frontblocks/v1/meta-fields' ),
+				'nonce'     => wp_create_nonce( 'wp_rest' ),
+				'sourceKey' => 'frontblocks/post-meta',
+			]
+		);
+	}
+
+	/**
+	 * Map field type to WordPress meta type.
+	 *
+	 * @param  string $type  FrontBlocks type.
+	 * @return string
+	 */
+	private function wp_meta_type( string $type ): string {
+		$map = [
+			'number'   => 'number',
+			'image'    => 'string',
+			'url'      => 'string',
+			'textarea' => 'string',
+		];
+
+		return $map[ $type ] ?? 'string';
+	}
+}
