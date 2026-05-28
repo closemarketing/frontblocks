@@ -559,7 +559,7 @@ function addAnimationControls(BlockEdit) {
                     </PanelBody>
 
                     <PanelBody
-                        title={__('FrontBlocks Hover Effects', 'frontblocks')}
+                        title={__('FrontBlocks - Hover Effects', 'frontblocks')}
                         initialOpen={false}
                     >
                         <ToggleControl

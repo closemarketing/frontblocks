@@ -1488,7 +1488,7 @@ function addTextAnimationPanelToNativeBlocks( BlockEdit ) {
 				}
 				<InspectorControls>
 					<PanelBody
-						title={ __( 'FrontBlocks Text Animation', 'frontblocks' ) }
+						title={ __( 'FrontBlocks - Text Animation', 'frontblocks' ) }
 						initialOpen={ false }
 					>
 						<SelectControl

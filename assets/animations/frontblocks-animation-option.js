@@ -733,7 +733,7 @@ function addAnimationControls(BlockEdit) {
       max: 50,
       step: 1
     })), /*#__PURE__*/React.createElement(PanelBody, {
-      title: __('FrontBlocks Hover Effects', 'frontblocks'),
+      title: __('FrontBlocks - Hover Effects', 'frontblocks'),
       initialOpen: false
     }, /*#__PURE__*/React.createElement(ToggleControl, {
       label: __('FrontBlocks - Scale Background on Hover', 'frontblocks'),
