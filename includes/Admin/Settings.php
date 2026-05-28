@@ -900,6 +900,8 @@ class Settings {
 			UI::show_info_card( 'stacked_images', __( 'Stacked Images Block', 'frontblocks' ), __( 'Display images with animated stacking effect from different directions', 'frontblocks' ) );
 			UI::show_info_card( 'product_categories', __( 'Product Categories Block', 'frontblocks' ), __( 'Display WooCommerce product categories', 'frontblocks' ) );
 			UI::show_info_card( 'headline_marquee', __( 'Headline Marquee', 'frontblocks' ), __( 'Infinite scrolling marquee effect for headline/text blocks with customizable speed', 'frontblocks' ) );
+			$pro_active = defined( 'FRBLP_PRO_ACTIVE' ) && function_exists( 'frblp_is_license_valid' ) && frblp_is_license_valid();
+			UI::show_pro_info_card( 'user_text', __( 'User Data Block', 'frontblocks' ), __( 'Display logged-in user data with placeholders like {nombre}, {email}, {username}', 'frontblocks' ), $pro_active );
 			?>
 		</div>
 		<?php

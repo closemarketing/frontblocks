@@ -1194,6 +1194,42 @@ video {
 	opacity: 0.6;
 }
 
+/* Locked PRO feature (no active license) */
+.frbl-feature-card.frbl-feature-locked {
+	background: linear-gradient(135deg, #ffffff 0%, #fff1f2 100%);
+	border-color: #fecdd3;
+	opacity: 0.85;
+}
+
+.frbl-feature-card.frbl-feature-locked:hover {
+	border-color: #ef4444;
+	transform: none;
+}
+
+.frbl-feature-card.frbl-feature-locked .frbl-feature-icon {
+	background: linear-gradient(135deg, #fecdd3 0%, #fca5a5 100%);
+	color: #ef4444;
+}
+
+.frbl-feature-card.frbl-feature-locked .frbl-feature-info {
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.frbl-feature-card.frbl-feature-locked .frbl-feature-content {
+	justify-content: flex-start;
+}
+
+.frbl-feature-card.frbl-feature-locked .frbl-pro-badge {
+	background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.frbl-feature-card.frbl-feature-locked .frbl-feature-description a {
+	color: #ef4444;
+	font-weight: 600;
+	text-decoration: underline;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
 	.frbl-features-grid {

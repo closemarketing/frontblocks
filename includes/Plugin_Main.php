@@ -141,6 +141,8 @@ class Plugin_Main {
 
 		// Before After comparison block.
 		new Frontend\BeforeAfter();
+
+		// User Text block is provided by FrontBlocks Pro when license is active.
 	}
 
 	/**
