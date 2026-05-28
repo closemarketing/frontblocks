@@ -57,7 +57,7 @@ class UI {
 		$icon_path = FRBL_PLUGIN_PATH . 'assets/admin/icons/' . $icon_slug . '.svg';
 		$icon_svg  = file_exists( $icon_path ) ? file_get_contents( $icon_path ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		?>
-		<div class="frbl-feature-card frbl-feature-pro">
+		<div class="frbl-feature-card frbl-feature-pro frbl-feature-pro-info">
 			<div class="frbl-pro-badge">PRO</div>
 			<div class="frbl-feature-content">
 				<div class="frbl-feature-icon">
