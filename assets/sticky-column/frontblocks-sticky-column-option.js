@@ -55,7 +55,7 @@
         frblStickyColumnIndex = 0;
       }
       return el('div', {}, el(BlockEdit, props), el(InspectorControls, {}, el(PanelBody, {
-        title: __('Sticky Column', 'frontblocks'),
+        title: __('FrontBlocks - Sticky Column', 'frontblocks'),
         initialOpen: false
       }, el(ToggleControl, {
         label: __('Enable Sticky Column', 'frontblocks'),
