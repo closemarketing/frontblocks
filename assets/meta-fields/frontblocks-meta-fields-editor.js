@@ -257,9 +257,18 @@ var withConvertToMeta = createHigherOrderComponent(function (BlockEdit) {
       padding: '16px',
       marginBottom: '16px'
     };
-    return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), !isAlreadyBound && /*#__PURE__*/React.createElement(BlockControls, {
+    return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(BlockControls, {
       group: "other"
-    }, /*#__PURE__*/React.createElement(ToolbarButton, {
+    }, isAlreadyBound ? /*#__PURE__*/React.createElement(ToolbarButton, {
+      icon: "database",
+      label: __('Meta vinculado: ' + (frblMeta[attrName] ? frblMeta[attrName].key : ''), 'frontblocks'),
+      onClick: openModal,
+      style: {
+        background: '#1e1e1e',
+        color: '#fff',
+        borderRadius: '2px'
+      }
+    }) : /*#__PURE__*/React.createElement(ToolbarButton, {
       icon: "database-add",
       label: __('Convertir a meta', 'frontblocks'),
       onClick: openModal

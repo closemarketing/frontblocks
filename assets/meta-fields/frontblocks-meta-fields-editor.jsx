@@ -172,15 +172,29 @@ const withConvertToMeta = createHigherOrderComponent( ( BlockEdit ) => {
 			<Fragment>
 				<BlockEdit { ...props } />
 
-				{ ! isAlreadyBound && (
-					<BlockControls group="other">
+				<BlockControls group="other">
+					{ isAlreadyBound ? (
+						<ToolbarButton
+							icon="database"
+							label={ __( 'Meta vinculado: ' + ( frblMeta[ attrName ] ? frblMeta[ attrName ].key : '' ), 'frontblocks' ) }
+							onClick={ openModal }
+							style={ {
+								background:   '#1e1e1e',
+								color:        '#fff',
+								borderRadius: '2px',
+								padding:      '6px',
+								width:        'auto',
+								height:       'auto',
+							} }
+						/>
+					) : (
 						<ToolbarButton
 							icon="database-add"
 							label={ __( 'Convertir a meta', 'frontblocks' ) }
 							onClick={ openModal }
 						/>
-					</BlockControls>
-				) }
+					) }
+				</BlockControls>
 
 				{ isOpen && (
 					<Modal
