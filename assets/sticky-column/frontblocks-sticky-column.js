@@ -18,7 +18,7 @@
             const stickyOffset = parseInt(wrapper.getAttribute('data-sticky-offset')) || 0;
             const stickyColumnIndex = parseInt(wrapper.getAttribute('data-sticky-column-index')) || 0;
             
-            const columns = wrapper.querySelectorAll('.gb-grid-column');
+            const columns = wrapper.querySelectorAll('.gb-grid-column, .wp-block-column');
             
             if (columns.length > stickyColumnIndex) {
                 const stickyColumn = columns[stickyColumnIndex];
@@ -29,39 +29,28 @@
 
     function setupStickyColumn(column, offset) {
         let isSticky = false;
-        
+        // GenerateBlocks uses an inner .gb-container; native columns use the column itself.
+        const stickyTarget = column.querySelector('.gb-container') || column;
+
         function checkStickyPosition() {
-            const rect = column.getBoundingClientRect();
             const wrapper = column.closest('.frontblocks-sticky-wrapper');
             const wrapperRect = wrapper.getBoundingClientRect();
-            
+
             // Check if the column should be sticky
             if (wrapperRect.top <= offset && !isSticky) {
                 column.classList.add('sticky-active');
-                // Apply offset to the gb-container within the sticky column
-                const container = column.querySelector('.gb-container');
-                if (container) {
-                    container.style.top = offset + 'px';
-                }
+                stickyTarget.style.top = offset + 'px';
                 isSticky = true;
             } else if (wrapperRect.top > offset && isSticky) {
                 column.classList.remove('sticky-active');
-                // Remove offset from the gb-container
-                const container = column.querySelector('.gb-container');
-                if (container) {
-                    container.style.top = '';
-                }
+                stickyTarget.style.top = '';
                 isSticky = false;
             }
-            
+
             // Check if we've scrolled past the wrapper
             if (wrapperRect.bottom <= offset && isSticky) {
                 column.classList.remove('sticky-active');
-                // Remove offset from the gb-container
-                const container = column.querySelector('.gb-container');
-                if (container) {
-                    container.style.top = '';
-                }
+                stickyTarget.style.top = '';
                 isSticky = false;
             }
         }

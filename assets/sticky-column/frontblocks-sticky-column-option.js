@@ -13,12 +13,13 @@
     SelectControl = _wp$components.SelectControl;
   var addFilter = wp.hooks.addFilter;
   var select = wp.data.select;
+  var SUPPORTED_BLOCKS = ['generateblocks/grid', 'core/columns'];
 
-  // Add sticky column controls to the GenerateBlocks Grid block
+  // Add sticky column controls to supported grid/columns blocks
   addFilter('editor.BlockEdit', 'frontblocks/sticky-column-controls', function (BlockEdit) {
     return function (props) {
-      // Only add controls to GenerateBlocks Grid block
-      if (props.name !== 'generateblocks/grid') {
+      // Only add controls to supported blocks
+      if (!SUPPORTED_BLOCKS.includes(props.name)) {
         return el(BlockEdit, props);
       }
       var attributes = props.attributes,
