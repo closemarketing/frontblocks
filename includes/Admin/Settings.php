@@ -1045,22 +1045,22 @@ class Settings {
 
 		// Short descriptions for each field.
 		$descriptions = array(
-			$this->option_enable_testimonials                     => __( 'Add a testimonials block to display customer reviews.', 'frontblocks' ),
-			$this->option_enable_reading_progress                 => __( 'Show a progress bar at the top of the page while reading posts.', 'frontblocks' ),
-			$this->option_enable_back_button                      => __( 'Add a floating back button for easy navigation.', 'frontblocks' ),
-			$this->option_enable_events                           => __( 'Register and display events using a CPT or blog posts.', 'frontblocks' ),
-			$this->option_enable_fluid_typography                 => __( 'Font sizes scale smoothly between mobile and desktop using CSS clamp().', 'frontblocks' ),
-			$this->option_enable_gutenberg                        => __( 'Use the block editor to write WooCommerce product descriptions.', 'frontblocks' ),
-			$this->option_enable_simple_prices_variable_products  => __( 'Show a simplified price range for variable products.', 'frontblocks' ),
-			$this->option_enable_after_add_to_cart                => __( 'Insert custom block content right after the Add to Cart button.', 'frontblocks' ),
-			$this->option_deactivate_short_description            => __( 'Remove the short description field from product pages.', 'frontblocks' ),
-			$this->option_move_content_to_short_description       => __( 'Move the main product content into the short description area.', 'frontblocks' ),
-			$this->option_disable_zoom_images                     => __( 'Remove the zoom effect on WooCommerce product images.', 'frontblocks' ),
-			$this->option_add_share_buttons                       => __( 'Add social share buttons to WooCommerce product pages.', 'frontblocks' ),
-			$this->option_deactivate_product_tabs                 => __( 'Remove the default description, reviews and attributes tabs.', 'frontblocks' ),
-			$this->option_horizontal_product_form                 => __( 'Display quantity and Add to Cart button side by side.', 'frontblocks' ),
-			$this->option_enable_fullpage_scroll                  => __( 'Enable full-page scroll navigation between sections.', 'frontblocks' ),
-			$this->option_enable_language_banner                  => __( 'Show a banner when the visitor language differs from the site language.', 'frontblocks' ),
+			$this->option_enable_testimonials          => __( 'Add a testimonials block to display customer reviews.', 'frontblocks' ),
+			$this->option_enable_reading_progress      => __( 'Show a progress bar at the top of the page while reading posts.', 'frontblocks' ),
+			$this->option_enable_back_button           => __( 'Add a floating back button for easy navigation.', 'frontblocks' ),
+			$this->option_enable_events                => __( 'Register and display events using a CPT or blog posts.', 'frontblocks' ),
+			$this->option_enable_fluid_typography      => __( 'Font sizes scale smoothly between mobile and desktop using CSS clamp().', 'frontblocks' ),
+			$this->option_enable_gutenberg             => __( 'Use the block editor to write WooCommerce product descriptions.', 'frontblocks' ),
+			$this->option_enable_simple_prices_variable_products => __( 'Show a simplified price range for variable products.', 'frontblocks' ),
+			$this->option_enable_after_add_to_cart     => __( 'Insert custom block content right after the Add to Cart button.', 'frontblocks' ),
+			$this->option_deactivate_short_description => __( 'Remove the short description field from product pages.', 'frontblocks' ),
+			$this->option_move_content_to_short_description => __( 'Move the main product content into the short description area.', 'frontblocks' ),
+			$this->option_disable_zoom_images          => __( 'Remove the zoom effect on WooCommerce product images.', 'frontblocks' ),
+			$this->option_add_share_buttons            => __( 'Add social share buttons to WooCommerce product pages.', 'frontblocks' ),
+			$this->option_deactivate_product_tabs      => __( 'Remove the default description, reviews and attributes tabs.', 'frontblocks' ),
+			$this->option_horizontal_product_form      => __( 'Display quantity and Add to Cart button side by side.', 'frontblocks' ),
+			$this->option_enable_fullpage_scroll       => __( 'Enable full-page scroll navigation between sections.', 'frontblocks' ),
+			$this->option_enable_language_banner       => __( 'Show a banner when the visitor language differs from the site language.', 'frontblocks' ),
 		);
 
 		$desc = $descriptions[ $field['id'] ] ?? '';
