@@ -56,9 +56,9 @@ class UI {
 	 * @return void
 	 */
 	public static function show_pro_info_card( $icon_slug, $title, $description ) {
-		$icon_path  = FRBL_PLUGIN_PATH . 'assets/admin/icons/' . $icon_slug . '.svg';
-		$icon_svg   = file_exists( $icon_path ) ? file_get_contents( $icon_path ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$pro_url    = 'https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-pro-card';
+		$icon_path = FRBL_PLUGIN_PATH . 'assets/admin/icons/' . $icon_slug . '.svg';
+		$icon_svg  = file_exists( $icon_path ) ? file_get_contents( $icon_path ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$pro_url   = 'https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-pro-card';
 		?>
 		<a href="<?php echo esc_url( $pro_url ); ?>" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit; display: block;">
 			<div class="frbl-feature-card frbl-feature-pro frbl-feature-pro-info" style="height: 100%;">

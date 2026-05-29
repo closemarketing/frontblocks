@@ -887,16 +887,56 @@ class Settings {
 		$active_blocks = apply_filters(
 			'frbl_active_blocks',
 			array(
-				array( 'icon' => 'animations',        'title' => __( 'Animations',             'frontblocks' ), 'desc' => __( 'Add animations to any block using Animate.css',                                        'frontblocks' ) ),
-				array( 'icon' => 'carousel',          'title' => __( 'Carousel/Slider',         'frontblocks' ), 'desc' => __( 'Transform any Grid block into a carousel or slider',                                  'frontblocks' ) ),
-				array( 'icon' => 'gallery',           'title' => __( 'Native Gallery',          'frontblocks' ), 'desc' => __( 'Enhanced gallery block with carousel and masonry options',                            'frontblocks' ) ),
-				array( 'icon' => 'sticky',            'title' => __( 'Sticky Columns',          'frontblocks' ), 'desc' => __( 'Make Grid blocks sticky when scrolling',                                              'frontblocks' ) ),
-				array( 'icon' => 'insert_post',       'title' => __( 'Insert Post Block',       'frontblocks' ), 'desc' => __( 'Display content from other posts, pages or custom post types',                       'frontblocks' ) ),
-				array( 'icon' => 'counter',           'title' => __( 'Counter Block',           'frontblocks' ), 'desc' => __( 'Display animated counters with start and end values',                                 'frontblocks' ) ),
-				array( 'icon' => 'reading_time',      'title' => __( 'Reading Time Block',      'frontblocks' ), 'desc' => __( 'Show estimated reading time for posts',                                               'frontblocks' ) ),
-				array( 'icon' => 'stacked_images',    'title' => __( 'Stacked Images Block',    'frontblocks' ), 'desc' => __( 'Display images with animated stacking effect from different directions',              'frontblocks' ) ),
-				array( 'icon' => 'product_categories','title' => __( 'Product Categories Block','frontblocks' ), 'desc' => __( 'Display WooCommerce product categories',                                              'frontblocks' ) ),
-				array( 'icon' => 'headline_marquee',  'title' => __( 'Headline Marquee',        'frontblocks' ), 'desc' => __( 'Infinite scrolling marquee effect for headline/text blocks with customizable speed', 'frontblocks' ) ),
+				array(
+					'icon'  => 'animations',
+					'title' => __( 'Animations', 'frontblocks' ),
+					'desc'  => __( 'Add animations to any block using Animate.css', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'carousel',
+					'title' => __( 'Carousel/Slider', 'frontblocks' ),
+					'desc'  => __( 'Transform any Grid block into a carousel or slider', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'gallery',
+					'title' => __( 'Native Gallery', 'frontblocks' ),
+					'desc'  => __( 'Enhanced gallery block with carousel and masonry options', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'sticky',
+					'title' => __( 'Sticky Columns', 'frontblocks' ),
+					'desc'  => __( 'Make Grid blocks sticky when scrolling', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'insert_post',
+					'title' => __( 'Insert Post Block', 'frontblocks' ),
+					'desc'  => __( 'Display content from other posts, pages or custom post types', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'counter',
+					'title' => __( 'Counter Block', 'frontblocks' ),
+					'desc'  => __( 'Display animated counters with start and end values', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'reading_time',
+					'title' => __( 'Reading Time Block', 'frontblocks' ),
+					'desc'  => __( 'Show estimated reading time for posts', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'stacked_images',
+					'title' => __( 'Stacked Images Block', 'frontblocks' ),
+					'desc'  => __( 'Display images with animated stacking effect from different directions', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'product_categories',
+					'title' => __( 'Product Categories Block', 'frontblocks' ),
+					'desc'  => __( 'Display WooCommerce product categories', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'headline_marquee',
+					'title' => __( 'Headline Marquee', 'frontblocks' ),
+					'desc'  => __( 'Infinite scrolling marquee effect for headline/text blocks with customizable speed', 'frontblocks' ),
+				),
 			)
 		);
 
@@ -1544,22 +1584,79 @@ class Settings {
 	 */
 	private function get_default_pro_blocks(): array {
 		return array(
-			array( 'icon' => 'meta-fields',           'title' => __( 'Dynamic Meta Fields',             'frontblocks' ), 'desc' => __( 'Bind any paragraph or heading to a custom post meta field, editable from the block editor.', 'frontblocks' ) ),
-			array( 'icon' => 'user-text',             'title' => __( 'User Data Block',                 'frontblocks' ), 'desc' => __( 'Display logged-in user data with placeholders like {nombre}, {email}, {username}.', 'frontblocks' ) ),
-			array( 'icon' => 'fullpage-scroll',       'title' => __( 'Full Page Scroll',                'frontblocks' ), 'desc' => __( 'Full-page scroll navigation between sections with smooth transitions.', 'frontblocks' ) ),
-			array( 'icon' => 'language-banner',       'title' => __( 'Language Banner',                 'frontblocks' ), 'desc' => __( 'Detect visitor language and show a recommendation banner (WPML/Polylang).', 'frontblocks' ) ),
-			array( 'icon' => 'gutenberg',             'title' => __( 'Gutenberg in Products',           'frontblocks' ), 'desc' => __( 'Use the full block editor to build WooCommerce product descriptions.', 'frontblocks' ) ),
-			array( 'icon' => 'after-add-to-cart',     'title' => __( 'After Add to Cart Block',         'frontblocks' ), 'desc' => __( 'Insert custom block content right after the Add to Cart button.', 'frontblocks' ) ),
-			array( 'icon' => 'simple-prices',         'title' => __( 'Simple Prices Variable Products', 'frontblocks' ), 'desc' => __( 'Simplified price display for variable WooCommerce products.', 'frontblocks' ) ),
-			array( 'icon' => 'horizontal-form',       'title' => __( 'Horizontal Product Form',         'frontblocks' ), 'desc' => __( 'Switch the WooCommerce product form to a horizontal layout.', 'frontblocks' ) ),
-			array( 'icon' => 'deactivate-tabs',       'title' => __( 'Deactivate Product Tabs',         'frontblocks' ), 'desc' => __( 'Remove the default tabs from WooCommerce product pages.', 'frontblocks' ) ),
-			array( 'icon' => 'disable-zoom',          'title' => __( 'Disable Product Image Zoom',      'frontblocks' ), 'desc' => __( 'Remove zoom effect on WooCommerce product images.', 'frontblocks' ) ),
-			array( 'icon' => 'share-buttons',         'title' => __( 'Share Buttons',                   'frontblocks' ), 'desc' => __( 'Add social share buttons to WooCommerce product pages.', 'frontblocks' ) ),
-			array( 'icon' => 'deactivate-description','title' => __( 'Manage Short Description',        'frontblocks' ), 'desc' => __( 'Deactivate or move the WooCommerce product short description.', 'frontblocks' ) ),
-			array( 'icon' => 'default',               'title' => __( 'Custom Post Types Builder',       'frontblocks' ), 'desc' => __( 'Create and manage custom post types directly from the admin panel.', 'frontblocks' ) ),
+			array(
+				'icon'  => 'meta-fields',
+				'title' => __( 'Dynamic Meta Fields', 'frontblocks' ),
+				'desc'  => __( 'Bind any paragraph or heading to a custom post meta field, editable from the block editor.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'user-text',
+				'title' => __( 'User Data Block', 'frontblocks' ),
+				'desc'  => __( 'Display logged-in user data with placeholders like {nombre}, {email}, {username}.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'fullpage-scroll',
+				'title' => __( 'Full Page Scroll', 'frontblocks' ),
+				'desc'  => __( 'Full-page scroll navigation between sections with smooth transitions.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'language-banner',
+				'title' => __( 'Language Banner', 'frontblocks' ),
+				'desc'  => __( 'Detect visitor language and show a recommendation banner (WPML/Polylang).', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'gutenberg',
+				'title' => __( 'Gutenberg in Products', 'frontblocks' ),
+				'desc'  => __( 'Use the full block editor to build WooCommerce product descriptions.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'after-add-to-cart',
+				'title' => __( 'After Add to Cart Block', 'frontblocks' ),
+				'desc'  => __( 'Insert custom block content right after the Add to Cart button.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'simple-prices',
+				'title' => __( 'Simple Prices Variable Products', 'frontblocks' ),
+				'desc'  => __( 'Simplified price display for variable WooCommerce products.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'horizontal-form',
+				'title' => __( 'Horizontal Product Form', 'frontblocks' ),
+				'desc'  => __( 'Switch the WooCommerce product form to a horizontal layout.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'deactivate-tabs',
+				'title' => __( 'Deactivate Product Tabs', 'frontblocks' ),
+				'desc'  => __( 'Remove the default tabs from WooCommerce product pages.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'disable-zoom',
+				'title' => __( 'Disable Product Image Zoom', 'frontblocks' ),
+				'desc'  => __( 'Remove zoom effect on WooCommerce product images.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'share-buttons',
+				'title' => __( 'Share Buttons', 'frontblocks' ),
+				'desc'  => __( 'Add social share buttons to WooCommerce product pages.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'deactivate-description',
+				'title' => __( 'Manage Short Description', 'frontblocks' ),
+				'desc'  => __( 'Deactivate or move the WooCommerce product short description.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'default',
+				'title' => __( 'Custom Post Types Builder', 'frontblocks' ),
+				'desc'  => __( 'Create and manage custom post types directly from the admin panel.', 'frontblocks' ),
+			),
 		);
 	}
 
+	/**
+	 * Render PRO features section after the main form.
+	 *
+	 * @return void
+	 */
 	private function render_pro_section(): void {
 		$pro_blocks    = apply_filters( 'frbl_pro_blocks', $this->get_default_pro_blocks() );
 		$license_valid = function_exists( 'frblp_is_license_valid' ) && frblp_is_license_valid();
