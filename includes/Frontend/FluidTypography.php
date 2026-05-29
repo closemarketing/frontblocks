@@ -37,7 +37,7 @@ class FluidTypography {
 	 */
 	private function is_enabled() {
 		$options = get_option( 'frontblocks_settings', array() );
-		return ! empty( $options['enable_fluid_typography'] );
+		return (bool) ( $options['enable_fluid_typography'] ?? true );
 	}
 
 	/**

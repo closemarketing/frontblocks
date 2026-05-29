@@ -1296,7 +1296,7 @@ class Settings {
 	 */
 	public function field_enable_fluid_typography() {
 		$options = get_option( 'frontblocks_settings', array() );
-		$enabled = (bool) ( $options[ $this->option_enable_fluid_typography ] ?? false );
+		$enabled = (bool) ( $options[ $this->option_enable_fluid_typography ] ?? true );
 		?>
 		<label class="frbl-toggle">
 			<input type="checkbox" 
