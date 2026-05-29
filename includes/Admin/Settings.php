@@ -893,7 +893,7 @@ class Settings {
 			UI::show_info_card( 'animations', __( 'Animations', 'frontblocks' ), __( 'Add animations to any block using Animate.css', 'frontblocks' ) );
 			UI::show_info_card( 'carousel', __( 'Carousel/Slider', 'frontblocks' ), __( 'Transform any Grid block into a carousel or slider', 'frontblocks' ) );
 			UI::show_info_card( 'gallery', __( 'Native Gallery', 'frontblocks' ), __( 'Enhanced gallery block with carousel and masonry options', 'frontblocks' ) );
-			UI::show_info_card( 'sticky', __( 'Sticky Columns', 'frontblocks' ), __( 'Make Grid blocks sticky when scrolling', 'frontblocks' ) );
+			UI::show_info_card( 'sticky', __( 'Sticky Columns', 'frontblocks' ), __( 'Make Grid or Columns blocks sticky when scrolling', 'frontblocks' ) );
 			UI::show_info_card( 'insert_post', __( 'Insert Post Block', 'frontblocks' ), __( 'Display content from other posts, pages or custom post types', 'frontblocks' ) );
 			UI::show_info_card( 'counter', __( 'Counter Block', 'frontblocks' ), __( 'Display animated counters with start and end values', 'frontblocks' ) );
 			UI::show_info_card( 'reading_time', __( 'Reading Time Block', 'frontblocks' ), __( 'Show estimated reading time for posts', 'frontblocks' ) );
