@@ -56,25 +56,28 @@ class UI {
 	 * @return void
 	 */
 	public static function show_pro_info_card( $icon_slug, $title, $description ) {
-		$icon_path = FRBL_PLUGIN_PATH . 'assets/admin/icons/' . $icon_slug . '.svg';
-		$icon_svg  = file_exists( $icon_path ) ? file_get_contents( $icon_path ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$icon_path  = FRBL_PLUGIN_PATH . 'assets/admin/icons/' . $icon_slug . '.svg';
+		$icon_svg   = file_exists( $icon_path ) ? file_get_contents( $icon_path ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$pro_url    = 'https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-pro-card';
 		?>
-		<div class="frbl-feature-card frbl-feature-pro frbl-feature-pro-info">
-			<div class="frbl-pro-badge">PRO</div>
-			<div class="frbl-feature-content">
-				<div class="frbl-feature-icon">
-					<?php echo $icon_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-				</div>
-				<div class="frbl-feature-info">
-					<h3 class="frbl-feature-title">
-						<?php echo esc_html( $title ); ?>
-					</h3>
-					<p class="frbl-feature-description">
-						<?php echo esc_html( $description ); ?>
-					</p>
+		<a href="<?php echo esc_url( $pro_url ); ?>" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit; display: block;">
+			<div class="frbl-feature-card frbl-feature-pro frbl-feature-pro-info" style="height: 100%;">
+				<div class="frbl-pro-badge">PRO</div>
+				<div class="frbl-feature-content">
+					<div class="frbl-feature-icon">
+						<?php echo $icon_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					</div>
+					<div class="frbl-feature-info">
+						<h3 class="frbl-feature-title">
+							<?php echo esc_html( $title ); ?>
+						</h3>
+						<p class="frbl-feature-description">
+							<?php echo esc_html( $description ); ?>
+						</p>
+					</div>
 				</div>
 			</div>
-		</div>
+		</a>
 		<?php
 	}
 
