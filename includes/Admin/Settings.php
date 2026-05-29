@@ -805,8 +805,6 @@ class Settings {
 				</form>
 
 				<?php
-				do_action( 'frontblocks_settings_after_form' );
-
 				// Render license section separately (outside main form) if PRO is active.
 				if ( frbl_is_pro_active() ) {
 					$this->render_license_section();
@@ -886,31 +884,44 @@ class Settings {
 	 * @return void
 	 */
 	private function section_active_blocks_callback() {
+		$active_blocks = apply_filters(
+			'frbl_active_blocks',
+			array(
+				array( 'icon' => 'animations',        'title' => __( 'Animations',             'frontblocks' ), 'desc' => __( 'Add animations to any block using Animate.css',                                        'frontblocks' ) ),
+				array( 'icon' => 'carousel',          'title' => __( 'Carousel/Slider',         'frontblocks' ), 'desc' => __( 'Transform any Grid block into a carousel or slider',                                  'frontblocks' ) ),
+				array( 'icon' => 'gallery',           'title' => __( 'Native Gallery',          'frontblocks' ), 'desc' => __( 'Enhanced gallery block with carousel and masonry options',                            'frontblocks' ) ),
+				array( 'icon' => 'sticky',            'title' => __( 'Sticky Columns',          'frontblocks' ), 'desc' => __( 'Make Grid blocks sticky when scrolling',                                              'frontblocks' ) ),
+				array( 'icon' => 'insert_post',       'title' => __( 'Insert Post Block',       'frontblocks' ), 'desc' => __( 'Display content from other posts, pages or custom post types',                       'frontblocks' ) ),
+				array( 'icon' => 'counter',           'title' => __( 'Counter Block',           'frontblocks' ), 'desc' => __( 'Display animated counters with start and end values',                                 'frontblocks' ) ),
+				array( 'icon' => 'reading_time',      'title' => __( 'Reading Time Block',      'frontblocks' ), 'desc' => __( 'Show estimated reading time for posts',                                               'frontblocks' ) ),
+				array( 'icon' => 'stacked_images',    'title' => __( 'Stacked Images Block',    'frontblocks' ), 'desc' => __( 'Display images with animated stacking effect from different directions',              'frontblocks' ) ),
+				array( 'icon' => 'product_categories','title' => __( 'Product Categories Block','frontblocks' ), 'desc' => __( 'Display WooCommerce product categories',                                              'frontblocks' ) ),
+				array( 'icon' => 'headline_marquee',  'title' => __( 'Headline Marquee',        'frontblocks' ), 'desc' => __( 'Infinite scrolling marquee effect for headline/text blocks with customizable speed', 'frontblocks' ) ),
+			)
+		);
+
+		$pro_blocks    = apply_filters( 'frbl_pro_blocks', $this->get_default_pro_blocks() );
+		$license_valid = function_exists( 'frblp_is_license_valid' ) && frblp_is_license_valid();
+
 		?>
 		<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
 			<?php echo esc_html__( 'These blocks and features are always active and available in the block editor.', 'frontblocks' ); ?>
 		</p>
 		<div class="frbl-features-grid">
 			<?php
-			UI::show_info_card( 'animations', __( 'Animations', 'frontblocks' ), __( 'Add animations to any block using Animate.css', 'frontblocks' ) );
-			UI::show_info_card( 'carousel', __( 'Carousel/Slider', 'frontblocks' ), __( 'Transform any Grid block into a carousel or slider', 'frontblocks' ) );
-			UI::show_info_card( 'gallery', __( 'Native Gallery', 'frontblocks' ), __( 'Enhanced gallery block with carousel and masonry options', 'frontblocks' ) );
-			UI::show_info_card( 'sticky', __( 'Sticky Columns', 'frontblocks' ), __( 'Make Grid blocks sticky when scrolling', 'frontblocks' ) );
-			UI::show_info_card( 'insert_post', __( 'Insert Post Block', 'frontblocks' ), __( 'Display content from other posts, pages or custom post types', 'frontblocks' ) );
-			UI::show_info_card( 'counter', __( 'Counter Block', 'frontblocks' ), __( 'Display animated counters with start and end values', 'frontblocks' ) );
-			UI::show_info_card( 'reading_time', __( 'Reading Time Block', 'frontblocks' ), __( 'Show estimated reading time for posts', 'frontblocks' ) );
-			UI::show_info_card( 'stacked_images', __( 'Stacked Images Block', 'frontblocks' ), __( 'Display images with animated stacking effect from different directions', 'frontblocks' ) );
-			UI::show_info_card( 'product_categories', __( 'Product Categories Block', 'frontblocks' ), __( 'Display WooCommerce product categories', 'frontblocks' ) );
-			UI::show_info_card( 'headline_marquee', __( 'Headline Marquee', 'frontblocks' ), __( 'Infinite scrolling marquee effect for headline/text blocks with customizable speed', 'frontblocks' ) );
-			if ( ! frbl_is_pro_active() || ! ( function_exists( 'frblp_is_license_valid' ) && frblp_is_license_valid() ) ) {
-				UI::show_pro_info_card( 'meta-fields', __( 'Dynamic Meta Fields', 'frontblocks' ), __( 'Bind any paragraph or heading to a custom post meta field, editable from the block editor.', 'frontblocks' ) );
+			foreach ( $active_blocks as $block ) {
+				UI::show_info_card( $block['icon'], $block['title'], $block['desc'] );
 			}
-			$pro_active = defined( 'FRBLP_PRO_ACTIVE' ) && function_exists( 'frblp_is_license_valid' ) && frblp_is_license_valid();
-			UI::show_pro_info_card( 'user_text', __( 'User Data Block', 'frontblocks' ), __( 'Display logged-in user data with placeholders like {nombre}, {email}, {username}', 'frontblocks' ), $pro_active );
+
+			if ( ! $license_valid ) {
+				foreach ( $pro_blocks as $block ) {
+					UI::show_pro_info_card( $block['icon'], $block['title'], $block['desc'] );
+				}
+			}
 			?>
 		</div>
 		<?php
-	} 
+	}
 
 	/**
 	 * Features section callback.
@@ -1494,6 +1505,94 @@ class Settings {
 
 					<?php do_action( 'frontblocks_render_existing_cpts' ); ?>
 				</div>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render PRO features section after the main form.
+	 * Shows when frbl_pro_blocks filter returns blocks and license is not active.
+	 *
+	 * @return void
+	 */
+	/**
+	 * Default PRO blocks list — shown as promotional cards when PRO is not installed.
+	 * The frbl_pro_blocks filter lets the PRO plugin override this list.
+	 *
+	 * @return array<int, array<string, string>>
+	 */
+	private function get_default_pro_blocks(): array {
+		return array(
+			array( 'icon' => 'meta-fields',           'title' => __( 'Dynamic Meta Fields',             'frontblocks' ), 'desc' => __( 'Bind any paragraph or heading to a custom post meta field, editable from the block editor.', 'frontblocks' ) ),
+			array( 'icon' => 'user-text',             'title' => __( 'User Data Block',                 'frontblocks' ), 'desc' => __( 'Display logged-in user data with placeholders like {nombre}, {email}, {username}.', 'frontblocks' ) ),
+			array( 'icon' => 'fullpage-scroll',       'title' => __( 'Full Page Scroll',                'frontblocks' ), 'desc' => __( 'Full-page scroll navigation between sections with smooth transitions.', 'frontblocks' ) ),
+			array( 'icon' => 'language-banner',       'title' => __( 'Language Banner',                 'frontblocks' ), 'desc' => __( 'Detect visitor language and show a recommendation banner (WPML/Polylang).', 'frontblocks' ) ),
+			array( 'icon' => 'gutenberg',             'title' => __( 'Gutenberg in Products',           'frontblocks' ), 'desc' => __( 'Use the full block editor to build WooCommerce product descriptions.', 'frontblocks' ) ),
+			array( 'icon' => 'after-add-to-cart',     'title' => __( 'After Add to Cart Block',         'frontblocks' ), 'desc' => __( 'Insert custom block content right after the Add to Cart button.', 'frontblocks' ) ),
+			array( 'icon' => 'simple-prices',         'title' => __( 'Simple Prices Variable Products', 'frontblocks' ), 'desc' => __( 'Simplified price display for variable WooCommerce products.', 'frontblocks' ) ),
+			array( 'icon' => 'horizontal-form',       'title' => __( 'Horizontal Product Form',         'frontblocks' ), 'desc' => __( 'Switch the WooCommerce product form to a horizontal layout.', 'frontblocks' ) ),
+			array( 'icon' => 'deactivate-tabs',       'title' => __( 'Deactivate Product Tabs',         'frontblocks' ), 'desc' => __( 'Remove the default tabs from WooCommerce product pages.', 'frontblocks' ) ),
+			array( 'icon' => 'disable-zoom',          'title' => __( 'Disable Product Image Zoom',      'frontblocks' ), 'desc' => __( 'Remove zoom effect on WooCommerce product images.', 'frontblocks' ) ),
+			array( 'icon' => 'share-buttons',         'title' => __( 'Share Buttons',                   'frontblocks' ), 'desc' => __( 'Add social share buttons to WooCommerce product pages.', 'frontblocks' ) ),
+			array( 'icon' => 'deactivate-description','title' => __( 'Manage Short Description',        'frontblocks' ), 'desc' => __( 'Deactivate or move the WooCommerce product short description.', 'frontblocks' ) ),
+			array( 'icon' => 'default',               'title' => __( 'Custom Post Types Builder',       'frontblocks' ), 'desc' => __( 'Create and manage custom post types directly from the admin panel.', 'frontblocks' ) ),
+		);
+	}
+
+	private function render_pro_section(): void {
+		$pro_blocks    = apply_filters( 'frbl_pro_blocks', $this->get_default_pro_blocks() );
+		$license_valid = function_exists( 'frblp_is_license_valid' ) && frblp_is_license_valid();
+
+		if ( empty( $pro_blocks ) || $license_valid ) {
+			return;
+		}
+
+		?>
+		<div class="frbl-section-wrapper tw-mt-6">
+			<div class="frbl-section-header">
+				<h2 class="tw-text-2xl tw-font-bold tw-text-gray-900 tw-mb-0">
+					<?php echo esc_html__( 'FrontBlocks PRO Features', 'frontblocks' ); ?>
+				</h2>
+				<div class="tw-text-sm tw-text-gray-600">
+					<p class="tw-mt-0 tw-mb-4">
+						<?php
+						$anchor = frbl_is_pro_active()
+							? '<a href="#frontblocks_section_license" class="tw-font-medium tw-text-red-600 hover:tw-text-red-700 tw-underline">' . esc_html__( 'License', 'frontblocks' ) . '</a>'
+							: '<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-pro-showcase" target="_blank" rel="noopener noreferrer" class="tw-font-medium tw-text-red-600 hover:tw-text-red-700 tw-underline">FrontBlocks PRO</a>';
+						printf(
+							frbl_is_pro_active()
+								/* translators: %s: license section link */
+								? esc_html__( 'Activate your license in the %s section below to unlock all features.', 'frontblocks' )
+								/* translators: %s: FrontBlocks PRO link */
+								: esc_html__( 'Unlock these features with %s.', 'frontblocks' ),
+							$anchor // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						);
+						?>
+					</p>
+				</div>
+			</div>
+
+			<div class="frbl-features-grid">
+				<?php foreach ( $pro_blocks as $block ) : ?>
+					<?php UI::show_pro_info_card( $block['icon'], $block['title'], $block['desc'] ); ?>
+				<?php endforeach; ?>
+			</div>
+
+			<?php if ( ! frbl_is_pro_active() ) : ?>
+			<div class="tw-mt-6 tw-text-center">
+				<a
+					href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-pro-cta"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="tw-inline-flex tw-items-center tw-px-6 tw-py-3 tw-border tw-border-transparent tw-text-base tw-font-medium tw-rounded-lg tw-shadow-sm tw-text-white tw-transition-colors tw-duration-200"
+					style="background-color: #ef4444;"
+					onmouseover="this.style.backgroundColor='#dc2626'"
+					onmouseout="this.style.backgroundColor='#ef4444'"
+				>
+					<?php echo esc_html__( 'Get FrontBlocks PRO', 'frontblocks' ); ?> →
+				</a>
+			</div>
 			<?php endif; ?>
 		</div>
 		<?php
