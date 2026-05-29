@@ -201,7 +201,7 @@ function ReadingTimeEdit(props) {
 
 // Register the block.
 registerBlockType('frontblocks/reading-time', {
-	title: __('Reading Time', 'frontblocks'),
+	title: __('FrontBlocks - Reading Time', 'frontblocks'),
 	description: __('Display estimated reading time for the current post or page.', 'frontblocks'),
 	category: 'common',
 	icon: 'clock',

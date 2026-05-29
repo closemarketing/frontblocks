@@ -2,7 +2,7 @@
   "devDependencies": {
     "@babel/cli": "^7.29.7",
     "@babel/core": "^7.29.7",
-    "@babel/preset-env": "^7.29.5",
+    "@babel/preset-env": "^7.29.7",
     "@babel/preset-react": "^7.29.7",
     "autoprefixer": "^10.5.0",
     "gulp": "^5.0.1",
@@ -11,7 +11,7 @@
     "merge-stream": "^2.0.0",
     "postcss": "^8.5.15",
     "postcss-cli": "^11.0.0",
-    "tailwindcss": "^4.3.0"
+    "tailwindcss": "^3.4.0"
   },
   "babel": {
     "presets": [
@@ -50,9 +50,10 @@
     "build:faq-schema": "babel assets/faq-schema/frontblocks-faq-schema-option.jsx --out-file assets/faq-schema/frontblocks-faq-schema.js",
     "build:text-animation": "babel assets/text-animation/frontblocks-text-animation-option.jsx --out-file assets/text-animation/frontblocks-text-animation.js",
     "build:before-after": "babel assets/before-after/frontblocks-before-after-option.jsx --out-file assets/before-after/frontblocks-before-after.js",
+    "build:user-text": "babel assets/user-text/frontblocks-user-text-option.jsx --out-file assets/user-text/frontblocks-user-text.js",
     "build:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css",
     "watch:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css --watch",
-    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:headline && npm run build:product-categories && npm run build:reading-time && npm run build:stacked-images && npm run build:edge-alignment && npm run build:shape-animations && npm run build:gf-inline && npm run build:faq-schema && npm run build:before-after && npm run build:text-animation && npm run build:css"
+    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:headline && npm run build:product-categories && npm run build:reading-time && npm run build:stacked-images && npm run build:edge-alignment && npm run build:shape-animations && npm run build:gf-inline && npm run build:faq-schema && npm run build:before-after && npm run build:text-animation && npm run build:user-text && npm run build:css"
   },
   "dependencies": {
     "react": "^19.2.6",
