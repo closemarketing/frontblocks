@@ -929,7 +929,23 @@ class Settings {
 	 * @return void
 	 */
 	private function section_features_callback() {
+		$license_valid = function_exists( 'frblp_is_license_valid' ) && frblp_is_license_valid();
 		?>
+		<?php if ( ! $license_valid ) : ?>
+		<div class="tw-mb-4">
+			<a
+				href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-optional-cta"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="tw-inline-flex tw-items-center tw-border tw-border-transparent tw-text-sm tw-font-medium tw-rounded-lg tw-shadow-sm tw-text-white tw-transition-colors tw-duration-200"
+				style="background-color: #ef4444; padding: 10px 20px;"
+				onmouseover="this.style.backgroundColor='#dc2626'"
+				onmouseout="this.style.backgroundColor='#ef4444'"
+			>
+				<?php echo esc_html__( 'Get FrontBlocks PRO', 'frontblocks' ); ?> →
+			</a>
+		</div>
+		<?php endif; ?>
 		<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
 			<?php echo esc_html__( 'Enable or disable these optional features as needed.', 'frontblocks' ); ?>
 		</p>
