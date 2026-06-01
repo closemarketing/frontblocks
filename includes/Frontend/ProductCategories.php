@@ -83,8 +83,8 @@ class ProductCategories {
 			if ( $src ) {
 				return array(
 					'src'    => $src,
-					'single' => $single ?: $src,
-					'full'   => $full ?: $src,
+					'single' => $single ? $single : $src,
+					'full'   => $full ? $full : $src,
 					'id'     => $thumbnail_id,
 				);
 			}
@@ -312,13 +312,13 @@ class ProductCategories {
 			return '';
 		}
 
-		$count      = absint( $attributes['count'] ?? 5 );
-		$orderby    = sanitize_key( $attributes['orderby'] ?? 'count' );
-		$order      = strtoupper( sanitize_key( $attributes['order'] ?? 'DESC' ) );
-		$hide_empty = $attributes['hideEmpty'] ?? false;
-		$show_count = $attributes['showCount'] ?? true;
-		$columns    = absint( $attributes['columns'] ?? 2 );
-		$image_size = sanitize_key( $attributes['imageSize'] ?? 'woocommerce_thumbnail' );
+		$count         = absint( $attributes['count'] ?? 5 );
+		$orderby       = sanitize_key( $attributes['orderby'] ?? 'count' );
+		$order         = strtoupper( sanitize_key( $attributes['order'] ?? 'DESC' ) );
+		$hide_empty    = $attributes['hideEmpty'] ?? false;
+		$show_count    = $attributes['showCount'] ?? true;
+		$columns       = absint( $attributes['columns'] ?? 2 );
+		$image_size    = sanitize_key( $attributes['imageSize'] ?? 'woocommerce_thumbnail' );
 		$allowed_sizes = array( 'woocommerce_thumbnail', 'woocommerce_single', 'full', 'large', 'medium' );
 		if ( ! in_array( $image_size, $allowed_sizes, true ) ) {
 			$image_size = 'woocommerce_thumbnail';
