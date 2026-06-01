@@ -84,6 +84,7 @@ function ProductCategoriesEdit(props) {
     hideEmpty = attributes.hideEmpty,
     showCount = attributes.showCount,
     columns = attributes.columns,
+    imageSize = attributes.imageSize,
     bgColor = attributes.bgColor,
     borderColor = attributes.borderColor,
     borderWidth = attributes.borderWidth,
@@ -239,6 +240,25 @@ function ProductCategoriesEdit(props) {
       });
     },
     help: __('Display the number of products in each category.', 'frontblocks')
+  }), /*#__PURE__*/React.createElement(SelectControl, {
+    label: __('Image Size', 'frontblocks'),
+    value: imageSize,
+    options: [{
+      label: __('Miniatura WooCommerce', 'frontblocks'),
+      value: 'woocommerce_thumbnail'
+    }, {
+      label: __('Imagen de producto (WooCommerce)', 'frontblocks'),
+      value: 'woocommerce_single'
+    }, {
+      label: __('Tamaño completo', 'frontblocks'),
+      value: 'full'
+    }],
+    onChange: function onChange(val) {
+      return setAttributes({
+        imageSize: val
+      });
+    },
+    help: __('Tamaño de imagen de cada categoría.', 'frontblocks')
   })), /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Card Style Settings', 'frontblocks'),
     initialOpen: false
@@ -491,7 +511,16 @@ function ProductCategoriesEdit(props) {
     className: "frbl-product-categories-grid",
     style: styleVars
   }, categories.map(function (category) {
-    var imageUrl = category.category_image && category.category_image.src ? category.category_image.src : 'https://placehold.co/600x400/eeeeee/333333?text=Product+Category';
+    var imgData = category.category_image || {};
+    var imageUrl;
+    if (imageSize === 'full') {
+      imageUrl = imgData.full || imgData.src;
+    } else if (imageSize === 'woocommerce_single') {
+      imageUrl = imgData.single || imgData.src;
+    } else {
+      imageUrl = imgData.src;
+    }
+    imageUrl = imageUrl || 'https://placehold.co/600x400/eeeeee/333333?text=Product+Category';
     return /*#__PURE__*/React.createElement("div", {
       key: category.id,
       className: "frbl-category-item frbl-category-".concat(category.slug)
@@ -544,6 +573,10 @@ registerBlockType('frontblocks/product-categories', {
     columns: {
       type: 'number',
       default: 2
+    },
+    imageSize: {
+      type: 'string',
+      default: 'woocommerce_thumbnail'
     },
     bgColor: {
       type: 'string',

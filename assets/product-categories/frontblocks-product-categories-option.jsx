@@ -54,6 +54,7 @@ function ProductCategoriesEdit(props) {
       hideEmpty,
       showCount,
       columns,
+      imageSize,
       bgColor,
       borderColor,
       borderWidth,
@@ -198,6 +199,18 @@ function ProductCategoriesEdit(props) {
                   checked={showCount}
                   onChange={(newShowCount) => setAttributes({ showCount: newShowCount })}
                   help={__('Display the number of products in each category.', 'frontblocks')}
+               />
+
+               <SelectControl
+                  label={__('Image Size', 'frontblocks')}
+                  value={imageSize}
+                  options={[
+                     { label: __('Miniatura WooCommerce', 'frontblocks'), value: 'woocommerce_thumbnail' },
+                     { label: __('Imagen de producto (WooCommerce)', 'frontblocks'), value: 'woocommerce_single' },
+                     { label: __('Tamaño completo', 'frontblocks'), value: 'full' },
+                  ]}
+                  onChange={(val) => setAttributes({ imageSize: val })}
+                  help={__('Tamaño de imagen de cada categoría.', 'frontblocks')}
                />
 
             </PanelBody>
@@ -398,9 +411,16 @@ function ProductCategoriesEdit(props) {
             ) : (
                <div className="frbl-product-categories-grid" style={styleVars}>
                   {categories.map((category) => {
-                     const imageUrl = category.category_image && category.category_image.src 
-                        ? category.category_image.src 
-                        : 'https://placehold.co/600x400/eeeeee/333333?text=Product+Category';
+                     const imgData = category.category_image || {};
+                     let imageUrl;
+                     if ( imageSize === 'full' ) {
+                        imageUrl = imgData.full || imgData.src;
+                     } else if ( imageSize === 'woocommerce_single' ) {
+                        imageUrl = imgData.single || imgData.src;
+                     } else {
+                        imageUrl = imgData.src;
+                     }
+                     imageUrl = imageUrl || 'https://placehold.co/600x400/eeeeee/333333?text=Product+Category';
                      
                      return (
                         <div key={category.id} className={`frbl-category-item frbl-category-${category.slug}`}>
@@ -450,6 +470,7 @@ registerBlockType('frontblocks/product-categories', {
       showCount: { type: 'boolean', default: true },
       className: { type: 'string', default: '' },
       columns: { type: 'number', default: 2 },
+      imageSize: { type: 'string', default: 'woocommerce_thumbnail' },
       bgColor: { type: 'string', default: 'rgba(255, 255, 255, 0.5)' },
       borderColor: { type: 'string', default: '#dddddd' },
       borderWidth: { type: 'number', default: 1 },

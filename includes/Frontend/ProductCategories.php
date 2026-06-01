@@ -76,19 +76,28 @@ class ProductCategories {
 		$thumbnail_id = get_term_meta( $term_data['id'], 'thumbnail_id', true );
 
 		if ( $thumbnail_id ) {
-			$image_url = wp_get_attachment_image_url( $thumbnail_id, 'woocommerce_thumbnail' );
-			if ( $image_url ) {
+			$src    = wp_get_attachment_image_url( $thumbnail_id, 'woocommerce_thumbnail' );
+			$single = wp_get_attachment_image_url( $thumbnail_id, 'woocommerce_single' );
+			$full   = wp_get_attachment_image_url( $thumbnail_id, 'full' );
+
+			if ( $src ) {
 				return array(
-					'src' => $image_url,
-					'id'  => $thumbnail_id,
+					'src'    => $src,
+					'single' => $single ?: $src,
+					'full'   => $full ?: $src,
+					'id'     => $thumbnail_id,
 				);
 			}
 		}
 
-		if ( function_exists( 'wc_placeholder_img_src' ) ) {
+		$placeholder = function_exists( 'wc_placeholder_img_src' ) ? wc_placeholder_img_src() : null;
+
+		if ( $placeholder ) {
 			return array(
-				'src' => wc_placeholder_img_src(),
-				'id'  => 0,
+				'src'    => $placeholder,
+				'single' => $placeholder,
+				'full'   => $placeholder,
+				'id'     => 0,
 			);
 		}
 
@@ -192,6 +201,10 @@ class ProductCategories {
 				'columns'             => array(
 					'type'    => 'number',
 					'default' => 2,
+				),
+				'imageSize'           => array(
+					'type'    => 'string',
+					'default' => 'woocommerce_thumbnail',
 				),
 				'bgColor'             => array(
 					'type'    => 'string',
@@ -305,6 +318,11 @@ class ProductCategories {
 		$hide_empty = $attributes['hideEmpty'] ?? false;
 		$show_count = $attributes['showCount'] ?? true;
 		$columns    = absint( $attributes['columns'] ?? 2 );
+		$image_size = sanitize_key( $attributes['imageSize'] ?? 'woocommerce_thumbnail' );
+		$allowed_sizes = array( 'woocommerce_thumbnail', 'woocommerce_single', 'full', 'large', 'medium' );
+		if ( ! in_array( $image_size, $allowed_sizes, true ) ) {
+			$image_size = 'woocommerce_thumbnail';
+		}
 
 		$bg_color               = sanitize_text_field( $attributes['bgColor'] ?? 'rgba(255, 255, 255, 0.5)' );
 		$border_color           = sanitize_text_field( $attributes['borderColor'] ?? '#dddddd' );
@@ -389,11 +407,15 @@ class ProductCategories {
 				$thumbnail_id = get_term_meta( $category->term_id, 'thumbnail_id', true );
 
 				if ( $thumbnail_id ) {
-					$image_url = wp_get_attachment_image_url( $thumbnail_id, 'woocommerce_thumbnail' );
-				} elseif ( function_exists( 'wc_placeholder_img_src' ) ) {
-					$image_url = wc_placeholder_img_src();
-				} else {
-					$image_url = 'https://placehold.co/600x400/eeeeee/333333?text=Product+Category';
+					$image_url = wp_get_attachment_image_url( $thumbnail_id, $image_size );
+				}
+
+				if ( empty( $image_url ) ) {
+					if ( function_exists( 'wc_placeholder_img_src' ) ) {
+						$image_url = wc_placeholder_img_src();
+					} else {
+						$image_url = 'https://placehold.co/600x400/eeeeee/333333?text=Product+Category';
+					}
 				}
 
 				$link = esc_url( get_term_link( $category, 'product_cat' ) );
