@@ -19,7 +19,9 @@ var _wp$i18n = wp.i18n,
 var LINE_CLASS_PREFIX = 'gb-line-effect-';
 var MARQUEE_CLASS = 'gb-marquee-infinite-scroll';
 var MARQUEE_SPEED_ATTR = 'frblMarqueeSpeed';
-var BLOCK_NAME = 'generateblocks/text';
+var GB_BLOCK = 'generateblocks/text';
+var NATIVE_BLOCKS = ['core/paragraph', 'core/heading'];
+var ALL_MARQUEE_BLOCKS = [GB_BLOCK].concat(NATIVE_BLOCKS);
 
 // Marquee speed presets
 var MARQUEE_SPEEDS = {
@@ -30,19 +32,19 @@ var MARQUEE_SPEEDS = {
   slow: 40 // 40 seconds - slow
 };
 
-// Register marquee speed attribute
+// Register marquee speed attribute for all supported blocks
 wp.hooks.addFilter('blocks.registerBlockType', 'frontblocks/add-marquee-attribute', function (settings, name) {
-  if (name === BLOCK_NAME) {
+  if (ALL_MARQUEE_BLOCKS.includes(name)) {
     settings.attributes = Object.assign(settings.attributes || {}, _defineProperty({}, MARQUEE_SPEED_ATTR, {
       type: 'string',
-      default: 'medium'
+      default: ''
     }));
   }
   return settings;
 });
 var withHeadlineLineControl = createHigherOrderComponent(function (BlockEdit) {
   return function (props) {
-    if (props.name !== BLOCK_NAME) {
+    if (!ALL_MARQUEE_BLOCKS.includes(props.name)) {
       return /*#__PURE__*/React.createElement(BlockEdit, props);
     }
     var attributes = props.attributes,
@@ -50,6 +52,7 @@ var withHeadlineLineControl = createHigherOrderComponent(function (BlockEdit) {
     var existingClasses = attributes.className || '';
     var htmlAttributes = attributes.htmlAttributes || {};
     var marqueeSpeed = attributes[MARQUEE_SPEED_ATTR] || 'medium';
+    var isGBBlock = props.name === GB_BLOCK;
     var cleanExistingLineClasses = function cleanExistingLineClasses(classes) {
       return classes.split(' ').filter(function (cls) {
         return !cls.startsWith(LINE_CLASS_PREFIX);
@@ -61,16 +64,14 @@ var withHeadlineLineControl = createHigherOrderComponent(function (BlockEdit) {
       }).join(' ').replace(/\s{2,}/g, ' ').trim();
     };
     var currentLineStyle = 'none';
-    if (existingClasses.includes(LINE_CLASS_PREFIX + 'vertical')) {
-      currentLineStyle = 'vertical';
-    } else if (existingClasses.includes(LINE_CLASS_PREFIX + 'horizontal')) {
-      currentLineStyle = 'horizontal';
+    if (isGBBlock) {
+      if (existingClasses.includes(LINE_CLASS_PREFIX + 'vertical')) {
+        currentLineStyle = 'vertical';
+      } else if (existingClasses.includes(LINE_CLASS_PREFIX + 'horizontal')) {
+        currentLineStyle = 'horizontal';
+      }
     }
     var isMarqueeEnabled = existingClasses.includes(MARQUEE_CLASS);
-
-    /**
-    * Maneja el cambio del SelectControl y actualiza las clases CSS.
-    */
     var setLineStyle = function setLineStyle(newStyle) {
       var newClasses = cleanExistingLineClasses(existingClasses);
       if (newStyle !== 'none') {
@@ -86,49 +87,45 @@ var withHeadlineLineControl = createHigherOrderComponent(function (BlockEdit) {
         className: newClasses
       });
     };
-
-    /**
-    * Maneja el cambio del ToggleControl para el marquee y actualiza las clases CSS.
-    */
     var setMarqueeEnabled = function setMarqueeEnabled(enabled) {
       var newClasses = cleanMarqueeClass(existingClasses);
-      var updatedHtmlAttributes = _objectSpread({}, htmlAttributes);
       var newAttributes = {
         className: newClasses
       };
       if (enabled) {
         newClasses = (newClasses + ' ' + MARQUEE_CLASS).trim();
         newAttributes.className = newClasses;
-        // Set default speed if not already set
-        if (!attributes[MARQUEE_SPEED_ATTR]) {
-          newAttributes[MARQUEE_SPEED_ATTR] = 'medium';
-          updatedHtmlAttributes['data-marquee-speed'] = MARQUEE_SPEEDS.medium;
-        } else {
-          var speedValue = MARQUEE_SPEEDS[attributes[MARQUEE_SPEED_ATTR]] || MARQUEE_SPEEDS.medium;
-          updatedHtmlAttributes['data-marquee-speed'] = speedValue;
+        var currentSpeed = attributes[MARQUEE_SPEED_ATTR] || 'medium';
+        newAttributes[MARQUEE_SPEED_ATTR] = currentSpeed;
+
+        // GB blocks store speed in htmlAttributes for direct rendering.
+        if (isGBBlock) {
+          var updatedHtmlAttributes = _objectSpread({}, htmlAttributes);
+          updatedHtmlAttributes['data-marquee-speed'] = MARQUEE_SPEEDS[currentSpeed] || MARQUEE_SPEEDS.medium;
+          newAttributes.htmlAttributes = updatedHtmlAttributes;
         }
-        newAttributes.htmlAttributes = updatedHtmlAttributes;
       } else {
-        // Remove speed attribute when disabling
-        newAttributes[MARQUEE_SPEED_ATTR] = undefined;
-        delete updatedHtmlAttributes['data-marquee-speed'];
-        newAttributes.htmlAttributes = updatedHtmlAttributes;
+        newAttributes[MARQUEE_SPEED_ATTR] = '';
+        if (isGBBlock) {
+          var _updatedHtmlAttributes = _objectSpread({}, htmlAttributes);
+          delete _updatedHtmlAttributes['data-marquee-speed'];
+          newAttributes.htmlAttributes = _updatedHtmlAttributes;
+        }
       }
       setAttributes(newAttributes);
     };
-
-    /**
-    * Maneja el cambio de la velocidad del marquee.
-    */
     var setMarqueeSpeed = function setMarqueeSpeed(speedPreset) {
       var speedValue = MARQUEE_SPEEDS[speedPreset] || MARQUEE_SPEEDS.medium;
-      var updatedHtmlAttributes = _objectSpread({}, htmlAttributes);
-      updatedHtmlAttributes['data-marquee-speed'] = speedValue;
-      setAttributes(_defineProperty(_defineProperty({}, MARQUEE_SPEED_ATTR, speedPreset), "htmlAttributes", updatedHtmlAttributes));
+      var newAttributes = _defineProperty({}, MARQUEE_SPEED_ATTR, speedPreset);
+      if (isGBBlock) {
+        var updatedHtmlAttributes = _objectSpread({}, htmlAttributes);
+        updatedHtmlAttributes['data-marquee-speed'] = speedValue;
+        newAttributes.htmlAttributes = updatedHtmlAttributes;
+      }
+      setAttributes(newAttributes);
 
-      // Update marquee wrapper directly if it exists (for immediate preview)
+      // Update marquee wrapper directly for immediate preview
       setTimeout(function () {
-        // Try to find the marquee wrapper in editor
         var blockElement = document.querySelector('[data-block="' + props.clientId + '"]');
         if (blockElement) {
           var marqueeElement = blockElement.querySelector('.gb-marquee-infinite-scroll');
@@ -163,7 +160,7 @@ var withHeadlineLineControl = createHigherOrderComponent(function (BlockEdit) {
         marginTop: 0,
         marginBottom: '10px'
       }
-    }, /*#__PURE__*/React.createElement("small", null, __('FrontBlocks visual effect settings.', 'frontblocks'))), /*#__PURE__*/React.createElement(SelectControl, {
+    }, /*#__PURE__*/React.createElement("small", null, __('FrontBlocks visual effect settings.', 'frontblocks'))), isGBBlock && /*#__PURE__*/React.createElement(SelectControl, {
       label: __('Decorative Line Style', 'frontblocks'),
       value: currentLineStyle,
       options: [{
@@ -182,7 +179,7 @@ var withHeadlineLineControl = createHigherOrderComponent(function (BlockEdit) {
       label: __('Infinite Scrolling Marquee', 'frontblocks'),
       checked: isMarqueeEnabled,
       onChange: setMarqueeEnabled,
-      help: isMarqueeEnabled ? __('Marquee effect is active. Text will scroll infinitely.', 'frontblocks') : __('Enable infinite scrolling marquee effect for the headline text.', 'frontblocks')
+      help: isMarqueeEnabled ? __('Marquee effect is active. Text will scroll infinitely.', 'frontblocks') : __('Enable infinite scrolling marquee effect for the text.', 'frontblocks')
     }), isMarqueeEnabled && /*#__PURE__*/React.createElement(SelectControl, {
       label: __('Marquee Speed', 'frontblocks'),
       value: marqueeSpeed,
