@@ -17,6 +17,46 @@ defined( 'ABSPATH' ) || exit;
  */
 class UI {
 	/**
+	 * Show an info card for a FrontBlocks Pro feature.
+	 *
+	 * Shows green (active) when Pro license is valid, red (locked) otherwise.
+	 *
+	 * @param string $feature_id  The ID of the feature.
+	 * @param string $title       The title of the feature.
+	 * @param string $description The description of the feature.
+	 * @param bool   $pro_active  Whether the Pro license is active.
+	 * @return void
+	 */
+	public static function show_pro_info_card( $feature_id, $title, $description, $pro_active = false ) {
+		$icon       = self::get_feature_icon( $feature_id );
+		$card_class = $pro_active ? 'frbl-feature-active' : 'frbl-feature-pro frbl-feature-locked';
+		?>
+		<div class="frbl-feature-card <?php echo esc_attr( $card_class ); ?>">
+			<span class="frbl-pro-badge"><?php echo esc_html__( 'PRO', 'frontblocks' ); ?></span>
+			<div class="frbl-feature-content">
+				<div class="frbl-feature-icon">
+					<?php echo $icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</div>
+				<div class="frbl-feature-info">
+					<h3 class="frbl-feature-title">
+						<?php echo esc_html( $title ); ?>
+					</h3>
+					<p class="frbl-feature-description">
+						<?php
+						if ( $pro_active ) {
+							echo esc_html( $description );
+						} else {
+							echo esc_html( $description ) . ' <a href="' . esc_url( admin_url( 'themes.php?page=frontblocks-settings&tab=license' ) ) . '">' . esc_html__( 'Activate FrontBlocks Pro', 'frontblocks' ) . '</a>';
+						}
+						?>
+					</p>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Show an info card for an always-active feature (no toggle).
 	 *
 	 * @param string $feature_id  The ID of the feature.
@@ -82,6 +122,9 @@ class UI {
 		// Headline marquee icon.
 		$headline_marquee_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 12l4-4m-4 4l4 4m14-4l-4-4m4 4l-4 4"/></svg>';
 
+		// User text icon.
+		$user_text_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+
 		// Default icon.
 		$default_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>';
 
@@ -96,6 +139,7 @@ class UI {
 			'stacked_images'     => $stacked_images_icon,
 			'product_categories' => $product_categories_icon,
 			'headline_marquee'   => $headline_marquee_icon,
+			'user_text'          => $user_text_icon,
 		);
 
 		return $icons[ $icon_slug ] ?? $default_icon;

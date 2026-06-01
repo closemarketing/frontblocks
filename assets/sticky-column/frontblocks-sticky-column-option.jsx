@@ -63,7 +63,7 @@
                         el(
                             PanelBody,
                             {
-                                title: __('Sticky Column', 'frontblocks'),
+                                title: __('FrontBlocks - Sticky Column', 'frontblocks'),
                                 initialOpen: false
                             },
                             el(ToggleControl, {

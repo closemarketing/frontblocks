@@ -640,7 +640,7 @@ function addAnimationControls(BlockEdit) {
       waitForAnimateCSS();
     };
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
-      title: __('Animations', 'frontblocks'),
+      title: __('FrontBlocks - Animations', 'frontblocks'),
       initialOpen: false
     }, /*#__PURE__*/React.createElement(SelectControl, {
       label: __('Animation Type', 'frontblocks'),
@@ -709,7 +709,7 @@ function addAnimationControls(BlockEdit) {
         width: '100%'
       }
     }, __('Preview Animation', 'frontblocks'))))), /*#__PURE__*/React.createElement(PanelBody, {
-      title: __('Container Effects', 'frontblocks'),
+      title: __('FrontBlocks - Container Effects', 'frontblocks'),
       initialOpen: false
     }, /*#__PURE__*/React.createElement(ToggleControl, {
       label: __('Enable Glass Effect', 'frontblocks'),
@@ -733,10 +733,10 @@ function addAnimationControls(BlockEdit) {
       max: 50,
       step: 1
     })), /*#__PURE__*/React.createElement(PanelBody, {
-      title: __('FrontBlocks Hover Effects', 'frontblocks'),
+      title: __('FrontBlocks - Hover Effects', 'frontblocks'),
       initialOpen: false
     }, /*#__PURE__*/React.createElement(ToggleControl, {
-      label: __('FrontBlocks: Scale Background on Hover', 'frontblocks'),
+      label: __('FrontBlocks - Scale Background on Hover', 'frontblocks'),
       help: __('Scales the background image when hovering (FrontBlocks Hover Effect). Works with inline background images (--inline-bg-image) and standard CSS backgrounds.', 'frontblocks'),
       checked: frblHoverBgScale,
       onChange: function onChange(value) {
