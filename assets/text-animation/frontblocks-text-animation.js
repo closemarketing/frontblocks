@@ -1884,7 +1884,7 @@ function TextAnimationEdit(props) {
   })));
 }
 registerBlockType('frontblocks/text-animation', {
-  title: __('Text Animation', 'frontblocks'),
+  title: __('FrontBlocks - Text Animation', 'frontblocks'),
   description: __('Animated text block with typography controls. Add animation effects from the sidebar.', 'frontblocks'),
   category: 'text',
   icon: 'editor-textcolor',
@@ -2088,7 +2088,7 @@ function addTextAnimationPanelToNativeBlocks(BlockEdit) {
       style: {},
       Tag: Tag
     }) : /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
-      title: __('FrontBlocks Text Animation', 'frontblocks'),
+      title: __('FrontBlocks - Text Animation', 'frontblocks'),
       initialOpen: false
     }, /*#__PURE__*/React.createElement(SelectControl, {
       label: __('Animation Type', 'frontblocks'),

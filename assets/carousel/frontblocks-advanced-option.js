@@ -368,7 +368,7 @@ function addCustomCarouselPanel(BlockEdit) {
     // ── Inspector panel ──────────────────────────────────────────────────
 
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
-      title: __('Carousel Settings', 'frontblocks'),
+      title: __('FrontBlocks - Carousel', 'frontblocks'),
       initialOpen: true
     }, /*#__PURE__*/React.createElement(SelectControl, {
       label: __('FrontBlocks Grid Option', 'frontblocks'),

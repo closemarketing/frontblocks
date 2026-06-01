@@ -1,7 +1,10 @@
 "use strict";
 
 var registerBlockType = wp.blocks.registerBlockType;
-var Fragment = wp.element.Fragment;
+var _wp$element = wp.element,
+  Fragment = _wp$element.Fragment,
+  useEffect = _wp$element.useEffect,
+  useRef = _wp$element.useRef;
 var _wp$blockEditor = wp.blockEditor,
   InspectorControls = _wp$blockEditor.InspectorControls,
   MediaUpload = _wp$blockEditor.MediaUpload,
@@ -33,6 +36,54 @@ function BeforeAfterEdit(props) {
     fixedHeight = attributes.fixedHeight;
   var blockProps = useBlockProps();
   var hasImages = beforeImageUrl && afterImageUrl;
+  var containerRef = useRef(null);
+
+  // Imperative drag logic — mirrors frontend JS, uses ownerDocument for iframe support.
+  useEffect(function () {
+    if (!containerRef.current || !hasImages) {
+      return;
+    }
+    var block = containerRef.current;
+    var beforeEl = block.querySelector('.frbl-before-after__before');
+    var handle = block.querySelector('.frbl-before-after__handle');
+    if (!beforeEl || !handle) {
+      return;
+    }
+    var dragging = false;
+    var doc = block.ownerDocument;
+    function setPos(pos) {
+      pos = Math.max(0, Math.min(100, pos));
+      beforeEl.style.clipPath = 'inset(0 ' + (100 - pos) + '% 0 0)';
+      handle.style.left = pos + '%';
+    }
+    function getPos(e) {
+      var rect = block.getBoundingClientRect();
+      return (e.clientX - rect.left) / rect.width * 100;
+    }
+    setPos(initialPosition);
+    function onMouseDown(e) {
+      dragging = true;
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    function onMouseMove(e) {
+      if (!dragging) {
+        return;
+      }
+      setPos(getPos(e));
+    }
+    function onMouseUp() {
+      dragging = false;
+    }
+    handle.addEventListener('mousedown', onMouseDown);
+    doc.addEventListener('mousemove', onMouseMove);
+    doc.addEventListener('mouseup', onMouseUp);
+    return function () {
+      handle.removeEventListener('mousedown', onMouseDown);
+      doc.removeEventListener('mousemove', onMouseMove);
+      doc.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [hasImages, beforeImageUrl, afterImageUrl, initialPosition]);
   return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Before Image', 'frontblocks'),
     initialOpen: true
@@ -178,6 +229,7 @@ function BeforeAfterEdit(props) {
     label: __('Before / After', 'frontblocks'),
     instructions: __('Select a "before" image and an "after" image from the sidebar.', 'frontblocks')
   }) : /*#__PURE__*/React.createElement("div", {
+    ref: containerRef,
     className: 'frbl-before-after frbl-before-after--editor' + (fixedHeight ? ' frbl-before-after--fixed-height' : ''),
     "data-initial-position": initialPosition,
     style: fixedHeight && blockHeight ? {
@@ -229,7 +281,7 @@ function BeforeAfterEdit(props) {
 
 // Register the block.
 registerBlockType('frontblocks/before-after', {
-  title: __('Before After', 'frontblocks'),
+  title: __('FrontBlocks - Before After', 'frontblocks'),
   description: __('Compare two images with a draggable before/after slider.', 'frontblocks'),
   category: 'media',
   icon: 'image-flip-horizontal',

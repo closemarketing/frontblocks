@@ -468,7 +468,7 @@ function addAnimationControls(BlockEdit) {
                 <BlockEdit {...props} />
                 <InspectorControls>
                     <PanelBody
-                        title={__('Animations', 'frontblocks')}
+                        title={__('FrontBlocks - Animations', 'frontblocks')}
                         initialOpen={false}
                     >
                         <SelectControl
@@ -535,7 +535,7 @@ function addAnimationControls(BlockEdit) {
                     </PanelBody>
 
                     <PanelBody
-                        title={__('Container Effects', 'frontblocks')}
+                        title={__('FrontBlocks - Container Effects', 'frontblocks')}
                         initialOpen={false}
                     >
                         <ToggleControl
@@ -559,11 +559,11 @@ function addAnimationControls(BlockEdit) {
                     </PanelBody>
 
                     <PanelBody
-                        title={__('FrontBlocks Hover Effects', 'frontblocks')}
+                        title={__('FrontBlocks - Hover Effects', 'frontblocks')}
                         initialOpen={false}
                     >
                         <ToggleControl
-                            label={__('FrontBlocks: Scale Background on Hover', 'frontblocks')}
+                            label={__('FrontBlocks - Scale Background on Hover', 'frontblocks')}
                             help={__('Scales the background image when hovering (FrontBlocks Hover Effect). Works with inline background images (--inline-bg-image) and standard CSS backgrounds.', 'frontblocks')}
                             checked={frblHoverBgScale}
                             onChange={(value) => props.setAttributes({ frblHoverBgScale: value })}
