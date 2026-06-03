@@ -1,27 +1,60 @@
 const { registerBlockType } = wp.blocks;
 const { Fragment, useState, useEffect } = wp.element;
 const { InspectorControls, useBlockProps } = wp.blockEditor;
-const { 
-   PanelBody, 
-   RangeControl, 
-   SelectControl, 
+const {
+   PanelBody,
+   RangeControl,
+   SelectControl,
    ToggleControl,
-   ColorPicker, 
+   TextControl,
+   ColorPicker,
+   ColorIndicator,
+   Dropdown,
+   Button,
    TabPanel,
    Spinner,
 } = wp.components;
 const { __ } = wp.i18n;
 const apiFetch = wp.apiFetch;
 
+function CompactColorPicker( { label, color, onChangeComplete, enableAlpha } ) {
+   return (
+      <div style={ { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' } }>
+         <span style={ { fontSize: '12px' } }>{ label }</span>
+         <Dropdown
+            renderToggle={ ( { isOpen, onToggle } ) => (
+               <Button
+                  onClick={ onToggle }
+                  aria-expanded={ isOpen }
+                  style={ { padding: 0, minWidth: 0, background: 'none', border: 'none', boxShadow: 'none' } }
+               >
+                  <ColorIndicator colorValue={ color || 'transparent' } />
+               </Button>
+            ) }
+            renderContent={ () => (
+               <div style={ { padding: '8px' } }>
+                  <ColorPicker
+                     color={ color }
+                     onChangeComplete={ onChangeComplete }
+                     disableAlpha={ ! enableAlpha }
+                  />
+               </div>
+            ) }
+         />
+      </div>
+   );
+}
+
 function ProductCategoriesEdit(props) {
    const { attributes, setAttributes } = props;
-   const { 
-      count, 
-      orderby, 
-      order, 
+   const {
+      count,
+      orderby,
+      order,
       hideEmpty,
       showCount,
       columns,
+      imageSize,
       bgColor,
       borderColor,
       borderWidth,
@@ -30,6 +63,19 @@ function ProductCategoriesEdit(props) {
       hoverBgColor,
       hoverBorderColor,
       hoverTextColor,
+      showButton,
+      buttonText,
+      btnBgColor,
+      btnTextColor,
+      btnBorderColor,
+      btnBorderWidth,
+      btnBorderRadius,
+      btnFontSize,
+      btnPaddingV,
+      btnPaddingH,
+      btnHoverBgColor,
+      btnHoverTextColor,
+      btnHoverBorderColor,
       className,
    } = attributes;
 
@@ -47,8 +93,6 @@ function ProductCategoriesEdit(props) {
    const countLabel = count === 999 ? 
       __('Number of Categories (All)', 'frontblocks') : 
       __('Number of Categories', 'frontblocks');
-
-   const colorPickerCompactStyle = { maxWidth: '250px' };
 
    // Load categories from API.
    useEffect(() => {
@@ -84,6 +128,17 @@ function ProductCategoriesEdit(props) {
       '--frbl-hover-border-color': hoverBorderColor,
       '--frbl-hover-text-color': hoverTextColor,
       '--frbl-border-radius': `${borderRadius}px`,
+      '--frbl-btn-bg': btnBgColor || 'transparent',
+      '--frbl-btn-color': btnTextColor || 'currentColor',
+      '--frbl-btn-border-color': btnBorderColor || 'currentColor',
+      '--frbl-btn-border-width': `${btnBorderWidth}px`,
+      '--frbl-btn-border-radius': `${btnBorderRadius}px`,
+      '--frbl-btn-font-size': `${btnFontSize}px`,
+      '--frbl-btn-padding-v': `${btnPaddingV}px`,
+      '--frbl-btn-padding-h': `${btnPaddingH}px`,
+      '--frbl-btn-hover-bg': btnHoverBgColor || 'transparent',
+      '--frbl-btn-hover-color': btnHoverTextColor || 'currentColor',
+      '--frbl-btn-hover-border-color': btnHoverBorderColor || 'currentColor',
    };
 
    return (
@@ -145,6 +200,19 @@ function ProductCategoriesEdit(props) {
                   onChange={(newShowCount) => setAttributes({ showCount: newShowCount })}
                   help={__('Display the number of products in each category.', 'frontblocks')}
                />
+
+               <SelectControl
+                  label={__('Image Size', 'frontblocks')}
+                  value={imageSize}
+                  options={[
+                     { label: __('WooCommerce Thumbnail', 'frontblocks'), value: 'woocommerce_thumbnail' },
+                     { label: __('Product Image (WooCommerce)', 'frontblocks'), value: 'woocommerce_single' },
+                     { label: __('Full size', 'frontblocks'), value: 'full' },
+                  ]}
+                  onChange={(val) => setAttributes({ imageSize: val })}
+                  help={__('Image size for each category.', 'frontblocks')}
+               />
+
             </PanelBody>
 
             <PanelBody
@@ -178,65 +246,154 @@ function ProductCategoriesEdit(props) {
                      if (tab.name === 'normal') {
                         return (
                            <Fragment>
-                              <h4 style={{marginTop: '15px'}}>{__('Background Color', 'frontblocks')}</h4>
-                              <div style={colorPickerCompactStyle}>
-                                 <ColorPicker
-                                    color={bgColor}
-                                    onChangeComplete={(value) => setAttributes({ bgColor: value.rgb ? `rgba(${value.rgb.r}, ${value.rgb.g}, ${value.rgb.b}, ${value.rgb.a})` : value.hex })}
-                                    disableAlpha={false}
-                                 />
-                              </div>
-
-                              <h4 style={{marginTop: '15px'}}>{__('Border Color', 'frontblocks')}</h4>
-                              <div style={colorPickerCompactStyle}>
-                                 <ColorPicker
-                                    color={borderColor}
-                                    onChangeComplete={(value) => setAttributes({ borderColor: value.hex })}
-                                 />
-                              </div>
-
-                              <h4 style={{marginTop: '15px'}}>{__('Text Color', 'frontblocks')}</h4>
-                              <div style={colorPickerCompactStyle}>
-                                 <ColorPicker
-                                    color={textColor}
-                                    onChangeComplete={(value) => setAttributes({ textColor: value.hex })}
-                                 />
-                              </div>
+                              <CompactColorPicker
+                                 label={ __( 'Background Color', 'frontblocks' ) }
+                                 color={ bgColor }
+                                 enableAlpha={ true }
+                                 onChangeComplete={ (value) => setAttributes({ bgColor: value.rgb ? `rgba(${value.rgb.r}, ${value.rgb.g}, ${value.rgb.b}, ${value.rgb.a})` : value.hex }) }
+                              />
+                              <CompactColorPicker
+                                 label={ __( 'Border Color', 'frontblocks' ) }
+                                 color={ borderColor }
+                                 onChangeComplete={ (value) => setAttributes({ borderColor: value.hex }) }
+                              />
+                              <CompactColorPicker
+                                 label={ __( 'Text Color', 'frontblocks' ) }
+                                 color={ textColor }
+                                 onChangeComplete={ (value) => setAttributes({ textColor: value.hex }) }
+                              />
                            </Fragment>
                         );
                      }
                      if (tab.name === 'hover') {
                         return (
                            <Fragment>
-                              <h4 style={{marginTop: '15px'}}>{__('Hover Background Color', 'frontblocks')}</h4>
-                              <div style={colorPickerCompactStyle}>
-                                 <ColorPicker
-                                    color={hoverBgColor}
-                                    onChangeComplete={(value) => setAttributes({ hoverBgColor: value.rgb ? `rgba(${value.rgb.r}, ${value.rgb.g}, ${value.rgb.b}, ${value.rgb.a})` : value.hex })}
-                                    disableAlpha={false}
-                                 />
-                              </div>
-
-                              <h4 style={{marginTop: '15px'}}>{__('Hover Border Color', 'frontblocks')}</h4>
-                              <div style={colorPickerCompactStyle}>
-                                 <ColorPicker
-                                    color={hoverBorderColor}
-                                    onChangeComplete={(value) => setAttributes({ hoverBorderColor: value.hex })}
-                                 />
-                              </div>
-
-                              <h4 style={{marginTop: '15px'}}>{__('Hover Text Color', 'frontblocks')}</h4>
-                              <div style={colorPickerCompactStyle}>
-                                 <ColorPicker
-                                    color={hoverTextColor}
-                                    onChangeComplete={(value) => setAttributes({ hoverTextColor: value.hex })}
-                                 />
-                              </div>
+                              <CompactColorPicker
+                                 label={ __( 'Hover Background Color', 'frontblocks' ) }
+                                 color={ hoverBgColor }
+                                 enableAlpha={ true }
+                                 onChangeComplete={ (value) => setAttributes({ hoverBgColor: value.rgb ? `rgba(${value.rgb.r}, ${value.rgb.g}, ${value.rgb.b}, ${value.rgb.a})` : value.hex }) }
+                              />
+                              <CompactColorPicker
+                                 label={ __( 'Hover Border Color', 'frontblocks' ) }
+                                 color={ hoverBorderColor }
+                                 onChangeComplete={ (value) => setAttributes({ hoverBorderColor: value.hex }) }
+                              />
+                              <CompactColorPicker
+                                 label={ __( 'Hover Text Color', 'frontblocks' ) }
+                                 color={ hoverTextColor }
+                                 onChangeComplete={ (value) => setAttributes({ hoverTextColor: value.hex }) }
+                              />
                            </Fragment>
                         );
                      }
                   }}
                </TabPanel>
+            </PanelBody>
+
+            <PanelBody title={ __( 'Button Style', 'frontblocks' ) } initialOpen={ false }>
+               <ToggleControl
+                  label={ __( 'Show Button', 'frontblocks' ) }
+                  checked={ showButton }
+                  onChange={ (val) => setAttributes({ showButton: val }) }
+                  help={ __( 'Display a button at the bottom of each category card.', 'frontblocks' ) }
+               />
+
+               { showButton && (
+               <Fragment>
+               <TextControl
+                  label={ __( 'Button Text', 'frontblocks' ) }
+                  value={ buttonText }
+                  onChange={ (val) => setAttributes({ buttonText: val }) }
+                  placeholder={ __( 'Shop now', 'frontblocks' ) }
+               />
+                  <RangeControl
+                     label={ __( 'Font Size (px)', 'frontblocks' ) }
+                     value={ btnFontSize }
+                     onChange={ (v) => setAttributes({ btnFontSize: v }) }
+                     min={ 10 } max={ 40 }
+                  />
+                  <RangeControl
+                     label={ __( 'Padding Vertical (px)', 'frontblocks' ) }
+                     value={ btnPaddingV }
+                     onChange={ (v) => setAttributes({ btnPaddingV: v }) }
+                     min={ 0 } max={ 60 }
+                  />
+                  <RangeControl
+                     label={ __( 'Padding Horizontal (px)', 'frontblocks' ) }
+                     value={ btnPaddingH }
+                     onChange={ (v) => setAttributes({ btnPaddingH: v }) }
+                     min={ 0 } max={ 100 }
+                  />
+                  <RangeControl
+                     label={ __( 'Border Width (px)', 'frontblocks' ) }
+                     value={ btnBorderWidth }
+                     onChange={ (v) => setAttributes({ btnBorderWidth: v }) }
+                     min={ 0 } max={ 10 }
+                  />
+                  <RangeControl
+                     label={ __( 'Border Radius (px)', 'frontblocks' ) }
+                     value={ btnBorderRadius }
+                     onChange={ (v) => setAttributes({ btnBorderRadius: v }) }
+                     min={ 0 } max={ 50 }
+                  />
+
+                  <TabPanel
+                     className="frbl-style-tabs"
+                     tabs={ [
+                        { name: 'normal', title: __( 'Normal', 'frontblocks' ), className: 'tab-normal' },
+                        { name: 'hover',  title: __( 'Hover',  'frontblocks' ), className: 'tab-hover'  },
+                     ] }
+                  >
+                     { (tab) => {
+                        if ( tab.name === 'normal' ) {
+                           return (
+                              <Fragment>
+                                 <CompactColorPicker
+                                    label={ __( 'Background', 'frontblocks' ) }
+                                    color={ btnBgColor }
+                                    enableAlpha={ true }
+                                    onChangeComplete={ (v) => setAttributes({ btnBgColor: v.rgb ? `rgba(${v.rgb.r},${v.rgb.g},${v.rgb.b},${v.rgb.a})` : v.hex }) }
+                                 />
+                                 <CompactColorPicker
+                                    label={ __( 'Text Color', 'frontblocks' ) }
+                                    color={ btnTextColor }
+                                    onChangeComplete={ (v) => setAttributes({ btnTextColor: v.hex }) }
+                                 />
+                                 <CompactColorPicker
+                                    label={ __( 'Border Color', 'frontblocks' ) }
+                                    color={ btnBorderColor }
+                                    onChangeComplete={ (v) => setAttributes({ btnBorderColor: v.hex }) }
+                                 />
+                              </Fragment>
+                           );
+                        }
+                        if ( tab.name === 'hover' ) {
+                           return (
+                              <Fragment>
+                                 <CompactColorPicker
+                                    label={ __( 'Background', 'frontblocks' ) }
+                                    color={ btnHoverBgColor }
+                                    enableAlpha={ true }
+                                    onChangeComplete={ (v) => setAttributes({ btnHoverBgColor: v.rgb ? `rgba(${v.rgb.r},${v.rgb.g},${v.rgb.b},${v.rgb.a})` : v.hex }) }
+                                 />
+                                 <CompactColorPicker
+                                    label={ __( 'Text Color', 'frontblocks' ) }
+                                    color={ btnHoverTextColor }
+                                    onChangeComplete={ (v) => setAttributes({ btnHoverTextColor: v.hex }) }
+                                 />
+                                 <CompactColorPicker
+                                    label={ __( 'Border Color', 'frontblocks' ) }
+                                    color={ btnHoverBorderColor }
+                                    onChangeComplete={ (v) => setAttributes({ btnHoverBorderColor: v.hex }) }
+                                 />
+                              </Fragment>
+                           );
+                        }
+                     } }
+                  </TabPanel>
+               </Fragment>
+               ) }
             </PanelBody>
          </InspectorControls>
 
@@ -254,16 +411,23 @@ function ProductCategoriesEdit(props) {
             ) : (
                <div className="frbl-product-categories-grid" style={styleVars}>
                   {categories.map((category) => {
-                     const imageUrl = category.category_image && category.category_image.src 
-                        ? category.category_image.src 
-                        : 'https://placehold.co/600x400/eeeeee/333333?text=Product+Category';
+                     const imgData = category.category_image || {};
+                     let imageUrl;
+                     if ( imageSize === 'full' ) {
+                        imageUrl = imgData.full || imgData.src;
+                     } else if ( imageSize === 'woocommerce_single' ) {
+                        imageUrl = imgData.single || imgData.src;
+                     } else {
+                        imageUrl = imgData.src;
+                     }
+                     imageUrl = imageUrl || 'https://placehold.co/600x400/eeeeee/333333?text=Product+Category';
                      
                      return (
                         <div key={category.id} className={`frbl-category-item frbl-category-${category.slug}`}>
                            <div className="frbl-category-link">
                               <div className="frbl-category-image-wrap">
-                                 <img 
-                                    src={imageUrl} 
+                                 <img
+                                    src={imageUrl}
                                     alt={category.name}
                                     className="frbl-category-image"
                                  />
@@ -271,6 +435,11 @@ function ProductCategoriesEdit(props) {
                               <h3 className="frbl-category-name">
                                  {category.name}{showCount && ` (${category.count})`}
                               </h3>
+                              { showButton && (
+                                 <span className="frbl-category-button">
+                                    { buttonText || __( 'Shop now', 'frontblocks' ) }
+                                 </span>
+                              ) }
                            </div>
                         </div>
                      );
@@ -301,6 +470,7 @@ registerBlockType('frontblocks/product-categories', {
       showCount: { type: 'boolean', default: true },
       className: { type: 'string', default: '' },
       columns: { type: 'number', default: 2 },
+      imageSize: { type: 'string', default: 'woocommerce_thumbnail' },
       bgColor: { type: 'string', default: 'rgba(255, 255, 255, 0.5)' },
       borderColor: { type: 'string', default: '#dddddd' },
       borderWidth: { type: 'number', default: 1 },
@@ -309,6 +479,19 @@ registerBlockType('frontblocks/product-categories', {
       hoverBgColor: { type: 'string', default: 'rgba(255, 255, 255, 0.7)' },
       hoverBorderColor: { type: 'string', default: '#555555' },
       hoverTextColor: { type: 'string', default: 'inherit' },
+      showButton:         { type: 'boolean', default: false },
+      buttonText:         { type: 'string',  default: '' },
+      btnBgColor:         { type: 'string',  default: 'transparent' },
+      btnTextColor:       { type: 'string',  default: '' },
+      btnBorderColor:     { type: 'string',  default: '' },
+      btnBorderWidth:     { type: 'number',  default: 2 },
+      btnBorderRadius:    { type: 'number',  default: 4 },
+      btnFontSize:        { type: 'number',  default: 14 },
+      btnPaddingV:        { type: 'number',  default: 10 },
+      btnPaddingH:        { type: 'number',  default: 20 },
+      btnHoverBgColor:    { type: 'string',  default: '' },
+      btnHoverTextColor:  { type: 'string',  default: '' },
+      btnHoverBorderColor:{ type: 'string',  default: '' },
    },
    edit: ProductCategoriesEdit,
    save: () => null,

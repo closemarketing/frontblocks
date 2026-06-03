@@ -19,11 +19,62 @@ var _wp$components = wp.components,
   RangeControl = _wp$components.RangeControl,
   SelectControl = _wp$components.SelectControl,
   ToggleControl = _wp$components.ToggleControl,
+  TextControl = _wp$components.TextControl,
   ColorPicker = _wp$components.ColorPicker,
+  ColorIndicator = _wp$components.ColorIndicator,
+  Dropdown = _wp$components.Dropdown,
+  Button = _wp$components.Button,
   TabPanel = _wp$components.TabPanel,
   Spinner = _wp$components.Spinner;
 var __ = wp.i18n.__;
 var apiFetch = wp.apiFetch;
+function CompactColorPicker(_ref) {
+  var label = _ref.label,
+    color = _ref.color,
+    onChangeComplete = _ref.onChangeComplete,
+    enableAlpha = _ref.enableAlpha;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: '12px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: '12px'
+    }
+  }, label), /*#__PURE__*/React.createElement(Dropdown, {
+    renderToggle: function renderToggle(_ref2) {
+      var isOpen = _ref2.isOpen,
+        onToggle = _ref2.onToggle;
+      return /*#__PURE__*/React.createElement(Button, {
+        onClick: onToggle,
+        "aria-expanded": isOpen,
+        style: {
+          padding: 0,
+          minWidth: 0,
+          background: 'none',
+          border: 'none',
+          boxShadow: 'none'
+        }
+      }, /*#__PURE__*/React.createElement(ColorIndicator, {
+        colorValue: color || 'transparent'
+      }));
+    },
+    renderContent: function renderContent() {
+      return /*#__PURE__*/React.createElement("div", {
+        style: {
+          padding: '8px'
+        }
+      }, /*#__PURE__*/React.createElement(ColorPicker, {
+        color: color,
+        onChangeComplete: onChangeComplete,
+        disableAlpha: !enableAlpha
+      }));
+    }
+  }));
+}
 function ProductCategoriesEdit(props) {
   var attributes = props.attributes,
     setAttributes = props.setAttributes;
@@ -33,6 +84,7 @@ function ProductCategoriesEdit(props) {
     hideEmpty = attributes.hideEmpty,
     showCount = attributes.showCount,
     columns = attributes.columns,
+    imageSize = attributes.imageSize,
     bgColor = attributes.bgColor,
     borderColor = attributes.borderColor,
     borderWidth = attributes.borderWidth,
@@ -41,6 +93,19 @@ function ProductCategoriesEdit(props) {
     hoverBgColor = attributes.hoverBgColor,
     hoverBorderColor = attributes.hoverBorderColor,
     hoverTextColor = attributes.hoverTextColor,
+    showButton = attributes.showButton,
+    buttonText = attributes.buttonText,
+    btnBgColor = attributes.btnBgColor,
+    btnTextColor = attributes.btnTextColor,
+    btnBorderColor = attributes.btnBorderColor,
+    btnBorderWidth = attributes.btnBorderWidth,
+    btnBorderRadius = attributes.btnBorderRadius,
+    btnFontSize = attributes.btnFontSize,
+    btnPaddingV = attributes.btnPaddingV,
+    btnPaddingH = attributes.btnPaddingH,
+    btnHoverBgColor = attributes.btnHoverBgColor,
+    btnHoverTextColor = attributes.btnHoverTextColor,
+    btnHoverBorderColor = attributes.btnHoverBorderColor,
     className = attributes.className;
   var _useState = useState([]),
     _useState2 = _slicedToArray(_useState, 2),
@@ -55,9 +120,6 @@ function ProductCategoriesEdit(props) {
   });
   var countHelpText = count === 999 ? __('Currently set to show ALL categories.', 'frontblocks') : __('Number of categories shown. Set to 999 to show all.', 'frontblocks');
   var countLabel = count === 999 ? __('Number of Categories (All)', 'frontblocks') : __('Number of Categories', 'frontblocks');
-  var colorPickerCompactStyle = {
-    maxWidth: '250px'
-  };
 
   // Load categories from API.
   useEffect(function () {
@@ -87,7 +149,18 @@ function ProductCategoriesEdit(props) {
     '--frbl-hover-bg-color': hoverBgColor,
     '--frbl-hover-border-color': hoverBorderColor,
     '--frbl-hover-text-color': hoverTextColor,
-    '--frbl-border-radius': "".concat(borderRadius, "px")
+    '--frbl-border-radius': "".concat(borderRadius, "px"),
+    '--frbl-btn-bg': btnBgColor || 'transparent',
+    '--frbl-btn-color': btnTextColor || 'currentColor',
+    '--frbl-btn-border-color': btnBorderColor || 'currentColor',
+    '--frbl-btn-border-width': "".concat(btnBorderWidth, "px"),
+    '--frbl-btn-border-radius': "".concat(btnBorderRadius, "px"),
+    '--frbl-btn-font-size': "".concat(btnFontSize, "px"),
+    '--frbl-btn-padding-v': "".concat(btnPaddingV, "px"),
+    '--frbl-btn-padding-h': "".concat(btnPaddingH, "px"),
+    '--frbl-btn-hover-bg': btnHoverBgColor || 'transparent',
+    '--frbl-btn-hover-color': btnHoverTextColor || 'currentColor',
+    '--frbl-btn-hover-border-color': btnHoverBorderColor || 'currentColor'
   };
   return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Product Categories Settings', 'frontblocks'),
@@ -167,6 +240,25 @@ function ProductCategoriesEdit(props) {
       });
     },
     help: __('Display the number of products in each category.', 'frontblocks')
+  }), /*#__PURE__*/React.createElement(SelectControl, {
+    label: __('Image Size', 'frontblocks'),
+    value: imageSize,
+    options: [{
+      label: __('Miniatura WooCommerce', 'frontblocks'),
+      value: 'woocommerce_thumbnail'
+    }, {
+      label: __('Imagen de producto (WooCommerce)', 'frontblocks'),
+      value: 'woocommerce_single'
+    }, {
+      label: __('Tamaño completo', 'frontblocks'),
+      value: 'full'
+    }],
+    onChange: function onChange(val) {
+      return setAttributes({
+        imageSize: val
+      });
+    },
+    help: __('Tamaño de imagen de cada categoría.', 'frontblocks')
   })), /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Card Style Settings', 'frontblocks'),
     initialOpen: false
@@ -204,92 +296,201 @@ function ProductCategoriesEdit(props) {
     }]
   }, function (tab) {
     if (tab.name === 'normal') {
-      return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement("h4", {
-        style: {
-          marginTop: '15px'
-        }
-      }, __('Background Color', 'frontblocks')), /*#__PURE__*/React.createElement("div", {
-        style: colorPickerCompactStyle
-      }, /*#__PURE__*/React.createElement(ColorPicker, {
+      return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Background Color', 'frontblocks'),
         color: bgColor,
+        enableAlpha: true,
         onChangeComplete: function onChangeComplete(value) {
           return setAttributes({
             bgColor: value.rgb ? "rgba(".concat(value.rgb.r, ", ").concat(value.rgb.g, ", ").concat(value.rgb.b, ", ").concat(value.rgb.a, ")") : value.hex
           });
-        },
-        disableAlpha: false
-      })), /*#__PURE__*/React.createElement("h4", {
-        style: {
-          marginTop: '15px'
         }
-      }, __('Border Color', 'frontblocks')), /*#__PURE__*/React.createElement("div", {
-        style: colorPickerCompactStyle
-      }, /*#__PURE__*/React.createElement(ColorPicker, {
+      }), /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Border Color', 'frontblocks'),
         color: borderColor,
         onChangeComplete: function onChangeComplete(value) {
           return setAttributes({
             borderColor: value.hex
           });
         }
-      })), /*#__PURE__*/React.createElement("h4", {
-        style: {
-          marginTop: '15px'
-        }
-      }, __('Text Color', 'frontblocks')), /*#__PURE__*/React.createElement("div", {
-        style: colorPickerCompactStyle
-      }, /*#__PURE__*/React.createElement(ColorPicker, {
+      }), /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Text Color', 'frontblocks'),
         color: textColor,
         onChangeComplete: function onChangeComplete(value) {
           return setAttributes({
             textColor: value.hex
           });
         }
-      })));
+      }));
     }
     if (tab.name === 'hover') {
-      return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement("h4", {
-        style: {
-          marginTop: '15px'
-        }
-      }, __('Hover Background Color', 'frontblocks')), /*#__PURE__*/React.createElement("div", {
-        style: colorPickerCompactStyle
-      }, /*#__PURE__*/React.createElement(ColorPicker, {
+      return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Hover Background Color', 'frontblocks'),
         color: hoverBgColor,
+        enableAlpha: true,
         onChangeComplete: function onChangeComplete(value) {
           return setAttributes({
             hoverBgColor: value.rgb ? "rgba(".concat(value.rgb.r, ", ").concat(value.rgb.g, ", ").concat(value.rgb.b, ", ").concat(value.rgb.a, ")") : value.hex
           });
-        },
-        disableAlpha: false
-      })), /*#__PURE__*/React.createElement("h4", {
-        style: {
-          marginTop: '15px'
         }
-      }, __('Hover Border Color', 'frontblocks')), /*#__PURE__*/React.createElement("div", {
-        style: colorPickerCompactStyle
-      }, /*#__PURE__*/React.createElement(ColorPicker, {
+      }), /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Hover Border Color', 'frontblocks'),
         color: hoverBorderColor,
         onChangeComplete: function onChangeComplete(value) {
           return setAttributes({
             hoverBorderColor: value.hex
           });
         }
-      })), /*#__PURE__*/React.createElement("h4", {
-        style: {
-          marginTop: '15px'
-        }
-      }, __('Hover Text Color', 'frontblocks')), /*#__PURE__*/React.createElement("div", {
-        style: colorPickerCompactStyle
-      }, /*#__PURE__*/React.createElement(ColorPicker, {
+      }), /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Hover Text Color', 'frontblocks'),
         color: hoverTextColor,
         onChangeComplete: function onChangeComplete(value) {
           return setAttributes({
             hoverTextColor: value.hex
           });
         }
-      })));
+      }));
     }
-  }))), /*#__PURE__*/React.createElement("div", blockProps, isLoading ? /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement(PanelBody, {
+    title: __('Button Style', 'frontblocks'),
+    initialOpen: false
+  }, /*#__PURE__*/React.createElement(ToggleControl, {
+    label: __('Show Button', 'frontblocks'),
+    checked: showButton,
+    onChange: function onChange(val) {
+      return setAttributes({
+        showButton: val
+      });
+    },
+    help: __('Display a button at the bottom of each category card.', 'frontblocks')
+  }), showButton && /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(TextControl, {
+    label: __('Button Text', 'frontblocks'),
+    value: buttonText,
+    onChange: function onChange(val) {
+      return setAttributes({
+        buttonText: val
+      });
+    },
+    placeholder: __('Shop now', 'frontblocks')
+  }), /*#__PURE__*/React.createElement(RangeControl, {
+    label: __('Font Size (px)', 'frontblocks'),
+    value: btnFontSize,
+    onChange: function onChange(v) {
+      return setAttributes({
+        btnFontSize: v
+      });
+    },
+    min: 10,
+    max: 40
+  }), /*#__PURE__*/React.createElement(RangeControl, {
+    label: __('Padding Vertical (px)', 'frontblocks'),
+    value: btnPaddingV,
+    onChange: function onChange(v) {
+      return setAttributes({
+        btnPaddingV: v
+      });
+    },
+    min: 0,
+    max: 60
+  }), /*#__PURE__*/React.createElement(RangeControl, {
+    label: __('Padding Horizontal (px)', 'frontblocks'),
+    value: btnPaddingH,
+    onChange: function onChange(v) {
+      return setAttributes({
+        btnPaddingH: v
+      });
+    },
+    min: 0,
+    max: 100
+  }), /*#__PURE__*/React.createElement(RangeControl, {
+    label: __('Border Width (px)', 'frontblocks'),
+    value: btnBorderWidth,
+    onChange: function onChange(v) {
+      return setAttributes({
+        btnBorderWidth: v
+      });
+    },
+    min: 0,
+    max: 10
+  }), /*#__PURE__*/React.createElement(RangeControl, {
+    label: __('Border Radius (px)', 'frontblocks'),
+    value: btnBorderRadius,
+    onChange: function onChange(v) {
+      return setAttributes({
+        btnBorderRadius: v
+      });
+    },
+    min: 0,
+    max: 50
+  }), /*#__PURE__*/React.createElement(TabPanel, {
+    className: "frbl-style-tabs",
+    tabs: [{
+      name: 'normal',
+      title: __('Normal', 'frontblocks'),
+      className: 'tab-normal'
+    }, {
+      name: 'hover',
+      title: __('Hover', 'frontblocks'),
+      className: 'tab-hover'
+    }]
+  }, function (tab) {
+    if (tab.name === 'normal') {
+      return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Background', 'frontblocks'),
+        color: btnBgColor,
+        enableAlpha: true,
+        onChangeComplete: function onChangeComplete(v) {
+          return setAttributes({
+            btnBgColor: v.rgb ? "rgba(".concat(v.rgb.r, ",").concat(v.rgb.g, ",").concat(v.rgb.b, ",").concat(v.rgb.a, ")") : v.hex
+          });
+        }
+      }), /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Text Color', 'frontblocks'),
+        color: btnTextColor,
+        onChangeComplete: function onChangeComplete(v) {
+          return setAttributes({
+            btnTextColor: v.hex
+          });
+        }
+      }), /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Border Color', 'frontblocks'),
+        color: btnBorderColor,
+        onChangeComplete: function onChangeComplete(v) {
+          return setAttributes({
+            btnBorderColor: v.hex
+          });
+        }
+      }));
+    }
+    if (tab.name === 'hover') {
+      return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Background', 'frontblocks'),
+        color: btnHoverBgColor,
+        enableAlpha: true,
+        onChangeComplete: function onChangeComplete(v) {
+          return setAttributes({
+            btnHoverBgColor: v.rgb ? "rgba(".concat(v.rgb.r, ",").concat(v.rgb.g, ",").concat(v.rgb.b, ",").concat(v.rgb.a, ")") : v.hex
+          });
+        }
+      }), /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Text Color', 'frontblocks'),
+        color: btnHoverTextColor,
+        onChangeComplete: function onChangeComplete(v) {
+          return setAttributes({
+            btnHoverTextColor: v.hex
+          });
+        }
+      }), /*#__PURE__*/React.createElement(CompactColorPicker, {
+        label: __('Border Color', 'frontblocks'),
+        color: btnHoverBorderColor,
+        onChangeComplete: function onChangeComplete(v) {
+          return setAttributes({
+            btnHoverBorderColor: v.hex
+          });
+        }
+      }));
+    }
+  })))), /*#__PURE__*/React.createElement("div", blockProps, isLoading ? /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: 'center',
       padding: '40px'
@@ -310,7 +511,16 @@ function ProductCategoriesEdit(props) {
     className: "frbl-product-categories-grid",
     style: styleVars
   }, categories.map(function (category) {
-    var imageUrl = category.category_image && category.category_image.src ? category.category_image.src : 'https://placehold.co/600x400/eeeeee/333333?text=Product+Category';
+    var imgData = category.category_image || {};
+    var imageUrl;
+    if (imageSize === 'full') {
+      imageUrl = imgData.full || imgData.src;
+    } else if (imageSize === 'woocommerce_single') {
+      imageUrl = imgData.single || imgData.src;
+    } else {
+      imageUrl = imgData.src;
+    }
+    imageUrl = imageUrl || 'https://placehold.co/600x400/eeeeee/333333?text=Product+Category';
     return /*#__PURE__*/React.createElement("div", {
       key: category.id,
       className: "frbl-category-item frbl-category-".concat(category.slug)
@@ -324,7 +534,9 @@ function ProductCategoriesEdit(props) {
       className: "frbl-category-image"
     })), /*#__PURE__*/React.createElement("h3", {
       className: "frbl-category-name"
-    }, category.name, showCount && " (".concat(category.count, ")"))));
+    }, category.name, showCount && " (".concat(category.count, ")")), showButton && /*#__PURE__*/React.createElement("span", {
+      className: "frbl-category-button"
+    }, buttonText || __('Shop now', 'frontblocks'))));
   }))));
 }
 registerBlockType('frontblocks/product-categories', {
@@ -362,6 +574,10 @@ registerBlockType('frontblocks/product-categories', {
       type: 'number',
       default: 2
     },
+    imageSize: {
+      type: 'string',
+      default: 'woocommerce_thumbnail'
+    },
     bgColor: {
       type: 'string',
       default: 'rgba(255, 255, 255, 0.5)'
@@ -393,6 +609,58 @@ registerBlockType('frontblocks/product-categories', {
     hoverTextColor: {
       type: 'string',
       default: 'inherit'
+    },
+    showButton: {
+      type: 'boolean',
+      default: false
+    },
+    buttonText: {
+      type: 'string',
+      default: ''
+    },
+    btnBgColor: {
+      type: 'string',
+      default: 'transparent'
+    },
+    btnTextColor: {
+      type: 'string',
+      default: ''
+    },
+    btnBorderColor: {
+      type: 'string',
+      default: ''
+    },
+    btnBorderWidth: {
+      type: 'number',
+      default: 2
+    },
+    btnBorderRadius: {
+      type: 'number',
+      default: 4
+    },
+    btnFontSize: {
+      type: 'number',
+      default: 14
+    },
+    btnPaddingV: {
+      type: 'number',
+      default: 10
+    },
+    btnPaddingH: {
+      type: 'number',
+      default: 20
+    },
+    btnHoverBgColor: {
+      type: 'string',
+      default: ''
+    },
+    btnHoverTextColor: {
+      type: 'string',
+      default: ''
+    },
+    btnHoverBorderColor: {
+      type: 'string',
+      default: ''
     }
   },
   edit: ProductCategoriesEdit,

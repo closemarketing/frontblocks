@@ -76,19 +76,28 @@ class ProductCategories {
 		$thumbnail_id = get_term_meta( $term_data['id'], 'thumbnail_id', true );
 
 		if ( $thumbnail_id ) {
-			$image_url = wp_get_attachment_image_url( $thumbnail_id, 'woocommerce_thumbnail' );
-			if ( $image_url ) {
+			$src    = wp_get_attachment_image_url( $thumbnail_id, 'woocommerce_thumbnail' );
+			$single = wp_get_attachment_image_url( $thumbnail_id, 'woocommerce_single' );
+			$full   = wp_get_attachment_image_url( $thumbnail_id, 'full' );
+
+			if ( $src ) {
 				return array(
-					'src' => $image_url,
-					'id'  => $thumbnail_id,
+					'src'    => $src,
+					'single' => $single ? $single : $src,
+					'full'   => $full ? $full : $src,
+					'id'     => $thumbnail_id,
 				);
 			}
 		}
 
-		if ( function_exists( 'wc_placeholder_img_src' ) ) {
+		$placeholder = function_exists( 'wc_placeholder_img_src' ) ? wc_placeholder_img_src() : null;
+
+		if ( $placeholder ) {
 			return array(
-				'src' => wc_placeholder_img_src(),
-				'id'  => 0,
+				'src'    => $placeholder,
+				'single' => $placeholder,
+				'full'   => $placeholder,
+				'id'     => 0,
 			);
 		}
 
@@ -165,65 +174,121 @@ class ProductCategories {
 			'editor_script'   => 'frontblocks-product-categories-option',
 			'render_callback' => array( $this, 'render_product_categories_block' ),
 			'attributes'      => array(
-				'count'            => array(
+				'count'               => array(
 					'type'    => 'number',
 					'default' => 5,
 				),
-				'orderby'          => array(
+				'orderby'             => array(
 					'type'    => 'string',
 					'default' => 'count',
 				),
-				'order'            => array(
+				'order'               => array(
 					'type'    => 'string',
 					'default' => 'DESC',
 				),
-				'hideEmpty'        => array(
+				'hideEmpty'           => array(
 					'type'    => 'boolean',
 					'default' => false,
 				),
-				'showCount'        => array(
+				'showCount'           => array(
 					'type'    => 'boolean',
 					'default' => true,
 				),
-				'className'        => array(
+				'className'           => array(
 					'type'    => 'string',
 					'default' => '',
 				),
-				'columns'          => array(
+				'columns'             => array(
 					'type'    => 'number',
 					'default' => 2,
 				),
-				'bgColor'          => array(
+				'imageSize'           => array(
+					'type'    => 'string',
+					'default' => 'woocommerce_thumbnail',
+				),
+				'bgColor'             => array(
 					'type'    => 'string',
 					'default' => 'rgba(255, 255, 255, 0.5)',
 				),
-				'borderColor'      => array(
+				'borderColor'         => array(
 					'type'    => 'string',
 					'default' => '#dddddd',
 				),
-				'borderWidth'      => array(
+				'borderWidth'         => array(
 					'type'    => 'number',
 					'default' => 1,
 				),
-				'borderRadius'     => array(
+				'borderRadius'        => array(
 					'type'    => 'number',
 					'default' => 20,
 				),
-				'textColor'        => array(
+				'textColor'           => array(
 					'type'    => 'string',
 					'default' => 'inherit',
 				),
-				'hoverBgColor'     => array(
+				'hoverBgColor'        => array(
 					'type'    => 'string',
 					'default' => 'rgba(255, 255, 255, 0.7)',
 				),
-				'hoverBorderColor' => array(
+				'hoverBorderColor'    => array(
 					'type'    => 'string',
 					'default' => '#555555',
 				),
-				'hoverTextColor'   => array(
+				'hoverTextColor'      => array(
 					'type'    => 'string',
 					'default' => 'inherit',
+				),
+				'showButton'          => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+				'buttonText'          => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'btnBgColor'          => array(
+					'type'    => 'string',
+					'default' => 'transparent',
+				),
+				'btnTextColor'        => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'btnBorderColor'      => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'btnBorderWidth'      => array(
+					'type'    => 'number',
+					'default' => 2,
+				),
+				'btnBorderRadius'     => array(
+					'type'    => 'number',
+					'default' => 4,
+				),
+				'btnFontSize'         => array(
+					'type'    => 'number',
+					'default' => 14,
+				),
+				'btnPaddingV'         => array(
+					'type'    => 'number',
+					'default' => 10,
+				),
+				'btnPaddingH'         => array(
+					'type'    => 'number',
+					'default' => 20,
+				),
+				'btnHoverBgColor'     => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'btnHoverTextColor'   => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'btnHoverBorderColor' => array(
+					'type'    => 'string',
+					'default' => '',
 				),
 			),
 		);
@@ -247,21 +312,39 @@ class ProductCategories {
 			return '';
 		}
 
-		$count      = absint( $attributes['count'] ?? 5 );
-		$orderby    = sanitize_key( $attributes['orderby'] ?? 'count' );
-		$order      = strtoupper( sanitize_key( $attributes['order'] ?? 'DESC' ) );
-		$hide_empty = $attributes['hideEmpty'] ?? false;
-		$show_count = $attributes['showCount'] ?? true;
-		$columns    = absint( $attributes['columns'] ?? 2 );
+		$count         = absint( $attributes['count'] ?? 5 );
+		$orderby       = sanitize_key( $attributes['orderby'] ?? 'count' );
+		$order         = strtoupper( sanitize_key( $attributes['order'] ?? 'DESC' ) );
+		$hide_empty    = $attributes['hideEmpty'] ?? false;
+		$show_count    = $attributes['showCount'] ?? true;
+		$columns       = absint( $attributes['columns'] ?? 2 );
+		$image_size    = sanitize_key( $attributes['imageSize'] ?? 'woocommerce_thumbnail' );
+		$allowed_sizes = array( 'woocommerce_thumbnail', 'woocommerce_single', 'full', 'large', 'medium' );
+		if ( ! in_array( $image_size, $allowed_sizes, true ) ) {
+			$image_size = 'woocommerce_thumbnail';
+		}
 
-		$bg_color           = sanitize_text_field( $attributes['bgColor'] ?? 'rgba(255, 255, 255, 0.5)' );
-		$border_color       = sanitize_text_field( $attributes['borderColor'] ?? '#dddddd' );
-		$border_width       = absint( $attributes['borderWidth'] ?? 1 );
-		$border_radius      = absint( $attributes['borderRadius'] ?? 20 );
-		$text_color         = sanitize_text_field( $attributes['textColor'] ?? 'inherit' );
-		$hover_bg_color     = sanitize_text_field( $attributes['hoverBgColor'] ?? 'rgba(255, 255, 255, 0.7)' );
-		$hover_border_color = sanitize_text_field( $attributes['hoverBorderColor'] ?? '#555555' );
-		$hover_text_color   = sanitize_text_field( $attributes['hoverTextColor'] ?? 'inherit' );
+		$bg_color               = sanitize_text_field( $attributes['bgColor'] ?? 'rgba(255, 255, 255, 0.5)' );
+		$border_color           = sanitize_text_field( $attributes['borderColor'] ?? '#dddddd' );
+		$border_width           = absint( $attributes['borderWidth'] ?? 1 );
+		$border_radius          = absint( $attributes['borderRadius'] ?? 20 );
+		$text_color             = sanitize_text_field( $attributes['textColor'] ?? 'inherit' );
+		$hover_bg_color         = sanitize_text_field( $attributes['hoverBgColor'] ?? 'rgba(255, 255, 255, 0.7)' );
+		$hover_border_color     = sanitize_text_field( $attributes['hoverBorderColor'] ?? '#555555' );
+		$hover_text_color       = sanitize_text_field( $attributes['hoverTextColor'] ?? 'inherit' );
+		$show_button            = ! empty( $attributes['showButton'] );
+		$button_text            = sanitize_text_field( $attributes['buttonText'] ?? '' );
+		$btn_bg_color           = sanitize_text_field( $attributes['btnBgColor'] ?? 'transparent' );
+		$btn_text_color         = sanitize_text_field( $attributes['btnTextColor'] ?? '' );
+		$btn_border_color       = sanitize_text_field( $attributes['btnBorderColor'] ?? '' );
+		$btn_border_width       = absint( $attributes['btnBorderWidth'] ?? 2 );
+		$btn_border_radius      = absint( $attributes['btnBorderRadius'] ?? 4 );
+		$btn_font_size          = absint( $attributes['btnFontSize'] ?? 14 );
+		$btn_padding_v          = absint( $attributes['btnPaddingV'] ?? 10 );
+		$btn_padding_h          = absint( $attributes['btnPaddingH'] ?? 20 );
+		$btn_hover_bg_color     = sanitize_text_field( $attributes['btnHoverBgColor'] ?? '' );
+		$btn_hover_text_color   = sanitize_text_field( $attributes['btnHoverTextColor'] ?? '' );
+		$btn_hover_border_color = sanitize_text_field( $attributes['btnHoverBorderColor'] ?? '' );
 
 		/**
 		 * Lógica para "Mostrar todas"
@@ -293,7 +376,7 @@ class ProductCategories {
 		}
 
 		$style_vars = sprintf(
-			'--frbl-grid-columns: %d; --frbl-bg-color: %s; --frbl-border-color: %s; --frbl-border-width: %dpx; --frbl-text-color: %s; --frbl-hover-bg-color: %s; --frbl-hover-border-color: %s; --frbl-hover-text-color: %s; --frbl-border-radius: %dpx;',
+			'--frbl-grid-columns:%d;--frbl-bg-color:%s;--frbl-border-color:%s;--frbl-border-width:%dpx;--frbl-text-color:%s;--frbl-hover-bg-color:%s;--frbl-hover-border-color:%s;--frbl-hover-text-color:%s;--frbl-border-radius:%dpx;--frbl-btn-bg:%s;--frbl-btn-color:%s;--frbl-btn-border-color:%s;--frbl-btn-border-width:%dpx;--frbl-btn-border-radius:%dpx;--frbl-btn-font-size:%dpx;--frbl-btn-padding-v:%dpx;--frbl-btn-padding-h:%dpx;--frbl-btn-hover-bg:%s;--frbl-btn-hover-color:%s;--frbl-btn-hover-border-color:%s;',
 			$columns,
 			$bg_color,
 			$border_color,
@@ -302,7 +385,18 @@ class ProductCategories {
 			$hover_bg_color,
 			$hover_border_color,
 			$hover_text_color,
-			$border_radius
+			$border_radius,
+			$btn_bg_color,
+			$btn_text_color ? $btn_text_color : 'currentColor',
+			$btn_border_color ? $btn_border_color : 'currentColor',
+			$btn_border_width,
+			$btn_border_radius,
+			$btn_font_size,
+			$btn_padding_v,
+			$btn_padding_h,
+			$btn_hover_bg_color ? $btn_hover_bg_color : 'transparent',
+			$btn_hover_text_color ? $btn_hover_text_color : 'currentColor',
+			$btn_hover_border_color ? $btn_hover_border_color : 'currentColor'
 		);
 
 		ob_start();
@@ -313,11 +407,15 @@ class ProductCategories {
 				$thumbnail_id = get_term_meta( $category->term_id, 'thumbnail_id', true );
 
 				if ( $thumbnail_id ) {
-					$image_url = wp_get_attachment_image_url( $thumbnail_id, 'woocommerce_thumbnail' );
-				} elseif ( function_exists( 'wc_placeholder_img_src' ) ) {
-					$image_url = wc_placeholder_img_src();
-				} else {
-					$image_url = 'https://placehold.co/600x400/eeeeee/333333?text=Product+Category';
+					$image_url = wp_get_attachment_image_url( $thumbnail_id, $image_size );
+				}
+
+				if ( empty( $image_url ) ) {
+					if ( function_exists( 'wc_placeholder_img_src' ) ) {
+						$image_url = wc_placeholder_img_src();
+					} else {
+						$image_url = 'https://placehold.co/600x400/eeeeee/333333?text=Product+Category';
+					}
 				}
 
 				$link = esc_url( get_term_link( $category, 'product_cat' ) );
@@ -334,6 +432,11 @@ class ProductCategories {
 						<h3 class="frbl-category-name">
 							<?php echo esc_html( $category->name ); ?><?php echo $show_count ? ' (' . esc_html( $category->count ) . ')' : ''; ?>
 						</h3>
+						<?php if ( $show_button ) : ?>
+							<span class="frbl-category-button">
+								<?php echo esc_html( $button_text ? $button_text : __( 'Shop now', 'frontblocks' ) ); ?>
+							</span>
+						<?php endif; ?>
 					</a>
 				</div>
 			<?php endforeach; ?>

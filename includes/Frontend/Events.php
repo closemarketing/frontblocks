@@ -84,21 +84,21 @@ class Events {
 	 */
 	public function register_cpt_event() {
 		$labels = array(
-			'name'          => __( 'Eventos', 'frontblocks' ),
-			'singular_name' => __( 'Evento', 'frontblocks' ),
-			'menu_name'     => __( 'Eventos', 'frontblocks' ),
-			'all_items'     => __( 'Todos los eventos', 'frontblocks' ),
-			'add_new'       => __( 'Añadir evento', 'frontblocks' ),
-			'add_new_item'  => __( 'Añadir nuevo evento', 'frontblocks' ),
-			'edit_item'     => __( 'Editar evento', 'frontblocks' ),
-			'new_item'      => __( 'Nuevo evento', 'frontblocks' ),
-			'view_item'     => __( 'Ver evento', 'frontblocks' ),
-			'search_items'  => __( 'Buscar evento', 'frontblocks' ),
-			'not_found'     => __( 'No se han encontrado eventos', 'frontblocks' ),
+			'name'          => __( 'Events', 'frontblocks' ),
+			'singular_name' => __( 'Event', 'frontblocks' ),
+			'menu_name'     => __( 'Events', 'frontblocks' ),
+			'all_items'     => __( 'All events', 'frontblocks' ),
+			'add_new'       => __( 'Add event', 'frontblocks' ),
+			'add_new_item'  => __( 'Add new event', 'frontblocks' ),
+			'edit_item'     => __( 'Edit event', 'frontblocks' ),
+			'new_item'      => __( 'New event', 'frontblocks' ),
+			'view_item'     => __( 'View event', 'frontblocks' ),
+			'search_items'  => __( 'Search event', 'frontblocks' ),
+			'not_found'     => __( 'No events found', 'frontblocks' ),
 		);
 
 		$args = array(
-			'label'         => __( 'Eventos', 'frontblocks' ),
+			'label'         => __( 'Events', 'frontblocks' ),
 			'labels'        => $labels,
 			'public'        => true,
 			'show_ui'       => true,
@@ -121,13 +121,13 @@ class Events {
 	 */
 	public function register_taxonomy_event_category() {
 		$labels = array(
-			'name'          => __( 'Categorías de eventos', 'frontblocks' ),
-			'singular_name' => __( 'Categoría', 'frontblocks' ),
-			'menu_name'     => __( 'Categorías', 'frontblocks' ),
+			'name'          => __( 'Event categories', 'frontblocks' ),
+			'singular_name' => __( 'Category', 'frontblocks' ),
+			'menu_name'     => __( 'Categories', 'frontblocks' ),
 		);
 
 		$args = array(
-			'label'             => __( 'Categorías', 'frontblocks' ),
+			'label'             => __( 'Categories', 'frontblocks' ),
 			'labels'            => $labels,
 			'public'            => true,
 			'hierarchical'      => true,
@@ -151,7 +151,7 @@ class Events {
 	public function add_metaboxes() {
 		add_meta_box(
 			'frbl_event_metabox',
-			__( 'Datos del Evento', 'frontblocks' ),
+			__( 'Event Data', 'frontblocks' ),
 			array( $this, 'render_metabox' ),
 			'event',
 			'normal',
@@ -167,7 +167,7 @@ class Events {
 	public function add_metaboxes_posts() {
 		add_meta_box(
 			'frbl_event_metabox',
-			__( 'Datos del Evento', 'frontblocks' ),
+			__( 'Event Data', 'frontblocks' ),
 			array( $this, 'render_metabox' ),
 			'post',
 			'normal',
@@ -238,47 +238,47 @@ class Events {
 		<div id="frbl_event_metabox" class="frbl-grid">
 
 			<div class="frbl-field">
-				<label><?php esc_html_e( 'Evento todo el día', 'frontblocks' ); ?></label>
+				<label><?php esc_html_e( 'All day event', 'frontblocks' ); ?></label>
 				<input type="checkbox" name="all_day" value="1" <?php checked( $all_day, '1' ); ?> />
 			</div>
 
 			<div class="frbl-field">
-				<label><?php esc_html_e( 'Coste', 'frontblocks' ); ?></label>
+				<label><?php esc_html_e( 'Cost', 'frontblocks' ); ?></label>
 				<input type="number" step="0.01" name="cost" value="<?php echo esc_attr( $cost ); ?>">
 			</div>
 
 			<div class="frbl-field">
-				<label><?php esc_html_e( 'Fecha inicio', 'frontblocks' ); ?></label>
+				<label><?php esc_html_e( 'Start date', 'frontblocks' ); ?></label>
 				<input type="date" name="start_date" value="<?php echo esc_attr( $start_date ); ?>">
 			</div>
 
 			<div class="frbl-field">
-				<label><?php esc_html_e( 'Hora inicio', 'frontblocks' ); ?></label>
+				<label><?php esc_html_e( 'Start time', 'frontblocks' ); ?></label>
 				<input type="time" name="start_time" value="<?php echo esc_attr( $start_time ); ?>">
 			</div>
 
 			<div class="frbl-field">
-				<label><?php esc_html_e( 'Fecha fin', 'frontblocks' ); ?></label>
+				<label><?php esc_html_e( 'End date', 'frontblocks' ); ?></label>
 				<input type="date" name="end_date" value="<?php echo esc_attr( $end_date ); ?>">
 			</div>
 
 			<div class="frbl-field">
-				<label><?php esc_html_e( 'Hora fin', 'frontblocks' ); ?></label>
+				<label><?php esc_html_e( 'End time', 'frontblocks' ); ?></label>
 				<input type="time" name="end_time" value="<?php echo esc_attr( $end_time ); ?>">
 			</div>
 
 			<div class="frbl-field">
-				<label><?php esc_html_e( 'Web del evento', 'frontblocks' ); ?></label>
+				<label><?php esc_html_e( 'Event website', 'frontblocks' ); ?></label>
 				<input type="url" name="web" value="<?php echo esc_attr( $web ); ?>">
 			</div>
 
 			<div class="frbl-field">
-				<label><?php esc_html_e( 'Póster del evento (url)', 'frontblocks' ); ?></label>
+				<label><?php esc_html_e( 'Event poster (url)', 'frontblocks' ); ?></label>
 				<input type="url" name="poster_evento" value="<?php echo esc_attr( $poster_evento ); ?>">
 			</div>
 
 			<div class="frbl-field full">
-				<label><?php esc_html_e( 'Dirección', 'frontblocks' ); ?></label>
+				<label><?php esc_html_e( 'Address', 'frontblocks' ); ?></label>
 				<input type="text" name="direccion_evento" value="<?php echo esc_attr( $direccion_evento ); ?>" style="max-width:100%;">
 			</div>
 
