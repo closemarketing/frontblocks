@@ -93,8 +93,8 @@ class SvgUpload {
 			return $file;
 		}
 
-		if ( ! current_user_can( 'upload_files' ) ) {
-			$file['error'] = __( 'Permission denied: you cannot upload SVG files.', 'frontblocks' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			$file['error'] = __( 'Permission denied: only administrators can upload SVG files.', 'frontblocks' );
 			return $file;
 		}
 
