@@ -78,13 +78,16 @@
 	display: inline-block;
 }
 
-/* Hide original Shape SVG when Lottie is active (frontend) */
-.frbl-has-lottie-animation .gb-shape > svg {
+/* Hide original SVG when Lottie is active (frontend) */
+.frbl-has-lottie-animation .gb-shape > svg,
+.frbl-has-lottie-animation .wp-block-icon > svg,
+.frbl-has-lottie-animation .wp-block-icon__icon {
 	display: none !important;
 }
 
-/* Hide original Shape SVG when Lottie preview is active (editor) */
-.block-editor-block-list__block .gb-shape:has(.frbl-lottie-preview) > svg {
+/* Hide original SVG when Lottie preview is active (editor) */
+.block-editor-block-list__block .gb-shape:has(.frbl-lottie-preview) > svg,
+.block-editor-block-list__block .wp-block-icon:has(.frbl-lottie-preview) > svg {
 	display: none !important;
 }
 

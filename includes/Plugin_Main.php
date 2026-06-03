@@ -141,6 +141,11 @@ class Plugin_Main {
 
 		// Before After comparison block.
 		new Frontend\BeforeAfter();
+
+		// SVG Upload module (allows SVG files in the media library).
+		new Frontend\SvgUpload();
+
+		// User Text block is provided by FrontBlocks Pro when license is active.
 	}
 
 	/**

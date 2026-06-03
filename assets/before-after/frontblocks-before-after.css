@@ -139,12 +139,7 @@
 	display: block;
 }
 
-/* Editor — disable interaction */
+/* Editor — handle stays interactive for the drag preview */
 .frbl-before-after--editor {
-	cursor: default;
-}
-
-.frbl-before-after--editor .frbl-before-after__handle {
-	cursor: default;
-	pointer-events: none;
+	cursor: col-resize;
 }

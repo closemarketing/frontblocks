@@ -91,7 +91,7 @@
 	padding-right: 0 !important;
 }
 
-/* Ensure child elements respect the edge alignment */
+/* Ensure child elements respect the edge alignment — GenerateBlocks */
 .frbl-edge-left > .gb-container,
 .frbl-edge-left > .gb-grid-wrapper,
 .frbl-edge-left > .gb-inside-container {
@@ -102,6 +102,19 @@
 .frbl-edge-right > .gb-container,
 .frbl-edge-right > .gb-grid-wrapper,
 .frbl-edge-right > .gb-inside-container {
+	padding-right: 0 !important;
+	margin-right: 0 !important;
+}
+
+/* Ensure child elements respect the edge alignment — native core blocks */
+.frbl-edge-left > .wp-block-group__inner-container,
+.frbl-edge-left > .wp-block-columns {
+	padding-left: 0 !important;
+	margin-left: 0 !important;
+}
+
+.frbl-edge-right > .wp-block-group__inner-container,
+.frbl-edge-right > .wp-block-columns {
 	padding-right: 0 !important;
 	margin-right: 0 !important;
 }
