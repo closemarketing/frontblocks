@@ -23,7 +23,6 @@ class FluidTypography {
 	 * Constructor.
 	 */
 	public function __construct() {
-		// Check if module is enabled.
 		if ( ! $this->is_enabled() ) {
 			return;
 		}
@@ -38,7 +37,7 @@ class FluidTypography {
 	 */
 	private function is_enabled() {
 		$options = get_option( 'frontblocks_settings', array() );
-		return ! empty( $options['enable_fluid_typography'] );
+		return (bool) ( $options['enable_fluid_typography'] ?? true );
 	}
 
 	/**
@@ -56,17 +55,14 @@ class FluidTypography {
 	 * @return void
 	 */
 	public function enqueue_fluid_typography() {
-		// Get GeneratePress dynamic CSS output.
-		$dynamic_css = get_option( 'generate_dynamic_css_output', '' );
+		$source_css = $this->get_source_css();
 
-		if ( empty( $dynamic_css ) ) {
+		if ( empty( $source_css ) ) {
 			return;
 		}
 
-		// Generate fluid typography CSS from dynamic CSS.
-		$fluid_css = $this->convert_to_fluid_typography( $dynamic_css );
+		$fluid_css = $this->convert_to_fluid_typography( $source_css );
 
-		// DEBUG: Show generated CSS as HTML comment for admins.
 		if ( current_user_can( 'manage_options' ) && isset( $_GET['frbl_debug'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			add_action(
 				'wp_head',
@@ -76,33 +72,87 @@ class FluidTypography {
 			);
 		}
 
-		if ( ! empty( $fluid_css ) ) {
-			wp_add_inline_style( 'generate-style', $fluid_css );
+		if ( empty( $fluid_css ) ) {
+			return;
 		}
+
+		$style_handle = $this->get_style_handle();
+		wp_add_inline_style( $style_handle, $fluid_css );
 	}
 
 	/**
-	 * Convert GeneratePress static CSS to fluid typography.
+	 * Get CSS source depending on active theme.
+	 * Priority: GeneratePress → theme.json global stylesheet → theme stylesheet.
 	 *
-	 * @param string $css Dynamic CSS from GeneratePress.
+	 * @return string
+	 */
+	private function get_source_css(): string {
+		// 1. GeneratePress — use its pre-compiled dynamic CSS cache.
+		if ( function_exists( 'generate_get_default_color_palettes' ) ) {
+			$gp_css = get_option( 'generate_dynamic_css_output', '' );
+			if ( ! empty( $gp_css ) ) {
+				return $gp_css;
+			}
+		}
+
+		// 2. Block/FSE themes — compile from theme.json via WP core.
+		if ( function_exists( 'wp_get_global_stylesheet' ) ) {
+			$global_css = wp_get_global_stylesheet();
+			if ( ! empty( $global_css ) ) {
+				return $global_css;
+			}
+		}
+
+		// 3. Classic themes — read the theme's style.css.
+		$stylesheet = get_stylesheet_directory() . '/style.css';
+		if ( file_exists( $stylesheet ) ) {
+			$css = file_get_contents( $stylesheet ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			if ( ! empty( $css ) ) {
+				return $css;
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Return the registered style handle to attach the fluid CSS to.
+	 * Falls back to 'wp-block-library' (always enqueued) if the theme handle isn't found.
+	 *
+	 * @return string
+	 */
+	private function get_style_handle(): string {
+		// GeneratePress.
+		if ( wp_style_is( 'generate-style', 'enqueued' ) ) {
+			return 'generate-style';
+		}
+
+		// Common theme handles.
+		$candidates = array( 'parent-style', 'child-style', 'theme-style', 'main-style', get_stylesheet() );
+		foreach ( $candidates as $handle ) {
+			if ( wp_style_is( $handle, 'enqueued' ) ) {
+				return $handle;
+			}
+		}
+
+		// Universal fallback — always present when blocks are used.
+		return 'wp-block-library';
+	}
+
+	/**
+	 * Convert source CSS to fluid typography using clamp().
+	 *
+	 * @param string $css Source CSS.
 	 * @return string Fluid typography CSS.
 	 */
 	private function convert_to_fluid_typography( $css ) {
 		$fluid_css = '';
+		$selectors = array( 'body', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' );
 
-		// Typography selectors to process - starting with simple ones that definitely work.
-		$selectors = array(
-			'body',  // Body text (paragraphs inherit from this).
-			'h1',    // Heading 1.
-			'h2',    // Heading 2.
-			'h3',    // Heading 3.
-			'h4',    // Heading 4.
-			'h5',    // Heading 5.
-			'h6',    // Heading 6.
-		);
+		$is_generateblocks = class_exists( 'GenerateBlocks' );
 
 		foreach ( $selectors as $selector ) {
-			$fluid_rule = $this->extract_and_convert_selector( $css, $selector );
+			$fluid_rule = $this->extract_and_convert_selector( $css, $selector, $is_generateblocks );
 
 			if ( ! empty( $fluid_rule ) ) {
 				$fluid_css .= $fluid_rule . "\n";
@@ -115,22 +165,21 @@ class FluidTypography {
 	/**
 	 * Extract font sizes from CSS and convert to fluid typography.
 	 *
-	 * @param string $css CSS content.
-	 * @param string $selector CSS selector (e.g., 'h1').
+	 * @param string $css                Source CSS.
+	 * @param string $selector           CSS selector (e.g. 'h1').
+	 * @param bool   $is_generateblocks  Whether GenerateBlocks is active.
 	 * @return string Fluid CSS rule or empty string.
 	 */
-	private function extract_and_convert_selector( $css, $selector ) {
+	private function extract_and_convert_selector( $css, $selector, $is_generateblocks = false ) {
 		$sizes = array(
 			'desktop' => null,
 			'tablet'  => null,
 			'mobile'  => null,
 		);
 
-		// Use different regex patterns depending on the selector.
-		// Body is in a multiple selector (body, button, input...), headings are standalone.
 		$is_multiple_selector = ( 'body' === $selector );
 
-		// Extract base/desktop font-size.
+		// Desktop font-size.
 		if ( $is_multiple_selector ) {
 			$pattern = '/(?:^|,|\})\s*[^{]*\b' . preg_quote( $selector, '/' ) . '\b[^{]*\{[^}]*font-size:\s*([0-9.]+)(px|rem|em)/i';
 		} else {
@@ -144,9 +193,8 @@ class FluidTypography {
 			);
 		}
 
-		// Extract tablet font-size from @media (max-width: 1024px).
+		// Tablet font-size — @media (max-width: 1024px).
 		if ( $is_multiple_selector ) {
-			// Pattern for body in media query.
 			$pattern_tablet = '/@media[^{]*max-width:\s*1024px[^{]*\{[^@]*\b' . preg_quote( $selector, '/' ) . '\b[^{]*\{[^}]*font-size:\s*([0-9.]+)(px|rem|em)/is';
 		} else {
 			$pattern_tablet = '/@media[^{]*max-width:\s*1024px[^{]*\{[^}]*' . preg_quote( $selector, '/' ) . '\s*\{[^}]*font-size:\s*([0-9.]+)(px|rem|em)/is';
@@ -159,9 +207,8 @@ class FluidTypography {
 			);
 		}
 
-		// Extract mobile font-size from @media (max-width: 768px).
+		// Mobile font-size — @media (max-width: 768px).
 		if ( $is_multiple_selector ) {
-			// Pattern for body in media query.
 			$pattern_mobile = '/@media[^{]*max-width:\s*768px[^{]*\{[^@]*\b' . preg_quote( $selector, '/' ) . '\b[^{]*\{[^}]*font-size:\s*([0-9.]+)(px|rem|em)/is';
 		} else {
 			$pattern_mobile = '/@media[^{]*max-width:\s*768px[^{]*\{[^}]*' . preg_quote( $selector, '/' ) . '\s*\{[^}]*font-size:\s*([0-9.]+)(px|rem|em)/is';
@@ -174,12 +221,10 @@ class FluidTypography {
 			);
 		}
 
-		// If we don't have enough data, skip.
 		if ( ! $sizes['desktop'] || ! $sizes['mobile'] ) {
 			return '';
 		}
 
-		// Ensure all units are the same.
 		if ( $sizes['desktop']['unit'] !== $sizes['mobile']['unit'] ) {
 			return '';
 		}
@@ -188,18 +233,14 @@ class FluidTypography {
 		$max_size = $sizes['desktop']['value'];
 		$unit     = $sizes['desktop']['unit'];
 
-		// Skip if same values.
 		if ( $min_size === $max_size ) {
 			return '';
 		}
 
-		// Generate fluid typography with clamp().
-		// Viewport range: 320px (mobile) to 1440px (desktop).
 		$viewport_start = 320;
 		$viewport_end   = 1440;
 		$viewport_diff  = $viewport_end - $viewport_start;
 
-		// Build clamp() formula.
 		$fluid_calc = sprintf(
 			'calc(%1$s%2$s + (%3$s - %1$s) * ((100vw - %4$spx) / %5$s))',
 			$min_size,
@@ -217,14 +258,17 @@ class FluidTypography {
 			$max_size
 		);
 
-		// Generate CSS rule with appropriate specificity.
 		if ( in_array( $selector, array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' ), true ) ) {
-			// For headings, use high specificity to ensure they always win over body classes.
-			$rule = sprintf( "body %s,\nbody %s.gb-headline {\n\tfont-size: %s !important;\n}", $selector, $selector, $clamp_rule );
+			$rule = sprintf( "body %s {\n\tfont-size: %s !important;\n}", $selector, $clamp_rule );
+
+			// Add GenerateBlocks-specific selector only when GB is active.
+			if ( $is_generateblocks ) {
+				$rule .= sprintf( "\nbody %s.gb-headline {\n\tfont-size: %s !important;\n}", $selector, $clamp_rule );
+			}
 		} else {
-			// For body, apply to body and paragraphs with GB classes.
 			$rule = sprintf( "%s {\n\tfont-size: %s !important;\n}", $selector, $clamp_rule );
-			if ( 'body' === $selector ) {
+
+			if ( 'body' === $selector && $is_generateblocks ) {
 				$rule .= sprintf( "\np.gb-headline-text {\n\tfont-size: %s !important;\n}", $clamp_rule );
 			}
 		}
