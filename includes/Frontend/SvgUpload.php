@@ -36,9 +36,9 @@ class SvgUpload {
 	 */
 	private function init_hooks() {
 		add_filter( 'upload_mimes', array( $this, 'add_svg_mime' ) );
-		add_filter( 'wp_check_filetype_and_ext', array( $this, 'fix_svg_mime_check' ), 10, 5 );
+		add_filter( 'wp_check_filetype_and_ext', array( $this, 'fix_svg_mime_check' ), 10, 3 );
 		add_filter( 'wp_handle_upload_prefilter', array( $this, 'sanitize_svg_upload' ) );
-		add_filter( 'wp_prepare_attachment_for_js', array( $this, 'fix_svg_in_media_library' ), 10, 3 );
+		add_filter( 'wp_prepare_attachment_for_js', array( $this, 'fix_svg_in_media_library' ), 10, 2 );
 	}
 
 	/**
@@ -58,14 +58,12 @@ class SvgUpload {
 	 *
 	 * PHP's finfo often misidentifies SVGs; this corrects the check.
 	 *
-	 * @param array       $data      File data.
-	 * @param string      $file      Full path to the file.
-	 * @param string      $filename  Original filename.
-	 * @param array       $mimes     Allowed MIME types.
-	 * @param string|bool $real_mime Detected MIME type from finfo.
+	 * @param array  $data     File data.
+	 * @param string $file     Full path to the file.
+	 * @param string $filename Original filename.
 	 * @return array
 	 */
-	public function fix_svg_mime_check( $data, $file, $filename, $mimes, $real_mime ) {
+	public function fix_svg_mime_check( $data, $file, $filename ) {
 		if ( ! empty( $data['ext'] ) && ! empty( $data['type'] ) ) {
 			return $data;
 		}
@@ -112,7 +110,7 @@ class SvgUpload {
 			return $file;
 		}
 
-		file_put_contents( $file['tmp_name'], $sanitized ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
+		file_put_contents( $file['tmp_name'], $sanitized ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 
 		return $file;
 	}
@@ -167,8 +165,8 @@ class SvgUpload {
 				$to_remove[] = $element;
 			}
 			foreach ( $to_remove as $element ) {
-				if ( $element->parentNode ) {
-					$element->parentNode->removeChild( $element );
+				if ( $element->parentNode ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+					$element->parentNode->removeChild( $element ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 				}
 			}
 		}
@@ -184,11 +182,11 @@ class SvgUpload {
 			$attrs_to_remove = array();
 
 			foreach ( $element->attributes as $attr ) {
-				$attr_lower = strtolower( $attr->nodeName );
+				$attr_lower = strtolower( $attr->nodeName ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 				// Remove all on* event handlers.
 				if ( 0 === strpos( $attr_lower, 'on' ) ) {
-					$attrs_to_remove[] = $attr->nodeName;
+					$attrs_to_remove[] = $attr->nodeName; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 					continue;
 				}
 
@@ -196,7 +194,7 @@ class SvgUpload {
 				if ( in_array( $attr_lower, array( 'href', 'xlink:href', 'src', 'action', 'formaction', 'data' ), true ) ) {
 					$value = ltrim( preg_replace( '/\s+/', '', $attr->value ) );
 					if ( 0 === stripos( $value, 'javascript:' ) || 0 === stripos( $value, 'data:text' ) ) {
-						$attrs_to_remove[] = $attr->nodeName;
+						$attrs_to_remove[] = $attr->nodeName; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 					}
 				}
 			}
@@ -215,12 +213,11 @@ class SvgUpload {
 	 * SVGs have no raster dimensions; provide fallback values so the
 	 * media library can render a thumbnail without throwing JS errors.
 	 *
-	 * @param array      $response   Attachment data for JS.
-	 * @param \WP_Post   $attachment Attachment post object.
-	 * @param array|bool $meta       Attachment meta.
+	 * @param array    $response   Attachment data for JS.
+	 * @param \WP_Post $attachment Attachment post object.
 	 * @return array
 	 */
-	public function fix_svg_in_media_library( $response, $attachment, $meta ) {
+	public function fix_svg_in_media_library( $response, $attachment ) {
 		if ( 'image/svg+xml' !== $response['mime'] ) {
 			return $response;
 		}
