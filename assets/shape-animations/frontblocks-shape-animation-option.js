@@ -27,8 +27,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
    */
   function addShapeAnimationControls(BlockEdit) {
     return function (props) {
-      // Only add controls to shape blocks.
-      if (props.name !== 'generateblocks/shape') {
+      // Only add controls to shape and icon blocks.
+      if (props.name !== 'generateblocks/shape' && props.name !== 'core/icon') {
         return wp.element.createElement(BlockEdit, props);
       }
       var attributes = props.attributes,
@@ -201,10 +201,11 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     useRef = _wp$element2.useRef;
   var withShapeAnimationPreview = createHigherOrderComponent(function (BlockListBlock) {
     return function (props) {
-      if (props.name !== 'generateblocks/shape') {
+      if (props.name !== 'generateblocks/shape' && props.name !== 'core/icon') {
         return wp.element.createElement(BlockListBlock, props);
       }
       var attributes = props.attributes;
+      var isIconBlock = props.name === 'core/icon';
       var _attributes$frblCusto3 = attributes.frblCustomSvgAnimationEnabled,
         frblCustomSvgAnimationEnabled = _attributes$frblCusto3 === void 0 ? false : _attributes$frblCusto3,
         _attributes$frblCusto4 = attributes.frblCustomSvgAnimationJson,
@@ -228,11 +229,12 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
               var blockElement = document.querySelector('[data-block="' + props.clientId + '"]');
               if (!blockElement) return;
 
-              // Find or create Lottie container in the Shape block.
+              // Find or create Lottie container in the block.
               var lottieContainer = blockElement.querySelector('.frbl-lottie-preview');
               if (!lottieContainer) {
-                // Find the gb-shape element.
-                var shapeElement = blockElement.querySelector('.gb-shape');
+                // Find the inner element: .gb-shape for generateblocks/shape, .wp-block-icon for core/icon.
+                var containerSelector = isIconBlock ? '.wp-block-icon' : '.gb-shape';
+                var shapeElement = blockElement.querySelector(containerSelector);
                 if (shapeElement) {
                   // HIDE original SVG completely.
                   var originalSvg = shapeElement.querySelector('svg');
@@ -327,7 +329,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
             lottieInstanceRef.current = null;
           }
         };
-      }, [frblCustomSvgAnimationEnabled, frblCustomSvgAnimationJson, props.clientId, styles]);
+      }, [frblCustomSvgAnimationEnabled, frblCustomSvgAnimationJson, props.clientId, styles, isIconBlock]);
       return wp.element.createElement(BlockListBlock, props);
     };
   }, 'withShapeAnimationPreview');
