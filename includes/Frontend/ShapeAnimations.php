@@ -22,6 +22,13 @@ defined( 'ABSPATH' ) || exit;
 class ShapeAnimations {
 
 	/**
+	 * CSS animation styles queued for wp_footer output.
+	 *
+	 * @var array
+	 */
+	private static $queued_css = array();
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -38,6 +45,7 @@ class ShapeAnimations {
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ), 5 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'register_shape_animation_attributes' ), 15 );
 		add_filter( 'render_block', array( $this, 'add_animation_classes_to_shape' ), 10, 2 );
+		add_action( 'wp_footer', array( $this, 'output_queued_styles' ), 5 );
 	}
 
 	/**
@@ -110,7 +118,7 @@ class ShapeAnimations {
 	}
 
 	/**
-	 * Register animation attributes for Shape block.
+	 * Register animation attributes for Shape and Icon blocks.
 	 *
 	 * @return void
 	 */
@@ -122,7 +130,7 @@ class ShapeAnimations {
 				'blocks.registerBlockType',
 				'frontblocks/shape-animation-attributes',
 				function( settings, name ) {
-					if ( 'generateblocks/shape' !== name ) {
+					if ( 'generateblocks/shape' !== name && 'core/icon' !== name ) {
 						return settings;
 					}
 					
@@ -165,7 +173,8 @@ class ShapeAnimations {
 	 * @return string Modified block content.
 	 */
 	public function add_animation_classes_to_shape( $block_content, $block ) {
-		if ( ! isset( $block['blockName'] ) || 'generateblocks/shape' !== $block['blockName'] ) {
+		if ( ! isset( $block['blockName'] ) ||
+			( 'generateblocks/shape' !== $block['blockName'] && 'core/icon' !== $block['blockName'] ) ) {
 			return $block_content;
 		}
 
@@ -201,8 +210,10 @@ class ShapeAnimations {
 		// Detect animation type: Lottie or CSS.
 		$is_lottie = $this->is_lottie_json( $json_data );
 
+		$block_name = $block['blockName'];
+
 		if ( $is_lottie ) {
-			return $this->render_lottie_animation( $block_content, $json_data, $attrs );
+			return $this->render_lottie_animation( $block_content, $json_data, $attrs, $block_name );
 		} else {
 			return $this->render_css_animation( $block_content, $json_data, $attrs );
 		}
@@ -225,9 +236,10 @@ class ShapeAnimations {
 	 * @param string $block_content Original block content.
 	 * @param array  $json_data Lottie JSON data.
 	 * @param array  $attrs Block attributes.
+	 * @param string $block_name Block name.
 	 * @return string Modified block content.
 	 */
-	private function render_lottie_animation( $block_content, $json_data, $attrs ) {
+	private function render_lottie_animation( $block_content, $json_data, $attrs, $block_name = 'generateblocks/shape' ) {
 		// Generate unique ID for this Lottie instance.
 		$unique_id = 'frbl-lottie-' . wp_generate_password( 8, false );
 
@@ -243,13 +255,20 @@ class ShapeAnimations {
 			$speed    = isset( $json_data['animation']['speed'] ) ? (float) $json_data['animation']['speed'] : 1;
 		}
 
-		// Get Shape block styles (width, height, colors from GenerateBlocks).
-		$styles       = isset( $attrs['styles'] ) ? $attrs['styles'] : array();
-		$svg_styles   = isset( $styles['svg'] ) ? $styles['svg'] : array();
-		$width        = isset( $svg_styles['width'] ) ? $svg_styles['width'] : '';
-		$height       = isset( $svg_styles['height'] ) ? $svg_styles['height'] : '';
-		$fill_color   = isset( $svg_styles['fill'] ) ? $svg_styles['fill'] : '';
-		$stroke_color = isset( $svg_styles['color'] ) ? $svg_styles['color'] : '';
+		// Extract size and color based on block type.
+		if ( 'core/icon' === $block_name ) {
+			$icon_width = isset( $attrs['width'] ) ? absint( $attrs['width'] ) : 0;
+			$width      = $icon_width > 0 ? $icon_width . 'px' : '';
+			$height     = $width;
+			$fill_color = isset( $attrs['style']['color']['text'] ) ? sanitize_text_field( $attrs['style']['color']['text'] ) : '';
+		} else {
+			// Get Shape block styles (width, height, colors from GenerateBlocks).
+			$styles     = isset( $attrs['styles'] ) ? $attrs['styles'] : array();
+			$svg_styles = isset( $styles['svg'] ) ? $styles['svg'] : array();
+			$width      = isset( $svg_styles['width'] ) ? $svg_styles['width'] : '';
+			$height     = isset( $svg_styles['height'] ) ? $svg_styles['height'] : '';
+			$fill_color = isset( $svg_styles['fill'] ) ? $svg_styles['fill'] : '';
+		}
 
 		// Build inline styles.
 		$inline_styles  = 'width: ' . ( ! empty( $width ) ? esc_attr( $width ) : '100%' ) . ';';
@@ -309,6 +328,22 @@ class ShapeAnimations {
 	}
 
 	/**
+	 * Output all queued CSS animation keyframes in the footer.
+	 *
+	 * @return void
+	 */
+	public function output_queued_styles() {
+		if ( empty( self::$queued_css ) ) {
+			return;
+		}
+		echo '<style id="frbl-shape-animation-keyframes">';
+		foreach ( self::$queued_css as $css ) {
+			echo $css; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized in render_css_animation.
+		}
+		echo '</style>';
+	}
+
+	/**
 	 * Render CSS animation (original functionality).
 	 *
 	 * @param string $block_content Original block content.
@@ -320,7 +355,7 @@ class ShapeAnimations {
 		// Extract SVG and animation data.
 		$custom_svg          = isset( $json_data['svg'] ) ? $json_data['svg'] : '';
 		$animation_data      = isset( $json_data['animation'] ) ? $json_data['animation'] : array();
-		$animation_name      = isset( $animation_data['name'] ) ? sanitize_key( $animation_data['name'] ) : 'customAnimation';
+		$animation_name      = isset( $animation_data['name'] ) ? sanitize_text_field( $animation_data['name'] ) : 'customAnimation';
 		$animation_trigger   = isset( $animation_data['trigger'] ) ? sanitize_text_field( $animation_data['trigger'] ) : 'load';
 		$animation_keyframes = isset( $animation_data['keyframes'] ) ? $animation_data['keyframes'] : '';
 		$animation_duration  = isset( $animation_data['duration'] ) ? sanitize_text_field( $animation_data['duration'] ) : '1s';
@@ -330,29 +365,27 @@ class ShapeAnimations {
 		// Generate unique ID for this block's animation.
 		$unique_id = 'frbl-anim-' . md5( $animation_keyframes );
 
-		// Inject custom keyframes and SVG.
-		if ( ! empty( $animation_keyframes ) ) {
-			// Add inline style with keyframes.
-			$inline_style  = '<style>';
-			$inline_style .= esc_html( $animation_keyframes );
-			$inline_style .= ' .frbl-custom-svg-animation.' . esc_attr( $unique_id ) . ' { ';
-			$inline_style .= 'animation-name: ' . esc_attr( $animation_name ) . '; ';
-			$inline_style .= 'animation-duration: ' . esc_attr( $animation_duration ) . '; ';
-			$inline_style .= 'animation-delay: ' . esc_attr( $animation_delay ) . '; ';
-			$inline_style .= 'animation-fill-mode: both; ';
-			$inline_style .= 'animation-timing-function: ease-in-out; ';
+		// Queue CSS keyframes for footer output (avoids inline style tag issues).
+		if ( ! empty( $animation_keyframes ) && ! isset( self::$queued_css[ $unique_id ] ) ) {
+			// Strip HTML tags to prevent injection; CSS does not use < > & characters.
+			$css  = wp_strip_all_tags( $animation_keyframes );
+			$css .= ' .frbl-custom-svg-animation.' . esc_attr( $unique_id ) . ' { ';
+			$css .= 'animation-name: ' . esc_attr( $animation_name ) . '; ';
+			$css .= 'animation-duration: ' . esc_attr( $animation_duration ) . '; ';
+			$css .= 'animation-delay: ' . esc_attr( $animation_delay ) . '; ';
+			$css .= 'animation-fill-mode: both; ';
+			$css .= 'animation-timing-function: ease-in-out; ';
 			if ( $animation_infinite ) {
-				$inline_style .= 'animation-iteration-count: infinite; ';
+				$css .= 'animation-iteration-count: infinite; ';
 			}
-			$inline_style .= '} ';
+			$css .= '} ';
 			if ( 'hover' === $animation_trigger ) {
-				$inline_style .= ' .frbl-custom-svg-animation.' . esc_attr( $unique_id ) . ':hover { ';
-				$inline_style .= 'animation-play-state: running; ';
-				$inline_style .= '} ';
+				$css .= ' .frbl-custom-svg-animation.' . esc_attr( $unique_id ) . ':hover { ';
+				$css .= 'animation-play-state: running; ';
+				$css .= '} ';
 			}
-			$inline_style .= '</style>';
 
-			$block_content = $inline_style . $block_content;
+			self::$queued_css[ $unique_id ] = $css;
 		}
 
 		// Replace SVG content if provided.

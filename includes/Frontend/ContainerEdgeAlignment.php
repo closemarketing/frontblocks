@@ -28,6 +28,7 @@ class ContainerEdgeAlignment {
 		add_action( 'init', array( $this, 'register_frontend_assets' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
 		add_filter( 'render_block', array( $this, 'add_edge_alignment_classes' ), 10, 2 );
+		add_filter( 'register_block_type_args', array( $this, 'register_native_block_attributes' ), 10, 2 );
 	}
 
 	/**
@@ -81,6 +82,31 @@ class ContainerEdgeAlignment {
 	}
 
 	/**
+	 * Register frblEdgeAlignment attribute server-side for native blocks.
+	 *
+	 * @param array  $args       Block type args.
+	 * @param string $block_type Block type name.
+	 * @return array
+	 */
+	public function register_native_block_attributes( $args, $block_type ) {
+		$native_blocks = array( 'core/group', 'core/columns' );
+		if ( ! in_array( $block_type, $native_blocks, true ) ) {
+			return $args;
+		}
+
+		if ( ! isset( $args['attributes'] ) ) {
+			$args['attributes'] = array();
+		}
+
+		$args['attributes']['frblEdgeAlignment'] = array(
+			'type'    => 'string',
+			'default' => '',
+		);
+
+		return $args;
+	}
+
+	/**
 	 * Add edge alignment classes to blocks.
 	 *
 	 * @param string $block_content Block content.
@@ -88,8 +114,14 @@ class ContainerEdgeAlignment {
 	 * @return string Modified block content.
 	 */
 	public function add_edge_alignment_classes( $block_content, $block ) {
-		// Only process GenerateBlocks container blocks (support both old and new versions).
-		if ( 'generateblocks/container' !== $block['blockName'] && 'generateblocks/element' !== $block['blockName'] ) {
+		$supported_blocks = array(
+			'generateblocks/container',
+			'generateblocks/element',
+			'core/group',
+			'core/columns',
+		);
+
+		if ( ! in_array( $block['blockName'], $supported_blocks, true ) ) {
 			return $block_content;
 		}
 

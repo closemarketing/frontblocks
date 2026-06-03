@@ -1,5 +1,5 @@
 const { registerBlockType } = wp.blocks;
-const { Fragment } = wp.element;
+const { Fragment, useEffect, useRef } = wp.element;
 const { InspectorControls, MediaUpload, MediaUploadCheck, useBlockProps } = wp.blockEditor;
 const { PanelBody, RangeControl, Button, Placeholder, TextControl, ToggleControl } = wp.components;
 const { __ } = wp.i18n;
@@ -24,6 +24,57 @@ function BeforeAfterEdit( props ) {
 	const blockProps = useBlockProps();
 
 	const hasImages = beforeImageUrl && afterImageUrl;
+	const containerRef = useRef( null );
+
+	// Imperative drag logic — mirrors frontend JS, uses ownerDocument for iframe support.
+	useEffect( () => {
+		if ( ! containerRef.current || ! hasImages ) { return; }
+
+		const block    = containerRef.current;
+		const beforeEl = block.querySelector( '.frbl-before-after__before' );
+		const handle   = block.querySelector( '.frbl-before-after__handle' );
+
+		if ( ! beforeEl || ! handle ) { return; }
+
+		let dragging = false;
+		const doc    = block.ownerDocument;
+
+		function setPos( pos ) {
+			pos = Math.max( 0, Math.min( 100, pos ) );
+			beforeEl.style.clipPath = 'inset(0 ' + ( 100 - pos ) + '% 0 0)';
+			handle.style.left       = pos + '%';
+		}
+
+		function getPos( e ) {
+			const rect = block.getBoundingClientRect();
+			return ( ( e.clientX - rect.left ) / rect.width ) * 100;
+		}
+
+		setPos( initialPosition );
+
+		function onMouseDown( e ) {
+			dragging = true;
+			e.preventDefault();
+			e.stopPropagation();
+		}
+		function onMouseMove( e ) {
+			if ( ! dragging ) { return; }
+			setPos( getPos( e ) );
+		}
+		function onMouseUp() {
+			dragging = false;
+		}
+
+		handle.addEventListener( 'mousedown', onMouseDown );
+		doc.addEventListener( 'mousemove', onMouseMove );
+		doc.addEventListener( 'mouseup', onMouseUp );
+
+		return () => {
+			handle.removeEventListener( 'mousedown', onMouseDown );
+			doc.removeEventListener( 'mousemove', onMouseMove );
+			doc.removeEventListener( 'mouseup', onMouseUp );
+		};
+	}, [ hasImages, beforeImageUrl, afterImageUrl, initialPosition ] );
 
 	return (
 		<Fragment>
@@ -178,6 +229,7 @@ function BeforeAfterEdit( props ) {
 					/>
 				) : (
 					<div
+						ref={ containerRef }
 						className={ 'frbl-before-after frbl-before-after--editor' + ( fixedHeight ? ' frbl-before-after--fixed-height' : '' ) }
 						data-initial-position={ initialPosition }
 						style={ fixedHeight && blockHeight ? { height: blockHeight + 'px' } : {} }
