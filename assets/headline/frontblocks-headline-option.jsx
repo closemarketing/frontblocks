@@ -1,13 +1,15 @@
 const { createHigherOrderComponent } = wp.compose;
 const { Fragment } = wp.element;
-const { InspectorControls } = wp.blockEditor; 
+const { InspectorControls } = wp.blockEditor;
 const { PanelBody, SelectControl, ToggleControl } = wp.components;
 const { __, sprintf } = wp.i18n;
 
-const LINE_CLASS_PREFIX = 'gb-line-effect-'; 
+const LINE_CLASS_PREFIX = 'gb-line-effect-';
 const MARQUEE_CLASS = 'gb-marquee-infinite-scroll';
 const MARQUEE_SPEED_ATTR = 'frblMarqueeSpeed';
-const BLOCK_NAME = 'generateblocks/text';
+const GB_BLOCK = 'generateblocks/text';
+const NATIVE_BLOCKS = [ 'core/paragraph', 'core/heading' ];
+const ALL_MARQUEE_BLOCKS = [ GB_BLOCK, ...NATIVE_BLOCKS ];
 
 // Marquee speed presets
 const MARQUEE_SPEEDS = {
@@ -16,26 +18,26 @@ const MARQUEE_SPEEDS = {
     slow: 40     // 40 seconds - slow
 };
 
-// Register marquee speed attribute
+// Register marquee speed attribute for all supported blocks
 wp.hooks.addFilter(
     'blocks.registerBlockType',
     'frontblocks/add-marquee-attribute',
     ( settings, name ) => {
-        if ( name === BLOCK_NAME ) {
+        if ( ALL_MARQUEE_BLOCKS.includes( name ) ) {
             settings.attributes = Object.assign( settings.attributes || {}, {
                 [MARQUEE_SPEED_ATTR]: {
                     type: 'string',
-                    default: 'medium',
+                    default: '',
                 },
             } );
         }
         return settings;
     }
-); 
+);
 
 const withHeadlineLineControl = createHigherOrderComponent( ( BlockEdit ) => {
    return ( props ) => {
-      if ( props.name !== BLOCK_NAME ) {
+      if ( ! ALL_MARQUEE_BLOCKS.includes( props.name ) ) {
          return <BlockEdit { ...props } />;
       }
 
@@ -43,7 +45,8 @@ const withHeadlineLineControl = createHigherOrderComponent( ( BlockEdit ) => {
       const existingClasses = attributes.className || '';
       const htmlAttributes = attributes.htmlAttributes || {};
       const marqueeSpeed = attributes[MARQUEE_SPEED_ATTR] || 'medium';
-        
+      const isGBBlock = props.name === GB_BLOCK;
+
       const cleanExistingLineClasses = ( classes ) => {
          return classes
             .split(' ')
@@ -63,18 +66,16 @@ const withHeadlineLineControl = createHigherOrderComponent( ( BlockEdit ) => {
       };
 
       let currentLineStyle = 'none';
-      if (existingClasses.includes(LINE_CLASS_PREFIX + 'vertical')) {
-         currentLineStyle = 'vertical';
-      } else if (existingClasses.includes(LINE_CLASS_PREFIX + 'horizontal')) {
-         currentLineStyle = 'horizontal';
+      if ( isGBBlock ) {
+         if ( existingClasses.includes( LINE_CLASS_PREFIX + 'vertical' ) ) {
+            currentLineStyle = 'vertical';
+         } else if ( existingClasses.includes( LINE_CLASS_PREFIX + 'horizontal' ) ) {
+            currentLineStyle = 'horizontal';
+         }
       }
 
       const isMarqueeEnabled = existingClasses.includes(MARQUEE_CLASS);
 
-
-      /**
-      * Maneja el cambio del SelectControl y actualiza las clases CSS.
-      */
       const setLineStyle = ( newStyle ) => {
          let newClasses = cleanExistingLineClasses(existingClasses);
 
@@ -91,51 +92,49 @@ const withHeadlineLineControl = createHigherOrderComponent( ( BlockEdit ) => {
          setAttributes( { className: newClasses } );
       };
 
-      /**
-      * Maneja el cambio del ToggleControl para el marquee y actualiza las clases CSS.
-      */
       const setMarqueeEnabled = ( enabled ) => {
          let newClasses = cleanMarqueeClass(existingClasses);
-         const updatedHtmlAttributes = { ...htmlAttributes };
          const newAttributes = { className: newClasses };
 
          if ( enabled ) {
             newClasses = ( newClasses + ' ' + MARQUEE_CLASS ).trim();
             newAttributes.className = newClasses;
-            // Set default speed if not already set
-            if ( !attributes[MARQUEE_SPEED_ATTR] ) {
-               newAttributes[MARQUEE_SPEED_ATTR] = 'medium';
-               updatedHtmlAttributes['data-marquee-speed'] = MARQUEE_SPEEDS.medium;
-            } else {
-               const speedValue = MARQUEE_SPEEDS[attributes[MARQUEE_SPEED_ATTR]] || MARQUEE_SPEEDS.medium;
-               updatedHtmlAttributes['data-marquee-speed'] = speedValue;
+            const currentSpeed = attributes[MARQUEE_SPEED_ATTR] || 'medium';
+            newAttributes[MARQUEE_SPEED_ATTR] = currentSpeed;
+
+            // GB blocks store speed in htmlAttributes for direct rendering.
+            if ( isGBBlock ) {
+               const updatedHtmlAttributes = { ...htmlAttributes };
+               updatedHtmlAttributes['data-marquee-speed'] = MARQUEE_SPEEDS[currentSpeed] || MARQUEE_SPEEDS.medium;
+               newAttributes.htmlAttributes = updatedHtmlAttributes;
             }
-            newAttributes.htmlAttributes = updatedHtmlAttributes;
          } else {
-            // Remove speed attribute when disabling
-            newAttributes[MARQUEE_SPEED_ATTR] = undefined;
-            delete updatedHtmlAttributes['data-marquee-speed'];
-            newAttributes.htmlAttributes = updatedHtmlAttributes;
+            newAttributes[MARQUEE_SPEED_ATTR] = '';
+
+            if ( isGBBlock ) {
+               const updatedHtmlAttributes = { ...htmlAttributes };
+               delete updatedHtmlAttributes['data-marquee-speed'];
+               newAttributes.htmlAttributes = updatedHtmlAttributes;
+            }
          }
 
          setAttributes( newAttributes );
       };
 
-      /**
-      * Maneja el cambio de la velocidad del marquee.
-      */
       const setMarqueeSpeed = ( speedPreset ) => {
          const speedValue = MARQUEE_SPEEDS[speedPreset] || MARQUEE_SPEEDS.medium;
-         const updatedHtmlAttributes = { ...htmlAttributes };
-         updatedHtmlAttributes['data-marquee-speed'] = speedValue;
-         setAttributes( { 
-            [MARQUEE_SPEED_ATTR]: speedPreset,
-            htmlAttributes: updatedHtmlAttributes
-         } );
-         
-         // Update marquee wrapper directly if it exists (for immediate preview)
+         const newAttributes = { [MARQUEE_SPEED_ATTR]: speedPreset };
+
+         if ( isGBBlock ) {
+            const updatedHtmlAttributes = { ...htmlAttributes };
+            updatedHtmlAttributes['data-marquee-speed'] = speedValue;
+            newAttributes.htmlAttributes = updatedHtmlAttributes;
+         }
+
+         setAttributes( newAttributes );
+
+         // Update marquee wrapper directly for immediate preview
          setTimeout(function() {
-            // Try to find the marquee wrapper in editor
             const blockElement = document.querySelector('[data-block="' + props.clientId + '"]');
             if (blockElement) {
                const marqueeElement = blockElement.querySelector('.gb-marquee-infinite-scroll');
@@ -169,41 +168,43 @@ const withHeadlineLineControl = createHigherOrderComponent( ( BlockEdit ) => {
             <BlockEdit { ...props } />
 
             <InspectorControls>
-               <PanelBody 
+               <PanelBody
                   title={ __( 'FrontBlocks - Visual Effects', 'frontblocks' ) }
                   initialOpen={ false }
                >
                   <p style={{ marginTop: 0, marginBottom: '10px' }}>
                      <small>{ __( 'FrontBlocks visual effect settings.', 'frontblocks' ) }</small>
                   </p>
-                     
-                  <SelectControl
-                     label={ __( 'Decorative Line Style', 'frontblocks' ) }
-                     value={ currentLineStyle }
-                     options={[
-                        { label: __( 'None', 'frontblocks' ), value: 'none' },
-                        { label: __( 'Vertical Line (Right)', 'frontblocks' ), value: 'vertical' },
-                        { label: __( 'Horizontal Line (Right)', 'frontblocks' ), value: 'horizontal' },
-                     ]}
-                     onChange={ setLineStyle }
-                     help={ 
-                           currentLineStyle === 'none' ? 
-                           __( 'Select a line style to add a decorative element.', 'frontblocks' ) : 
-                           sprintf( 
-                              __( 'Current style: %s.', 'frontblocks' ), 
-                              currentLineStyle.charAt(0).toUpperCase() + currentLineStyle.slice(1) 
-                           )
-                     }
-                  />
+
+                  { isGBBlock && (
+                     <SelectControl
+                        label={ __( 'Decorative Line Style', 'frontblocks' ) }
+                        value={ currentLineStyle }
+                        options={[
+                           { label: __( 'None', 'frontblocks' ), value: 'none' },
+                           { label: __( 'Vertical Line (Right)', 'frontblocks' ), value: 'vertical' },
+                           { label: __( 'Horizontal Line (Right)', 'frontblocks' ), value: 'horizontal' },
+                        ]}
+                        onChange={ setLineStyle }
+                        help={
+                              currentLineStyle === 'none' ?
+                              __( 'Select a line style to add a decorative element.', 'frontblocks' ) :
+                              sprintf(
+                                 __( 'Current style: %s.', 'frontblocks' ),
+                                 currentLineStyle.charAt(0).toUpperCase() + currentLineStyle.slice(1)
+                              )
+                        }
+                     />
+                  )}
 
                   <ToggleControl
                      label={ __( 'Infinite Scrolling Marquee', 'frontblocks' ) }
                      checked={ isMarqueeEnabled }
                      onChange={ setMarqueeEnabled }
-                     help={ 
-                        isMarqueeEnabled ? 
-                        __( 'Marquee effect is active. Text will scroll infinitely.', 'frontblocks' ) : 
-                        __( 'Enable infinite scrolling marquee effect for the headline text.', 'frontblocks' )
+                     help={
+                        isMarqueeEnabled ?
+                        __( 'Marquee effect is active. Text will scroll infinitely.', 'frontblocks' ) :
+                        __( 'Enable infinite scrolling marquee effect for the text.', 'frontblocks' )
                      }
                   />
 
@@ -221,7 +222,7 @@ const withHeadlineLineControl = createHigherOrderComponent( ( BlockEdit ) => {
                      />
                   )}
                </PanelBody>
-               
+
             </InspectorControls>
          </Fragment>
       );

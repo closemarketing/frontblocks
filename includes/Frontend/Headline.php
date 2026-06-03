@@ -28,6 +28,9 @@ class Headline {
 		add_filter( 'generateblocks_attr_text', array( $this, 'add_marquee_speed_attribute' ), 10, 2 );
 		add_filter( 'render_block_generateblocks/text', array( $this, 'maybe_enqueue_frontend_assets' ), 10, 2 );
 		add_filter( 'render_block_generateblocks/headline', array( $this, 'maybe_enqueue_frontend_assets' ), 10, 2 );
+		add_filter( 'register_block_type_args', array( $this, 'register_native_block_attributes' ), 10, 2 );
+		add_filter( 'render_block_core/paragraph', array( $this, 'apply_marquee_to_native_block' ), 10, 2 );
+		add_filter( 'render_block_core/heading', array( $this, 'apply_marquee_to_native_block' ), 10, 2 );
 	}
 
 	/**
@@ -117,6 +120,73 @@ class Headline {
 	 */
 	public function add_line_class_attribute( $attributes ) {
 		return $attributes;
+	}
+
+	/**
+	 * Register frblMarqueeSpeed attribute server-side for paragraph and heading.
+	 *
+	 * @param array  $args       Block type args.
+	 * @param string $block_type Block type name.
+	 * @return array
+	 */
+	public function register_native_block_attributes( $args, $block_type ) {
+		if ( 'core/paragraph' !== $block_type && 'core/heading' !== $block_type ) {
+			return $args;
+		}
+
+		if ( ! isset( $args['attributes'] ) ) {
+			$args['attributes'] = array();
+		}
+
+		$args['attributes']['frblMarqueeSpeed'] = array(
+			'type'    => 'string',
+			'default' => '',
+		);
+
+		return $args;
+	}
+
+	/**
+	 * Inject data-marquee-speed and enqueue scripts for native paragraph/heading blocks.
+	 *
+	 * @param string $block_content Block HTML.
+	 * @param array  $block         Block data.
+	 * @return string
+	 */
+	public function apply_marquee_to_native_block( $block_content, $block ) {
+		$attrs      = $block['attrs'] ?? array();
+		$class_name = $attrs['className'] ?? '';
+
+		if ( false === strpos( $class_name, 'gb-marquee-infinite-scroll' ) ) {
+			return $block_content;
+		}
+
+		$speed_presets = array(
+			'fast'   => 10,
+			'medium' => 20,
+			'slow'   => 40,
+		);
+
+		$speed       = isset( $attrs['frblMarqueeSpeed'] ) && ! empty( $attrs['frblMarqueeSpeed'] ) ? sanitize_text_field( $attrs['frblMarqueeSpeed'] ) : 'medium';
+		$speed_value = isset( $speed_presets[ $speed ] ) ? $speed_presets[ $speed ] : 20;
+
+		// Inject data-marquee-speed into the first opening tag.
+		$block_content = preg_replace(
+			'/(<[a-z][a-z0-9]*(?:\s[^>]*)?)(\s*>)/i',
+			'$1 data-marquee-speed="' . esc_attr( $speed_value ) . '"$2',
+			$block_content,
+			1
+		);
+
+		if ( ! wp_script_is( 'frontblocks-headline-marquee', 'enqueued' ) ) {
+			wp_enqueue_script( 'frontblocks-headline-marquee' );
+		}
+
+		if ( ! wp_style_is( 'frontblocks-headline-styles', 'enqueued' ) ) {
+			wp_enqueue_style( 'frontblocks-headline-styles' );
+		}
+
+		return $block_content;
 	}
 
 	/**
