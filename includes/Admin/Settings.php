@@ -1242,7 +1242,7 @@ class Settings {
 		<!-- Select and description - will be moved below the card by JavaScript -->
 		<div id="events-type-wrapper" class="tw-mt-4" style="<?php echo $enabled ? 'width: 100%; min-width: 100%; display: block;' : 'display: none;'; ?>">
 			<label for="<?php echo esc_attr( $this->option_events_type ); ?>" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
-				<?php echo esc_html__( 'Tipo de eventos', 'frontblocks' ); ?>
+				<?php echo esc_html__( 'Event type', 'frontblocks' ); ?>
 			</label>
 			<select 
 				id="<?php echo esc_attr( $this->option_events_type ); ?>" 
@@ -1254,11 +1254,11 @@ class Settings {
 					<?php echo esc_html__( 'Custom Post Type (CPT)', 'frontblocks' ); ?>
 				</option>
 				<option value="posts" <?php selected( $events_type, 'posts' ); ?>>
-					<?php echo esc_html__( 'Entradas de blog', 'frontblocks' ); ?>
+					<?php echo esc_html__( 'Blog posts', 'frontblocks' ); ?>
 				</option>
 			</select>
 			<p class="tw-text-xs tw-text-gray-500 tw-mt-2">
-				<?php echo esc_html__( 'Elige si los eventos se crearán en un CPT dedicado o en las entradas de blog normales.', 'frontblocks' ); ?>
+				<?php echo esc_html__( 'Choose whether events will be created in a dedicated CPT or in regular blog posts.', 'frontblocks' ); ?>
 			</p>
 		</div>
 		<?php
@@ -1479,7 +1479,7 @@ class Settings {
 								id="frbl-create-cpt-btn" 
 								class="tw-px-4 tw-py-2 tw-bg-primary-500 tw-text-white tw-rounded-lg hover:tw-bg-primary-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 tw-transition-colors"
 							>
-								<?php echo esc_html__( 'Crear', 'frontblocks' ); ?>
+								<?php echo esc_html__( 'Create', 'frontblocks' ); ?>
 							</button>
 						</div>
 						<p class="tw-text-xs tw-text-gray-500 tw-mt-2">
