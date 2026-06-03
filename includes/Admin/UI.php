@@ -125,6 +125,9 @@ class UI {
 		// User text icon.
 		$user_text_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
 
+		// SVG upload icon.
+		$svg_upload_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/><path d="M12 10v4m-2-2h4" stroke-linecap="round"/></svg>';
+
 		// Default icon.
 		$default_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>';
 
@@ -140,6 +143,7 @@ class UI {
 			'product_categories' => $product_categories_icon,
 			'headline_marquee'   => $headline_marquee_icon,
 			'user_text'          => $user_text_icon,
+			'svg_upload'         => $svg_upload_icon,
 		);
 
 		return $icons[ $icon_slug ] ?? $default_icon;
