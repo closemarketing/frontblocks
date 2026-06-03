@@ -10,17 +10,15 @@ var _wp$components = wp.components,
   PanelBody = _wp$components.PanelBody,
   SelectControl = _wp$components.SelectControl;
 var __ = wp.i18n.__;
+var GB_BLOCKS = ['generateblocks/container', 'generateblocks/element'];
+var NATIVE_BLOCKS = ['core/group', 'core/columns'];
+var ALL_SUPPORTED_BLOCKS = [].concat(GB_BLOCKS, NATIVE_BLOCKS);
 
 /**
- * Add custom attributes to GenerateBlocks Container block.
- *
- * @param {Object} settings Block settings.
- * @param {string} name Block name.
- * @return {Object} Modified settings.
+ * Add custom attributes to supported blocks.
  */
 function addEdgeAlignmentAttributes(settings, name) {
-  // Support both old (container) and new (element) GenerateBlocks versions
-  if (name !== 'generateblocks/container' && name !== 'generateblocks/element') {
+  if (!ALL_SUPPORTED_BLOCKS.includes(name)) {
     return settings;
   }
   settings.attributes = Object.assign(settings.attributes, {
@@ -34,22 +32,14 @@ function addEdgeAlignmentAttributes(settings, name) {
 addFilter('blocks.registerBlockType', 'frontblocks/edge-alignment-attributes', addEdgeAlignmentAttributes);
 
 /**
- * Check if container uses GenerateBlocks global container width.
+ * Check if a GenerateBlocks container uses the global container width.
  * Only containers with var(--gb-container-width) should have edge alignment.
- *
- * @param {Object} attributes Block attributes.
- * @return {boolean} True if uses global container width.
  */
 function usesGlobalMaxWidth(attributes) {
-  // GenerateBlocks stores styles in an object (not array).
-  // Check if maxWidth uses var(--gb-container-width) and margins are auto.
   if (!attributes.styles || _typeof(attributes.styles) !== 'object') {
     return false;
   }
-
-  // Check if maxWidth contains the global container width variable.
   if (attributes.styles.maxWidth && attributes.styles.maxWidth.includes('var(--gb-container-width)')) {
-    // Also verify it's centered (marginLeft and marginRight are auto).
     if (attributes.styles.marginLeft === 'auto' && attributes.styles.marginRight === 'auto') {
       return true;
     }
@@ -58,21 +48,33 @@ function usesGlobalMaxWidth(attributes) {
 }
 
 /**
- * Add edge alignment controls to GenerateBlocks Container block inspector.
- * ONLY shows if container uses GeneratePress global max-width.
+ * Check if a native block uses a constrained (centered, max-width) layout.
+ * Matches core/group and core/columns with constrained layout or inherited layout.
+ */
+function usesConstrainedLayout(attributes) {
+  // No explicit layout — inherits from theme, which is typically constrained.
+  if (!attributes.layout) {
+    return true;
+  }
+  return attributes.layout.type === 'constrained';
+}
+
+/**
+ * Add edge alignment controls to supported block inspector panels.
  */
 var withEdgeAlignmentControls = createHigherOrderComponent(function (BlockEdit) {
   return function (props) {
-    // Support both old (container) and new (element) GenerateBlocks versions
-    if (props.name !== 'generateblocks/container' && props.name !== 'generateblocks/element') {
+    if (!ALL_SUPPORTED_BLOCKS.includes(props.name)) {
       return /*#__PURE__*/React.createElement(BlockEdit, props);
     }
     var attributes = props.attributes,
       setAttributes = props.setAttributes;
     var frblEdgeAlignment = attributes.frblEdgeAlignment;
+    var isGBBlock = GB_BLOCKS.includes(props.name);
 
-    // Only show panel if container uses centered layout (margin auto).
-    if (!usesGlobalMaxWidth(attributes)) {
+    // Guard: only show panel when the block uses a centered/constrained layout.
+    var shouldShowPanel = isGBBlock ? usesGlobalMaxWidth(attributes) : usesConstrainedLayout(attributes);
+    if (!shouldShowPanel) {
       return /*#__PURE__*/React.createElement(BlockEdit, props);
     }
     return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
@@ -106,12 +108,11 @@ var withEdgeAlignmentControls = createHigherOrderComponent(function (BlockEdit) 
 addFilter('editor.BlockEdit', 'frontblocks/edge-alignment-controls', withEdgeAlignmentControls);
 
 /**
- * Add custom classes to block in editor for visual feedback.
+ * Add visual feedback classes in the editor.
  */
 var addEdgeAlignmentClass = createHigherOrderComponent(function (BlockListBlock) {
   return function (props) {
-    // Support both old (container) and new (element) GenerateBlocks versions
-    if (props.name !== 'generateblocks/container' && props.name !== 'generateblocks/element') {
+    if (!ALL_SUPPORTED_BLOCKS.includes(props.name)) {
       return /*#__PURE__*/React.createElement(BlockListBlock, props);
     }
     var attributes = props.attributes;
