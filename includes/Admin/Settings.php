@@ -937,6 +937,11 @@ class Settings {
 					'title' => __( 'Headline Marquee', 'frontblocks' ),
 					'desc'  => __( 'Infinite scrolling marquee effect for headline/text blocks with customizable speed', 'frontblocks' ),
 				),
+				array(
+					'icon'  => 'svg_upload',
+					'title' => __( 'SVG Uploads', 'frontblocks' ),
+					'desc'  => __( 'Upload SVG files to the media library. Files are automatically sanitized to prevent security risks.', 'frontblocks' ),
+				),
 			)
 		);
 

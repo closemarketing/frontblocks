@@ -134,6 +134,9 @@ Features:
 - Initial slider position control (0–100%) to choose how much of each image is revealed on load.
 - Fixed height mode with a configurable pixel value, keeping the block compact regardless of image proportions.
 
+**SVG Uploads:**
+Upload SVG files directly to the WordPress media library. Only administrators can upload SVG files. All files are automatically sanitized on upload — dangerous elements (`<script>`, `<iframe>`, `<object>`, `<embed>`) and event-handler attributes (`on*`) are stripped before saving, protecting against XSS attacks.
+
 **FAQ Schema (JSON-LD):**
 Automatically generate FAQPage structured data for search engines. Enable the "FAQ Schema" toggle in any accordion block (core/details) to mark it as an FAQ item. FrontBlocks collects all enabled items on the page and outputs a valid FAQPage JSON-LD script in the footer, improving your chances of appearing as rich results in Google Search.
 
@@ -181,6 +184,9 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 2. Go to Settings > FrontBlocks > Features and enable the features you want to use.
 
 == Changelog ==
+
+== n.e.x.t ==
+*   Added: SVG Uploads — allows administrators to upload SVG files to the WordPress media library with automatic server-side sanitization.
 
 == 1.3.5 ==
 *   Added: FAQ Schema — automatically generates FAQPage JSON-LD structured data from accordion blocks (core/details) marked as FAQ items, improving SEO visibility in search engines.
