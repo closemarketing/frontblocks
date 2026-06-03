@@ -4,8 +4,8 @@ Tags: carrusel, slider, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 1.3.5
-Version: 1.3.5
+Stable tag: 1.3.6
+Version: 1.3.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,8 +13,8 @@ Plugin extending Gutenberg and GeneratePress with carousel, slider, animations, 
 
 == Description ==
 
-**Container Edge Alignment for GenerateBlocks**
-Add custom controls to GenerateBlocks Container blocks to remove padding from the left or right side, creating edge-to-edge layouts. This feature only appears for containers using GeneratePress global max-width settings, perfect for creating asymmetric layouts where content extends to one browser edge while maintaining proper spacing on the other side.
+**Container Edge Alignment**
+Add custom controls to GenerateBlocks Container blocks and native WordPress Group/Container blocks to remove padding from the left or right side, creating edge-to-edge layouts. This feature only appears for containers using GeneratePress global max-width settings, perfect for creating asymmetric layouts where content extends to one browser edge while maintaining proper spacing on the other side.
 
 **Carousel/Slider for GenerateBlocks Grid and Query Loop**
 We have added options to Gutenberg blocks that enable you to create a carousel or slider using your preferred blocks. Supported blocks include GenerateBlocks Grid, GenerateBlocks Element, core/group, and the native WordPress Query Loop (core/query).
@@ -55,8 +55,8 @@ Add smooth zoom effects to background images when users hover over elements. Per
 - Content remains readable and properly positioned above the scaled image
 - Overflow protection ensures images don't extend beyond container
 
-**Sticky option for Grid block:**
-The sticky option allows you to make the grid block stick to the top of the viewport when scrolling down. To use this feature, enable the "Sticky" option in the Grid block settings. When enabled, the grid block will remain fixed at the top of the viewport as you scroll down the page.
+**Sticky Columns:**
+The sticky option allows you to make a column stick to the top of the viewport when scrolling. Works with both GenerateBlocks Grid blocks and native WordPress blocks. Enable the "Sticky" option in the block settings and the column will remain fixed at the top of the viewport as the rest of the page scrolls.
 
 **Insert Post Block:**
 Display content from other posts, pages or custom post types. Search and select any published content to display its title as an H2 heading and its full content. This is perfect for creating dynamic content sections without duplicating content.
@@ -65,7 +65,7 @@ Display content from other posts, pages or custom post types. Search and select 
 Add a decorative line to the Headline Block. You can choose between a vertical or horizontal line on the right.
 
 **Headline Marquee Effect:**
-Add an infinite scrolling marquee effect to Headline/Text blocks. The text scrolls continuously from right to left, automatically adapting to the container width. Short text repeats more times, long text repeats less. Features:
+Add an infinite scrolling marquee effect to Headline/Text blocks. Works with both GenerateBlocks Headline blocks and native WordPress Heading/Paragraph blocks. The text scrolls continuously from right to left, automatically adapting to the container width. Short text repeats more times, long text repeats less. Features:
 - Toggle to enable/disable the marquee effect
 - Speed control with three presets: Fast (10s), Medium (20s), Slow (40s)
 - Seamless infinite loop with no jumps or interruptions
@@ -94,19 +94,19 @@ Display a vertical progress bar on the right side of posts that fills up as user
 Display a floating back button in the bottom left corner that allows users to navigate to the previous page. Enable it from the FrontBlocks settings page.
 
 **Fluid Typography:**
-Automatically converts GeneratePress Pro's static typography settings into modern fluid typography using CSS clamp(). Instead of abrupt font size changes at breakpoints, this creates smooth, gradual scaling from mobile (320px) to desktop (1440px). 
+Automatically converts your theme's static typography settings into modern fluid typography using CSS clamp(). Instead of abrupt font size changes at breakpoints, this creates smooth, gradual scaling from mobile (320px) to desktop (1440px). Compatible with all WordPress themes.
 
-Supports all typography elements configured in GeneratePress:
+Supports all typography elements:
 - Body text and paragraphs (including GenerateBlocks headline elements)
 - All headings (H1-H6)
 - Each element maintains its own responsive values
-- Zero configuration - automatically reads from GeneratePress dynamic CSS
+- Zero configuration - automatically reads from your theme's dynamic CSS
 - Smooth transitions across all viewport sizes without jumps
 
 Simply enable "Fluid Typography" in FrontBlocks settings, and all your responsive typography will scale smoothly between devices!
 
 **Custom SVG Animations:**
-Add animated graphics to GenerateBlocks Shape blocks by importing JSON files. Supports two formats that are automatically detected: **Lottie/Bodymovin** (import JSON from After Effects or LottieFiles.com) and **Custom CSS** (SVG + @keyframes). 
+Add animated graphics to GenerateBlocks Shape blocks and native WordPress Icon blocks by importing JSON files. Supports two formats that are automatically detected: **Lottie/Bodymovin** (import JSON from After Effects or LottieFiles.com) and **Custom CSS** (SVG + @keyframes).
 
 **Text Animation Block:**
 Add dynamic animated text effects to any page or post. Insert the block from the Gutenberg inserter under the FrontBlocks category and choose from 30+ animation types to make your headings and copy stand out.
@@ -136,6 +136,12 @@ Features:
 
 **SVG Uploads:**
 Upload SVG files directly to the WordPress media library. Only administrators can upload SVG files. All files are automatically sanitized on upload — dangerous elements (`<script>`, `<iframe>`, `<object>`, `<embed>`) and event-handler attributes (`on*`) are stripped before saving, protecting against XSS attacks.
+
+**Login Block:**
+Add a native Gutenberg login form block to any page or post. Insert the block from the Gutenberg inserter under the FrontBlocks category. Features a toggle to switch between login form and registration form views, with fully customizable labels and styles. Ideal for membership sites or pages requiring a clean, integrated login experience without a shortcode.
+
+**Post Meta (Native) — FrontBlocks PRO:**
+Display custom field values from post meta inside native WordPress blocks directly in the editor. Select any registered meta key and output its value inline within heading, paragraph, or other text blocks — no shortcodes or custom PHP required. Useful for displaying dynamic data such as prices, dates, or any custom field stored in post meta. Available in [FrontBlocks PRO](https://close.technology/en/wordpress-plugins/frontblocks-pro/?utm_source=WordPressORGReadme&utm_medium=link&utm_campaign=frontblocks).
 
 **FAQ Schema (JSON-LD):**
 Automatically generate FAQPage structured data for search engines. Enable the "FAQ Schema" toggle in any accordion block (core/details) to mark it as an FAQ item. FrontBlocks collects all enabled items on the page and outputs a valid FAQPage JSON-LD script in the footer, improving your chances of appearing as rich results in Google Search.
@@ -185,8 +191,19 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Changelog ==
 
-== n.e.x.t ==
+== 1.3.6 ==
 *   Added: SVG Uploads — allows administrators to upload SVG files to the WordPress media library with automatic server-side sanitization.
+*   Added: Login Block — native Gutenberg block for login form with toggle options and customizable UI.
+*   Added: Meta Native — display custom field meta values inside native WordPress blocks directly from the editor.
+*   Added: Before/After Effect Editor — interactive image comparison block now fully editable inside the Gutenberg editor.
+*   Added: Fluid Typography for all themes — fluid typography scaling now applies across all active WordPress themes, not just GeneratePress.
+*   Added: Headline Marquee Native — scrolling marquee/ticker text support for native WordPress headline blocks.
+*   Added: Container Edge Alignment Native — edge-to-edge alignment option for native WordPress container/group blocks.
+*   Added: Shape Animations Native Icon — shape animation support extended to native WordPress icon blocks.
+*   Added: Sticky Column Native — sticky column behavior for native WordPress blocks.
+*   Fixed: Product category filter display on WooCommerce product pages.
+*   Improved: Block and function names prefixed with `frontblocks-` for consistency and conflict prevention.
+*   Dev: Added WordPress Playground PR preview — one-click preview button added to every pull request.
 
 == 1.3.5 ==
 *   Added: FAQ Schema — automatically generates FAQPage JSON-LD structured data from accordion blocks (core/details) marked as FAQ items, improving SEO visibility in search engines.
