@@ -8,14 +8,16 @@
     const { addFilter } = wp.hooks;
     const { select } = wp.data;
 
-    // Add sticky column controls to the GenerateBlocks Grid block
+    const SUPPORTED_BLOCKS = ['generateblocks/grid', 'core/columns'];
+
+    // Add sticky column controls to supported grid/columns blocks
     addFilter(
         'editor.BlockEdit',
         'frontblocks/sticky-column-controls',
         function(BlockEdit) {
             return function(props) {
-                // Only add controls to GenerateBlocks Grid block
-                if (props.name !== 'generateblocks/grid') {
+                // Only add controls to supported blocks
+                if (!SUPPORTED_BLOCKS.includes(props.name)) {
                     return el(BlockEdit, props);
                 }
 

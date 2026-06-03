@@ -35,6 +35,7 @@ class StickyColumn {
 		add_action( 'init', array( $this, 'register_scripts' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		add_filter( 'render_block_generateblocks/grid', array( $this, 'add_sticky_attributes_to_grid_block' ), 10, 2 );
+		add_filter( 'render_block_core/columns', array( $this, 'add_sticky_attributes_to_columns_block' ), 10, 2 );
 		add_action( 'init', array( $this, 'register_custom_attributes' ), 5 );
 	}
 
@@ -89,31 +90,54 @@ class StickyColumn {
 	 * @return string
 	 */
 	public function add_sticky_attributes_to_grid_block( $block_content, $block ) {
+		return $this->add_sticky_attributes( $block_content, $block, 'gb-grid-wrapper' );
+	}
+
+	/**
+	 * Add sticky attributes to native core/columns block.
+	 *
+	 * @param string $block_content Block content.
+	 * @param array  $block Block attributes.
+	 * @return string
+	 */
+	public function add_sticky_attributes_to_columns_block( $block_content, $block ) {
+		return $this->add_sticky_attributes( $block_content, $block, 'wp-block-columns' );
+	}
+
+	/**
+	 * Generic method to inject sticky wrapper class and data attributes.
+	 *
+	 * @param string $block_content Block content.
+	 * @param array  $block Block data.
+	 * @param string $wrapper_class CSS class that identifies the wrapper div.
+	 * @return string
+	 */
+	private function add_sticky_attributes( $block_content, $block, $wrapper_class ) {
 		$attrs               = $block['attrs'] ?? array();
 		$sticky_enabled      = isset( $attrs['frblStickyEnabled'] ) ? (bool) $attrs['frblStickyEnabled'] : false;
 		$sticky_offset       = isset( $attrs['frblStickyOffset'] ) ? (int) $attrs['frblStickyOffset'] : 0;
 		$sticky_column_index = isset( $attrs['frblStickyColumnIndex'] ) ? (int) $attrs['frblStickyColumnIndex'] : 0;
 
-		// Add sticky attributes to the wrapper div if sticky is enabled.
-		if ( $sticky_enabled ) {
-			$block_content = preg_replace(
-				'/<div([^>]*)class="([^"]*gb-grid-wrapper[^"]*)"([^>]*)>/',
-				'<div$1class="$2 frontblocks-sticky-wrapper"$3' .
-					' data-sticky-enabled="' . esc_attr( $sticky_enabled ? 'true' : 'false' ) . '"' .
-					' data-sticky-offset="' . esc_attr( $sticky_offset ) . '"' .
-					' data-sticky-column-index="' . esc_attr( $sticky_column_index ) . '"' .
-					'>',
-				$block_content,
-				1 // Only replace the first occurrence.
-			);
+		if ( ! $sticky_enabled ) {
+			return $block_content;
+		}
 
-			// Enqueue frontend assets only when a sticky column block is detected.
-			if ( ! wp_style_is( 'frontblocks-sticky-column', 'enqueued' ) ) {
-				wp_enqueue_style( 'frontblocks-sticky-column' );
-			}
-			if ( ! wp_script_is( 'frontblocks-sticky-column-custom', 'enqueued' ) ) {
-				wp_enqueue_script( 'frontblocks-sticky-column-custom' );
-			}
+		$block_content = preg_replace(
+			'/<div([^>]*)class="([^"]*' . preg_quote( $wrapper_class, '/' ) . '[^"]*)"([^>]*)>/',
+			'<div$1class="$2 frontblocks-sticky-wrapper"$3' .
+				' data-sticky-enabled="true"' .
+				' data-sticky-offset="' . esc_attr( $sticky_offset ) . '"' .
+				' data-sticky-column-index="' . esc_attr( $sticky_column_index ) . '"' .
+				'>',
+			$block_content,
+			1
+		);
+
+		if ( ! wp_style_is( 'frontblocks-sticky-column', 'enqueued' ) ) {
+			wp_enqueue_style( 'frontblocks-sticky-column' );
+		}
+		if ( ! wp_script_is( 'frontblocks-sticky-column-custom', 'enqueued' ) ) {
+			wp_enqueue_script( 'frontblocks-sticky-column-custom' );
 		}
 
 		return $block_content;
@@ -132,6 +156,9 @@ class StickyColumn {
 			9,
 			2
 		);
+
+		// Register attributes for native core/columns block.
+		add_filter( 'register_block_type_args', array( $this, 'register_sticky_attributes_for_columns_block' ), 10, 2 );
 
 		// Register attributes from frontend side as well.
 		add_action(
@@ -169,6 +196,34 @@ class StickyColumn {
 	}
 
 	/**
+	 * Register sticky attributes for native core/columns block via register_block_type_args.
+	 *
+	 * @param array  $args       Block type arguments.
+	 * @param string $block_type Block type name.
+	 * @return array
+	 */
+	public function register_sticky_attributes_for_columns_block( $args, $block_type ) {
+		if ( 'core/columns' !== $block_type ) {
+			return $args;
+		}
+
+		$args['attributes']['frblStickyEnabled']     = array(
+			'type'    => 'boolean',
+			'default' => false,
+		);
+		$args['attributes']['frblStickyOffset']      = array(
+			'type'    => 'number',
+			'default' => 0,
+		);
+		$args['attributes']['frblStickyColumnIndex'] = array(
+			'type'    => 'number',
+			'default' => 0,
+		);
+
+		return $args;
+	}
+
+	/**
 	 * Add inline script for block attributes.
 	 *
 	 * @return void
@@ -181,7 +236,7 @@ class StickyColumn {
 				'blocks.registerBlockType',
 				'frontblocks/sticky-attributes',
 				function( settings, name ) {
-					if ( name !== 'generateblocks/grid' ) {
+					if ( name !== 'generateblocks/grid' && name !== 'core/columns' ) {
 						return settings;
 					}
 

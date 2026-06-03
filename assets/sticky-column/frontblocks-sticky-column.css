@@ -3,23 +3,12 @@
     position: relative;
 }
 
-.frontblocks-sticky-wrapper .gb-grid-column {
-    transition: position 0.3s ease;
-}
-
-/* Apply sticky positioning to the column wrapper, not the container */
-.frontblocks-sticky-wrapper .gb-grid-column.sticky-active .gb-container {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: inherit;
-}
-/* Responsive adjustments */
+/* Disable sticky on mobile — JS applies position:sticky via inline styles */
 @media (max-width: 768px) {
-    .frontblocks-sticky-wrapper .gb-grid-column.sticky-active .gb-container {
-        position: relative;
+    .frontblocks-sticky-wrapper .gb-grid-column .gb-container,
+    .frontblocks-sticky-wrapper .wp-block-column {
+        position: relative !important;
         top: auto !important;
-        z-index: auto;
-        box-shadow: none;
+        z-index: auto !important;
     }
-} 
+}
