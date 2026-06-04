@@ -56,7 +56,7 @@
     "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:headline && npm run build:product-categories && npm run build:reading-time && npm run build:stacked-images && npm run build:edge-alignment && npm run build:shape-animations && npm run build:gf-inline && npm run build:faq-schema && npm run build:before-after && npm run build:text-animation && npm run build:user-text && npm run build:css"
   },
   "dependencies": {
-    "react": "^19.2.6",
+    "react": "^19.2.7",
     "react-dom": "^19.2.6"
   }
 }
