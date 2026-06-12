@@ -338,23 +338,23 @@ class Popups {
 	 */
 	private function get_meta( $post_id ) {
 		$defaults = array(
-			'where'                => 'all',
-			'specific_pages'       => array(),
-			'specific_post_types'  => array(),
-			'url_contains'         => '',
-			'trigger'              => 'load',
-			'trigger_delay'        => 3,
-			'trigger_scroll'       => 50,
-			'trigger_selector'     => '',
-			'trigger_inactivity'   => 30,
-			'frequency'            => 'session',
-			'animation'            => 'fade',
-			'max_width'            => 600,
-			'overlay'              => '1',
-			'close_on_overlay'     => '1',
-			'show_close_button'    => '1',
-			'bg_color'             => '#ffffff',
-			'close_color'          => '#333333',
+			'where'               => 'all',
+			'specific_pages'      => array(),
+			'specific_post_types' => array(),
+			'url_contains'        => '',
+			'trigger'             => 'load',
+			'trigger_delay'       => 3,
+			'trigger_scroll'      => 50,
+			'trigger_selector'    => '',
+			'trigger_inactivity'  => 30,
+			'frequency'           => 'session',
+			'animation'           => 'fade',
+			'max_width'           => 600,
+			'overlay'             => '1',
+			'close_on_overlay'    => '1',
+			'show_close_button'   => '1',
+			'bg_color'            => '#ffffff',
+			'close_color'         => '#333333',
 		);
 
 		$stored = get_post_meta( $post_id, '_frbl_popup', true );
@@ -386,8 +386,11 @@ class Popups {
 			return;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Verified above.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Verified above; each field sanitized individually below.
 		$raw = isset( $_POST['frbl_popup'] ) ? wp_unslash( $_POST['frbl_popup'] ) : array();
+
+		$bg_color_sanitized    = sanitize_hex_color( $raw['bg_color'] ?? '#ffffff' );
+		$close_color_sanitized = sanitize_hex_color( $raw['close_color'] ?? '#333333' );
 
 		$data = array(
 			'where'               => sanitize_text_field( $raw['where'] ?? 'all' ),
@@ -405,8 +408,8 @@ class Popups {
 			'overlay'             => isset( $raw['overlay'] ) ? '1' : '0',
 			'close_on_overlay'    => isset( $raw['close_on_overlay'] ) ? '1' : '0',
 			'show_close_button'   => isset( $raw['show_close_button'] ) ? '1' : '0',
-			'bg_color'            => sanitize_hex_color( $raw['bg_color'] ?? '#ffffff' ) ?: '#ffffff',
-			'close_color'         => sanitize_hex_color( $raw['close_color'] ?? '#333333' ) ?: '#333333',
+			'bg_color'            => null !== $bg_color_sanitized ? $bg_color_sanitized : '#ffffff',
+			'close_color'         => null !== $close_color_sanitized ? $close_color_sanitized : '#333333',
 		);
 
 		update_post_meta( $post_id, '_frbl_popup', $data );
@@ -510,7 +513,7 @@ class Popups {
 		if ( 'specific_pages' === $where ) {
 			global $post;
 			$page_id = $post ? $post->ID : 0;
-			return in_array( $page_id, (array) $meta['specific_pages'], false ); // loose compare (int vs string).
+			return in_array( $page_id, (array) $meta['specific_pages'], true );
 		}
 
 		if ( 'specific_post_types' === $where ) {
@@ -567,9 +570,9 @@ class Popups {
 				<?php if ( $overlay ) : ?>
 					<div class="frbl-popup-overlay"></div>
 				<?php endif; ?>
-				<div class="frbl-popup <?php echo esc_attr( $animation_class ); ?>" style="max-width:<?php echo esc_attr( $max_width ); ?>px; background-color:<?php echo $bg_color; ?>;">
+				<div class="frbl-popup <?php echo esc_attr( $animation_class ); ?>" style="max-width:<?php echo esc_attr( $max_width ); ?>px; background-color:<?php echo esc_attr( $bg_color ); ?>;">
 					<?php if ( $show_close_button ) : ?>
-						<button class="frbl-popup-close" style="color:<?php echo $close_color; ?>;" aria-label="<?php esc_attr_e( 'Close popup', 'frontblocks' ); ?>">
+						<button class="frbl-popup-close" style="color:<?php echo esc_attr( $close_color ); ?>;" aria-label="<?php esc_attr_e( 'Close popup', 'frontblocks' ); ?>">
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
 						</button>
 					<?php endif; ?>
