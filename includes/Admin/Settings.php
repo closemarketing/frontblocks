@@ -1148,6 +1148,7 @@ class Settings {
 			$this->option_enable_back_button           => __( 'Add a floating back button for easy navigation.', 'frontblocks' ),
 			$this->option_enable_events                => __( 'Register and display events using a CPT or blog posts.', 'frontblocks' ),
 			$this->option_enable_fluid_typography      => __( 'Font sizes scale smoothly between mobile and desktop using CSS clamp().', 'frontblocks' ),
+			$this->option_enable_popups                => __( 'Create popups with the block editor and configure when and where they appear.', 'frontblocks' ),
 			$this->option_enable_gutenberg             => __( 'Use the block editor to write WooCommerce product descriptions.', 'frontblocks' ),
 			$this->option_enable_simple_prices_variable_products => __( 'Show a simplified price range for variable products.', 'frontblocks' ),
 			$this->option_enable_after_add_to_cart     => __( 'Insert custom block content right after the Add to Cart button.', 'frontblocks' ),
@@ -1205,6 +1206,7 @@ class Settings {
 			$this->option_enable_back_button           => 'back-button',
 			$this->option_enable_events                => 'events',
 			$this->option_enable_fluid_typography      => 'fluid-typography',
+			$this->option_enable_popups                => 'popups',
 			$this->option_enable_gutenberg             => 'gutenberg',
 			$this->option_enable_simple_prices_variable_products => 'simple-prices',
 			$this->option_enable_after_add_to_cart     => 'after-add-to-cart',
@@ -1426,9 +1428,6 @@ class Settings {
 			/>
 			<span></span>
 		</label>
-		<p class="description" style="margin-top:6px;">
-			<?php esc_html_e( 'Creates a Popups post type where each entry is a popup with configurable display rules and triggers.', 'frontblocks' ); ?>
-		</p>
 		<?php
 	}
 
