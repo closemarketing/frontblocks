@@ -280,6 +280,16 @@ class Popups {
 				</label>
 			</div>
 
+			<div class="frbl-field">
+				<label class="frbl-label"><?php esc_html_e( 'Background color', 'frontblocks' ); ?></label>
+				<input type="color" name="frbl_popup[bg_color]" value="<?php echo esc_attr( $meta['bg_color'] ); ?>" style="width:48px; height:32px; padding:2px; cursor:pointer;">
+			</div>
+
+			<div class="frbl-field">
+				<label class="frbl-label"><?php esc_html_e( 'Close button color', 'frontblocks' ); ?></label>
+				<input type="color" name="frbl_popup[close_color]" value="<?php echo esc_attr( $meta['close_color'] ); ?>" style="width:48px; height:32px; padding:2px; cursor:pointer;">
+			</div>
+
 		</div>
 
 		<script>
@@ -343,6 +353,8 @@ class Popups {
 			'overlay'              => '1',
 			'close_on_overlay'     => '1',
 			'show_close_button'    => '1',
+			'bg_color'             => '#ffffff',
+			'close_color'          => '#333333',
 		);
 
 		$stored = get_post_meta( $post_id, '_frbl_popup', true );
@@ -393,6 +405,8 @@ class Popups {
 			'overlay'             => isset( $raw['overlay'] ) ? '1' : '0',
 			'close_on_overlay'    => isset( $raw['close_on_overlay'] ) ? '1' : '0',
 			'show_close_button'   => isset( $raw['show_close_button'] ) ? '1' : '0',
+			'bg_color'            => sanitize_hex_color( $raw['bg_color'] ?? '#ffffff' ) ?: '#ffffff',
+			'close_color'         => sanitize_hex_color( $raw['close_color'] ?? '#333333' ) ?: '#333333',
 		);
 
 		update_post_meta( $post_id, '_frbl_popup', $data );
@@ -539,6 +553,8 @@ class Popups {
 			$max_width         = absint( $meta['max_width'] );
 			$show_close_button = '1' === $meta['show_close_button'];
 			$overlay           = '1' === $meta['overlay'];
+			$bg_color          = esc_attr( $meta['bg_color'] );
+			$close_color       = esc_attr( $meta['close_color'] );
 			?>
 			<div
 				id="frbl-popup-<?php echo esc_attr( $post_id ); ?>"
@@ -551,9 +567,9 @@ class Popups {
 				<?php if ( $overlay ) : ?>
 					<div class="frbl-popup-overlay"></div>
 				<?php endif; ?>
-				<div class="frbl-popup <?php echo esc_attr( $animation_class ); ?>" style="max-width:<?php echo esc_attr( $max_width ); ?>px;">
+				<div class="frbl-popup <?php echo esc_attr( $animation_class ); ?>" style="max-width:<?php echo esc_attr( $max_width ); ?>px; background-color:<?php echo $bg_color; ?>;">
 					<?php if ( $show_close_button ) : ?>
-						<button class="frbl-popup-close" aria-label="<?php esc_attr_e( 'Close popup', 'frontblocks' ); ?>">
+						<button class="frbl-popup-close" style="color:<?php echo $close_color; ?>; background:transparent;" aria-label="<?php esc_attr_e( 'Close popup', 'frontblocks' ); ?>">
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
 						</button>
 					<?php endif; ?>

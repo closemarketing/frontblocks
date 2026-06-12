@@ -26,11 +26,11 @@
 .frbl-popup {
 	position: relative;
 	z-index: 1;
-	background: #fff;
 	border-radius: 8px;
 	width: 100%;
 	max-height: 90vh;
 	overflow-y: auto;
+	overflow-x: hidden;
 	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
@@ -104,14 +104,8 @@
 
 /* Content */
 .frbl-popup-content {
-	padding: 32px;
+	padding: 0;
 }
 
 .frbl-popup-content > *:first-child { margin-top: 0; }
 .frbl-popup-content > *:last-child  { margin-bottom: 0; }
-
-@media (max-width: 480px) {
-	.frbl-popup-content {
-		padding: 20px;
-	}
-}
