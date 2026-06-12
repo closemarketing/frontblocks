@@ -144,6 +144,9 @@ class Plugin_Main {
 		// Before After comparison block.
 		new Frontend\BeforeAfter();
 
+		// Popups module.
+		new Frontend\Popups();
+
 		// SVG Upload module (allows SVG files in the media library).
 		new Frontend\SvgUpload();
 

@@ -55,6 +55,13 @@ class Settings {
 	private $option_events_type = 'events_type';
 
 	/**
+	 * Option key for popups feature.
+	 *
+	 * @var string
+	 */
+	private $option_enable_popups = 'enable_popups';
+
+	/**
 	 * Option key for fluid typography feature.
 	 *
 	 * @var string
@@ -503,6 +510,14 @@ class Settings {
 			$this->option_enable_fluid_typography,
 			__( 'Enable Fluid Typography', 'frontblocks' ),
 			array( $this, 'field_enable_fluid_typography' ),
+			$this->page_slug,
+			'frontblocks_section_features'
+		);
+
+		add_settings_field(
+			$this->option_enable_popups,
+			__( 'Enable Popups', 'frontblocks' ),
+			array( $this, 'field_enable_popups' ),
 			$this->page_slug,
 			'frontblocks_section_features'
 		);
@@ -1390,6 +1405,30 @@ class Settings {
 			/>
 			<span></span>
 		</label>
+		<?php
+	}
+
+	/**
+	 * Render toggle field for enable popups.
+	 *
+	 * @return void
+	 */
+	public function field_enable_popups() {
+		$options = get_option( 'frontblocks_settings', array() );
+		$enabled = (bool) ( $options[ $this->option_enable_popups ] ?? false );
+		?>
+		<label class="frbl-toggle">
+			<input type="checkbox"
+				id="<?php echo esc_attr( $this->option_enable_popups ); ?>"
+				name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_popups ); ?>]"
+				value="1"
+				<?php checked( true, $enabled ); ?>
+			/>
+			<span></span>
+		</label>
+		<p class="description" style="margin-top:6px;">
+			<?php esc_html_e( 'Creates a Popups post type where each entry is a popup with configurable display rules and triggers.', 'frontblocks' ); ?>
+		</p>
 		<?php
 	}
 
