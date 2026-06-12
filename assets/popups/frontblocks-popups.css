@@ -91,15 +91,14 @@
 	height: 32px;
 	padding: 0;
 	border: none;
-	border-radius: 50%;
-	background: rgba(0, 0, 0, 0.08);
+	background: transparent;
 	cursor: pointer;
-	transition: background 0.2s;
-	color: #333;
+	opacity: 0.8;
+	transition: opacity 0.2s;
 }
 
 .frbl-popup-close:hover {
-	background: rgba(0, 0, 0, 0.18);
+	opacity: 1;
 }
 
 /* Content */
