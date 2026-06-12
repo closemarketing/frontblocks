@@ -6,3 +6,7 @@
 	display: flex;
 	flex-direction: column;
 }
+
+.frbl-columns-same-height > .wp-block-column > * {
+	flex-grow: 1;
+}
