@@ -26,6 +26,29 @@ wp.hooks.addFilter(
     }
 );
 
+// Add data attribute to the block wrapper in the editor for CSS targeting.
+const withSameHeightWrapper = createHigherOrderComponent( ( BlockListBlock ) => {
+    return ( props ) => {
+        if ( COLUMNS_BLOCK !== props.name || ! props.attributes.frblSameHeight ) {
+            return <BlockListBlock { ...props } />;
+        }
+
+        const wrapperProps = {
+            ...( props.wrapperProps || {} ),
+            'data-frbl-same-height': 'true',
+        };
+
+        return <BlockListBlock { ...props } wrapperProps={ wrapperProps } />;
+    };
+}, 'withSameHeightWrapper' );
+
+wp.hooks.addFilter(
+    'editor.BlockListBlock',
+    'frontblocks/columns-same-height-wrapper',
+    withSameHeightWrapper
+);
+
+// Add the inspector toggle.
 const withSameHeightControl = createHigherOrderComponent( ( BlockEdit ) => {
     return ( props ) => {
         if ( COLUMNS_BLOCK !== props.name ) {

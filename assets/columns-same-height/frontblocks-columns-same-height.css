@@ -1,12 +1,17 @@
-.frbl-columns-same-height {
+/* Frontend: class on .wp-block-columns */
+.frbl-columns-same-height,
+/* Editor: data attribute on the outer block wrapper */
+[data-frbl-same-height="true"] .wp-block-columns {
 	align-items: stretch;
 }
 
-.frbl-columns-same-height > .wp-block-column {
+.frbl-columns-same-height > .wp-block-column,
+[data-frbl-same-height="true"] .wp-block-columns > .wp-block-column {
 	display: flex;
 	flex-direction: column;
 }
 
-.frbl-columns-same-height > .wp-block-column > * {
+.frbl-columns-same-height > .wp-block-column > *,
+[data-frbl-same-height="true"] .wp-block-columns > .wp-block-column > * {
 	flex-grow: 1;
 }

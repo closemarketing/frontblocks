@@ -27,6 +27,7 @@ class ColumnsSameHeight {
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_assets' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_editor_styles' ) );
 		add_filter( 'register_block_type_args', array( $this, 'register_native_block_attributes' ), 10, 2 );
 		add_filter( 'render_block_core/columns', array( $this, 'apply_same_height_class' ), 10, 2 );
 	}
@@ -73,6 +74,40 @@ class ColumnsSameHeight {
 			'frontblocks-columns-same-height-editor',
 			'frontblocks'
 		);
+	}
+
+	/**
+	 * Inject editor styles inside the iframe via wp-block-library inline styles.
+	 *
+	 * wp-block-library is guaranteed to load inside the WP 6.3+ editor iframe,
+	 * so attaching inline CSS to it ensures the styles reach block content.
+	 * The selectors cover both structural variants: data attr on the columns
+	 * element itself (wrapperProps merged) or on an outer wrapper div.
+	 *
+	 * @return void
+	 */
+	public function enqueue_editor_styles() {
+		if ( ! is_admin() ) {
+			return;
+		}
+
+		$css = '
+			[data-frbl-same-height] .wp-block-columns,
+			[data-frbl-same-height].wp-block-columns {
+				align-items: stretch;
+			}
+			[data-frbl-same-height] .wp-block-columns > .wp-block-column,
+			[data-frbl-same-height].wp-block-columns > .wp-block-column {
+				display: flex;
+				flex-direction: column;
+			}
+			[data-frbl-same-height] .wp-block-columns > .wp-block-column > *,
+			[data-frbl-same-height].wp-block-columns > .wp-block-column > * {
+				flex-grow: 1;
+			}
+		';
+
+		wp_add_inline_style( 'wp-block-library', $css );
 	}
 
 	/**
