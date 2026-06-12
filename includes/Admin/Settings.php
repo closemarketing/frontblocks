@@ -2048,6 +2048,7 @@ class Settings {
 			$this->option_enable_custom_post_types,
 			$this->option_enable_fullpage_scroll,
 			$this->option_enable_language_banner,
+			$this->option_enable_popups,
 		);
 
 		// Initialize all boolean options to false (unchecked checkboxes are not submitted).
