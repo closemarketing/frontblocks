@@ -1,0 +1,8 @@
+.frbl-columns-same-height {
+	align-items: stretch;
+}
+
+.frbl-columns-same-height > .wp-block-column {
+	display: flex;
+	flex-direction: column;
+}

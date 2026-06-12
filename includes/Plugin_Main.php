@@ -147,6 +147,9 @@ class Plugin_Main {
 		// SVG Upload module (allows SVG files in the media library).
 		new Frontend\SvgUpload();
 
+		// Columns Same Height module (equal-height columns for native columns block).
+		new Frontend\ColumnsSameHeight();
+
 		// User Text block is provided by FrontBlocks Pro when license is active.
 	}
 
