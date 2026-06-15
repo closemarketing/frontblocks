@@ -79,7 +79,7 @@ class ColumnsSameHeight {
 	/**
 	 * Inject editor styles inside the iframe via wp-block-library inline styles.
 	 *
-	 * wp-block-library is guaranteed to load inside the WP 6.3+ editor iframe,
+	 * `wp-block-library` is guaranteed to load inside the WP 6.3+ editor iframe,
 	 * so attaching inline CSS to it ensures the styles reach block content.
 	 * The selectors cover both structural variants: data attr on the columns
 	 * element itself (wrapperProps merged) or on an outer wrapper div.
