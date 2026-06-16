@@ -1708,6 +1708,11 @@ class Settings {
 				'title' => __( 'Custom Post Types Builder', 'frontblocks' ),
 				'desc'  => __( 'Create and manage custom post types directly from the admin panel.', 'frontblocks' ),
 			),
+			array(
+				'icon'  => 'popups',
+				'title' => __( 'Popups', 'frontblocks' ),
+				'desc'  => __( 'Create popups with the block editor and configure when and where they appear.', 'frontblocks' ),
+			),
 		);
 	}
 
