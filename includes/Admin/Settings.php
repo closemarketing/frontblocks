@@ -514,14 +514,6 @@ class Settings {
 			'frontblocks_section_features'
 		);
 
-		add_settings_field(
-			$this->option_enable_popups,
-			__( 'Enable Popups', 'frontblocks' ),
-			array( $this, 'field_enable_popups' ),
-			$this->page_slug,
-			'frontblocks_section_features'
-		);
-
 		// PRO Features section.
 		add_settings_section(
 			'frontblocks_section_woocommerce_features',
@@ -614,6 +606,14 @@ class Settings {
 			$this->option_enable_language_banner,
 			__( 'Enable Language Banner', 'frontblocks' ),
 			array( $this, 'field_enable_language_banner' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
+		add_settings_field(
+			$this->option_enable_popups,
+			__( 'Enable Popups', 'frontblocks' ),
+			array( $this, 'field_enable_popups' ),
 			$this->page_slug,
 			'frontblocks_section_woocommerce_features'
 		);
@@ -1131,6 +1131,7 @@ class Settings {
 				$this->option_horizontal_product_form,
 				$this->option_enable_fullpage_scroll,
 				$this->option_enable_language_banner,
+				$this->option_enable_popups,
 			),
 			true
 		);
