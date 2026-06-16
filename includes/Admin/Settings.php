@@ -1411,24 +1411,12 @@ class Settings {
 	}
 
 	/**
-	 * Render toggle field for enable popups.
+	 * Render toggle field for enable popups (PRO feature).
 	 *
 	 * @return void
 	 */
 	public function field_enable_popups() {
-		$options = get_option( 'frontblocks_settings', array() );
-		$enabled = (bool) ( $options[ $this->option_enable_popups ] ?? false );
-		?>
-		<label class="frbl-toggle">
-			<input type="checkbox"
-				id="<?php echo esc_attr( $this->option_enable_popups ); ?>"
-				name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_popups ); ?>]"
-				value="1"
-				<?php checked( true, $enabled ); ?>
-			/>
-			<span></span>
-		</label>
-		<?php
+		$this->render_pro_toggle( $this->option_enable_popups );
 	}
 
 	/**
