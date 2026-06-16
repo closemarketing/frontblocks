@@ -144,8 +144,14 @@ class Plugin_Main {
 		// Before After comparison block.
 		new Frontend\BeforeAfter();
 
+		// Popups module.
+		new Frontend\Popups();
+
 		// SVG Upload module (allows SVG files in the media library).
 		new Frontend\SvgUpload();
+
+		// Download Button module (download option for the native button block).
+		new Frontend\DownloadButton();
 
 		// User Text block is provided by FrontBlocks Pro when license is active.
 	}
