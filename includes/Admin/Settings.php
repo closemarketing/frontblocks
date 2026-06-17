@@ -153,6 +153,13 @@ class Settings {
 	private $option_enable_language_banner = 'enable_language_banner';
 
 	/**
+	 * Option key for checkout inline fields (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_checkout_inline = 'checkout_inline';
+
+	/**
 	 * Page slug.
 	 *
 	 * @var string
@@ -614,6 +621,14 @@ class Settings {
 			$this->option_enable_language_banner,
 			__( 'Enable Language Banner', 'frontblocks' ),
 			array( $this, 'field_enable_language_banner' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
+		add_settings_field(
+			$this->option_checkout_inline,
+			__( 'Checkout Inline Fields', 'frontblocks' ),
+			array( $this, 'field_checkout_inline' ),
 			$this->page_slug,
 			'frontblocks_section_woocommerce_features'
 		);
@@ -1131,6 +1146,7 @@ class Settings {
 				$this->option_horizontal_product_form,
 				$this->option_enable_fullpage_scroll,
 				$this->option_enable_language_banner,
+				$this->option_checkout_inline,
 			),
 			true
 		);
@@ -1160,6 +1176,7 @@ class Settings {
 			$this->option_horizontal_product_form      => __( 'Display quantity and Add to Cart button side by side.', 'frontblocks' ),
 			$this->option_enable_fullpage_scroll       => __( 'Enable full-page scroll navigation between sections.', 'frontblocks' ),
 			$this->option_enable_language_banner       => __( 'Show a banner when the visitor language differs from the site language.', 'frontblocks' ),
+			$this->option_checkout_inline              => __( 'Display address, email and phone fields side by side in the WooCommerce checkout.', 'frontblocks' ),
 		);
 
 		$desc = $descriptions[ $field['id'] ] ?? '';
@@ -1218,6 +1235,7 @@ class Settings {
 			$this->option_horizontal_product_form      => 'horizontal-form',
 			$this->option_enable_fullpage_scroll       => 'fullpage-scroll',
 			$this->option_enable_language_banner       => 'language-banner',
+			$this->option_checkout_inline              => 'horizontal-form',
 		);
 
 		$icon_name = $icon_map[ $field_id ] ?? 'default';
@@ -1531,6 +1549,15 @@ class Settings {
 	}
 
 	/**
+	 * Render toggle field for checkout inline fields (PRO).
+	 *
+	 * @return void
+	 */
+	public function field_checkout_inline() {
+		$this->render_pro_toggle( $this->option_checkout_inline );
+	}
+
+	/**
 	 * Custom Post Types section callback.
 	 *
 	 * @return void
@@ -1718,6 +1745,11 @@ class Settings {
 				'icon'  => 'default',
 				'title' => __( 'Custom Post Types Builder', 'frontblocks' ),
 				'desc'  => __( 'Create and manage custom post types directly from the admin panel.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'horizontal-form',
+				'title' => __( 'Checkout Inline Fields', 'frontblocks' ),
+				'desc'  => __( 'Display address, email and phone fields side by side in the WooCommerce checkout.', 'frontblocks' ),
 			),
 		);
 	}
@@ -2049,6 +2081,7 @@ class Settings {
 			$this->option_enable_fullpage_scroll,
 			$this->option_enable_language_banner,
 			$this->option_enable_popups,
+			$this->option_checkout_inline,
 		);
 
 		// Initialize all boolean options to false (unchecked checkboxes are not submitted).
