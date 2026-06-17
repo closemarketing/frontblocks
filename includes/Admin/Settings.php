@@ -975,8 +975,7 @@ class Settings {
 			)
 		);
 
-		$pro_blocks    = apply_filters( 'frbl_pro_blocks', $this->get_default_pro_blocks() );
-		$license_valid = function_exists( 'frblp_is_license_valid' ) && frblp_is_license_valid();
+		$pro_blocks = apply_filters( 'frbl_pro_blocks', $this->get_default_pro_blocks() );
 
 		?>
 		<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
@@ -988,10 +987,8 @@ class Settings {
 				UI::show_info_card( $block['icon'], $block['title'], $block['desc'] );
 			}
 
-			if ( ! $license_valid ) {
-				foreach ( $pro_blocks as $block ) {
-					UI::show_pro_info_card( $block['icon'], $block['title'], $block['desc'] );
-				}
+			foreach ( $pro_blocks as $block ) {
+				UI::show_pro_info_card( $block['icon'], $block['title'], $block['desc'] );
 			}
 			?>
 		</div>
@@ -1750,6 +1747,11 @@ class Settings {
 				'icon'  => 'horizontal-form',
 				'title' => __( 'Checkout Inline Fields', 'frontblocks' ),
 				'desc'  => __( 'Display address, email and phone fields side by side in the WooCommerce checkout.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'popups',
+				'title' => __( 'Popups', 'frontblocks' ),
+				'desc'  => __( 'Create popups with the block editor and configure when and where they appear.', 'frontblocks' ),
 			),
 		);
 	}
