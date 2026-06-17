@@ -801,6 +801,13 @@ class Settings {
 					}
 
 					foreach ( (array) $wp_settings_sections[ $this->page_slug ] as $section ) {
+						if ( 'frontblocks_section_custom_post_types' === $section['id'] ) {
+							/**
+							 * Action: inject content just before the Custom Post Types section.
+							 * Used by FrontBlocks PRO to insert module panels (e.g. Reviews).
+							 */
+							do_action( 'frbl_settings_before_cpt_section' );
+						}
 						$this->render_settings_section( $section );
 					}
 					?>
@@ -824,6 +831,12 @@ class Settings {
 				if ( frbl_is_pro_active() ) {
 					$this->render_license_section();
 				}
+
+				/**
+				 * Action: render extra sections after the main settings form.
+				 * Used by FrontBlocks PRO to inject its module panels (e.g. Reviews).
+				 */
+				do_action( 'frbl_settings_extra_sections' );
 				?>
 
 				<!-- Footer Info -->
