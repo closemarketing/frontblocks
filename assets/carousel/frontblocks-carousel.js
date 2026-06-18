@@ -44,6 +44,8 @@ window.addEventListener('load', function (event) {
             const carouselbuttonsColor = item.getAttribute('data-buttons-color') ? item.getAttribute('data-buttons-color') : 'black';
             const carouselbuttonsBackgroundColor = item.getAttribute('data-buttons-background-color') ? item.getAttribute('data-buttons-background-color') : 'transparent';
             const carouselbuttonsPosition = item.getAttribute('data-buttons-position') ? item.getAttribute('data-buttons-position') : 'side';
+            const carouselArrowLeftUrl = item.getAttribute('data-arrow-left-url') || '';
+            const carouselArrowRightUrl = item.getAttribute('data-arrow-right-url') || '';
 
 
             // Add classes
@@ -100,24 +102,32 @@ window.addEventListener('load', function (event) {
             if (carouselbuttons == 'arrows') {
                 const arrows = document.createElement('div');
                 arrows.classList.add('glide__arrows');
-                if (carouselbuttonsPosition == 'bottom') {
-                    arrows.classList.add('glide__arrows--bottom');
-                } else {
-                    arrows.classList.add('glide__arrows--top');
-                }
+
+                const positionClassMap = {
+                    'side':         'glide__arrows--side',
+                    'bottom':       'glide__arrows--bottom-left',
+                    'bottom-left':  'glide__arrows--bottom-left',
+                    'bottom-right': 'glide__arrows--bottom-right',
+                    'top-left':     'glide__arrows--top-left',
+                    'top-right':    'glide__arrows--top-right',
+                };
+                arrows.classList.add(positionClassMap[carouselbuttonsPosition] || 'glide__arrows--side');
 
                 arrows.setAttribute('data-glide-el', 'controls');
-                arrowsHTML = '<button class="glide__arrow glide__arrow--left glide__arrow glide__arrow--left" data-glide-dir="<"';
+
+                const defaultLeftSvg = '<svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="' + carouselbuttonsColor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                const defaultRightSvg = '<svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 11L6 6L1 1" stroke="' + carouselbuttonsColor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                const leftSvg = carouselArrowLeftUrl ? '<img src="' + carouselArrowLeftUrl + '" alt="" aria-hidden="true">' : defaultLeftSvg;
+                const rightSvg = carouselArrowRightUrl ? '<img src="' + carouselArrowRightUrl + '" alt="" aria-hidden="true">' : defaultRightSvg;
+
+                arrowsHTML = '<button class="glide__arrow glide__arrow--left" data-glide-dir="<"';
                 arrowsHTML += ' aria-label="Previous slide"';
                 arrowsHTML += ' style="background-color: ' + carouselbuttonsBackgroundColor + '"';
-                arrowsHTML += '><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="';
-                arrowsHTML += carouselbuttonsColor;
-                arrowsHTML += '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="glide__arrow glide__arrow--right glide__arrow glide__arrow--right" data-glide-dir=">"';
+                arrowsHTML += '>' + leftSvg + '</button>';
+                arrowsHTML += '<button class="glide__arrow glide__arrow--right" data-glide-dir=">"';
                 arrowsHTML += ' aria-label="Next slide"';
                 arrowsHTML += ' style="background-color: ' + carouselbuttonsBackgroundColor + '"';
-                arrowsHTML += '><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 11L6 6L1 1" stroke="';
-                arrowsHTML += carouselbuttonsColor;
-                arrowsHTML += '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+                arrowsHTML += '>' + rightSvg + '</button>';
                 arrows.innerHTML = arrowsHTML;
                 wrapperParent.appendChild(arrows);
             }
