@@ -244,13 +244,13 @@ function ProductCategoriesEdit(props) {
     label: __('Image Size', 'frontblocks'),
     value: imageSize,
     options: [{
-      label: __('Miniatura WooCommerce', 'frontblocks'),
+      label: __('WooCommerce Thumbnail', 'frontblocks'),
       value: 'woocommerce_thumbnail'
     }, {
-      label: __('Imagen de producto (WooCommerce)', 'frontblocks'),
+      label: __('Product Image (WooCommerce)', 'frontblocks'),
       value: 'woocommerce_single'
     }, {
-      label: __('Tamaño completo', 'frontblocks'),
+      label: __('Full size', 'frontblocks'),
       value: 'full'
     }],
     onChange: function onChange(val) {
@@ -258,7 +258,7 @@ function ProductCategoriesEdit(props) {
         imageSize: val
       });
     },
-    help: __('Tamaño de imagen de cada categoría.', 'frontblocks')
+    help: __('Image size for each category.', 'frontblocks')
   })), /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Card Style Settings', 'frontblocks'),
     initialOpen: false
