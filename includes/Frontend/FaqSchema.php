@@ -34,6 +34,7 @@ class FaqSchema {
 	 */
 	public function __construct() {
 		add_filter( 'render_block_core/accordion', array( $this, 'collect_details_block' ), 10, 2 );
+		add_filter( 'render_block_generateblocks/container', array( $this, 'collect_gb_accordion_block' ), 10, 2 );
 		add_action( 'wp_footer', array( $this, 'output_json_ld' ), 99 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
 	}
@@ -57,6 +58,53 @@ class FaqSchema {
 			$question = trim( wp_strip_all_tags( $raw_question ) );
 			$answer   = isset( $answers[1][ $i ] ) ? trim( wp_strip_all_tags( $answers[1][ $i ] ) ) : '';
 
+			if ( '' !== $question && '' !== $answer ) {
+				$this->faq_items[] = array(
+					'question' => $question,
+					'answer'   => $answer,
+				);
+			}
+		}
+
+		return $block_content;
+	}
+
+	/**
+	 * Collect FAQ entries from a GenerateBlocks accordion container when frblFaqSchema is enabled.
+	 *
+	 * @param string $block_content Rendered HTML.
+	 * @param array  $block         Block data.
+	 * @return string Unchanged block HTML.
+	 */
+	public function collect_gb_accordion_block( string $block_content, array $block ): string {
+		if ( empty( $block['attrs']['frblFaqSchema'] ) ) {
+			return $block_content;
+		}
+		if ( ( $block['attrs']['variantRole'] ?? '' ) !== 'accordion' ) {
+			return $block_content;
+		}
+
+		$dom = new \DOMDocument();
+		libxml_use_internal_errors( true );
+		$dom->loadHTML( '<?xml encoding="utf-8" ?>' . $block_content );
+		libxml_clear_errors();
+		$xpath = new \DOMXPath( $dom );
+
+		$toggle_texts  = $xpath->query( '//*[contains(@class,"gb-accordion__toggle")]//span[contains(@class,"gb-button-text")]' );
+		$content_nodes = $xpath->query( '//*[starts-with(@id,"gb-accordion-content-")]' );
+
+		$questions = array();
+		foreach ( $toggle_texts as $node ) {
+			$questions[] = trim( $node->textContent );
+		}
+
+		$answers = array();
+		foreach ( $content_nodes as $node ) {
+			$answers[] = trim( $node->textContent );
+		}
+
+		foreach ( $questions as $i => $question ) {
+			$answer = $answers[ $i ] ?? '';
 			if ( '' !== $question && '' !== $answer ) {
 				$this->faq_items[] = array(
 					'question' => $question,

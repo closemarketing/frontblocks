@@ -7,7 +7,7 @@ var _wp$components = wp.components,
   PanelBody = _wp$components.PanelBody,
   ToggleControl = _wp$components.ToggleControl;
 var __ = wp.i18n.__;
-var FAQ_BLOCKS = ['core/accordion'];
+var FAQ_BLOCKS = ['core/accordion', 'generateblocks/container'];
 
 // Register frblFaqSchema attribute on supported blocks.
 addFilter('blocks.registerBlockType', 'frontblocks/faq-schema-attribute', function (settings, name) {
@@ -27,6 +27,9 @@ addFilter('blocks.registerBlockType', 'frontblocks/faq-schema-attribute', functi
 addFilter('editor.BlockEdit', 'frontblocks/faq-schema-controls', function (BlockEdit) {
   return function (props) {
     if (!FAQ_BLOCKS.includes(props.name)) {
+      return /*#__PURE__*/React.createElement(BlockEdit, props);
+    }
+    if (props.name === 'generateblocks/container' && props.attributes.variantRole !== 'accordion') {
       return /*#__PURE__*/React.createElement(BlockEdit, props);
     }
     var _props$attributes$frb = props.attributes.frblFaqSchema,

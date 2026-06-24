@@ -4,7 +4,7 @@ const { InspectorControls } = wp.blockEditor;
 const { PanelBody, ToggleControl } = wp.components;
 const { __ } = wp.i18n;
 
-const FAQ_BLOCKS = [ 'core/accordion' ];
+const FAQ_BLOCKS = [ 'core/accordion', 'generateblocks/container' ];
 
 // Register frblFaqSchema attribute on supported blocks.
 addFilter(
@@ -30,6 +30,11 @@ addFilter(
 	'frontblocks/faq-schema-controls',
 	( BlockEdit ) => ( props ) => {
 		if ( ! FAQ_BLOCKS.includes( props.name ) ) {
+			return <BlockEdit { ...props } />;
+		}
+
+		// For generateblocks/container, only show on the accordion variant role.
+		if ( props.name === 'generateblocks/container' && props.attributes.variantRole !== 'accordion' ) {
 			return <BlockEdit { ...props } />;
 		}
 
