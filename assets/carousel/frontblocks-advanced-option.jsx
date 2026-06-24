@@ -1,8 +1,8 @@
 // Add custom controls to the Advanced panel of GenerateBlocks Grid block
 const { addFilter } = wp.hooks;
 const { Fragment, useEffect, useRef } = wp.element;
-const { InspectorControls, PanelColorSettings } = wp.blockEditor;
-const { SelectControl, TextControl, PanelBody, ToggleControl } = wp.components;
+const { InspectorControls, PanelColorSettings, MediaUpload } = wp.blockEditor;
+const { SelectControl, TextControl, PanelBody, ToggleControl, Button } = wp.components;
 const { __ } = wp.i18n;
 
 /**
@@ -100,6 +100,8 @@ function addCustomCarouselPanel( BlockEdit ) {
 			frblButtonColor,
 			frblButtonBgColor,
 			frblButtonsPosition = 'side',
+			frblArrowLeftUrl    = '',
+			frblArrowRightUrl   = '',
 			frblDisableOnDesktop = false,
 		} = props.attributes;
 
@@ -414,15 +416,66 @@ function addCustomCarouselPanel( BlockEdit ) {
 									onChange={ ( value ) => props.setAttributes( { frblButtons: value } ) }
 								/>
 								{ frblButtons === 'arrows' && (
+									<>
 									<SelectControl
 										label={ __( 'Buttons Position', 'frontblocks' ) }
 										value={ frblButtonsPosition }
 										options={ [
-											{ label: __( 'Side',   'frontblocks' ), value: 'side'   },
-											{ label: __( 'Bottom', 'frontblocks' ), value: 'bottom' },
+											{ label: __( 'Side (left & right)',  'frontblocks' ), value: 'side'         },
+											{ label: __( 'Bottom left',          'frontblocks' ), value: 'bottom-left'  },
+											{ label: __( 'Bottom right',         'frontblocks' ), value: 'bottom-right' },
+											{ label: __( 'Top left',             'frontblocks' ), value: 'top-left'     },
+											{ label: __( 'Top right',            'frontblocks' ), value: 'top-right'    },
 										] }
 										onChange={ ( value ) => props.setAttributes( { frblButtonsPosition: value } ) }
 									/>
+									<div style={ { marginBottom: '12px' } }>
+										<p style={ { marginBottom: '4px', fontWeight: 500 } }>{ __( 'Left arrow icon', 'frontblocks' ) }</p>
+										{ frblArrowLeftUrl && (
+											<img src={ frblArrowLeftUrl } alt="" style={ { display: 'block', width: '32px', height: '32px', marginBottom: '6px', objectFit: 'contain' } } />
+										) }
+										<MediaUpload
+											onSelect={ ( media ) => props.setAttributes( { frblArrowLeftUrl: media.url } ) }
+											allowedTypes={ [ 'image' ] }
+											value={ frblArrowLeftUrl }
+											render={ ( { open } ) => (
+												<div style={ { display: 'flex', gap: '6px', flexWrap: 'wrap' } }>
+													<Button onClick={ open } variant="secondary" size="small">
+														{ frblArrowLeftUrl ? __( 'Change', 'frontblocks' ) : __( 'Select SVG', 'frontblocks' ) }
+													</Button>
+													{ frblArrowLeftUrl && (
+														<Button onClick={ () => props.setAttributes( { frblArrowLeftUrl: '' } ) } variant="link" isDestructive size="small">
+															{ __( 'Remove', 'frontblocks' ) }
+														</Button>
+													) }
+												</div>
+											) }
+										/>
+									</div>
+									<div style={ { marginBottom: '12px' } }>
+										<p style={ { marginBottom: '4px', fontWeight: 500 } }>{ __( 'Right arrow icon', 'frontblocks' ) }</p>
+										{ frblArrowRightUrl && (
+											<img src={ frblArrowRightUrl } alt="" style={ { display: 'block', width: '32px', height: '32px', marginBottom: '6px', objectFit: 'contain' } } />
+										) }
+										<MediaUpload
+											onSelect={ ( media ) => props.setAttributes( { frblArrowRightUrl: media.url } ) }
+											allowedTypes={ [ 'image' ] }
+											value={ frblArrowRightUrl }
+											render={ ( { open } ) => (
+												<div style={ { display: 'flex', gap: '6px', flexWrap: 'wrap' } }>
+													<Button onClick={ open } variant="secondary" size="small">
+														{ frblArrowRightUrl ? __( 'Change', 'frontblocks' ) : __( 'Select SVG', 'frontblocks' ) }
+													</Button>
+													{ frblArrowRightUrl && (
+														<Button onClick={ () => props.setAttributes( { frblArrowRightUrl: '' } ) } variant="link" isDestructive size="small">
+															{ __( 'Remove', 'frontblocks' ) }
+														</Button>
+													) }
+												</div>
+											) }
+										/>
+									</div>
+									</>
 								) }
 								<PanelColorSettings
 									title={ __( 'Button Colors', 'frontblocks' ) }

@@ -11,12 +11,14 @@ var _wp$element = wp.element,
   useRef = _wp$element.useRef;
 var _wp$blockEditor = wp.blockEditor,
   InspectorControls = _wp$blockEditor.InspectorControls,
-  PanelColorSettings = _wp$blockEditor.PanelColorSettings;
+  PanelColorSettings = _wp$blockEditor.PanelColorSettings,
+  MediaUpload = _wp$blockEditor.MediaUpload;
 var _wp$components = wp.components,
   SelectControl = _wp$components.SelectControl,
   TextControl = _wp$components.TextControl,
   PanelBody = _wp$components.PanelBody,
-  ToggleControl = _wp$components.ToggleControl;
+  ToggleControl = _wp$components.ToggleControl,
+  Button = _wp$components.Button;
 var __ = wp.i18n.__;
 
 /**
@@ -123,8 +125,12 @@ function addCustomCarouselPanel(BlockEdit) {
       frblButtonBgColor = _props$attributes.frblButtonBgColor,
       _props$attributes$frb0 = _props$attributes.frblButtonsPosition,
       frblButtonsPosition = _props$attributes$frb0 === void 0 ? 'side' : _props$attributes$frb0,
-      _props$attributes$frb1 = _props$attributes.frblDisableOnDesktop,
-      frblDisableOnDesktop = _props$attributes$frb1 === void 0 ? false : _props$attributes$frb1;
+      _props$attributes$frb1 = _props$attributes.frblArrowLeftUrl,
+      frblArrowLeftUrl = _props$attributes$frb1 === void 0 ? '' : _props$attributes$frb1,
+      _props$attributes$frb10 = _props$attributes.frblArrowRightUrl,
+      frblArrowRightUrl = _props$attributes$frb10 === void 0 ? '' : _props$attributes$frb10,
+      _props$attributes$frb11 = _props$attributes.frblDisableOnDesktop,
+      frblDisableOnDesktop = _props$attributes$frb11 === void 0 ? false : _props$attributes$frb11;
 
     // ── Editor carousel preview ──────────────────────────────────────────
     var stateRef = useRef(null);
@@ -468,22 +474,131 @@ function addCustomCarouselPanel(BlockEdit) {
           frblButtons: value
         });
       }
-    }), frblButtons === 'arrows' && /*#__PURE__*/React.createElement(SelectControl, {
+    }), frblButtons === 'arrows' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(SelectControl, {
       label: __('Buttons Position', 'frontblocks'),
       value: frblButtonsPosition,
       options: [{
-        label: __('Side', 'frontblocks'),
+        label: __('Side (left & right)', 'frontblocks'),
         value: 'side'
       }, {
-        label: __('Bottom', 'frontblocks'),
-        value: 'bottom'
+        label: __('Bottom left', 'frontblocks'),
+        value: 'bottom-left'
+      }, {
+        label: __('Bottom right', 'frontblocks'),
+        value: 'bottom-right'
+      }, {
+        label: __('Top left', 'frontblocks'),
+        value: 'top-left'
+      }, {
+        label: __('Top right', 'frontblocks'),
+        value: 'top-right'
       }],
       onChange: function onChange(value) {
         return props.setAttributes({
           frblButtonsPosition: value
         });
       }
-    }), /*#__PURE__*/React.createElement(PanelColorSettings, {
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginBottom: '12px'
+      }
+    }, /*#__PURE__*/React.createElement("p", {
+      style: {
+        marginBottom: '4px',
+        fontWeight: 500
+      }
+    }, __('Left arrow icon', 'frontblocks')), frblArrowLeftUrl && /*#__PURE__*/React.createElement("img", {
+      src: frblArrowLeftUrl,
+      alt: "",
+      style: {
+        display: 'block',
+        width: '32px',
+        height: '32px',
+        marginBottom: '6px',
+        objectFit: 'contain'
+      }
+    }), /*#__PURE__*/React.createElement(MediaUpload, {
+      onSelect: function onSelect(media) {
+        return props.setAttributes({
+          frblArrowLeftUrl: media.url
+        });
+      },
+      allowedTypes: ['image'],
+      value: frblArrowLeftUrl,
+      render: function render(_ref) {
+        var open = _ref.open;
+        return /*#__PURE__*/React.createElement("div", {
+          style: {
+            display: 'flex',
+            gap: '6px',
+            flexWrap: 'wrap'
+          }
+        }, /*#__PURE__*/React.createElement(Button, {
+          onClick: open,
+          variant: "secondary",
+          size: "small"
+        }, frblArrowLeftUrl ? __('Change', 'frontblocks') : __('Select SVG', 'frontblocks')), frblArrowLeftUrl && /*#__PURE__*/React.createElement(Button, {
+          onClick: function onClick() {
+            return props.setAttributes({
+              frblArrowLeftUrl: ''
+            });
+          },
+          variant: "link",
+          isDestructive: true,
+          size: "small"
+        }, __('Remove', 'frontblocks')));
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginBottom: '12px'
+      }
+    }, /*#__PURE__*/React.createElement("p", {
+      style: {
+        marginBottom: '4px',
+        fontWeight: 500
+      }
+    }, __('Right arrow icon', 'frontblocks')), frblArrowRightUrl && /*#__PURE__*/React.createElement("img", {
+      src: frblArrowRightUrl,
+      alt: "",
+      style: {
+        display: 'block',
+        width: '32px',
+        height: '32px',
+        marginBottom: '6px',
+        objectFit: 'contain'
+      }
+    }), /*#__PURE__*/React.createElement(MediaUpload, {
+      onSelect: function onSelect(media) {
+        return props.setAttributes({
+          frblArrowRightUrl: media.url
+        });
+      },
+      allowedTypes: ['image'],
+      value: frblArrowRightUrl,
+      render: function render(_ref2) {
+        var open = _ref2.open;
+        return /*#__PURE__*/React.createElement("div", {
+          style: {
+            display: 'flex',
+            gap: '6px',
+            flexWrap: 'wrap'
+          }
+        }, /*#__PURE__*/React.createElement(Button, {
+          onClick: open,
+          variant: "secondary",
+          size: "small"
+        }, frblArrowRightUrl ? __('Change', 'frontblocks') : __('Select SVG', 'frontblocks')), frblArrowRightUrl && /*#__PURE__*/React.createElement(Button, {
+          onClick: function onClick() {
+            return props.setAttributes({
+              frblArrowRightUrl: ''
+            });
+          },
+          variant: "link",
+          isDestructive: true,
+          size: "small"
+        }, __('Remove', 'frontblocks')));
+      }
+    }))), /*#__PURE__*/React.createElement(PanelColorSettings, {
       title: __('Button Colors', 'frontblocks'),
       colorSettings: [{
         value: frblButtonColor,

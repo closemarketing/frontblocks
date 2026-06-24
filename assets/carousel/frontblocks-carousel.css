@@ -172,16 +172,77 @@
   cursor: -webkit-grabbing;
 }
 
-.frontblocks .glide__arrows--bottom .glide__arrow {
-  top: calc(100% + 25px);
+/* Side: arrows on left and right sides, vertically centered (default) */
+.frontblocks .glide__arrows--side {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 10;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.frontblocks .glide__arrows--side .glide__arrow {
+  pointer-events: all;
+}
+
+.frontblocks .glide__arrows--side .glide__arrow--left {
+  left: 2em;
+}
+
+.frontblocks .glide__arrows--side .glide__arrow--right {
+  right: 2em;
+}
+
+/* Grouped positions: both arrows outside the carousel, below or above */
+.frontblocks .glide__arrows--bottom-left,
+.frontblocks .glide__arrows--bottom-right,
+.frontblocks .glide__arrows--top-left,
+.frontblocks .glide__arrows--top-right {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  z-index: 10;
+}
+
+.frontblocks .glide__arrows--bottom-left .glide__arrow,
+.frontblocks .glide__arrows--bottom-right .glide__arrow,
+.frontblocks .glide__arrows--top-left .glide__arrow,
+.frontblocks .glide__arrows--top-right .glide__arrow {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  transform: none;
+}
+
+/* Below the carousel */
+.frontblocks .glide__arrows--bottom-left {
+  top: calc(100% + 12px);
   left: 0;
 }
 
-.frontblocks .glide__arrows--bottom .glide__arrow--right {
-  left: 50px;
-  right: unset;
+.frontblocks .glide__arrows--bottom-right {
+  top: calc(100% + 12px);
+  right: 0;
 }
 
+/* Above the carousel */
+.frontblocks .glide__arrows--top-left {
+  bottom: calc(100% + 12px);
+  left: 0;
+}
+
+.frontblocks .glide__arrows--top-right {
+  bottom: calc(100% + 12px);
+  right: 0;
+}
+
+
+/* Backward compatibility aliases */
 .frontblocks .glide__arrows--top {
   position: absolute;
   top: 50%;
@@ -203,6 +264,16 @@
 
 .frontblocks .glide__arrows--top .glide__arrow--right {
   right: 2em;
+}
+
+.frontblocks .glide__arrows--bottom .glide__arrow {
+  top: calc(100% + 25px);
+  left: 0;
+}
+
+.frontblocks .glide__arrows--bottom .glide__arrow--right {
+  left: 50px;
+  right: unset;
 }
 
 @media only screen and (max-width: 768px) {

@@ -125,6 +125,8 @@ class Carousel {
 		$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
 		$button_bg_color    = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
 		$buttons_position   = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
+		$arrow_left_url     = isset( $attrs['frblArrowLeftUrl'] ) ? esc_url_raw( $attrs['frblArrowLeftUrl'] ) : '';
+		$arrow_right_url    = isset( $attrs['frblArrowRightUrl'] ) ? esc_url_raw( $attrs['frblArrowRightUrl'] ) : '';
 		$disable_on_desktop = isset( $attrs['frblDisableOnDesktop'] ) ? (bool) $attrs['frblDisableOnDesktop'] : false;
 
 		// Add data attributes to the wrapper div if carousel is enabled.
@@ -149,6 +151,8 @@ class Carousel {
 					' data-buttons-color="' . esc_attr( $button_color ) . '"' .
 					' data-buttons-background-color="' . esc_attr( $button_bg_color ) . '"' .
 					' data-buttons-position="' . esc_attr( $buttons_position ) . '"' .
+					( $arrow_left_url ? ' data-arrow-left-url="' . esc_url( $arrow_left_url ) . '"' : '' ) .
+					( $arrow_right_url ? ' data-arrow-right-url="' . esc_url( $arrow_right_url ) . '"' : '' ) .
 					' data-disable-on-desktop="' . esc_attr( $disable_on_desktop ? 'true' : 'false' ) . '"' .
 					$attributes .
 					'>',
@@ -193,6 +197,8 @@ class Carousel {
 		$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
 		$button_bg_color    = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
 		$buttons_position   = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
+		$arrow_left_url     = isset( $attrs['frblArrowLeftUrl'] ) ? esc_url_raw( $attrs['frblArrowLeftUrl'] ) : '';
+		$arrow_right_url    = isset( $attrs['frblArrowRightUrl'] ) ? esc_url_raw( $attrs['frblArrowRightUrl'] ) : '';
 		$disable_on_desktop = isset( $attrs['frblDisableOnDesktop'] ) ? (bool) $attrs['frblDisableOnDesktop'] : false;
 
 		// Add data attributes to the wrapper div if carousel is enabled.
@@ -217,6 +223,8 @@ class Carousel {
 					' data-buttons-color="' . esc_attr( $button_color ) . '"' .
 					' data-buttons-background-color="' . esc_attr( $button_bg_color ) . '"' .
 					' data-buttons-position="' . esc_attr( $buttons_position ) . '"' .
+					( $arrow_left_url ? ' data-arrow-left-url="' . esc_url( $arrow_left_url ) . '"' : '' ) .
+					( $arrow_right_url ? ' data-arrow-right-url="' . esc_url( $arrow_right_url ) . '"' : '' ) .
 					' data-disable-on-desktop="' . esc_attr( $disable_on_desktop ? 'true' : 'false' ) . '"' .
 					$attributes .
 					'>',
@@ -261,6 +269,8 @@ class Carousel {
 		$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
 		$button_bg_color    = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
 		$buttons_position   = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
+		$arrow_left_url     = isset( $attrs['frblArrowLeftUrl'] ) ? esc_url_raw( $attrs['frblArrowLeftUrl'] ) : '';
+		$arrow_right_url    = isset( $attrs['frblArrowRightUrl'] ) ? esc_url_raw( $attrs['frblArrowRightUrl'] ) : '';
 		$disable_on_desktop = isset( $attrs['frblDisableOnDesktop'] ) ? (bool) $attrs['frblDisableOnDesktop'] : false;
 
 		// Add data attributes to the wrapper div if carousel is enabled.
@@ -285,6 +295,8 @@ class Carousel {
 					' data-buttons-color="' . esc_attr( $button_color ) . '"' .
 					' data-buttons-background-color="' . esc_attr( $button_bg_color ) . '"' .
 					' data-buttons-position="' . esc_attr( $buttons_position ) . '"' .
+					( $arrow_left_url ? ' data-arrow-left-url="' . esc_url( $arrow_left_url ) . '"' : '' ) .
+					( $arrow_right_url ? ' data-arrow-right-url="' . esc_url( $arrow_right_url ) . '"' : '' ) .
 					' data-disable-on-desktop="' . esc_attr( $disable_on_desktop ? 'true' : 'false' ) . '"' .
 					$attributes .
 					'>',
@@ -324,6 +336,8 @@ class Carousel {
 		$button_color       = isset( $attrs['frblButtonColor'] ) ? sanitize_text_field( $attrs['frblButtonColor'] ) : '';
 		$button_bg_color    = isset( $attrs['frblButtonBgColor'] ) ? sanitize_text_field( $attrs['frblButtonBgColor'] ) : '';
 		$buttons_position   = isset( $attrs['frblButtonsPosition'] ) ? sanitize_text_field( $attrs['frblButtonsPosition'] ) : 'side';
+		$arrow_left_url     = isset( $attrs['frblArrowLeftUrl'] ) ? esc_url_raw( $attrs['frblArrowLeftUrl'] ) : '';
+		$arrow_right_url    = isset( $attrs['frblArrowRightUrl'] ) ? esc_url_raw( $attrs['frblArrowRightUrl'] ) : '';
 		$disable_on_desktop = isset( $attrs['frblDisableOnDesktop'] ) ? (bool) $attrs['frblDisableOnDesktop'] : false;
 
 		$extra = '';
@@ -345,6 +359,8 @@ class Carousel {
 				' data-buttons-color="' . esc_attr( $button_color ) . '"' .
 				' data-buttons-background-color="' . esc_attr( $button_bg_color ) . '"' .
 				' data-buttons-position="' . esc_attr( $buttons_position ) . '"' .
+				( $arrow_left_url ? ' data-arrow-left-url="' . esc_url( $arrow_left_url ) . '"' : '' ) .
+				( $arrow_right_url ? ' data-arrow-right-url="' . esc_url( $arrow_right_url ) . '"' : '' ) .
 				' data-disable-on-desktop="' . esc_attr( $disable_on_desktop ? 'true' : 'false' ) . '"' .
 				$extra .
 				'>',
@@ -441,6 +457,14 @@ class Carousel {
 			'type'    => 'string',
 			'default' => 'side',
 		);
+		$block_args['attributes']['frblArrowLeftUrl']     = array(
+			'type'    => 'string',
+			'default' => '',
+		);
+		$block_args['attributes']['frblArrowRightUrl']    = array(
+			'type'    => 'string',
+			'default' => '',
+		);
 		$block_args['attributes']['frblDisableOnDesktop'] = array(
 			'type'    => 'boolean',
 			'default' => false,
@@ -513,6 +537,14 @@ class Carousel {
 			'type'    => 'string',
 			'default' => 'side',
 		);
+		$args['attributes']['frblArrowLeftUrl']     = array(
+			'type'    => 'string',
+			'default' => '',
+		);
+		$args['attributes']['frblArrowRightUrl']    = array(
+			'type'    => 'string',
+			'default' => '',
+		);
 		$args['attributes']['frblDisableOnDesktop'] = array(
 			'type'    => 'boolean',
 			'default' => false,
@@ -581,6 +613,14 @@ class Carousel {
 							default: ''
 						},
 						frblButtonBgColor: {
+							type: 'string',
+							default: ''
+						},
+						frblArrowLeftUrl: {
+							type: 'string',
+							default: ''
+						},
+						frblArrowRightUrl: {
 							type: 'string',
 							default: ''
 						},
