@@ -195,6 +195,13 @@ class Settings {
 	private $option_enable_language_banner = 'enable_language_banner';
 
 	/**
+	 * Option key for checkout inline fields (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_checkout_inline = 'checkout_inline';
+
+	/**
 	 * Page slug.
 	 *
 	 * @var string
@@ -708,6 +715,14 @@ class Settings {
 			'frontblocks_section_woocommerce_features'
 		);
 
+		add_settings_field(
+			$this->option_checkout_inline,
+			__( 'Checkout Inline Fields', 'frontblocks' ),
+			array( $this, 'field_checkout_inline' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
 		// Custom Post Types section (PRO).
 		if ( frbl_is_pro_active() ) {
 			add_settings_section(
@@ -1050,8 +1065,7 @@ class Settings {
 			)
 		);
 
-		$pro_blocks    = apply_filters( 'frbl_pro_blocks', $this->get_default_pro_blocks() );
-		$license_valid = function_exists( 'frblp_is_license_valid' ) && frblp_is_license_valid();
+		$pro_blocks = apply_filters( 'frbl_pro_blocks', $this->get_default_pro_blocks() );
 
 		?>
 		<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
@@ -1063,10 +1077,8 @@ class Settings {
 				UI::show_info_card( $block['icon'], $block['title'], $block['desc'] );
 			}
 
-			if ( ! $license_valid ) {
-				foreach ( $pro_blocks as $block ) {
-					UI::show_pro_info_card( $block['icon'], $block['title'], $block['desc'] );
-				}
+			foreach ( $pro_blocks as $block ) {
+				UI::show_pro_info_card( $block['icon'], $block['title'], $block['desc'] );
 			}
 			?>
 		</div>
@@ -1222,6 +1234,7 @@ class Settings {
 				$this->option_enable_variant_display_mode,
 				$this->option_enable_fullpage_scroll,
 				$this->option_enable_language_banner,
+				$this->option_checkout_inline,
 				$this->option_disable_cart_coupon,
 				$this->option_disable_cart_cross_sells,
 				$this->option_disable_checkout_coupon,
@@ -1255,6 +1268,13 @@ class Settings {
 			$this->option_deactivate_product_tabs       => __( 'Remove the default description, reviews and attributes tabs.', 'frontblocks' ),
 			$this->option_horizontal_product_form       => __( 'Display quantity and Add to Cart button side by side.', 'frontblocks' ),
 			$this->option_enable_variant_display_mode   => __( 'Choose per attribute whether to display product variations as a dropdown or radio buttons.', 'frontblocks' ),
+			$this->option_enable_fullpage_scroll        => __( 'Enable full-page scroll navigation between sections.', 'frontblocks' ),
+			$this->option_enable_language_banner        => __( 'Show a banner when the visitor language differs from the site language.', 'frontblocks' ),
+			$this->option_checkout_inline               => __( 'Display address, email and phone fields side by side in the WooCommerce checkout.', 'frontblocks' ),
+			$this->option_disable_zoom_images           => __( 'Remove the zoom effect on WooCommerce product images.', 'frontblocks' ),
+			$this->option_add_share_buttons             => __( 'Add social share buttons to WooCommerce product pages.', 'frontblocks' ),
+			$this->option_deactivate_product_tabs       => __( 'Remove the default description, reviews and attributes tabs.', 'frontblocks' ),
+			$this->option_horizontal_product_form       => __( 'Display quantity and Add to Cart button side by side.', 'frontblocks' ),
 			$this->option_enable_fullpage_scroll        => __( 'Enable full-page scroll navigation between sections.', 'frontblocks' ),
 			$this->option_enable_language_banner        => __( 'Show a banner when the visitor language differs from the site language.', 'frontblocks' ),
 			$this->option_disable_cart_coupon           => __( 'Hide the coupon code input field from the Cart page.', 'frontblocks' ),
@@ -1319,6 +1339,13 @@ class Settings {
 			$this->option_deactivate_product_tabs       => 'deactivate-tabs',
 			$this->option_horizontal_product_form       => 'horizontal-form',
 			$this->option_enable_variant_display_mode   => 'default',
+			$this->option_enable_fullpage_scroll        => 'fullpage-scroll',
+			$this->option_enable_language_banner        => 'language-banner',
+			$this->option_checkout_inline               => 'horizontal-form',
+			$this->option_disable_zoom_images           => 'disable-zoom',
+			$this->option_add_share_buttons             => 'share-buttons',
+			$this->option_deactivate_product_tabs       => 'deactivate-tabs',
+			$this->option_horizontal_product_form       => 'horizontal-form',
 			$this->option_enable_fullpage_scroll        => 'fullpage-scroll',
 			$this->option_enable_language_banner        => 'language-banner',
 			$this->option_disable_cart_coupon           => 'default',
@@ -1693,6 +1720,15 @@ class Settings {
 	}
 
 	/**
+	 * Render toggle field for checkout inline fields (PRO).
+	 *
+	 * @return void
+	 */
+	public function field_checkout_inline() {
+		$this->render_pro_toggle( $this->option_checkout_inline );
+	}
+
+	/**
 	 * Custom Post Types section callback.
 	 *
 	 * @return void
@@ -1880,6 +1916,16 @@ class Settings {
 				'icon'  => 'default',
 				'title' => __( 'Custom Post Types Builder', 'frontblocks' ),
 				'desc'  => __( 'Create and manage custom post types directly from the admin panel.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'horizontal-form',
+				'title' => __( 'Checkout Inline Fields', 'frontblocks' ),
+				'desc'  => __( 'Display address, email and phone fields side by side in the WooCommerce checkout.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'popups',
+				'title' => __( 'Popups', 'frontblocks' ),
+				'desc'  => __( 'Create popups with the block editor and configure when and where they appear.', 'frontblocks' ),
 			),
 		);
 	}
@@ -2212,6 +2258,7 @@ class Settings {
 			$this->option_enable_fullpage_scroll,
 			$this->option_enable_language_banner,
 			$this->option_enable_popups,
+			$this->option_checkout_inline,
 			$this->option_disable_cart_coupon,
 			$this->option_disable_cart_cross_sells,
 			$this->option_disable_checkout_coupon,
