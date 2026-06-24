@@ -101,11 +101,13 @@ class FaqSchema {
 
 		$questions = array();
 		foreach ( $toggle_texts as $node ) {
+			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			$questions[] = trim( html_entity_decode( $node->textContent, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 		}
 
 		$answers = array();
 		foreach ( $content_nodes as $node ) {
+			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			$answers[] = trim( html_entity_decode( $node->textContent, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 		}
 
