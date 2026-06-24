@@ -7,8 +7,8 @@ const { __ } = wp.i18n;
 const FAQ_BLOCKS = [ 'core/accordion', 'generateblocks/container' ];
 
 const SCHEMA_TYPES = [
-	{ label: __( 'FAQPage (preguntas y respuestas)', 'frontblocks' ), value: 'FAQPage' },
-	{ label: __( 'HowTo (pasos / cómo hacerlo)', 'frontblocks' ), value: 'HowTo' },
+	{ label: __( 'FAQPage (questions & answers)', 'frontblocks' ), value: 'FAQPage' },
+	{ label: __( 'HowTo (steps / how-to guide)', 'frontblocks' ), value: 'HowTo' },
 ];
 
 // Register attributes on supported blocks.
@@ -58,14 +58,14 @@ addFilter(
 						initialOpen={ false }
 					>
 						<ToggleControl
-							label={ __( 'Añadir Schema (JSON-LD)', 'frontblocks' ) }
-							help={ __( 'Incluye el contenido de este bloque en el structured data de la página.', 'frontblocks' ) }
+							label={ __( 'Add Schema (JSON-LD)', 'frontblocks' ) }
+							help={ __( 'Include this block\'s content in the page structured data.', 'frontblocks' ) }
 							checked={ frblFaqSchema }
 							onChange={ ( value ) => props.setAttributes( { frblFaqSchema: value } ) }
 						/>
 						{ frblFaqSchema && (
 							<SelectControl
-								label={ __( 'Tipo de schema', 'frontblocks' ) }
+								label={ __( 'Schema type', 'frontblocks' ) }
 								value={ frblSchemaType }
 								options={ SCHEMA_TYPES }
 								onChange={ ( value ) => props.setAttributes( { frblSchemaType: value } ) }

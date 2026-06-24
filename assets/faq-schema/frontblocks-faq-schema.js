@@ -10,10 +10,10 @@ var _wp$components = wp.components,
 var __ = wp.i18n.__;
 var FAQ_BLOCKS = ['core/accordion', 'generateblocks/container'];
 var SCHEMA_TYPES = [{
-  label: __('FAQPage (preguntas y respuestas)', 'frontblocks'),
+  label: __('FAQPage (questions & answers)', 'frontblocks'),
   value: 'FAQPage'
 }, {
-  label: __('HowTo (pasos / cómo hacerlo)', 'frontblocks'),
+  label: __('HowTo (steps / how-to guide)', 'frontblocks'),
   value: 'HowTo'
 }];
 
@@ -61,8 +61,8 @@ addFilter('editor.BlockEdit', 'frontblocks/faq-schema-controls', function (Block
             initialOpen: false
           },
           wp.element.createElement(ToggleControl, {
-            label: __('Añadir Schema (JSON-LD)', 'frontblocks'),
-            help: __('Incluye el contenido de este bloque en el structured data de la página.', 'frontblocks'),
+            label: __('Add Schema (JSON-LD)', 'frontblocks'),
+            help: __('Include this block\'s content in the page structured data.', 'frontblocks'),
             checked: frblFaqSchema,
             onChange: function (value) {
               return props.setAttributes({
@@ -71,7 +71,7 @@ addFilter('editor.BlockEdit', 'frontblocks/faq-schema-controls', function (Block
             }
           }),
           frblFaqSchema && wp.element.createElement(SelectControl, {
-            label: __('Tipo de schema', 'frontblocks'),
+            label: __('Schema type', 'frontblocks'),
             value: frblSchemaType,
             options: SCHEMA_TYPES,
             onChange: function (value) {
