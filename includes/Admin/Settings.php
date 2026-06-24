@@ -563,14 +563,6 @@ class Settings {
 			'frontblocks_section_features'
 		);
 
-		add_settings_field(
-			$this->option_enable_popups,
-			__( 'Enable Popups', 'frontblocks' ),
-			array( $this, 'field_enable_popups' ),
-			$this->page_slug,
-			'frontblocks_section_features'
-		);
-
 		// PRO Features section.
 		add_settings_section(
 			'frontblocks_section_woocommerce_features',
@@ -711,6 +703,14 @@ class Settings {
 			$this->option_enable_language_banner,
 			__( 'Enable Language Banner', 'frontblocks' ),
 			array( $this, 'field_enable_language_banner' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
+		add_settings_field(
+			$this->option_enable_popups,
+			__( 'Enable Popups', 'frontblocks' ),
+			array( $this, 'field_enable_popups' ),
 			$this->page_slug,
 			'frontblocks_section_woocommerce_features'
 		);
@@ -1234,6 +1234,7 @@ class Settings {
 				$this->option_enable_variant_display_mode,
 				$this->option_enable_fullpage_scroll,
 				$this->option_enable_language_banner,
+				$this->option_enable_popups,
 				$this->option_checkout_inline,
 				$this->option_disable_cart_coupon,
 				$this->option_disable_cart_cross_sells,
@@ -1546,24 +1547,12 @@ class Settings {
 	}
 
 	/**
-	 * Render toggle field for enable popups.
+	 * Render toggle field for enable popups (PRO feature).
 	 *
 	 * @return void
 	 */
 	public function field_enable_popups() {
-		$options = get_option( 'frontblocks_settings', array() );
-		$enabled = (bool) ( $options[ $this->option_enable_popups ] ?? false );
-		?>
-		<label class="frbl-toggle">
-			<input type="checkbox"
-				id="<?php echo esc_attr( $this->option_enable_popups ); ?>"
-				name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_popups ); ?>]"
-				value="1"
-				<?php checked( true, $enabled ); ?>
-			/>
-			<span></span>
-		</label>
-		<?php
+		$this->render_pro_toggle( $this->option_enable_popups );
 	}
 
 	/**
