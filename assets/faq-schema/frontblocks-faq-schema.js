@@ -5,11 +5,19 @@ var Fragment = wp.element.Fragment;
 var InspectorControls = wp.blockEditor.InspectorControls;
 var _wp$components = wp.components,
   PanelBody = _wp$components.PanelBody,
-  ToggleControl = _wp$components.ToggleControl;
+  ToggleControl = _wp$components.ToggleControl,
+  SelectControl = _wp$components.SelectControl;
 var __ = wp.i18n.__;
 var FAQ_BLOCKS = ['core/accordion', 'generateblocks/container'];
+var SCHEMA_TYPES = [{
+  label: __('FAQPage (preguntas y respuestas)', 'frontblocks'),
+  value: 'FAQPage'
+}, {
+  label: __('HowTo (pasos / cómo hacerlo)', 'frontblocks'),
+  value: 'HowTo'
+}];
 
-// Register frblFaqSchema attribute on supported blocks.
+// Register attributes on supported blocks.
 addFilter('blocks.registerBlockType', 'frontblocks/faq-schema-attribute', function (settings, name) {
   if (!FAQ_BLOCKS.includes(name)) {
     return settings;
@@ -18,34 +26,62 @@ addFilter('blocks.registerBlockType', 'frontblocks/faq-schema-attribute', functi
     frblFaqSchema: {
       type: 'boolean',
       default: false
+    },
+    frblSchemaType: {
+      type: 'string',
+      default: 'FAQPage'
     }
   });
   return settings;
 });
 
-// Add inspector toggle to supported blocks.
+// Add inspector controls to supported blocks.
 addFilter('editor.BlockEdit', 'frontblocks/faq-schema-controls', function (BlockEdit) {
   return function (props) {
     if (!FAQ_BLOCKS.includes(props.name)) {
-      return /*#__PURE__*/React.createElement(BlockEdit, props);
+      return wp.element.createElement(BlockEdit, props);
     }
     if (props.name === 'generateblocks/container' && props.attributes.variantRole !== 'accordion') {
-      return /*#__PURE__*/React.createElement(BlockEdit, props);
+      return wp.element.createElement(BlockEdit, props);
     }
-    var _props$attributes$frb = props.attributes.frblFaqSchema,
-      frblFaqSchema = _props$attributes$frb === void 0 ? false : _props$attributes$frb;
-    return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(BlockEdit, props), /*#__PURE__*/React.createElement(InspectorControls, null, /*#__PURE__*/React.createElement(PanelBody, {
-      title: __('FrontBlocks - FAQ Schema', 'frontblocks'),
-      initialOpen: false
-    }, /*#__PURE__*/React.createElement(ToggleControl, {
-      label: __('Add FAQ Schema (JSON-LD)', 'frontblocks'),
-      help: __('Include this block\'s Q&A in the page FAQPage structured data.', 'frontblocks'),
-      checked: frblFaqSchema,
-      onChange: function onChange(value) {
-        return props.setAttributes({
-          frblFaqSchema: value
-        });
-      }
-    }))));
+    var _props$attributes = props.attributes,
+      frblFaqSchema = _props$attributes.frblFaqSchema === undefined ? false : _props$attributes.frblFaqSchema,
+      frblSchemaType = _props$attributes.frblSchemaType === undefined ? 'FAQPage' : _props$attributes.frblSchemaType;
+    return wp.element.createElement(
+      Fragment,
+      null,
+      wp.element.createElement(BlockEdit, props),
+      wp.element.createElement(
+        InspectorControls,
+        null,
+        wp.element.createElement(
+          PanelBody,
+          {
+            title: __('FrontBlocks - Schema', 'frontblocks'),
+            initialOpen: false
+          },
+          wp.element.createElement(ToggleControl, {
+            label: __('Añadir Schema (JSON-LD)', 'frontblocks'),
+            help: __('Incluye el contenido de este bloque en el structured data de la página.', 'frontblocks'),
+            checked: frblFaqSchema,
+            onChange: function (value) {
+              return props.setAttributes({
+                frblFaqSchema: value
+              });
+            }
+          }),
+          frblFaqSchema && wp.element.createElement(SelectControl, {
+            label: __('Tipo de schema', 'frontblocks'),
+            value: frblSchemaType,
+            options: SCHEMA_TYPES,
+            onChange: function (value) {
+              return props.setAttributes({
+                frblSchemaType: value
+              });
+            }
+          })
+        )
+      )
+    );
   };
 });
