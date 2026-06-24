@@ -132,6 +132,13 @@ class Settings {
 	private $option_horizontal_product_form = 'horizontal_product_form';
 
 	/**
+	 * Option key for variant display mode default (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_variant_display_mode_default = 'variant_display_mode_default';
+
+	/**
 	 * Option key for disabling coupon field in cart (PRO).
 	 *
 	 * @var string
@@ -633,6 +640,14 @@ class Settings {
 			$this->option_horizontal_product_form,
 			__( 'Horizontal Product Form Layout', 'frontblocks' ),
 			array( $this, 'field_horizontal_product_form' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
+		add_settings_field(
+			$this->option_variant_display_mode_default,
+			__( 'Variant Display Mode', 'frontblocks' ),
+			array( $this, 'field_variant_display_mode_default' ),
 			$this->page_slug,
 			'frontblocks_section_woocommerce_features'
 		);
@@ -1204,6 +1219,7 @@ class Settings {
 				$this->option_add_share_buttons,
 				$this->option_deactivate_product_tabs,
 				$this->option_horizontal_product_form,
+				$this->option_variant_display_mode_default,
 				$this->option_enable_fullpage_scroll,
 				$this->option_enable_language_banner,
 				$this->option_disable_cart_coupon,
@@ -1238,6 +1254,7 @@ class Settings {
 			$this->option_add_share_buttons             => __( 'Add social share buttons to WooCommerce product pages.', 'frontblocks' ),
 			$this->option_deactivate_product_tabs       => __( 'Remove the default description, reviews and attributes tabs.', 'frontblocks' ),
 			$this->option_horizontal_product_form       => __( 'Display quantity and Add to Cart button side by side.', 'frontblocks' ),
+			$this->option_variant_display_mode_default  => __( 'Set a global default for displaying product variation attributes as dropdowns or radio buttons.', 'frontblocks' ),
 			$this->option_enable_fullpage_scroll        => __( 'Enable full-page scroll navigation between sections.', 'frontblocks' ),
 			$this->option_enable_language_banner        => __( 'Show a banner when the visitor language differs from the site language.', 'frontblocks' ),
 			$this->option_disable_cart_coupon           => __( 'Hide the coupon code input field from the Cart page.', 'frontblocks' ),
@@ -1301,6 +1318,7 @@ class Settings {
 			$this->option_add_share_buttons             => 'share-buttons',
 			$this->option_deactivate_product_tabs       => 'deactivate-tabs',
 			$this->option_horizontal_product_form       => 'horizontal-form',
+			$this->option_variant_display_mode_default  => 'default',
 			$this->option_enable_fullpage_scroll        => 'fullpage-scroll',
 			$this->option_enable_language_banner        => 'language-banner',
 			$this->option_disable_cart_coupon           => 'default',
@@ -1600,6 +1618,31 @@ class Settings {
 	 */
 	public function field_horizontal_product_form() {
 		$this->render_pro_toggle( $this->option_horizontal_product_form );
+	}
+
+	/**
+	 * Render Variant Display Mode default field.
+	 *
+	 * @return void
+	 */
+	public function field_variant_display_mode_default() {
+		$options  = get_option( 'frontblocks_settings', array() );
+		$value    = sanitize_text_field( $options[ $this->option_variant_display_mode_default ] ?? '' );
+		$disabled = ! $this->is_license_valid ? 'disabled' : '';
+		?>
+		<select
+			id="<?php echo esc_attr( $this->option_variant_display_mode_default ); ?>"
+			name="frontblocks_settings[<?php echo esc_attr( $this->option_variant_display_mode_default ); ?>]"
+			<?php echo esc_attr( $disabled ); ?>
+		>
+			<option value="select_dropdown" <?php selected( $value, 'select_dropdown' ); ?>>
+				<?php esc_html_e( 'Drop Down', 'frontblocks' ); ?>
+			</option>
+			<option value="radio_button" <?php selected( $value, 'radio_button' ); ?>>
+				<?php esc_html_e( 'Radio Button', 'frontblocks' ); ?>
+			</option>
+		</select>
+		<?php
 	}
 
 	/**
@@ -2203,6 +2246,9 @@ class Settings {
 			} elseif ( $this->option_events_type === $key ) {
 				// Sanitize events type: only allow 'cpt' or 'posts'.
 				$sanitized[ $key ] = in_array( $val, array( 'cpt', 'posts' ), true ) ? $val : 'cpt';
+			} elseif ( $this->option_variant_display_mode_default === $key ) {
+				// Sanitize variant display mode: only allow known values.
+				$sanitized[ $key ] = in_array( $val, array( 'select_dropdown', 'radio_button' ), true ) ? $val : 'select_dropdown';
 			}
 		}
 
