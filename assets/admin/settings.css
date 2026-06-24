@@ -808,6 +808,10 @@ video {
   --tw-text-opacity: 1;
   color: rgb(70 81 217 / var(--tw-text-opacity, 1));
 }
+.frbl-settings-wrapper .tw-text-red-600 {
+  --tw-text-opacity: 1;
+  color: rgb(220 38 38 / var(--tw-text-opacity, 1));
+}
 .frbl-settings-wrapper .tw-text-red-700 {
   --tw-text-opacity: 1;
   color: rgb(185 28 28 / var(--tw-text-opacity, 1));
@@ -1115,8 +1119,8 @@ video {
 	flex: 1;
 	min-width: 0;
 	display: flex;
-	flex-direction: column;
 	align-items: center;
+	flex-direction: column;
 }
 
 .frbl-feature-title {
@@ -1568,6 +1572,10 @@ video {
 .frbl-settings-wrapper .hover\:tw-text-primary-600:hover {
   --tw-text-opacity: 1;
   color: rgb(85 101 237 / var(--tw-text-opacity, 1));
+}
+.frbl-settings-wrapper .hover\:tw-text-red-700:hover {
+  --tw-text-opacity: 1;
+  color: rgb(185 28 28 / var(--tw-text-opacity, 1));
 }
 .frbl-settings-wrapper .focus\:tw-border-transparent:focus {
   border-color: transparent;

@@ -132,6 +132,48 @@ class Settings {
 	private $option_horizontal_product_form = 'horizontal_product_form';
 
 	/**
+	 * Option key for enabling variant display mode per-attribute selector (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_enable_variant_display_mode = 'enable_variant_display_mode';
+
+	/**
+	 * Option key for disabling coupon field in cart (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_disable_cart_coupon = 'disable_cart_coupon';
+
+	/**
+	 * Option key for disabling cross-sells in cart (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_disable_cart_cross_sells = 'disable_cart_cross_sells';
+
+	/**
+	 * Option key for disabling coupon form in checkout (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_disable_checkout_coupon = 'disable_checkout_coupon';
+
+	/**
+	 * Option key for disabling order notes in checkout (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_disable_checkout_order_notes = 'disable_checkout_order_notes';
+
+	/**
+	 * Option key for disabling login prompt in checkout (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_disable_checkout_login_prompt = 'disable_checkout_login_prompt';
+
+	/**
 	 * Option key for custom post types builder (PRO).
 	 *
 	 * @var string
@@ -151,6 +193,13 @@ class Settings {
 	 * @var string
 	 */
 	private $option_enable_language_banner = 'enable_language_banner';
+
+	/**
+	 * Option key for checkout inline fields (PRO).
+	 *
+	 * @var string
+	 */
+	private $option_checkout_inline = 'checkout_inline';
 
 	/**
 	 * Page slug.
@@ -603,6 +652,54 @@ class Settings {
 		);
 
 		add_settings_field(
+			$this->option_enable_variant_display_mode,
+			__( 'Variant Display Mode', 'frontblocks' ),
+			array( $this, 'field_enable_variant_display_mode' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
+		add_settings_field(
+			$this->option_disable_cart_coupon,
+			__( 'Disable Coupon Field in Cart', 'frontblocks' ),
+			array( $this, 'field_disable_cart_coupon' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
+		add_settings_field(
+			$this->option_disable_cart_cross_sells,
+			__( 'Disable Cross-Sells in Cart', 'frontblocks' ),
+			array( $this, 'field_disable_cart_cross_sells' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
+		add_settings_field(
+			$this->option_disable_checkout_coupon,
+			__( 'Disable Coupon Field in Checkout', 'frontblocks' ),
+			array( $this, 'field_disable_checkout_coupon' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
+		add_settings_field(
+			$this->option_disable_checkout_order_notes,
+			__( 'Disable Order Notes in Checkout', 'frontblocks' ),
+			array( $this, 'field_disable_checkout_order_notes' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
+		add_settings_field(
+			$this->option_disable_checkout_login_prompt,
+			__( 'Disable Login Prompt in Checkout', 'frontblocks' ),
+			array( $this, 'field_disable_checkout_login_prompt' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
+		add_settings_field(
 			$this->option_enable_fullpage_scroll,
 			__( 'Enable Full Page Scroll', 'frontblocks' ),
 			array( $this, 'field_enable_fullpage_scroll' ),
@@ -614,6 +711,14 @@ class Settings {
 			$this->option_enable_language_banner,
 			__( 'Enable Language Banner', 'frontblocks' ),
 			array( $this, 'field_enable_language_banner' ),
+			$this->page_slug,
+			'frontblocks_section_woocommerce_features'
+		);
+
+		add_settings_field(
+			$this->option_checkout_inline,
+			__( 'Checkout Inline Fields', 'frontblocks' ),
+			array( $this, 'field_checkout_inline' ),
 			$this->page_slug,
 			'frontblocks_section_woocommerce_features'
 		);
@@ -960,8 +1065,7 @@ class Settings {
 			)
 		);
 
-		$pro_blocks    = apply_filters( 'frbl_pro_blocks', $this->get_default_pro_blocks() );
-		$license_valid = function_exists( 'frblp_is_license_valid' ) && frblp_is_license_valid();
+		$pro_blocks = apply_filters( 'frbl_pro_blocks', $this->get_default_pro_blocks() );
 
 		?>
 		<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
@@ -973,10 +1077,8 @@ class Settings {
 				UI::show_info_card( $block['icon'], $block['title'], $block['desc'] );
 			}
 
-			if ( ! $license_valid ) {
-				foreach ( $pro_blocks as $block ) {
-					UI::show_pro_info_card( $block['icon'], $block['title'], $block['desc'] );
-				}
+			foreach ( $pro_blocks as $block ) {
+				UI::show_pro_info_card( $block['icon'], $block['title'], $block['desc'] );
 			}
 			?>
 		</div>
@@ -1129,8 +1231,15 @@ class Settings {
 				$this->option_add_share_buttons,
 				$this->option_deactivate_product_tabs,
 				$this->option_horizontal_product_form,
+				$this->option_enable_variant_display_mode,
 				$this->option_enable_fullpage_scroll,
 				$this->option_enable_language_banner,
+				$this->option_checkout_inline,
+				$this->option_disable_cart_coupon,
+				$this->option_disable_cart_cross_sells,
+				$this->option_disable_checkout_coupon,
+				$this->option_disable_checkout_order_notes,
+				$this->option_disable_checkout_login_prompt,
 			),
 			true
 		);
@@ -1143,23 +1252,36 @@ class Settings {
 
 		// Short descriptions for each field.
 		$descriptions = array(
-			$this->option_enable_testimonials          => __( 'Add a testimonials block to display customer reviews.', 'frontblocks' ),
-			$this->option_enable_reading_progress      => __( 'Show a progress bar at the top of the page while reading posts.', 'frontblocks' ),
-			$this->option_enable_back_button           => __( 'Add a floating back button for easy navigation.', 'frontblocks' ),
-			$this->option_enable_events                => __( 'Register and display events using a CPT or blog posts.', 'frontblocks' ),
-			$this->option_enable_fluid_typography      => __( 'Font sizes scale smoothly between mobile and desktop using CSS clamp().', 'frontblocks' ),
-			$this->option_enable_popups                => __( 'Create popups with the block editor and configure when and where they appear.', 'frontblocks' ),
-			$this->option_enable_gutenberg             => __( 'Use the block editor to write WooCommerce product descriptions.', 'frontblocks' ),
+			$this->option_enable_testimonials           => __( 'Add a testimonials block to display customer reviews.', 'frontblocks' ),
+			$this->option_enable_reading_progress       => __( 'Show a progress bar at the top of the page while reading posts.', 'frontblocks' ),
+			$this->option_enable_back_button            => __( 'Add a floating back button for easy navigation.', 'frontblocks' ),
+			$this->option_enable_events                 => __( 'Register and display events using a CPT or blog posts.', 'frontblocks' ),
+			$this->option_enable_fluid_typography       => __( 'Font sizes scale smoothly between mobile and desktop using CSS clamp().', 'frontblocks' ),
+			$this->option_enable_popups                 => __( 'Create popups with the block editor and configure when and where they appear.', 'frontblocks' ),
+			$this->option_enable_gutenberg              => __( 'Use the block editor to write WooCommerce product descriptions.', 'frontblocks' ),
 			$this->option_enable_simple_prices_variable_products => __( 'Show a simplified price range for variable products.', 'frontblocks' ),
-			$this->option_enable_after_add_to_cart     => __( 'Insert custom block content right after the Add to Cart button.', 'frontblocks' ),
-			$this->option_deactivate_short_description => __( 'Remove the short description field from product pages.', 'frontblocks' ),
+			$this->option_enable_after_add_to_cart      => __( 'Insert custom block content right after the Add to Cart button.', 'frontblocks' ),
+			$this->option_deactivate_short_description  => __( 'Remove the short description field from product pages.', 'frontblocks' ),
 			$this->option_move_content_to_short_description => __( 'Move the main product content into the short description area.', 'frontblocks' ),
-			$this->option_disable_zoom_images          => __( 'Remove the zoom effect on WooCommerce product images.', 'frontblocks' ),
-			$this->option_add_share_buttons            => __( 'Add social share buttons to WooCommerce product pages.', 'frontblocks' ),
-			$this->option_deactivate_product_tabs      => __( 'Remove the default description, reviews and attributes tabs.', 'frontblocks' ),
-			$this->option_horizontal_product_form      => __( 'Display quantity and Add to Cart button side by side.', 'frontblocks' ),
-			$this->option_enable_fullpage_scroll       => __( 'Enable full-page scroll navigation between sections.', 'frontblocks' ),
-			$this->option_enable_language_banner       => __( 'Show a banner when the visitor language differs from the site language.', 'frontblocks' ),
+			$this->option_disable_zoom_images           => __( 'Remove the zoom effect on WooCommerce product images.', 'frontblocks' ),
+			$this->option_add_share_buttons             => __( 'Add social share buttons to WooCommerce product pages.', 'frontblocks' ),
+			$this->option_deactivate_product_tabs       => __( 'Remove the default description, reviews and attributes tabs.', 'frontblocks' ),
+			$this->option_horizontal_product_form       => __( 'Display quantity and Add to Cart button side by side.', 'frontblocks' ),
+			$this->option_enable_variant_display_mode   => __( 'Choose per attribute whether to display product variations as a dropdown or radio buttons.', 'frontblocks' ),
+			$this->option_enable_fullpage_scroll        => __( 'Enable full-page scroll navigation between sections.', 'frontblocks' ),
+			$this->option_enable_language_banner        => __( 'Show a banner when the visitor language differs from the site language.', 'frontblocks' ),
+			$this->option_checkout_inline               => __( 'Display address, email and phone fields side by side in the WooCommerce checkout.', 'frontblocks' ),
+			$this->option_disable_zoom_images           => __( 'Remove the zoom effect on WooCommerce product images.', 'frontblocks' ),
+			$this->option_add_share_buttons             => __( 'Add social share buttons to WooCommerce product pages.', 'frontblocks' ),
+			$this->option_deactivate_product_tabs       => __( 'Remove the default description, reviews and attributes tabs.', 'frontblocks' ),
+			$this->option_horizontal_product_form       => __( 'Display quantity and Add to Cart button side by side.', 'frontblocks' ),
+			$this->option_enable_fullpage_scroll        => __( 'Enable full-page scroll navigation between sections.', 'frontblocks' ),
+			$this->option_enable_language_banner        => __( 'Show a banner when the visitor language differs from the site language.', 'frontblocks' ),
+			$this->option_disable_cart_coupon           => __( 'Hide the coupon code input field from the Cart page.', 'frontblocks' ),
+			$this->option_disable_cart_cross_sells      => __( 'Remove the cross-sell product suggestions from the Cart page.', 'frontblocks' ),
+			$this->option_disable_checkout_coupon       => __( 'Hide the coupon code form shown above the Checkout form.', 'frontblocks' ),
+			$this->option_disable_checkout_order_notes  => __( 'Remove the order notes / additional information field from Checkout.', 'frontblocks' ),
+			$this->option_disable_checkout_login_prompt => __( 'Hide the login and registration prompt shown before the Checkout form.', 'frontblocks' ),
 		);
 
 		$desc = $descriptions[ $field['id'] ] ?? '';
@@ -1201,23 +1323,36 @@ class Settings {
 	private function get_feature_icon( $field_id ) {
 		// Map field IDs to icon file names.
 		$icon_map = array(
-			$this->option_enable_testimonials          => 'testimonials',
-			$this->option_enable_reading_progress      => 'reading-progress',
-			$this->option_enable_back_button           => 'back-button',
-			$this->option_enable_events                => 'events',
-			$this->option_enable_fluid_typography      => 'fluid-typography',
-			$this->option_enable_popups                => 'popups',
-			$this->option_enable_gutenberg             => 'gutenberg',
+			$this->option_enable_testimonials           => 'testimonials',
+			$this->option_enable_reading_progress       => 'reading-progress',
+			$this->option_enable_back_button            => 'back-button',
+			$this->option_enable_events                 => 'events',
+			$this->option_enable_fluid_typography       => 'fluid-typography',
+			$this->option_enable_popups                 => 'popups',
+			$this->option_enable_gutenberg              => 'gutenberg',
 			$this->option_enable_simple_prices_variable_products => 'simple-prices',
-			$this->option_enable_after_add_to_cart     => 'after-add-to-cart',
-			$this->option_deactivate_short_description => 'deactivate-description',
+			$this->option_enable_after_add_to_cart      => 'after-add-to-cart',
+			$this->option_deactivate_short_description  => 'deactivate-description',
 			$this->option_move_content_to_short_description => 'move-content',
-			$this->option_disable_zoom_images          => 'disable-zoom',
-			$this->option_add_share_buttons            => 'share-buttons',
-			$this->option_deactivate_product_tabs      => 'deactivate-tabs',
-			$this->option_horizontal_product_form      => 'horizontal-form',
-			$this->option_enable_fullpage_scroll       => 'fullpage-scroll',
-			$this->option_enable_language_banner       => 'language-banner',
+			$this->option_disable_zoom_images           => 'disable-zoom',
+			$this->option_add_share_buttons             => 'share-buttons',
+			$this->option_deactivate_product_tabs       => 'deactivate-tabs',
+			$this->option_horizontal_product_form       => 'horizontal-form',
+			$this->option_enable_variant_display_mode   => 'default',
+			$this->option_enable_fullpage_scroll        => 'fullpage-scroll',
+			$this->option_enable_language_banner        => 'language-banner',
+			$this->option_checkout_inline               => 'horizontal-form',
+			$this->option_disable_zoom_images           => 'disable-zoom',
+			$this->option_add_share_buttons             => 'share-buttons',
+			$this->option_deactivate_product_tabs       => 'deactivate-tabs',
+			$this->option_horizontal_product_form       => 'horizontal-form',
+			$this->option_enable_fullpage_scroll        => 'fullpage-scroll',
+			$this->option_enable_language_banner        => 'language-banner',
+			$this->option_disable_cart_coupon           => 'default',
+			$this->option_disable_cart_cross_sells      => 'default',
+			$this->option_disable_checkout_coupon       => 'default',
+			$this->option_disable_checkout_order_notes  => 'default',
+			$this->option_disable_checkout_login_prompt => 'default',
 		);
 
 		$icon_name = $icon_map[ $field_id ] ?? 'default';
@@ -1513,6 +1648,60 @@ class Settings {
 	}
 
 	/**
+	 * Render Variant Display Mode toggle field.
+	 *
+	 * @return void
+	 */
+	public function field_enable_variant_display_mode() {
+		$this->render_pro_toggle( $this->option_enable_variant_display_mode );
+	}
+
+	/**
+	 * Render Disable Coupon Field in Cart field.
+	 *
+	 * @return void
+	 */
+	public function field_disable_cart_coupon() {
+		$this->render_pro_toggle( $this->option_disable_cart_coupon );
+	}
+
+	/**
+	 * Render Disable Cross-Sells in Cart field.
+	 *
+	 * @return void
+	 */
+	public function field_disable_cart_cross_sells() {
+		$this->render_pro_toggle( $this->option_disable_cart_cross_sells );
+	}
+
+	/**
+	 * Render Disable Coupon Field in Checkout field.
+	 *
+	 * @return void
+	 */
+	public function field_disable_checkout_coupon() {
+		$this->render_pro_toggle( $this->option_disable_checkout_coupon );
+	}
+
+	/**
+	 * Render Disable Order Notes in Checkout field.
+	 *
+	 * @return void
+	 */
+	public function field_disable_checkout_order_notes() {
+		$this->render_pro_toggle( $this->option_disable_checkout_order_notes );
+	}
+
+	/**
+	 * Render Disable Login Prompt in Checkout field.
+	 *
+	 * @return void
+	 */
+	public function field_disable_checkout_login_prompt() {
+		$this->render_pro_toggle( $this->option_disable_checkout_login_prompt );
+	}
+
+	/**
 	 * Render Enable Full Page Scroll field.
 	 *
 	 * @return void
@@ -1528,6 +1717,15 @@ class Settings {
 	 */
 	public function field_enable_language_banner() {
 		$this->render_pro_toggle( $this->option_enable_language_banner );
+	}
+
+	/**
+	 * Render toggle field for checkout inline fields (PRO).
+	 *
+	 * @return void
+	 */
+	public function field_checkout_inline() {
+		$this->render_pro_toggle( $this->option_checkout_inline );
 	}
 
 	/**
@@ -1718,6 +1916,16 @@ class Settings {
 				'icon'  => 'default',
 				'title' => __( 'Custom Post Types Builder', 'frontblocks' ),
 				'desc'  => __( 'Create and manage custom post types directly from the admin panel.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'horizontal-form',
+				'title' => __( 'Checkout Inline Fields', 'frontblocks' ),
+				'desc'  => __( 'Display address, email and phone fields side by side in the WooCommerce checkout.', 'frontblocks' ),
+			),
+			array(
+				'icon'  => 'popups',
+				'title' => __( 'Popups', 'frontblocks' ),
+				'desc'  => __( 'Create popups with the block editor and configure when and where they appear.', 'frontblocks' ),
 			),
 		);
 	}
@@ -2045,10 +2253,17 @@ class Settings {
 			$this->option_add_share_buttons,
 			$this->option_deactivate_product_tabs,
 			$this->option_horizontal_product_form,
+			$this->option_enable_variant_display_mode,
 			$this->option_enable_custom_post_types,
 			$this->option_enable_fullpage_scroll,
 			$this->option_enable_language_banner,
 			$this->option_enable_popups,
+			$this->option_checkout_inline,
+			$this->option_disable_cart_coupon,
+			$this->option_disable_cart_cross_sells,
+			$this->option_disable_checkout_coupon,
+			$this->option_disable_checkout_order_notes,
+			$this->option_disable_checkout_login_prompt,
 		);
 
 		// Initialize all boolean options to false (unchecked checkboxes are not submitted).
