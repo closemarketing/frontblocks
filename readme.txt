@@ -4,8 +4,8 @@ Tags: carrusel, slider, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 1.3.6
-Version: 1.3.6
+Stable tag: 1.4.0
+Version: 1.4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -158,6 +158,22 @@ To use this feature:
 
 This feature eliminates the need for custom CSS to achieve inline form layouts.
 
+**Stacked Images Block:**
+Display a set of images with an animated stacking effect. Images appear layered on top of each other and animate in from a configurable direction (top, bottom, left, or right). Insert the block from the Gutenberg inserter under the FrontBlocks category and upload multiple images. Features:
+- Configurable animation duration and delay between each image.
+- Container height control to fit any layout.
+- Smooth entrance animations driven by CSS/JS with no dependencies.
+
+**Events:**
+Register and manage events directly from WordPress. Enable the Events feature from the FrontBlocks settings page and choose between two modes: a dedicated Custom Post Type (with its own menu and category taxonomy) or storing events as regular posts. Each event includes meta fields for:
+- All-day toggle
+- Start and end date and time
+- Cost
+- Event website URL
+
+**Language Recommendation Banner:**
+Display a smart banner that detects the visitor's browser language and suggests switching to the matching version of the site. Enable the banner from the FrontBlocks settings page. The banner only appears when the site has a translated version matching the user's browser language, and respects user dismissal via a cookie.
+
 **WooCommerce Features:**
 Included features for WooCommerce FrontBlocks PRO.
 
@@ -180,7 +196,11 @@ Features:
   * Delete custom post types easily with a single click
 - Disable tabs on the product page.
 - Horizontal product form layout (price, quantity, and add to cart button in one row).
+- Checkout Inline: Display billing/shipping fields (email + phone, address line 1 + address line 2) side by side in a two-column layout. Compatible with Block Checkout (WooCommerce 8+) and legacy shortcode checkout.
 - Full Page Scroll: Create fullpage scroll experiences with smooth section-by-section navigation and automatic side navigation dots. Perfect for landing pages, portfolios, and presentations.
+- Footer Patterns: Ready-to-use footer block patterns (3 columns, 4 columns, hero contact) for native WordPress and Gutenberg.
+- Login Block: Native Gutenberg block for user login and registration forms with customizable labels and styles.
+- Popup Native: Native popup system with multiple trigger conditions (exit intent, scroll percentage, time delay, on click), entrance animations, overlay, and cookie-based frequency control.
 
 More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-plugins/frontblocks-pro/?utm_source=WordPressORGReadme&utm_medium=link&utm_campaign=frontblocks) page.
 
@@ -190,6 +210,25 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 2. Go to Settings > FrontBlocks > Features and enable the features you want to use.
 
 == Changelog ==
+
+== 1.4.0 ==
+*   Added: Carousel Pattern — ready-to-use Hero Carousel pattern using native WordPress Cover blocks, registered in the Patterns tab under the FrontBlocks category.
+*   Added: Language Recommendation Banner — settings integration to enable a smart banner that suggests switching to the user's browser language.
+*   Added: Hover Background Scale — adds smooth zoom effect on background images when hovering over blocks (GenerateBlocks Query Loop and standard CSS backgrounds).
+*   Improved: Carousel editor — revamped carousel editor UI with live preview and improved advanced options panel.
+*   Improved: Conditional asset loading — scripts and styles for Animations, Carousel, Counter, ContainerEdgeAlignment, GravityFormsInline, Headline, InsertPost, ShapeAnimations and StickyColumn only enqueue on pages where the feature is used.
+*   Improved: Settings moved to Appearance submenu child page for better organization.
+*   Fixed: Accordion/Gravity Forms inline layout CSS conflicts.
+*   Fixed: Carousel display, bullets, and JavaScript issues.
+*   Fixed: Carousel bullet accessibility — added aria-label attributes and increased clickable area.
+*   Added: [PRO] Checkout Inline — displays WooCommerce checkout fields (email/phone and address lines) side by side in a two-column layout. Compatible with both Block Checkout (WooCommerce 8+) and legacy shortcode checkout.
+*   Added: [PRO] Popup Native — native popup system with trigger conditions (exit intent, scroll percentage, time delay, click), animations, overlay, and cookie-based frequency control.
+*   Added: [PRO] Meta Fields Native — display custom post meta values inside native WordPress blocks directly from the Gutenberg editor.
+*   Added: [PRO] Login Block — block for displaying a user login form with customizable options.
+*   Added: [PRO] Full Page Scroll Pattern — ready-to-use full page scroll pattern for native WordPress and Gutenberg blocks.
+*   Added: [PRO] Footer Patterns — new footer patterns (3 columns, 4 columns, hero contact) for native WordPress and Gutenberg.
+*   Added: [PRO] Language Recommendation Banner — smart banner that suggests switching to the user's browser language.
+*   Fixed: [PRO] Duplicate settings entry in PRO Showcase panel.
 
 == 1.3.6 ==
 *   Added: SVG Uploads — allows administrators to upload SVG files to the WordPress media library with automatic server-side sanitization.
