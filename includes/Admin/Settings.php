@@ -711,11 +711,11 @@ class Settings {
 			$this->option_enable_popups,
 			__( 'Enable Popups', 'frontblocks' ),
 			array( $this, 'field_enable_popups' ),
-      $this->page_slug,
+			$this->page_slug,
 			'frontblocks_section_woocommerce_features'
-    );
-    
-    add_settings_field( 
+		);
+
+		add_settings_field(
 			$this->option_checkout_inline,
 			__( 'Checkout Inline Fields', 'frontblocks' ),
 			array( $this, 'field_checkout_inline' ),
