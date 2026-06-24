@@ -132,11 +132,11 @@ class Settings {
 	private $option_horizontal_product_form = 'horizontal_product_form';
 
 	/**
-	 * Option key for variant display mode default (PRO).
+	 * Option key for enabling variant display mode per-attribute selector (PRO).
 	 *
 	 * @var string
 	 */
-	private $option_variant_display_mode_default = 'variant_display_mode_default';
+	private $option_enable_variant_display_mode = 'enable_variant_display_mode';
 
 	/**
 	 * Option key for disabling coupon field in cart (PRO).
@@ -645,9 +645,9 @@ class Settings {
 		);
 
 		add_settings_field(
-			$this->option_variant_display_mode_default,
+			$this->option_enable_variant_display_mode,
 			__( 'Variant Display Mode', 'frontblocks' ),
-			array( $this, 'field_variant_display_mode_default' ),
+			array( $this, 'field_enable_variant_display_mode' ),
 			$this->page_slug,
 			'frontblocks_section_woocommerce_features'
 		);
@@ -1219,7 +1219,7 @@ class Settings {
 				$this->option_add_share_buttons,
 				$this->option_deactivate_product_tabs,
 				$this->option_horizontal_product_form,
-				$this->option_variant_display_mode_default,
+				$this->option_enable_variant_display_mode,
 				$this->option_enable_fullpage_scroll,
 				$this->option_enable_language_banner,
 				$this->option_disable_cart_coupon,
@@ -1254,7 +1254,7 @@ class Settings {
 			$this->option_add_share_buttons             => __( 'Add social share buttons to WooCommerce product pages.', 'frontblocks' ),
 			$this->option_deactivate_product_tabs       => __( 'Remove the default description, reviews and attributes tabs.', 'frontblocks' ),
 			$this->option_horizontal_product_form       => __( 'Display quantity and Add to Cart button side by side.', 'frontblocks' ),
-			$this->option_variant_display_mode_default  => __( 'Set a global default for displaying product variation attributes as dropdowns or radio buttons.', 'frontblocks' ),
+			$this->option_enable_variant_display_mode  => __( 'Choose per attribute whether to display product variations as a dropdown or radio buttons.', 'frontblocks' ),
 			$this->option_enable_fullpage_scroll        => __( 'Enable full-page scroll navigation between sections.', 'frontblocks' ),
 			$this->option_enable_language_banner        => __( 'Show a banner when the visitor language differs from the site language.', 'frontblocks' ),
 			$this->option_disable_cart_coupon           => __( 'Hide the coupon code input field from the Cart page.', 'frontblocks' ),
@@ -1318,7 +1318,7 @@ class Settings {
 			$this->option_add_share_buttons             => 'share-buttons',
 			$this->option_deactivate_product_tabs       => 'deactivate-tabs',
 			$this->option_horizontal_product_form       => 'horizontal-form',
-			$this->option_variant_display_mode_default  => 'default',
+			$this->option_enable_variant_display_mode  => 'default',
 			$this->option_enable_fullpage_scroll        => 'fullpage-scroll',
 			$this->option_enable_language_banner        => 'language-banner',
 			$this->option_disable_cart_coupon           => 'default',
@@ -1621,28 +1621,12 @@ class Settings {
 	}
 
 	/**
-	 * Render Variant Display Mode default field.
+	 * Render Variant Display Mode toggle field.
 	 *
 	 * @return void
 	 */
-	public function field_variant_display_mode_default() {
-		$options  = get_option( 'frontblocks_settings', array() );
-		$value    = sanitize_text_field( $options[ $this->option_variant_display_mode_default ] ?? '' );
-		$disabled = ! $this->is_license_valid ? 'disabled' : '';
-		?>
-		<select
-			id="<?php echo esc_attr( $this->option_variant_display_mode_default ); ?>"
-			name="frontblocks_settings[<?php echo esc_attr( $this->option_variant_display_mode_default ); ?>]"
-			<?php echo esc_attr( $disabled ); ?>
-		>
-			<option value="select_dropdown" <?php selected( $value, 'select_dropdown' ); ?>>
-				<?php esc_html_e( 'Drop Down', 'frontblocks' ); ?>
-			</option>
-			<option value="radio_button" <?php selected( $value, 'radio_button' ); ?>>
-				<?php esc_html_e( 'Radio Button', 'frontblocks' ); ?>
-			</option>
-		</select>
-		<?php
+	public function field_enable_variant_display_mode() {
+		$this->render_pro_toggle( $this->option_enable_variant_display_mode );
 	}
 
 	/**
@@ -2223,6 +2207,7 @@ class Settings {
 			$this->option_add_share_buttons,
 			$this->option_deactivate_product_tabs,
 			$this->option_horizontal_product_form,
+			$this->option_enable_variant_display_mode,
 			$this->option_enable_custom_post_types,
 			$this->option_enable_fullpage_scroll,
 			$this->option_enable_language_banner,
@@ -2246,9 +2231,6 @@ class Settings {
 			} elseif ( $this->option_events_type === $key ) {
 				// Sanitize events type: only allow 'cpt' or 'posts'.
 				$sanitized[ $key ] = in_array( $val, array( 'cpt', 'posts' ), true ) ? $val : 'cpt';
-			} elseif ( $this->option_variant_display_mode_default === $key ) {
-				// Sanitize variant display mode: only allow known values.
-				$sanitized[ $key ] = in_array( $val, array( 'select_dropdown', 'radio_button' ), true ) ? $val : 'select_dropdown';
 			}
 		}
 
