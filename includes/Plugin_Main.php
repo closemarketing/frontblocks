@@ -147,6 +147,9 @@ class Plugin_Main {
 		// SVG Upload module (allows SVG files in the media library).
 		new Frontend\SvgUpload();
 
+		// Columns Same Height module (equal-height columns for native columns block).
+		new Frontend\ColumnsSameHeight();
+
 		// Download Button module (download option for the native button block).
 		new Frontend\DownloadButton();
 
