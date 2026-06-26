@@ -1639,7 +1639,7 @@ class Settings {
 				<select
 					id="<?php echo esc_attr( $this->option_scroll_top_position ); ?>"
 					name="frontblocks_settings[<?php echo esc_attr( $this->option_scroll_top_position ); ?>]"
-					class="tw-block tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-sm focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
+					class="tw-block tw-pl-3 tw-pr-8 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-sm focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
 				>
 					<option value="bottom-right" <?php selected( $position, 'bottom-right' ); ?>>
 						<?php echo esc_html__( 'Bottom right', 'frontblocks' ); ?>
