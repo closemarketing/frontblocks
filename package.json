@@ -4,7 +4,7 @@
     "@babel/core": "^7.29.7",
     "@babel/preset-env": "^7.29.7",
     "@babel/preset-react": "~7.27.0",
-    "autoprefixer": "^10.5.0",
+    "autoprefixer": "^10.5.2",
     "gulp": "^5.0.1",
     "gulp-clean-css": "^4.3.0",
     "gulp-terser": "^2.1.0",
