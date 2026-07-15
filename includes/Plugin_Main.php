@@ -153,6 +153,9 @@ class Plugin_Main {
 		// Download Button module (download option for the native button block).
 		new Frontend\DownloadButton();
 
+		// Maintenance Mode module.
+		new Frontend\Maintenance();
+
 		// User Text block is provided by FrontBlocks Pro when license is active.
 	}
 
