@@ -443,9 +443,14 @@ class Settings {
 					const previewImg = previewWrapper ? previewWrapper.querySelector('img') : null;
 					let mediaFrame;
 
-					if (selectButton && imageInput && window.wp && window.wp.media) {
+					if (selectButton && imageInput) {
 						selectButton.addEventListener('click', function (event) {
 							event.preventDefault();
+
+							if (! window.wp || ! window.wp.media) {
+								window.alert('" . esc_js( __( 'The media library failed to load. Please reload the page and try again.', 'frontblocks' ) ) . "');
+								return;
+							}
 
 							if (mediaFrame) {
 								mediaFrame.open();
