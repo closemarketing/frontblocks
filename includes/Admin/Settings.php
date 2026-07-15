@@ -423,78 +423,92 @@ class Settings {
 					updateEventsTypeVisibility();
 				}
 
-				// Show/hide maintenance title & image fields based on toggle state.
+			});
+			"
+		);
+
+		// Separate, isolated inline script for the maintenance mode fields: kept apart from the
+		// script above so that an error there can never prevent this one from running.
+		wp_add_inline_script(
+			'jquery',
+			"
+			document.addEventListener('DOMContentLoaded', function() {
 				const maintenanceCheckbox = document.getElementById('enable_maintenance');
 				const maintenanceWrapper = document.getElementById('maintenance-fields-wrapper');
 
 				if (maintenanceCheckbox && maintenanceWrapper) {
-					function updateMaintenanceFieldsVisibility() {
+					maintenanceCheckbox.addEventListener('change', function () {
 						maintenanceWrapper.style.display = maintenanceCheckbox.checked ? 'block' : 'none';
-					}
-
-					maintenanceCheckbox.addEventListener('change', updateMaintenanceFieldsVisibility);
-					updateMaintenanceFieldsVisibility();
-
-					// Media uploader for the maintenance background image.
-					const imageInput = document.getElementById('maintenance_image');
-					const selectButton = maintenanceWrapper.querySelector('.frbl-maintenance-select-image');
-					const removeButton = maintenanceWrapper.querySelector('.frbl-maintenance-remove-image');
-					const previewWrapper = maintenanceWrapper.querySelector('.frbl-maintenance-image-preview');
-					const previewImg = previewWrapper ? previewWrapper.querySelector('img') : null;
-					let mediaFrame;
-
-					if (selectButton && imageInput) {
-						selectButton.addEventListener('click', function (event) {
-							event.preventDefault();
-
-							if (! window.wp || ! window.wp.media) {
-								window.alert('" . esc_js( __( 'The media library failed to load. Please reload the page and try again.', 'frontblocks' ) ) . "');
-								return;
-							}
-
-							if (mediaFrame) {
-								mediaFrame.open();
-								return;
-							}
-
-							mediaFrame = window.wp.media({
-								title: selectButton.textContent,
-								button: { text: selectButton.textContent },
-								multiple: false,
-								library: { type: 'image' },
-							});
-
-							mediaFrame.on('select', function () {
-								const attachment = mediaFrame.state().get('selection').first().toJSON();
-								imageInput.value = attachment.id;
-
-								if (previewImg) {
-									previewImg.src = attachment.sizes && attachment.sizes.medium ? attachment.sizes.medium.url : attachment.url;
-								}
-								if (previewWrapper) {
-									previewWrapper.style.display = 'block';
-								}
-								if (removeButton) {
-									removeButton.style.display = '';
-								}
-							});
-
-							mediaFrame.open();
-						});
-					}
-
-					if (removeButton && imageInput) {
-						removeButton.addEventListener('click', function (event) {
-							event.preventDefault();
-							imageInput.value = '';
-							if (previewWrapper) {
-								previewWrapper.style.display = 'none';
-							}
-							removeButton.style.display = 'none';
-						});
-					}
+					});
 				}
 
+				// Event delegation: works even if the button is added/replaced later, and does not
+				// depend on any other inline script having run successfully first.
+				let mediaFrame;
+
+				document.addEventListener('click', function (event) {
+					const selectButton = event.target.closest('.frbl-maintenance-select-image');
+					const removeButton = event.target.closest('.frbl-maintenance-remove-image');
+
+					if (! selectButton && ! removeButton) {
+						return;
+					}
+
+					event.preventDefault();
+
+					const imageInput = document.getElementById('maintenance_image');
+					const previewWrapper = document.querySelector('.frbl-maintenance-image-preview');
+					const previewImg = previewWrapper ? previewWrapper.querySelector('img') : null;
+
+					if (removeButton) {
+						if (imageInput) {
+							imageInput.value = '';
+						}
+						if (previewWrapper) {
+							previewWrapper.style.display = 'none';
+						}
+						removeButton.style.display = 'none';
+						return;
+					}
+
+					if (! window.wp || ! window.wp.media) {
+						window.alert('" . esc_js( __( 'The media library failed to load. Please reload the page and try again.', 'frontblocks' ) ) . "');
+						return;
+					}
+
+					if (mediaFrame) {
+						mediaFrame.open();
+						return;
+					}
+
+					mediaFrame = window.wp.media({
+						title: selectButton.textContent,
+						button: { text: selectButton.textContent },
+						multiple: false,
+						library: { type: 'image' },
+					});
+
+					mediaFrame.on('select', function () {
+						const attachment = mediaFrame.state().get('selection').first().toJSON();
+
+						if (imageInput) {
+							imageInput.value = attachment.id;
+						}
+						if (previewImg) {
+							previewImg.src = attachment.sizes && attachment.sizes.medium ? attachment.sizes.medium.url : attachment.url;
+						}
+						if (previewWrapper) {
+							previewWrapper.style.display = 'block';
+						}
+
+						const currentRemoveButton = document.querySelector('.frbl-maintenance-remove-image');
+						if (currentRemoveButton) {
+							currentRemoveButton.style.display = '';
+						}
+					});
+
+					mediaFrame.open();
+				});
 			});
 			"
 		);
