@@ -107,7 +107,7 @@ class Maintenance {
 			<meta name="viewport" content="width=device-width, initial-scale=1">
 			<meta name="robots" content="noindex, nofollow">
 			<title><?php echo esc_html( $title ); ?></title>
-			<link rel="stylesheet" href="<?php echo esc_url( FRBL_PLUGIN_URL . 'assets/maintenance/frontblocks-maintenance.css' ); ?>">
+			<style><?php echo $this->get_maintenance_css(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></style>
 		</head>
 		<body class="frbl-maintenance-body">
 			<div class="frbl-maintenance-overlay" <?php echo $image_url ? 'style="background-image: url(\'' . esc_url( $image_url ) . '\');"' : ''; ?>>
@@ -118,5 +118,23 @@ class Maintenance {
 		</body>
 		</html>
 		<?php
+	}
+
+	/**
+	 * Read the maintenance page CSS to inline it.
+	 *
+	 * There is no theme/template context on this page (we bypass wp_head/wp_footer
+	 * entirely), so the stylesheet is inlined instead of enqueued.
+	 *
+	 * @return string
+	 */
+	private function get_maintenance_css() {
+		$css_path = FRBL_PLUGIN_PATH . 'assets/maintenance/frontblocks-maintenance.css';
+
+		if ( ! file_exists( $css_path ) ) {
+			return '';
+		}
+
+		return file_get_contents( $css_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 	}
 }
