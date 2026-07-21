@@ -76,6 +76,27 @@ class Settings {
 	private $option_events_type = 'events_type';
 
 	/**
+	 * Option key for maintenance mode feature.
+	 *
+	 * @var string
+	 */
+	private $option_enable_maintenance = 'enable_maintenance';
+
+	/**
+	 * Option key for maintenance page title.
+	 *
+	 * @var string
+	 */
+	private $option_maintenance_title = 'maintenance_title';
+
+	/**
+	 * Option key for maintenance page background image (attachment ID).
+	 *
+	 * @var string
+	 */
+	private $option_maintenance_image = 'maintenance_image';
+
+	/**
 	 * Option key for popups feature.
 	 *
 	 * @var string
@@ -297,8 +318,8 @@ class Settings {
 				
 				if (deactivateCheckbox && moveContentCheckbox) {
 					function updateMutualExclusion() {
-						const deactivateWrapper = deactivateCheckbox.closest('.tw-flex');
-						const moveContentWrapper = moveContentCheckbox.closest('.tw-flex');
+						const deactivateWrapper = deactivateCheckbox.closest('.tw:flex');
+						const moveContentWrapper = moveContentCheckbox.closest('.tw:flex');
 						
 						// Check if license is valid (not just PRO active).
 						const isLicenseValid = " . ( $this->is_license_valid ? 'true' : 'false' ) . ";
@@ -526,6 +547,95 @@ class Settings {
 			"
 		);
 
+		// Separate, isolated inline script for the maintenance mode fields: kept apart from the
+		// script above so that an error there can never prevent this one from running.
+		wp_add_inline_script(
+			'jquery',
+			"
+			document.addEventListener('DOMContentLoaded', function() {
+				const maintenanceCheckbox = document.getElementById('enable_maintenance');
+				const maintenanceWrapper = document.getElementById('maintenance-fields-wrapper');
+
+				if (maintenanceCheckbox && maintenanceWrapper) {
+					maintenanceCheckbox.addEventListener('change', function () {
+						maintenanceWrapper.style.display = maintenanceCheckbox.checked ? 'block' : 'none';
+					});
+				}
+
+				// Event delegation: works even if the button is added/replaced later, and does not
+				// depend on any other inline script having run successfully first.
+				let mediaFrame;
+
+				document.addEventListener('click', function (event) {
+					const selectButton = event.target.closest('.frbl-maintenance-select-image');
+					const removeButton = event.target.closest('.frbl-maintenance-remove-image');
+
+					if (! selectButton && ! removeButton) {
+						return;
+					}
+
+					event.preventDefault();
+
+					const imageInput = document.getElementById('maintenance_image');
+					const previewWrapper = document.querySelector('.frbl-maintenance-image-preview');
+					const previewImg = previewWrapper ? previewWrapper.querySelector('img') : null;
+
+					if (removeButton) {
+						if (imageInput) {
+							imageInput.value = '';
+						}
+						if (previewWrapper) {
+							previewWrapper.style.display = 'none';
+						}
+						removeButton.style.display = 'none';
+						return;
+					}
+
+					if (! window.wp || ! window.wp.media) {
+						window.alert('" . esc_js( __( 'The media library failed to load. Please reload the page and try again.', 'frontblocks' ) ) . "');
+						return;
+					}
+
+					if (mediaFrame) {
+						mediaFrame.open();
+						return;
+					}
+
+					mediaFrame = window.wp.media({
+						title: selectButton.textContent,
+						button: { text: selectButton.textContent },
+						multiple: false,
+						library: { type: 'image' },
+					});
+
+					mediaFrame.on('select', function () {
+						const attachment = mediaFrame.state().get('selection').first().toJSON();
+
+						if (imageInput) {
+							imageInput.value = attachment.id;
+						}
+						if (previewImg) {
+							previewImg.src = attachment.sizes && attachment.sizes.medium ? attachment.sizes.medium.url : attachment.url;
+						}
+						if (previewWrapper) {
+							previewWrapper.style.display = 'block';
+						}
+
+						const currentRemoveButton = document.querySelector('.frbl-maintenance-remove-image');
+						if (currentRemoveButton) {
+							currentRemoveButton.style.display = '';
+						}
+					});
+
+					mediaFrame.open();
+				});
+			});
+			"
+		);
+
+		// Enqueue the WordPress media uploader for the maintenance background image field.
+		wp_enqueue_media();
+
 		// Enqueue script for custom post types if PRO is active and license is valid.
 		if ( frbl_is_pro_active() && $this->is_license_valid ) {
 			wp_enqueue_script(
@@ -689,6 +799,22 @@ class Settings {
 			array( $this, 'field_enable_fluid_typography' ),
 			$this->page_slug,
 			'frontblocks_section_features'
+		);
+
+		// Maintenance Mode section (own full-width section, needs room for title + image fields).
+		add_settings_section(
+			'frontblocks_section_maintenance',
+			__( 'Maintenance Mode', 'frontblocks' ),
+			array( $this, 'section_maintenance_callback' ),
+			$this->page_slug
+		);
+
+		add_settings_field(
+			$this->option_enable_maintenance,
+			__( 'Enable Maintenance Mode', 'frontblocks' ),
+			array( $this, 'field_enable_maintenance' ),
+			$this->page_slug,
+			'frontblocks_section_maintenance'
 		);
 
 		// PRO Features section.
@@ -885,21 +1011,21 @@ class Settings {
 			return;
 		}
 		?>
-		<div class="frbl-settings-wrapper tw-min-h-screen tw-bg-gray-50 tw-py-8">
-			<div class="tw-max-w-5xl tw-mx-auto tw-px-4 sm:tw-px-6 lg:tw-px-8">
+		<div class="frbl-settings-wrapper tw:min-h-screen tw:bg-gray-50 tw:py-8">
+			<div class="tw:max-w-5xl tw:mx-auto tw:px-4 tw:sm:px-6 tw:lg:px-8">
 				<!-- Header Section -->
-				<div class="tw-mb-8 frbl-animate-slide-in">
-					<div class="tw-flex tw-items-center tw-justify-between">
+				<div class="tw:mb-8 frbl-animate-slide-in">
+					<div class="tw:flex tw:items-center tw:justify-between">
 						<div>
-							<h1 class="tw-text-3xl tw-font-bold tw-text-gray-900 tw-mb-2">
+							<h1 class="tw:text-3xl tw:font-bold tw:text-gray-900 tw:mb-2">
 								<?php echo esc_html__( 'FrontBlocks Settings', 'frontblocks' ); ?>
 							</h1>
-							<p class="tw-text-gray-600">
+							<p class="tw:text-gray-600">
 								<?php echo esc_html__( 'Add visual enhancements to your website with FrontBlocks.', 'frontblocks' ); ?>
 							</p>
 						</div>
-						<div class="tw-flex tw-items-center tw-space-x-2">
-							<span class="tw-inline-flex tw-items-center tw-px-3 tw-py-1 tw-rounded-full tw-text-sm tw-font-medium tw-bg-primary-100 tw-text-primary-700">
+						<div class="tw:flex tw:items-center tw:space-x-2">
+							<span class="tw:inline-flex tw:items-center tw:px-3 tw:py-1 tw:rounded-full tw:text-sm tw:font-medium tw:bg-primary-100 tw:text-primary-700">
 								<?php echo esc_html__( 'Version', 'frontblocks' ) . ' ' . esc_html( FRBL_VERSION ); ?>
 							</span>
 						</div>
@@ -912,14 +1038,14 @@ class Settings {
 				if ( isset( $_GET['settings-updated'] ) && 'true' === sanitize_text_field( wp_unslash( $_GET['settings-updated'] ) ) ) :
 					?>
 					<div style="background-color: #f0fdf4; border-left: 4px solid #4ade80; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
-						<div class="tw-flex">
-							<div class="tw-flex-shrink-0">
-								<svg class="tw-h-5 tw-w-5" style="color: #4ade80;" viewBox="0 0 20 20" fill="currentColor">
+						<div class="tw:flex">
+							<div class="tw:flex-shrink-0">
+								<svg class="tw:h-5 tw:w-5" style="color: #4ade80;" viewBox="0 0 20 20" fill="currentColor">
 									<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
 								</svg>
 							</div>
-							<div class="tw-ml-3">
-								<p class="tw-text-sm tw-font-medium" style="color: #15803d; margin: 0;">
+							<div class="tw:ml-3">
+								<p class="tw:text-sm tw:font-medium" style="color: #15803d; margin: 0;">
 									<?php esc_html_e( 'Changes saved successfully', 'frontblocks' ); ?>
 								</p>
 							</div>
@@ -933,14 +1059,14 @@ class Settings {
 				if ( isset( $_GET['settings-error'] ) && 'true' === sanitize_text_field( wp_unslash( $_GET['settings-error'] ) ) ) :
 					?>
 					<div style="background-color: #fef2f2; border-left: 4px solid #f87171; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
-						<div class="tw-flex">
-							<div class="tw-flex-shrink-0">
-								<svg class="tw-h-5 tw-w-5" style="color: #f87171;" viewBox="0 0 20 20" fill="currentColor">
+						<div class="tw:flex">
+							<div class="tw:flex-shrink-0">
+								<svg class="tw:h-5 tw:w-5" style="color: #f87171;" viewBox="0 0 20 20" fill="currentColor">
 									<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
 								</svg>
 							</div>
-							<div class="tw-ml-3">
-								<p class="tw-text-sm tw-font-medium" style="color: #991b1b; margin: 0;">
+							<div class="tw:ml-3">
+								<p class="tw:text-sm tw:font-medium" style="color: #991b1b; margin: 0;">
 									<?php esc_html_e( 'Failed to save changes. Please try again.', 'frontblocks' ); ?>
 								</p>
 							</div>
@@ -954,14 +1080,14 @@ class Settings {
 				if ( isset( $_GET['license_activated'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['license_activated'] ) ) ) :
 					?>
 					<div style="background-color: #f0fdf4; border-left: 4px solid #4ade80; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
-						<div class="tw-flex">
-							<div class="tw-flex-shrink-0">
-								<svg class="tw-h-5 tw-w-5" style="color: #4ade80;" viewBox="0 0 20 20" fill="currentColor">
+						<div class="tw:flex">
+							<div class="tw:flex-shrink-0">
+								<svg class="tw:h-5 tw:w-5" style="color: #4ade80;" viewBox="0 0 20 20" fill="currentColor">
 									<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
 								</svg>
 							</div>
-							<div class="tw-ml-3">
-								<p class="tw-text-sm tw-font-medium" style="color: #15803d; margin: 0;">
+							<div class="tw:ml-3">
+								<p class="tw:text-sm tw:font-medium" style="color: #15803d; margin: 0;">
 									<?php esc_html_e( 'License activated successfully!', 'frontblocks' ); ?>
 								</p>
 							</div>
@@ -975,14 +1101,14 @@ class Settings {
 				if ( isset( $_GET['license_deactivated'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['license_deactivated'] ) ) ) :
 					?>
 					<div style="background-color: #fffbeb; border-left: 4px solid #fbbf24; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
-						<div class="tw-flex">
-							<div class="tw-flex-shrink-0">
-								<svg class="tw-h-5 tw-w-5" style="color: #fbbf24;" viewBox="0 0 20 20" fill="currentColor">
+						<div class="tw:flex">
+							<div class="tw:flex-shrink-0">
+								<svg class="tw:h-5 tw:w-5" style="color: #fbbf24;" viewBox="0 0 20 20" fill="currentColor">
 									<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
 								</svg>
 							</div>
-							<div class="tw-ml-3">
-								<p class="tw-text-sm tw-font-medium" style="color: #92400e; margin: 0;">
+							<div class="tw:ml-3">
+								<p class="tw:text-sm tw:font-medium" style="color: #92400e; margin: 0;">
 									<?php esc_html_e( 'License deactivated successfully.', 'frontblocks' ); ?>
 								</p>
 							</div>
@@ -998,14 +1124,14 @@ class Settings {
 					$error_msg = isset( $_GET['error_msg'] ) ? sanitize_text_field( wp_unslash( $_GET['error_msg'] ) ) : '';
 					?>
 					<div style="background-color: #fef2f2; border-left: 4px solid #f87171; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
-						<div class="tw-flex">
-							<div class="tw-flex-shrink-0">
-								<svg class="tw-h-5 tw-w-5" style="color: #f87171;" viewBox="0 0 20 20" fill="currentColor">
+						<div class="tw:flex">
+							<div class="tw:flex-shrink-0">
+								<svg class="tw:h-5 tw:w-5" style="color: #f87171;" viewBox="0 0 20 20" fill="currentColor">
 									<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
 								</svg>
 							</div>
-							<div class="tw-ml-3">
-								<p class="tw-text-sm tw-font-medium" style="color: #991b1b; margin: 0;">
+							<div class="tw:ml-3">
+								<p class="tw:text-sm tw:font-medium" style="color: #991b1b; margin: 0;">
 									<?php
 									if ( ! empty( $error_msg ) ) {
 										echo esc_html__( 'Failed to activate license: ', 'frontblocks' ) . '<br><strong>' . esc_html( $error_msg ) . '</strong>';
@@ -1022,7 +1148,7 @@ class Settings {
 				?>
 
 				<!-- Settings Form -->
-				<form method="post" action="options.php" class="tw-space-y-6">
+				<form method="post" action="options.php" class="tw:space-y-6">
 					<?php settings_fields( 'frontblocks_settings' ); ?>
 
 					<?php
@@ -1039,12 +1165,12 @@ class Settings {
 					?>
 
 					<!-- Submit Button -->
-					<div class="tw-flex tw-items-center tw-justify-between tw-pt-6 tw-border-t tw-border-gray-200">
-						<div class="tw-text-sm tw-text-gray-500">
+					<div class="tw:flex tw:items-center tw:justify-between tw:pt-6 tw:border-t tw:border-gray-200">
+						<div class="tw:text-sm tw:text-gray-500">
 							<?php echo esc_html__( 'Changes will be applied immediately after saving.', 'frontblocks' ); ?>
 						</div>
-						<button type="submit" class="tw-inline-flex tw-items-center tw-px-4 tw-py-3 tw-border tw-border-transparent tw-text-base tw-font-medium tw-rounded-lg tw-shadow-sm tw-text-white tw-bg-primary-500 hover:tw-bg-primary-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-primary-500 tw-transition-colors tw-duration-200">
-							<svg class="tw-w-5 tw-h-5 tw-mr-2 tw--ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<button type="submit" class="tw:inline-flex tw:items-center tw:px-4 tw:py-3 tw:border tw:border-transparent tw:text-base tw:font-medium tw:rounded-lg tw:shadow-sm tw:text-white tw:bg-primary-500 tw:hover:bg-primary-600 tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-offset-2 tw:focus:ring-primary-500 tw:transition-colors tw:duration-200">
+							<svg class="tw:w-5 tw:h-5 tw:mr-2 tw:-ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
 							</svg>
 							<?php echo esc_html__( 'Save Settings', 'frontblocks' ); ?>
@@ -1060,12 +1186,12 @@ class Settings {
 				?>
 
 				<!-- Footer Info -->
-				<div class="tw-mt-8 tw-text-center tw-text-sm tw-text-gray-500">
+				<div class="tw:mt-8 tw:text-center tw:text-sm tw:text-gray-500">
 					<?php
 					printf(
 						/* translators: %s: Close·marketing link */
 						esc_html__( 'Made with ❤️ by %s', 'frontblocks' ),
-						'<a href="https://close.technology/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings" target="_blank" rel="noopener noreferrer" class="tw-text-primary-500 hover:tw-text-primary-600 tw-font-medium">Close·Technology</a>'
+						'<a href="https://close.technology/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings" target="_blank" rel="noopener noreferrer" class="tw:text-primary-500 tw:hover:text-primary-600 tw:font-medium">Close·Technology</a>'
 					);
 					?>
 				</div>
@@ -1103,17 +1229,17 @@ class Settings {
 		}
 
 		?>
-		<div class="tw-mt-8 tw-p-6 tw-bg-yellow-50 tw-border tw-border-yellow-200 tw-rounded-lg">
-			<h3 class="tw-text-lg tw-font-semibold tw-text-gray-900 tw-mb-4">
+		<div class="tw:mt-8 tw:p-6 tw:bg-yellow-50 tw:border tw:border-yellow-200 tw:rounded-lg">
+			<h3 class="tw:text-lg tw:font-semibold tw:text-gray-900 tw:mb-4">
 				🐛 Debug: Fluid Typography Settings
 			</h3>
-			<p class="tw-text-sm tw-text-gray-600 tw-mb-4">
+			<p class="tw:text-sm tw:text-gray-600 tw:mb-4">
 				<?php echo esc_html__( 'This shows the GeneratePress font settings being used by the Fluid Typography module.', 'frontblocks' ); ?>
 			</p>
-			<div class="tw-bg-white tw-p-4 tw-rounded tw-border tw-border-gray-300 tw-overflow-auto" style="max-height: 400px;">
+			<div class="tw:bg-white tw:p-4 tw:rounded tw:border tw:border-gray-300 tw:overflow-auto" style="max-height: 400px;">
 				<pre style="margin: 0; font-size: 12px;"><?php print_r( $font_settings ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r ?></pre>
 			</div>
-			<p class="tw-text-xs tw-text-gray-500 tw-mt-4">
+			<p class="tw:text-xs tw:text-gray-500 tw:mt-4">
 				<?php
 				printf(
 					/* translators: %s: URL parameter */
@@ -1196,7 +1322,7 @@ class Settings {
 		$pro_blocks = apply_filters( 'frbl_pro_blocks', $this->get_default_pro_blocks() );
 
 		?>
-		<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
+		<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
 			<?php echo esc_html__( 'These blocks and features are always active and available in the block editor.', 'frontblocks' ); ?>
 		</p>
 		<div class="frbl-features-grid">
@@ -1221,8 +1347,21 @@ class Settings {
 	private function section_features_callback() {
 		$license_valid = function_exists( 'frblp_is_license_valid' ) && frblp_is_license_valid();
 		?>
-		<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
+		<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
 			<?php echo esc_html__( 'Enable or disable these optional features as needed.', 'frontblocks' ); ?>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Maintenance mode section callback.
+	 *
+	 * @return void
+	 */
+	private function section_maintenance_callback() {
+		?>
+		<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
+			<?php echo esc_html__( 'Show a full-screen curtain page on every URL of the site while you work on it.', 'frontblocks' ); ?>
 		</p>
 		<?php
 	}
@@ -1246,18 +1385,18 @@ class Settings {
 		// Check if this is a section with callback only (like active_blocks).
 		$is_callback_only = ! $has_fields && $section['callback'];
 
-		// Check if this is the custom post types section - render it full width.
-		$is_cpt_section = 'frontblocks_section_custom_post_types' === $section['id'];
+		// Check if this is a section that needs full width (rich fields, not a simple toggle grid).
+		$is_cpt_section = in_array( $section['id'], array( 'frontblocks_section_custom_post_types', 'frontblocks_section_maintenance' ), true );
 
 		// Show PRO CTA button before the Optional Features section.
 		if ( 'frontblocks_section_features' === $section['id'] && ! $this->is_license_valid ) {
 			?>
-			<div class="tw-mb-4">
+			<div class="tw:mb-4">
 				<a
 					href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-optional-cta"
 					target="_blank"
 					rel="noopener noreferrer"
-					class="tw-inline-flex tw-items-center tw-border tw-border-transparent tw-text-sm tw-font-medium tw-rounded-lg tw-shadow-sm tw-text-white tw-transition-colors tw-duration-200"
+					class="tw:inline-flex tw:items-center tw:border tw:border-transparent tw:text-sm tw:font-medium tw:rounded-lg tw:shadow-sm tw:text-white tw:transition-colors tw:duration-200"
 					style="background-color: #ef4444; padding: 10px 20px;"
 					onmouseover="this.style.backgroundColor='#dc2626'"
 					onmouseout="this.style.backgroundColor='#ef4444'"
@@ -1273,7 +1412,7 @@ class Settings {
 			?>
 			<div class="frbl-section-wrapper">
 				<div class="frbl-section-header">
-					<h2 class="tw-text-2xl tw-font-bold tw-text-gray-900 tw-mb-0">
+					<h2 class="tw:text-2xl tw:font-bold tw:text-gray-900 tw:mb-0">
 						<?php echo esc_html( $section['title'] ); ?>
 					</h2>
 				</div>
@@ -1286,20 +1425,20 @@ class Settings {
 		if ( $is_cpt_section ) {
 			// Render CPT section as a full-width card.
 			?>
-			<div class="frbl-card tw-bg-white tw-rounded-lg tw-shadow-sm tw-border tw-border-gray-200 tw-overflow-hidden frbl-animate-slide-in tw-mb-8">
-				<div class="tw-px-6 tw-py-5 tw-border-b tw-border-gray-200 tw-bg-gradient-to-r tw-from-gray-50 tw-to-white">
-					<h2 class="tw-text-xl tw-font-semibold tw-text-gray-900">
+			<div class="frbl-card tw:bg-white tw:rounded-lg tw:shadow-sm tw:border tw:border-gray-200 tw:overflow-hidden frbl-animate-slide-in tw:mb-8">
+				<div class="tw:px-6 tw:py-5 tw:border-b tw:border-gray-200 tw:bg-gradient-to-r tw:from-gray-50 tw:to-white">
+					<h2 class="tw:text-xl tw:font-semibold tw:text-gray-900">
 						<?php echo esc_html( $section['title'] ); ?>
 					</h2>
 					<?php
 					if ( $section['callback'] ) {
-						echo '<div class="tw-mt-2 tw-text-sm tw-text-gray-600">';
+						echo '<div class="tw:mt-2 tw:text-sm tw:text-gray-600">';
 						call_user_func( $section['callback'], $section );
 						echo '</div>';
 					}
 					?>
 				</div>
-				<div class="tw-px-6 tw-py-5">
+				<div class="tw:px-6 tw:py-5">
 					<?php
 					foreach ( (array) $wp_settings_fields[ $this->page_slug ][ $section['id'] ] as $field ) {
 						call_user_func( $field['callback'], $field['args'] );
@@ -1314,12 +1453,12 @@ class Settings {
 			<div class="frbl-section-wrapper">
 				<!-- Section Header -->
 				<div class="frbl-section-header">
-					<h2 class="tw-text-2xl tw-font-bold tw-text-gray-900 tw-mb-0">
+					<h2 class="tw:text-2xl tw:font-bold tw:text-gray-900 tw:mb-0">
 						<?php echo esc_html( $section['title'] ); ?>
 					</h2>
 					<?php
 					if ( $section['callback'] ) {
-						echo '<div class="tw-text-sm tw-text-gray-600">';
+						echo '<div class="tw:text-sm tw:text-gray-600">';
 						call_user_func( $section['callback'], $section );
 						echo '</div>';
 					}
@@ -1504,34 +1643,34 @@ class Settings {
 	 */
 	public function section_woo_features_callback() {
 		if ( ! frbl_is_pro_active() ) {
-			echo '<div class="tw-bg-blue-50 tw-border-l-4 tw-border-blue-400 tw-p-4 tw-mb-4">';
-			echo '<div class="tw-flex">';
-			echo '<div class="tw-flex-shrink-0">';
-			echo '<svg class="tw-h-5 tw-w-5 tw-text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>';
+			echo '<div class="tw:bg-blue-50 tw:border-l-4 tw:border-blue-400 tw:p-4 tw:mb-4">';
+			echo '<div class="tw:flex">';
+			echo '<div class="tw:flex-shrink-0">';
+			echo '<svg class="tw:h-5 tw:w-5 tw:text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>';
 			echo '</div>';
-			echo '<div class="tw-ml-3">';
-			echo '<p class="tw-text-sm tw-text-blue-700">';
+			echo '<div class="tw:ml-3">';
+			echo '<p class="tw:text-sm tw:text-blue-700">';
 			printf(
 				/* translators: %s: FrontBlocks PRO link */
 				esc_html__( 'These features require %s. Upgrade to unlock advanced functionality.', 'frontblocks' ),
-				'<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings" target="_blank" class="tw-font-medium tw-underline">FrontBlocks PRO</a>'
+				'<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings" target="_blank" class="tw:font-medium tw:underline">FrontBlocks PRO</a>'
 			);
 			echo '</p>';
 			echo '</div>';
 			echo '</div>';
 			echo '</div>';
 		} elseif ( ! $this->is_license_valid ) {
-			echo '<div class="tw-bg-yellow-50 tw-border-l-4 tw-border-yellow-400 tw-p-4 tw-mb-4">';
-			echo '<div class="tw-flex">';
-			echo '<div class="tw-flex-shrink-0">';
-			echo '<svg class="tw-h-5 tw-w-5 tw-text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>';
+			echo '<div class="tw:bg-yellow-50 tw:border-l-4 tw:border-yellow-400 tw:p-4 tw:mb-4">';
+			echo '<div class="tw:flex">';
+			echo '<div class="tw:flex-shrink-0">';
+			echo '<svg class="tw:h-5 tw:w-5 tw:text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>';
 			echo '</div>';
-			echo '<div class="tw-ml-3">';
-			echo '<p class="tw-text-sm tw-text-yellow-700">';
+			echo '<div class="tw:ml-3">';
+			echo '<p class="tw:text-sm tw:text-yellow-700">';
 			printf(
 				/* translators: %s: License section link */
 				esc_html__( 'License is not activated. Please activate your license in the %s section below to enable these features.', 'frontblocks' ),
-				'<a href="#frontblocks_section_license" class="tw-font-medium tw-underline">' . esc_html__( 'License', 'frontblocks' ) . '</a>'
+				'<a href="#frontblocks_section_license" class="tw:font-medium tw:underline">' . esc_html__( 'License', 'frontblocks' ) . '</a>'
 			);
 			echo '</p>';
 			echo '</div>';
@@ -1539,7 +1678,7 @@ class Settings {
 			echo '</div>';
 		} else {
 			?>
-			<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
+			<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
 				<?php echo esc_html__( 'Advanced features for WooCommerce and more.', 'frontblocks' ); ?>
 			</p>
 			<?php
@@ -1696,14 +1835,14 @@ class Settings {
 		</label>
 		
 		<!-- Select and description - will be moved below the card by JavaScript -->
-		<div id="events-type-wrapper" class="tw-mt-4" style="<?php echo $enabled ? 'width: 100%; min-width: 100%; display: block;' : 'display: none;'; ?>">
-			<label for="<?php echo esc_attr( $this->option_events_type ); ?>" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
+		<div id="events-type-wrapper" class="tw:mt-4" style="<?php echo $enabled ? 'width: 100%; min-width: 100%; display: block;' : 'display: none;'; ?>">
+			<label for="<?php echo esc_attr( $this->option_events_type ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
 				<?php echo esc_html__( 'Event type', 'frontblocks' ); ?>
 			</label>
 			<select 
 				id="<?php echo esc_attr( $this->option_events_type ); ?>" 
 				name="frontblocks_settings[<?php echo esc_attr( $this->option_events_type ); ?>]"
-				class="tw-block tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
+				class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
 				style="width: 100%; min-width: 100%; max-width: 100%; box-sizing: border-box;"
 			>
 				<option value="cpt" <?php selected( $events_type, 'cpt' ); ?>>
@@ -1713,7 +1852,7 @@ class Settings {
 					<?php echo esc_html__( 'Blog posts', 'frontblocks' ); ?>
 				</option>
 			</select>
-			<p class="tw-text-xs tw-text-gray-500 tw-mt-2">
+			<p class="tw:text-xs tw:text-gray-500 tw:mt-2">
 				<?php echo esc_html__( 'Choose whether events will be created in a dedicated CPT or in regular blog posts.', 'frontblocks' ); ?>
 			</p>
 		</div>
@@ -1738,6 +1877,72 @@ class Settings {
 			/>
 			<span></span>
 		</label>
+		<?php
+	}
+
+	/**
+	 * Render toggle field for enable maintenance mode.
+	 *
+	 * @return void
+	 */
+	public function field_enable_maintenance() {
+		$options   = get_option( 'frontblocks_settings', array() );
+		$enabled   = (bool) ( $options[ $this->option_enable_maintenance ] ?? false );
+		$title     = (string) ( $options[ $this->option_maintenance_title ] ?? '' );
+		$image_id  = (int) ( $options[ $this->option_maintenance_image ] ?? 0 );
+		$image_url = $image_id ? wp_get_attachment_image_url( $image_id, 'medium' ) : '';
+		?>
+		<div class="frbl-maintenance-wrapper">
+			<div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
+				<label for="<?php echo esc_attr( $this->option_enable_maintenance ); ?>" class="tw:text-base tw:font-medium tw:text-gray-900">
+					<?php echo esc_html__( 'Enable Maintenance Mode', 'frontblocks' ); ?>
+				</label>
+				<label class="frbl-toggle">
+					<input type="checkbox"
+						id="<?php echo esc_attr( $this->option_enable_maintenance ); ?>"
+						name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_maintenance ); ?>]"
+						value="1"
+						<?php checked( true, $enabled ); ?>
+					/>
+					<span></span>
+				</label>
+			</div>
+
+			<div id="maintenance-fields-wrapper" style="<?php echo $enabled ? '' : 'display: none;'; ?>">
+				<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200">
+					<label for="<?php echo esc_attr( $this->option_maintenance_title ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+						<?php echo esc_html__( 'Maintenance page title', 'frontblocks' ); ?>
+					</label>
+					<input
+						type="text"
+						id="<?php echo esc_attr( $this->option_maintenance_title ); ?>"
+						name="frontblocks_settings[<?php echo esc_attr( $this->option_maintenance_title ); ?>]"
+						value="<?php echo esc_attr( $title ); ?>"
+						placeholder="<?php echo esc_attr__( 'We are currently performing maintenance', 'frontblocks' ); ?>"
+						class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
+					/>
+
+					<label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mt-4 tw:mb-2">
+						<?php echo esc_html__( 'Background image', 'frontblocks' ); ?>
+					</label>
+					<input type="hidden" id="<?php echo esc_attr( $this->option_maintenance_image ); ?>" name="frontblocks_settings[<?php echo esc_attr( $this->option_maintenance_image ); ?>]" value="<?php echo esc_attr( $image_id ); ?>" />
+					<div class="frbl-maintenance-image-preview tw:mb-2" style="<?php echo $image_url ? '' : 'display:none;'; ?>">
+						<img src="<?php echo esc_url( $image_url ? $image_url : '' ); ?>" alt="" style="max-width: 200px; height: auto; border-radius: 8px; display: block;" />
+					</div>
+					<div class="tw:flex tw:gap-2">
+						<button type="button" class="button frbl-maintenance-select-image">
+							<?php echo esc_html__( 'Select image', 'frontblocks' ); ?>
+						</button>
+						<button type="button" class="button frbl-maintenance-remove-image" style="<?php echo $image_url ? '' : 'display:none;'; ?>">
+							<?php echo esc_html__( 'Remove image', 'frontblocks' ); ?>
+						</button>
+					</div>
+					<p class="tw:text-xs tw:text-gray-500 tw:mt-2 tw:mb-0">
+						<?php echo esc_html__( 'Shown as the full-screen background while maintenance mode is active. Recommended size: 1920×1080px.', 'frontblocks' ); ?>
+					</p>
+				</div>
+			</div>
+		</div>
 		<?php
 	}
 
@@ -1919,34 +2124,34 @@ class Settings {
 	 */
 	public function section_custom_post_types_callback() {
 		if ( ! frbl_is_pro_active() ) {
-			echo '<div class="tw-bg-blue-50 tw-border-l-4 tw-border-blue-400 tw-p-4 tw-mb-4">';
-			echo '<div class="tw-flex">';
-			echo '<div class="tw-flex-shrink-0">';
-			echo '<svg class="tw-h-5 tw-w-5 tw-text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>';
+			echo '<div class="tw:bg-blue-50 tw:border-l-4 tw:border-blue-400 tw:p-4 tw:mb-4">';
+			echo '<div class="tw:flex">';
+			echo '<div class="tw:flex-shrink-0">';
+			echo '<svg class="tw:h-5 tw:w-5 tw:text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>';
 			echo '</div>';
-			echo '<div class="tw-ml-3">';
-			echo '<p class="tw-text-sm tw-text-blue-700">';
+			echo '<div class="tw:ml-3">';
+			echo '<p class="tw:text-sm tw:text-blue-700">';
 			printf(
 				/* translators: %s: FrontBlocks PRO link */
 				esc_html__( 'This feature requires %s. Upgrade to unlock advanced functionality.', 'frontblocks' ),
-				'<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings" target="_blank" class="tw-font-medium tw-underline">FrontBlocks PRO</a>'
+				'<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings" target="_blank" class="tw:font-medium tw:underline">FrontBlocks PRO</a>'
 			);
 			echo '</p>';
 			echo '</div>';
 			echo '</div>';
 			echo '</div>';
 		} elseif ( ! $this->is_license_valid ) {
-			echo '<div class="tw-bg-yellow-50 tw-border-l-4 tw-border-yellow-400 tw-p-4 tw-mb-4">';
-			echo '<div class="tw-flex">';
-			echo '<div class="tw-flex-shrink-0">';
-			echo '<svg class="tw-h-5 tw-w-5 tw-text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>';
+			echo '<div class="tw:bg-yellow-50 tw:border-l-4 tw:border-yellow-400 tw:p-4 tw:mb-4">';
+			echo '<div class="tw:flex">';
+			echo '<div class="tw:flex-shrink-0">';
+			echo '<svg class="tw:h-5 tw:w-5 tw:text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>';
 			echo '</div>';
-			echo '<div class="tw-ml-3">';
-			echo '<p class="tw-text-sm tw-text-yellow-700">';
+			echo '<div class="tw:ml-3">';
+			echo '<p class="tw:text-sm tw:text-yellow-700">';
 			printf(
 				/* translators: %s: License section link */
 				esc_html__( 'License is not activated. Please activate your license in the %s section below to enable these features.', 'frontblocks' ),
-				'<a href="#frontblocks_section_license" class="tw-font-medium tw-underline">' . esc_html__( 'License', 'frontblocks' ) . '</a>'
+				'<a href="#frontblocks_section_license" class="tw:font-medium tw:underline">' . esc_html__( 'License', 'frontblocks' ) . '</a>'
 			);
 			echo '</p>';
 			echo '</div>';
@@ -1954,7 +2159,7 @@ class Settings {
 			echo '</div>';
 		} else {
 			?>
-			<p class="tw-text-sm tw-text-gray-600 tw-mt-0 tw-mb-4">
+			<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
 				<?php echo esc_html__( 'Create and manage custom post types with advanced configuration options.', 'frontblocks' ); ?>
 			</p>
 			<?php
@@ -1973,8 +2178,8 @@ class Settings {
 		$disabled   = ! $is_enabled ? 'disabled' : '';
 		?>
 		<div class="frbl-custom-post-types-wrapper">
-			<div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-				<label for="<?php echo esc_attr( $this->option_enable_custom_post_types ); ?>" class="tw-text-base tw-font-medium tw-text-gray-900">
+			<div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
+				<label for="<?php echo esc_attr( $this->option_enable_custom_post_types ); ?>" class="tw:text-base tw:font-medium tw:text-gray-900">
 					<?php echo esc_html__( 'Enable Custom Post Types Builder', 'frontblocks' ); ?>
 				</label>
 				<label class="frbl-toggle">
@@ -1991,26 +2196,26 @@ class Settings {
 			
 			<?php if ( $is_enabled ) : ?>
 				<div id="frbl-cpt-builder" class="frbl-cpt-builder" style="<?php echo $enabled ? '' : 'display: none;'; ?>">
-					<div class="tw-mt-4 tw-p-4 tw-bg-gray-50 tw-rounded-lg tw-border tw-border-gray-200">
-						<label for="frbl-cpt-name" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
+					<div class="tw:mt-4 tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200">
+						<label for="frbl-cpt-name" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
 							<?php echo esc_html__( 'Post Type Name', 'frontblocks' ); ?>
 						</label>
-						<div class="tw-flex tw-gap-2">
+						<div class="tw:flex tw:gap-2">
 							<input 
 								type="text" 
 								id="frbl-cpt-name" 
-								class="tw-flex-1 tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent" 
+								class="tw:flex-1 tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent" 
 								placeholder="<?php echo esc_attr__( 'e.g., Portfolio, Team, Services', 'frontblocks' ); ?>"
 							/>
 							<button 
 								type="button" 
 								id="frbl-create-cpt-btn" 
-								class="tw-px-4 tw-py-2 tw-bg-primary-500 tw-text-white tw-rounded-lg hover:tw-bg-primary-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 tw-transition-colors"
+								class="tw:px-4 tw:py-2 tw:bg-primary-500 tw:text-white tw:rounded-lg tw:hover:bg-primary-600 tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:transition-colors"
 							>
 								<?php echo esc_html__( 'Create', 'frontblocks' ); ?>
 							</button>
 						</div>
-						<p class="tw-text-xs tw-text-gray-500 tw-mt-2">
+						<p class="tw:text-xs tw:text-gray-500 tw:mt-2">
 							<?php echo esc_html__( 'Enter a singular name for your custom post type (e.g., "Portfolio" will create "portfolio" post type).', 'frontblocks' ); ?>
 						</p>
 					</div>
@@ -2128,17 +2333,17 @@ class Settings {
 		}
 
 		?>
-		<div class="frbl-section-wrapper tw-mt-6">
+		<div class="frbl-section-wrapper tw:mt-6">
 			<div class="frbl-section-header">
-				<h2 class="tw-text-2xl tw-font-bold tw-text-gray-900 tw-mb-0">
+				<h2 class="tw:text-2xl tw:font-bold tw:text-gray-900 tw:mb-0">
 					<?php echo esc_html__( 'FrontBlocks PRO Features', 'frontblocks' ); ?>
 				</h2>
-				<div class="tw-text-sm tw-text-gray-600">
-					<p class="tw-mt-0 tw-mb-4">
+				<div class="tw:text-sm tw:text-gray-600">
+					<p class="tw:mt-0 tw:mb-4">
 						<?php
 						$anchor = frbl_is_pro_active()
-							? '<a href="#frontblocks_section_license" class="tw-font-medium tw-text-red-600 hover:tw-text-red-700 tw-underline">' . esc_html__( 'License', 'frontblocks' ) . '</a>'
-							: '<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-pro-showcase" target="_blank" rel="noopener noreferrer" class="tw-font-medium tw-text-red-600 hover:tw-text-red-700 tw-underline">FrontBlocks PRO</a>';
+							? '<a href="#frontblocks_section_license" class="tw:font-medium tw:text-red-600 tw:hover:text-red-700 tw:underline">' . esc_html__( 'License', 'frontblocks' ) . '</a>'
+							: '<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-pro-showcase" target="_blank" rel="noopener noreferrer" class="tw:font-medium tw:text-red-600 tw:hover:text-red-700 tw:underline">FrontBlocks PRO</a>';
 						printf(
 							frbl_is_pro_active()
 								/* translators: %s: license section link */
@@ -2159,12 +2364,12 @@ class Settings {
 			</div>
 
 			<?php if ( ! frbl_is_pro_active() ) : ?>
-			<div class="tw-mt-6 tw-text-center">
+			<div class="tw:mt-6 tw:text-center">
 				<a
 					href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-pro-cta"
 					target="_blank"
 					rel="noopener noreferrer"
-					class="tw-inline-flex tw-items-center tw-px-6 tw-py-3 tw-border tw-border-transparent tw-text-base tw-font-medium tw-rounded-lg tw-shadow-sm tw-text-white tw-transition-colors tw-duration-200"
+					class="tw:inline-flex tw:items-center tw:px-6 tw:py-3 tw:border tw:border-transparent tw:text-base tw:font-medium tw:rounded-lg tw:shadow-sm tw:text-white tw:transition-colors tw:duration-200"
 					style="background-color: #ef4444;"
 					onmouseover="this.style.backgroundColor='#dc2626'"
 					onmouseout="this.style.backgroundColor='#ef4444'"
@@ -2186,13 +2391,13 @@ class Settings {
 		global $frblp_license;
 
 		?>
-		<div class="tw-mt-6" id="frontblocks_section_license">
+		<div class="tw:mt-6" id="frontblocks_section_license">
 			<?php
 			// Check if license instance exists.
 			if ( ! $frblp_license ) {
 				?>
-				<div class="tw-p-4 tw-rounded-lg tw-bg-red-50 tw-border tw-border-red-200">
-					<p class="tw-text-sm tw-text-red-700">
+				<div class="tw:p-4 tw:rounded-lg tw:bg-red-50 tw:border tw:border-red-200">
+					<p class="tw:text-sm tw:text-red-700">
 						<?php echo esc_html__( 'License manager not initialized.', 'frontblocks' ); ?>
 					</p>
 				</div>
@@ -2203,8 +2408,8 @@ class Settings {
 			// Check if License class exists (requires FrontBlocks PRO).
 			if ( ! class_exists( '\Closemarketing\WPLicenseManager\License' ) ) {
 				?>
-				<div class="tw-p-4 tw-rounded-lg tw-bg-yellow-50 tw-border tw-border-yellow-200">
-					<p class="tw-text-sm tw-text-yellow-700">
+				<div class="tw:p-4 tw:rounded-lg tw:bg-yellow-50 tw:border tw:border-yellow-200">
+					<p class="tw:text-sm tw:text-yellow-700">
 						<?php echo esc_html__( 'License management requires FrontBlocks PRO to be installed and active.', 'frontblocks' ); ?>
 					</p>
 				</div>
@@ -2429,6 +2634,7 @@ class Settings {
 			$this->option_enable_scroll_top,
 			$this->option_enable_events,
 			$this->option_enable_fluid_typography,
+			$this->option_enable_maintenance,
 			$this->option_enable_gutenberg,
 			$this->option_enable_simple_prices_variable_products,
 			$this->option_enable_after_add_to_cart,
@@ -2467,6 +2673,10 @@ class Settings {
 				$sanitized[ $key ] = in_array( $val, array( 'bottom-right', 'bottom-left' ), true ) ? $val : 'bottom-right';
 			} elseif ( $this->option_scroll_top_icon_url === $key ) {
 				$sanitized[ $key ] = esc_url_raw( $val );
+			} elseif ( $this->option_maintenance_title === $key ) {
+				$sanitized[ $key ] = sanitize_text_field( $val );
+			} elseif ( $this->option_maintenance_image === $key ) {
+				$sanitized[ $key ] = absint( $val );
 			}
 		}
 

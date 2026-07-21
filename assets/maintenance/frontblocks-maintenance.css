@@ -1,0 +1,50 @@
+/**
+ * FrontBlocks Maintenance Mode Styles
+ *
+ * @package FrontBlocks
+ * @version 1.0.0
+ */
+
+html,
+body.frbl-maintenance-body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	background-color: #111111;
+}
+
+.frbl-maintenance-overlay {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 24px;
+	box-sizing: border-box;
+	background-color: #111111;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.frbl-maintenance-overlay::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background-color: rgba(0, 0, 0, 0.55);
+}
+
+.frbl-maintenance-content {
+	position: relative;
+	max-width: 720px;
+}
+
+.frbl-maintenance-title {
+	margin: 0;
+	color: #ffffff;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+	font-size: clamp(1.5rem, 4vw, 2.75rem);
+	font-weight: 700;
+	line-height: 1.3;
+}

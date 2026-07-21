@@ -24,7 +24,7 @@ module.exports = {
 	},
 	plugins: [],
 	// Prefix for Tailwind classes to avoid conflicts with WordPress admin.
-	prefix: 'tw-',
+	prefix: 'tw',
 	important: '.frbl-settings-wrapper',
 };
 

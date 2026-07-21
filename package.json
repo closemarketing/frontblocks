@@ -3,15 +3,16 @@
     "@babel/cli": "^7.29.7",
     "@babel/core": "^7.29.7",
     "@babel/preset-env": "^7.29.7",
-    "@babel/preset-react": "~7.27.0",
-    "autoprefixer": "^10.5.0",
+    "@babel/preset-react": "^7.29.7",
+    "@tailwindcss/postcss": "^4.3.2",
+    "autoprefixer": "^10.5.3",
     "gulp": "^5.0.1",
     "gulp-clean-css": "^4.3.0",
     "gulp-terser": "^2.1.0",
     "merge-stream": "^2.0.0",
-    "postcss": "^8.5.15",
+    "postcss": "^8.5.19",
     "postcss-cli": "^11.0.0",
-    "tailwindcss": "^3.4.19"
+    "tailwindcss": "^4.3.1"
   },
   "babel": {
     "presets": [
@@ -55,8 +56,6 @@
     "build:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css",
     "watch:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css --watch",
     "build:download-button": "babel assets/download-button/frontblocks-download-button-option.jsx --out-file assets/download-button/frontblocks-download-button-option.js",
-    "build:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css",
-    "watch:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css --watch",
     "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:headline && npm run build:product-categories && npm run build:reading-time && npm run build:stacked-images && npm run build:edge-alignment && npm run build:shape-animations && npm run build:gf-inline && npm run build:faq-schema && npm run build:before-after && npm run build:text-animation && npm run build:user-text && npm run build:download-button && npm run build:columns-same-height && npm run build:css"
   },
   "dependencies": {

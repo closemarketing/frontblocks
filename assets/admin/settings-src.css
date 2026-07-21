@@ -6,9 +6,8 @@
  * @copyright  2025 Closemarketing
  */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@config "../../tailwind.config.js";
+@import "tailwindcss";
 
 /* Custom WordPress Admin overrides */
 .frbl-settings-wrapper {
@@ -177,19 +176,19 @@
  * Includes feature grid/cards, license field tweaks, and FormsCRM-style license UI.
  */
 /* Custom styles for license fields */
-.frbl-settings-wrapper .tw-text-base:not(button) {
+.frbl-settings-wrapper .tw\:text-base:not(button) {
 	font-size: 1rem;
 	line-height: 1.5rem;
 	width: 100%;
 }
 
-.frbl-settings-wrapper .tw-flex {
+.frbl-settings-wrapper .tw\:flex {
 	display: flex;
 	column-gap: 20px;
 }
 
 /* Submit button width */
-.frbl-settings-wrapper .tw-w-1\/2 {
+.frbl-settings-wrapper .tw\:w-1\/2 {
 	width: 50%;
 }
 
@@ -717,8 +716,8 @@
 		margin-left: 0;
 	}
 	
-	.frbl-settings-wrapper .tw-flex.tw-items-center.tw-justify-between {
-		@apply tw-flex-col tw-items-start tw-space-y-4;
+	.frbl-settings-wrapper .tw\:flex.tw\:items-center.tw\:justify-between {
+		@apply tw:flex-col tw:items-start tw:space-y-4;
 	}
 }
 
