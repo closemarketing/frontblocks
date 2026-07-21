@@ -248,6 +248,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	flex-wrap: wrap;
 	gap: 1rem;
 	min-height: 3rem;
 }
@@ -280,7 +281,7 @@
 /* Feature Info */
 .frbl-feature-info {
 	flex: 1;
-	min-width: 0;
+	min-width: 160px;
 	display: flex;
 	align-items: center;
 	flex-direction: column;
@@ -336,6 +337,25 @@
 	flex-shrink: 0;
 	display: flex;
 	align-items: center;
+}
+
+/*
+ * Sub-settings panels (Scroll to Top position, Events type, etc.) are rendered
+ * inside .frbl-feature-toggle and moved below the card by JS once the field is
+ * enabled. This is a CSS-only fallback so the card still lays out correctly
+ * (instead of squeezing the title/description into a sliver) if JS hasn't run yet.
+ */
+.frbl-feature-toggle:has( input:checked ):has( > div[id$='-settings-wrapper'] ),
+.frbl-feature-toggle:has( input:checked ):has( > div[id$='-type-wrapper'] ) {
+	flex: 1 1 100%;
+	flex-wrap: wrap;
+	justify-content: space-between;
+}
+
+.frbl-feature-toggle > div[id$='-settings-wrapper'],
+.frbl-feature-toggle > div[id$='-type-wrapper'] {
+	flex: 1 1 100%;
+	width: 100%;
 }
 
 /* PRO info-only cards (no toggle, same layout as active cards) */
