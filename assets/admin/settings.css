@@ -773,6 +773,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 1rem;
   min-height: 3rem;
 }
@@ -799,7 +800,7 @@
 }
 .frbl-feature-info {
   flex: 1;
-  min-width: 0;
+  min-width: 160px;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -842,6 +843,17 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
+}
+.frbl-feature-toggle:has( input:checked ):has( > div[id$='-settings-wrapper'] ),
+.frbl-feature-toggle:has( input:checked ):has( > div[id$='-type-wrapper'] ) {
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.frbl-feature-toggle > div[id$='-settings-wrapper'],
+.frbl-feature-toggle > div[id$='-type-wrapper'] {
+  flex: 1 1 100%;
+  width: 100%;
 }
 .frbl-feature-card.frbl-feature-pro.frbl-feature-pro-info .frbl-feature-info {
   flex-direction: column;

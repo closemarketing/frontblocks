@@ -117,6 +117,9 @@ class Plugin_Main {
 		// Back Button module.
 		new Frontend\BackButton();
 
+		// Scroll to Top module.
+		new Frontend\ScrollTop();
+
 		// Events module.
 		new Frontend\Events();
 

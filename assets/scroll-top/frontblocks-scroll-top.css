@@ -1,0 +1,115 @@
+/**
+ * FrontBlocks Scroll to Top Styles
+ *
+ * @package FrontBlocks
+ * @version 1.0.0
+ */
+
+.frbl-scroll-top {
+	position: fixed;
+	bottom: 24px;
+	width: 56px;
+	height: 56px;
+	background-color: #000000;
+	border: none;
+	border-radius: 50%;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.1);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	z-index: 9999;
+	opacity: 0;
+	visibility: hidden;
+	transform: scale(0.8) translateY(20px);
+	padding: 0;
+	outline: none;
+}
+
+.frbl-scroll-top--right {
+	right: 24px;
+}
+
+.frbl-scroll-top--left {
+	left: 24px;
+}
+
+.frbl-scroll-top.frbl-show {
+	opacity: 1;
+	visibility: visible;
+	transform: scale(1) translateY(0);
+}
+
+.frbl-scroll-top svg {
+	width: 24px;
+	height: 24px;
+	color: #ffffff;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.frbl-scroll-top img {
+	width: 28px;
+	height: 28px;
+	object-fit: contain;
+}
+
+.frbl-scroll-top:hover {
+	background-color: #333333;
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.1);
+	transform: scale(1.1);
+}
+
+.frbl-scroll-top:hover svg {
+	width: 26px;
+	height: 26px;
+}
+
+.frbl-scroll-top:active {
+	transform: scale(0.95);
+}
+
+.frbl-scroll-top:focus-visible {
+	outline: 2px solid #4ade80;
+	outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+	.frbl-scroll-top {
+		bottom: 20px;
+		width: 48px;
+		height: 48px;
+	}
+
+	.frbl-scroll-top--right {
+		right: 20px;
+	}
+
+	.frbl-scroll-top--left {
+		left: 20px;
+	}
+
+	.frbl-scroll-top svg {
+		width: 20px;
+		height: 20px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.frbl-scroll-top {
+		transition: opacity 0.1s linear, visibility 0.1s linear;
+	}
+
+	.frbl-scroll-top svg {
+		transition: none;
+	}
+
+	.frbl-scroll-top:hover {
+		transform: none;
+	}
+
+	.frbl-scroll-top:hover svg {
+		width: 24px;
+		height: 24px;
+	}
+}

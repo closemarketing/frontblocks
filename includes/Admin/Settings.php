@@ -41,6 +41,27 @@ class Settings {
 	private $option_enable_back_button = 'enable_back_button';
 
 	/**
+	 * Option key for scroll to top feature.
+	 *
+	 * @var string
+	 */
+	private $option_enable_scroll_top = 'enable_scroll_top';
+
+	/**
+	 * Option key for scroll to top button position.
+	 *
+	 * @var string
+	 */
+	private $option_scroll_top_position = 'scroll_top_position';
+
+	/**
+	 * Option key for scroll to top custom icon URL.
+	 *
+	 * @var string
+	 */
+	private $option_scroll_top_icon_url = 'scroll_top_icon_url';
+
+	/**
 	 * Option key for events CPT feature.
 	 *
 	 * @var string
@@ -286,6 +307,8 @@ class Settings {
 			FRBL_VERSION
 		);
 
+		wp_enqueue_media();
+
 		wp_add_inline_script(
 			'jquery',
 			"
@@ -421,6 +444,103 @@ class Settings {
 					
 					eventsCheckbox.addEventListener('change', updateEventsTypeVisibility);
 					updateEventsTypeVisibility();
+				}
+
+				// Show/hide scroll-top sub-settings based on toggle state.
+				const scrollTopCheckbox = document.getElementById('enable_scroll_top');
+				const scrollTopWrapper = document.getElementById('scroll-top-settings-wrapper');
+
+				if (scrollTopCheckbox && scrollTopWrapper) {
+					const scrollTopCard = scrollTopCheckbox.closest('.frbl-feature-card');
+					const scrollTopContent = scrollTopCard ? scrollTopCard.querySelector('.frbl-feature-content') : null;
+
+					if (scrollTopCard && scrollTopContent && scrollTopContent.contains(scrollTopWrapper)) {
+						scrollTopCard.appendChild(scrollTopWrapper);
+					}
+
+					function updateScrollTopVisibility() {
+						if (scrollTopCheckbox.checked) {
+							scrollTopWrapper.style.display = 'block';
+							scrollTopWrapper.style.width = '100%';
+							scrollTopWrapper.style.minWidth = '100%';
+							scrollTopWrapper.style.marginTop = '1rem';
+							scrollTopWrapper.style.paddingTop = '1rem';
+							scrollTopWrapper.style.paddingLeft = '1rem';
+							scrollTopWrapper.style.paddingRight = '1rem';
+							scrollTopWrapper.style.paddingBottom = '1rem';
+							scrollTopWrapper.style.borderTop = '1px solid #e5e7eb';
+							scrollTopWrapper.style.backgroundColor = '#f9fafb';
+							if (scrollTopCard) {
+								scrollTopCard.style.display = 'flex';
+								scrollTopCard.style.flexDirection = 'column';
+							}
+							if (scrollTopContent) {
+								scrollTopContent.style.flexDirection = 'row';
+								scrollTopContent.style.alignItems = 'center';
+								scrollTopContent.style.justifyContent = 'space-between';
+							}
+						} else {
+							scrollTopWrapper.style.display = 'none';
+							if (scrollTopCard) {
+								scrollTopCard.style.display = '';
+								scrollTopCard.style.flexDirection = '';
+							}
+							if (scrollTopContent) {
+								scrollTopContent.style.flexDirection = 'row';
+								scrollTopContent.style.alignItems = 'center';
+								scrollTopContent.style.justifyContent = 'space-between';
+							}
+						}
+					}
+
+					scrollTopCheckbox.addEventListener('change', updateScrollTopVisibility);
+					updateScrollTopVisibility();
+
+					// Media uploader for custom icon.
+					const uploadBtn = document.getElementById('scroll-top-icon-upload');
+					const removeBtn = document.getElementById('scroll-top-icon-remove');
+					const iconInput = document.getElementById('scroll_top_icon_url');
+					const iconPreview = document.getElementById('scroll-top-icon-preview');
+					const iconImg = document.getElementById('scroll-top-icon-img');
+
+					if (uploadBtn && iconInput && typeof wp !== 'undefined' && wp.media) {
+						var mediaFrame;
+
+						uploadBtn.addEventListener('click', function(e) {
+							e.preventDefault();
+
+							if (mediaFrame) {
+								mediaFrame.open();
+								return;
+							}
+
+							mediaFrame = wp.media({
+								title: '" . esc_js( __( 'Select Icon', 'frontblocks' ) ) . "',
+								button: { text: '" . esc_js( __( 'Use this image', 'frontblocks' ) ) . "' },
+								multiple: false
+							});
+
+							mediaFrame.on('select', function() {
+								const attachment = mediaFrame.state().get('selection').first().toJSON();
+								iconInput.value = attachment.url;
+								if (iconImg) { iconImg.src = attachment.url; }
+								if (iconPreview) { iconPreview.style.display = ''; }
+								if (removeBtn) { removeBtn.style.display = ''; }
+							});
+
+							mediaFrame.open();
+						});
+					}
+
+					if (removeBtn && iconInput) {
+						removeBtn.addEventListener('click', function(e) {
+							e.preventDefault();
+							iconInput.value = '';
+							if (iconImg) { iconImg.src = ''; }
+							if (iconPreview) { iconPreview.style.display = 'none'; }
+							removeBtn.style.display = 'none';
+						});
+					}
 				}
 
 			});
@@ -653,6 +773,14 @@ class Settings {
 			$this->option_enable_back_button,
 			__( 'Enable Back Button', 'frontblocks' ),
 			array( $this, 'field_enable_back_button' ),
+			$this->page_slug,
+			'frontblocks_section_features'
+		);
+
+		add_settings_field(
+			$this->option_enable_scroll_top,
+			__( 'Enable Scroll to Top', 'frontblocks' ),
+			array( $this, 'field_enable_scroll_top' ),
 			$this->page_slug,
 			'frontblocks_section_features'
 		);
@@ -1395,6 +1523,7 @@ class Settings {
 			$this->option_enable_testimonials           => __( 'Add a testimonials block to display customer reviews.', 'frontblocks' ),
 			$this->option_enable_reading_progress       => __( 'Show a progress bar at the top of the page while reading posts.', 'frontblocks' ),
 			$this->option_enable_back_button            => __( 'Add a floating back button for easy navigation.', 'frontblocks' ),
+			$this->option_enable_scroll_top             => __( 'Add a floating button to scroll back to the top of the page.', 'frontblocks' ),
 			$this->option_enable_events                 => __( 'Register and display events using a CPT or blog posts.', 'frontblocks' ),
 			$this->option_enable_fluid_typography       => __( 'Font sizes scale smoothly between mobile and desktop using CSS clamp().', 'frontblocks' ),
 			$this->option_enable_popups                 => __( 'Create popups with the block editor and configure when and where they appear.', 'frontblocks' ),
@@ -1466,6 +1595,7 @@ class Settings {
 			$this->option_enable_testimonials           => 'testimonials',
 			$this->option_enable_reading_progress       => 'reading-progress',
 			$this->option_enable_back_button            => 'back-button',
+			$this->option_enable_scroll_top             => 'scroll-top',
 			$this->option_enable_events                 => 'events',
 			$this->option_enable_fluid_typography       => 'fluid-typography',
 			$this->option_enable_popups                 => 'popups',
@@ -1615,6 +1745,71 @@ class Settings {
 			/>
 			<span></span>
 		</label>
+		<?php
+	}
+
+	/**
+	 * Render toggle field and sub-settings for scroll to top.
+	 *
+	 * @return void
+	 */
+	public function field_enable_scroll_top() {
+		$options  = get_option( 'frontblocks_settings', array() );
+		$enabled  = (bool) ( $options[ $this->option_enable_scroll_top ] ?? false );
+		$position = sanitize_text_field( $options[ $this->option_scroll_top_position ] ?? 'bottom-right' );
+		$icon_url = esc_url( $options[ $this->option_scroll_top_icon_url ] ?? '' );
+		?>
+		<label class="frbl-toggle">
+			<input type="checkbox"
+				id="<?php echo esc_attr( $this->option_enable_scroll_top ); ?>"
+				name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_scroll_top ); ?>]"
+				value="1"
+				<?php checked( true, $enabled ); ?>
+			/>
+			<span></span>
+		</label>
+
+		<!-- Sub-settings - moved below the card by JavaScript -->
+		<div id="scroll-top-settings-wrapper" style="<?php echo $enabled ? '' : 'display: none;'; ?>">
+			<div class="tw-mb-4">
+				<label for="<?php echo esc_attr( $this->option_scroll_top_position ); ?>" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
+					<?php echo esc_html__( 'Position', 'frontblocks' ); ?>
+				</label>
+				<select
+					id="<?php echo esc_attr( $this->option_scroll_top_position ); ?>"
+					name="frontblocks_settings[<?php echo esc_attr( $this->option_scroll_top_position ); ?>]"
+					class="tw-block tw-pl-3 tw-pr-8 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-sm focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-transparent"
+				>
+					<option value="bottom-right" <?php selected( $position, 'bottom-right' ); ?>>
+						<?php echo esc_html__( 'Bottom right', 'frontblocks' ); ?>
+					</option>
+					<option value="bottom-left" <?php selected( $position, 'bottom-left' ); ?>>
+						<?php echo esc_html__( 'Bottom left', 'frontblocks' ); ?>
+					</option>
+				</select>
+			</div>
+
+			<div>
+				<label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
+					<?php echo esc_html__( 'Custom icon (optional)', 'frontblocks' ); ?>
+				</label>
+				<div id="scroll-top-icon-preview" class="tw-mb-2" style="<?php echo $icon_url ? '' : 'display: none;'; ?>">
+					<img id="scroll-top-icon-img" src="<?php echo esc_url( $icon_url ); ?>" alt="" style="width: 48px; height: 48px; object-fit: contain; border: 1px solid #e5e7eb; border-radius: 0.375rem; padding: 4px;" />
+				</div>
+				<input type="hidden" id="scroll_top_icon_url" name="frontblocks_settings[<?php echo esc_attr( $this->option_scroll_top_icon_url ); ?>]" value="<?php echo esc_attr( $icon_url ); ?>" />
+				<div class="tw-flex tw-gap-2 tw-items-center">
+					<button type="button" id="scroll-top-icon-upload" class="tw-px-3 tw-py-1.5 tw-text-sm tw-border tw-border-gray-300 tw-rounded-lg tw-bg-white hover:tw-bg-gray-50 tw-text-gray-700 tw-transition-colors">
+						<?php echo esc_html__( 'Select image', 'frontblocks' ); ?>
+					</button>
+					<button type="button" id="scroll-top-icon-remove" class="tw-px-3 tw-py-1.5 tw-text-sm tw-border tw-border-red-200 tw-rounded-lg tw-bg-white hover:tw-bg-red-50 tw-text-red-600 tw-transition-colors" style="<?php echo $icon_url ? '' : 'display: none;'; ?>">
+						<?php echo esc_html__( 'Remove', 'frontblocks' ); ?>
+					</button>
+				</div>
+				<p class="tw-text-xs tw-text-gray-500 tw-mt-2">
+					<?php echo esc_html__( 'Upload an SVG, PNG or any image. Leave empty to use the default arrow icon.', 'frontblocks' ); ?>
+				</p>
+			</div>
+		</div>
 		<?php
 	}
 
@@ -2436,6 +2631,7 @@ class Settings {
 			$this->option_enable_testimonials,
 			$this->option_enable_reading_progress,
 			$this->option_enable_back_button,
+			$this->option_enable_scroll_top,
 			$this->option_enable_events,
 			$this->option_enable_fluid_typography,
 			$this->option_enable_maintenance,
@@ -2473,6 +2669,10 @@ class Settings {
 			} elseif ( $this->option_events_type === $key ) {
 				// Sanitize events type: only allow 'cpt' or 'posts'.
 				$sanitized[ $key ] = in_array( $val, array( 'cpt', 'posts' ), true ) ? $val : 'cpt';
+			} elseif ( $this->option_scroll_top_position === $key ) {
+				$sanitized[ $key ] = in_array( $val, array( 'bottom-right', 'bottom-left' ), true ) ? $val : 'bottom-right';
+			} elseif ( $this->option_scroll_top_icon_url === $key ) {
+				$sanitized[ $key ] = esc_url_raw( $val );
 			} elseif ( $this->option_maintenance_title === $key ) {
 				$sanitized[ $key ] = sanitize_text_field( $val );
 			} elseif ( $this->option_maintenance_image === $key ) {
