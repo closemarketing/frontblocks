@@ -27,6 +27,34 @@ class Maintenance {
 		if ( ! is_admin() && $this->is_enabled() ) {
 			add_action( 'template_redirect', array( $this, 'maybe_render_maintenance_page' ) );
 		}
+
+		// Flag maintenance mode in the admin bar (front and back office) so admins don't forget it's on.
+		if ( $this->is_enabled() ) {
+			add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_node' ), 999 );
+		}
+	}
+
+	/**
+	 * Add a visible "Maintenance: ON" node to the admin bar.
+	 *
+	 * @param \WP_Admin_Bar $wp_admin_bar Admin bar instance.
+	 * @return void
+	 */
+	public function add_admin_bar_node( $wp_admin_bar ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$wp_admin_bar->add_node(
+			array(
+				'id'    => 'frbl-maintenance-status',
+				'title' => '<span style="background:#d63638;color:#fff;padding:2px 8px;border-radius:3px;font-weight:600;">' . esc_html__( 'Maintenance: ON', 'frontblocks' ) . '</span>',
+				'href'  => admin_url( 'themes.php?page=frontblocks-settings' ),
+				'meta'  => array(
+					'title' => esc_attr__( 'Maintenance mode is currently enabled. Click to manage it.', 'frontblocks' ),
+				),
+			)
+		);
 	}
 
 	/**

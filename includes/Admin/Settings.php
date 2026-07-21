@@ -1743,7 +1743,7 @@ class Settings {
 						</button>
 					</div>
 					<p class="tw:text-xs tw:text-gray-500 tw:mt-2 tw:mb-0">
-						<?php echo esc_html__( 'Shown as the full-screen background while maintenance mode is active.', 'frontblocks' ); ?>
+						<?php echo esc_html__( 'Shown as the full-screen background while maintenance mode is active. Recommended size: 1920×1080px.', 'frontblocks' ); ?>
 					</p>
 				</div>
 			</div>
