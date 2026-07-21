@@ -55,6 +55,27 @@ class Settings {
 	private $option_events_type = 'events_type';
 
 	/**
+	 * Option key for maintenance mode feature.
+	 *
+	 * @var string
+	 */
+	private $option_enable_maintenance = 'enable_maintenance';
+
+	/**
+	 * Option key for maintenance page title.
+	 *
+	 * @var string
+	 */
+	private $option_maintenance_title = 'maintenance_title';
+
+	/**
+	 * Option key for maintenance page background image (attachment ID).
+	 *
+	 * @var string
+	 */
+	private $option_maintenance_image = 'maintenance_image';
+
+	/**
 	 * Option key for popups feature.
 	 *
 	 * @var string
@@ -406,6 +427,95 @@ class Settings {
 			"
 		);
 
+		// Separate, isolated inline script for the maintenance mode fields: kept apart from the
+		// script above so that an error there can never prevent this one from running.
+		wp_add_inline_script(
+			'jquery',
+			"
+			document.addEventListener('DOMContentLoaded', function() {
+				const maintenanceCheckbox = document.getElementById('enable_maintenance');
+				const maintenanceWrapper = document.getElementById('maintenance-fields-wrapper');
+
+				if (maintenanceCheckbox && maintenanceWrapper) {
+					maintenanceCheckbox.addEventListener('change', function () {
+						maintenanceWrapper.style.display = maintenanceCheckbox.checked ? 'block' : 'none';
+					});
+				}
+
+				// Event delegation: works even if the button is added/replaced later, and does not
+				// depend on any other inline script having run successfully first.
+				let mediaFrame;
+
+				document.addEventListener('click', function (event) {
+					const selectButton = event.target.closest('.frbl-maintenance-select-image');
+					const removeButton = event.target.closest('.frbl-maintenance-remove-image');
+
+					if (! selectButton && ! removeButton) {
+						return;
+					}
+
+					event.preventDefault();
+
+					const imageInput = document.getElementById('maintenance_image');
+					const previewWrapper = document.querySelector('.frbl-maintenance-image-preview');
+					const previewImg = previewWrapper ? previewWrapper.querySelector('img') : null;
+
+					if (removeButton) {
+						if (imageInput) {
+							imageInput.value = '';
+						}
+						if (previewWrapper) {
+							previewWrapper.style.display = 'none';
+						}
+						removeButton.style.display = 'none';
+						return;
+					}
+
+					if (! window.wp || ! window.wp.media) {
+						window.alert('" . esc_js( __( 'The media library failed to load. Please reload the page and try again.', 'frontblocks' ) ) . "');
+						return;
+					}
+
+					if (mediaFrame) {
+						mediaFrame.open();
+						return;
+					}
+
+					mediaFrame = window.wp.media({
+						title: selectButton.textContent,
+						button: { text: selectButton.textContent },
+						multiple: false,
+						library: { type: 'image' },
+					});
+
+					mediaFrame.on('select', function () {
+						const attachment = mediaFrame.state().get('selection').first().toJSON();
+
+						if (imageInput) {
+							imageInput.value = attachment.id;
+						}
+						if (previewImg) {
+							previewImg.src = attachment.sizes && attachment.sizes.medium ? attachment.sizes.medium.url : attachment.url;
+						}
+						if (previewWrapper) {
+							previewWrapper.style.display = 'block';
+						}
+
+						const currentRemoveButton = document.querySelector('.frbl-maintenance-remove-image');
+						if (currentRemoveButton) {
+							currentRemoveButton.style.display = '';
+						}
+					});
+
+					mediaFrame.open();
+				});
+			});
+			"
+		);
+
+		// Enqueue the WordPress media uploader for the maintenance background image field.
+		wp_enqueue_media();
+
 		// Enqueue script for custom post types if PRO is active and license is valid.
 		if ( frbl_is_pro_active() && $this->is_license_valid ) {
 			wp_enqueue_script(
@@ -561,6 +671,22 @@ class Settings {
 			array( $this, 'field_enable_fluid_typography' ),
 			$this->page_slug,
 			'frontblocks_section_features'
+		);
+
+		// Maintenance Mode section (own full-width section, needs room for title + image fields).
+		add_settings_section(
+			'frontblocks_section_maintenance',
+			__( 'Maintenance Mode', 'frontblocks' ),
+			array( $this, 'section_maintenance_callback' ),
+			$this->page_slug
+		);
+
+		add_settings_field(
+			$this->option_enable_maintenance,
+			__( 'Enable Maintenance Mode', 'frontblocks' ),
+			array( $this, 'field_enable_maintenance' ),
+			$this->page_slug,
+			'frontblocks_section_maintenance'
 		);
 
 		// PRO Features section.
@@ -1100,6 +1226,19 @@ class Settings {
 	}
 
 	/**
+	 * Maintenance mode section callback.
+	 *
+	 * @return void
+	 */
+	private function section_maintenance_callback() {
+		?>
+		<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
+			<?php echo esc_html__( 'Show a full-screen curtain page on every URL of the site while you work on it.', 'frontblocks' ); ?>
+		</p>
+		<?php
+	}
+
+	/**
 	 * Render a single settings section as a card.
 	 *
 	 * @param array $section Section data.
@@ -1118,8 +1257,8 @@ class Settings {
 		// Check if this is a section with callback only (like active_blocks).
 		$is_callback_only = ! $has_fields && $section['callback'];
 
-		// Check if this is the custom post types section - render it full width.
-		$is_cpt_section = 'frontblocks_section_custom_post_types' === $section['id'];
+		// Check if this is a section that needs full width (rich fields, not a simple toggle grid).
+		$is_cpt_section = in_array( $section['id'], array( 'frontblocks_section_custom_post_types', 'frontblocks_section_maintenance' ), true );
 
 		// Show PRO CTA button before the Optional Features section.
 		if ( 'frontblocks_section_features' === $section['id'] && ! $this->is_license_valid ) {
@@ -1543,6 +1682,72 @@ class Settings {
 			/>
 			<span></span>
 		</label>
+		<?php
+	}
+
+	/**
+	 * Render toggle field for enable maintenance mode.
+	 *
+	 * @return void
+	 */
+	public function field_enable_maintenance() {
+		$options   = get_option( 'frontblocks_settings', array() );
+		$enabled   = (bool) ( $options[ $this->option_enable_maintenance ] ?? false );
+		$title     = (string) ( $options[ $this->option_maintenance_title ] ?? '' );
+		$image_id  = (int) ( $options[ $this->option_maintenance_image ] ?? 0 );
+		$image_url = $image_id ? wp_get_attachment_image_url( $image_id, 'medium' ) : '';
+		?>
+		<div class="frbl-maintenance-wrapper">
+			<div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
+				<label for="<?php echo esc_attr( $this->option_enable_maintenance ); ?>" class="tw:text-base tw:font-medium tw:text-gray-900">
+					<?php echo esc_html__( 'Enable Maintenance Mode', 'frontblocks' ); ?>
+				</label>
+				<label class="frbl-toggle">
+					<input type="checkbox"
+						id="<?php echo esc_attr( $this->option_enable_maintenance ); ?>"
+						name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_maintenance ); ?>]"
+						value="1"
+						<?php checked( true, $enabled ); ?>
+					/>
+					<span></span>
+				</label>
+			</div>
+
+			<div id="maintenance-fields-wrapper" style="<?php echo $enabled ? '' : 'display: none;'; ?>">
+				<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200">
+					<label for="<?php echo esc_attr( $this->option_maintenance_title ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+						<?php echo esc_html__( 'Maintenance page title', 'frontblocks' ); ?>
+					</label>
+					<input
+						type="text"
+						id="<?php echo esc_attr( $this->option_maintenance_title ); ?>"
+						name="frontblocks_settings[<?php echo esc_attr( $this->option_maintenance_title ); ?>]"
+						value="<?php echo esc_attr( $title ); ?>"
+						placeholder="<?php echo esc_attr__( 'We are currently performing maintenance', 'frontblocks' ); ?>"
+						class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
+					/>
+
+					<label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mt-4 tw:mb-2">
+						<?php echo esc_html__( 'Background image', 'frontblocks' ); ?>
+					</label>
+					<input type="hidden" id="<?php echo esc_attr( $this->option_maintenance_image ); ?>" name="frontblocks_settings[<?php echo esc_attr( $this->option_maintenance_image ); ?>]" value="<?php echo esc_attr( $image_id ); ?>" />
+					<div class="frbl-maintenance-image-preview tw:mb-2" style="<?php echo $image_url ? '' : 'display:none;'; ?>">
+						<img src="<?php echo esc_url( $image_url ? $image_url : '' ); ?>" alt="" style="max-width: 200px; height: auto; border-radius: 8px; display: block;" />
+					</div>
+					<div class="tw:flex tw:gap-2">
+						<button type="button" class="button frbl-maintenance-select-image">
+							<?php echo esc_html__( 'Select image', 'frontblocks' ); ?>
+						</button>
+						<button type="button" class="button frbl-maintenance-remove-image" style="<?php echo $image_url ? '' : 'display:none;'; ?>">
+							<?php echo esc_html__( 'Remove image', 'frontblocks' ); ?>
+						</button>
+					</div>
+					<p class="tw:text-xs tw:text-gray-500 tw:mt-2 tw:mb-0">
+						<?php echo esc_html__( 'Shown as the full-screen background while maintenance mode is active. Recommended size: 1920×1080px.', 'frontblocks' ); ?>
+					</p>
+				</div>
+			</div>
+		</div>
 		<?php
 	}
 
@@ -2233,6 +2438,7 @@ class Settings {
 			$this->option_enable_back_button,
 			$this->option_enable_events,
 			$this->option_enable_fluid_typography,
+			$this->option_enable_maintenance,
 			$this->option_enable_gutenberg,
 			$this->option_enable_simple_prices_variable_products,
 			$this->option_enable_after_add_to_cart,
@@ -2267,6 +2473,10 @@ class Settings {
 			} elseif ( $this->option_events_type === $key ) {
 				// Sanitize events type: only allow 'cpt' or 'posts'.
 				$sanitized[ $key ] = in_array( $val, array( 'cpt', 'posts' ), true ) ? $val : 'cpt';
+			} elseif ( $this->option_maintenance_title === $key ) {
+				$sanitized[ $key ] = sanitize_text_field( $val );
+			} elseif ( $this->option_maintenance_image === $key ) {
+				$sanitized[ $key ] = absint( $val );
 			}
 		}
 
