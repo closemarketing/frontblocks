@@ -4,7 +4,7 @@
     "@babel/core": "^7.29.7",
     "@babel/preset-env": "^7.29.7",
     "@babel/preset-react": "^7.29.7",
-    "@tailwindcss/postcss": "^4.3.2",
+    "@tailwindcss/postcss": "^4.3.3",
     "autoprefixer": "^10.5.3",
     "gulp": "^5.0.1",
     "gulp-clean-css": "^4.3.0",
