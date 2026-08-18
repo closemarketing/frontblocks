@@ -24,6 +24,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - Headline Marquee - Infinite scrolling marquee effect for headline/text blocks with customizable speed (Fast, Medium, Slow)
 - Modern Settings Page with Card-based Layout
 - Custom SVG Animations
+- **Cookie Notice** - Configurable cookie consent banner (bar/box/popup) that gates Google Tag Manager and GA4 behind consent
 
 ### PRO Features (FrontBlocks PRO)
 - **Custom Post Types Builder** - Create and manage custom post types with advanced configuration options:
@@ -61,6 +62,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - [Full Page Implementation](./docs/FULLPAGE-IMPLEMENTATION-SUMMARY.md) - Technical implementation details
 - [Changelog Full Page](./docs/CHANGELOG-FULLPAGE.md) - Full Page feature changelog
 - [Carousel Pattern](./docs/CAROUSEL-PATTERN.md) - Hero carousel pattern with native WordPress blocks
+- [Cookie Notice](./docs/COOKIE-NOTICE.md) - Consent banner and consent-gated Google Tag Manager / GA4 loading
 
 ## Release
 Actions for making a release:

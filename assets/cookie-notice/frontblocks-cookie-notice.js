@@ -14,6 +14,11 @@
 		init();
 	}
 
+	function readCookie(name) {
+		var match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+		return match ? decodeURIComponent(match[1]) : '';
+	}
+
 	function init() {
 		var banner = document.getElementById('frbl-cookie-notice');
 
@@ -21,18 +26,34 @@
 			return;
 		}
 
+		var existingConsent = readCookie(frblCookieNotice.cookieName);
+
+		if (existingConsent === 'accepted' || existingConsent === 'rejected') {
+			// Already decided: the inline bootstrap script printed with the banner
+			// already hid it and, for an accepted visitor, already requested the
+			// tracking scripts. Nothing left to wire up.
+			return;
+		}
+
 		var acceptBtn = banner.querySelector('[data-frbl-cookie-action="accept"]');
 		var rejectBtn = banner.querySelector('[data-frbl-cookie-action="reject"]');
+		var isPopup = banner.classList.contains('frbl-cookie-notice--popup');
+		var previouslyFocused = document.activeElement;
 
-		if (banner.classList.contains('frbl-cookie-notice--popup')) {
+		if (isPopup) {
 			document.body.classList.add('frbl-cookie-notice-lock-scroll');
+
+			if (acceptBtn) {
+				acceptBtn.focus({ preventScroll: true });
+			}
+
+			document.addEventListener('keydown', trapFocus);
 		}
 
 		if (acceptBtn) {
 			acceptBtn.addEventListener('click', function () {
 				handleDecision('accepted');
 			});
-			acceptBtn.focus({ preventScroll: true });
 		}
 
 		if (rejectBtn) {
@@ -41,11 +62,38 @@
 			});
 		}
 
+		function trapFocus(event) {
+			if (event.key !== 'Tab') {
+				return;
+			}
+
+			var focusable = [rejectBtn, acceptBtn].filter(Boolean);
+
+			if (!focusable.length) {
+				return;
+			}
+
+			var first = focusable[0];
+			var last = focusable[focusable.length - 1];
+
+			if (event.shiftKey && document.activeElement === first) {
+				event.preventDefault();
+				last.focus();
+			} else if (!event.shiftKey && document.activeElement === last) {
+				event.preventDefault();
+				first.focus();
+			}
+		}
+
 		function handleDecision(decision) {
 			setConsentCookie(decision);
 			hideBanner();
 			dispatchConsentEvent(decision);
 			logDecision(decision);
+
+			if (decision === 'accepted') {
+				fetchAndInjectScripts();
+			}
 		}
 
 		function setConsentCookie(decision) {
@@ -53,12 +101,17 @@
 			var secure = window.location.protocol === 'https:' ? '; Secure' : '';
 
 			document.cookie = frblCookieNotice.cookieName + '=' + decision +
-				'; path=/; max-age=' + maxAge + '; SameSite=Lax' + secure;
+				'; path=' + frblCookieNotice.cookiePath + '; max-age=' + maxAge + '; SameSite=Lax' + secure;
 		}
 
 		function hideBanner() {
 			banner.classList.add('frbl-cookie-notice--hidden');
 			document.body.classList.remove('frbl-cookie-notice-lock-scroll');
+			document.removeEventListener('keydown', trapFocus);
+
+			if (isPopup && previouslyFocused && typeof previouslyFocused.focus === 'function') {
+				previouslyFocused.focus({ preventScroll: true });
+			}
 
 			window.setTimeout(function () {
 				if (banner.parentNode) {
@@ -83,8 +136,23 @@
 		function logDecision(decision) {
 			var formData = new FormData();
 			formData.append('action', 'frbl_log_cookie_consent');
-			formData.append('nonce', frblCookieNotice.nonce);
+			formData.append('nonce', frblCookieNotice.logNonce);
+			formData.append('token', frblCookieNotice.decisionToken);
 			formData.append('decision', decision);
+
+			fetch(frblCookieNotice.ajaxUrl, {
+				method: 'POST',
+				credentials: 'same-origin',
+				body: formData
+			}).catch(function () {
+				// Best-effort: the aggregate stat is not critical to the consent flow.
+			});
+		}
+
+		function fetchAndInjectScripts() {
+			var formData = new FormData();
+			formData.append('action', 'frbl_get_cookie_notice_config');
+			formData.append('nonce', frblCookieNotice.configNonce);
 
 			fetch(frblCookieNotice.ajaxUrl, {
 				method: 'POST',
@@ -95,59 +163,13 @@
 					return response.json();
 				})
 				.then(function (response) {
-					if (decision === 'accepted' && response && response.success && response.data) {
-						injectAcceptedScripts(response.data);
+					if (response && response.success && response.data && window.frblCookieNoticeInject) {
+						window.frblCookieNoticeInject(response.data.gtmId, response.data.ga4Id);
 					}
 				})
 				.catch(function () {
-					// Consent is already stored locally; a failed log request is not fatal.
+					// Network hiccup: consent is already stored locally; nothing else to do here.
 				});
-		}
-
-		function injectAcceptedScripts(data) {
-			if (data.gtmId) {
-				injectGtm(data.gtmId);
-			}
-
-			if (data.ga4Id) {
-				injectGa4(data.ga4Id);
-			}
-		}
-
-		function injectGtm(gtmId) {
-			window.dataLayer = window.dataLayer || [];
-			window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
-
-			var script = document.createElement('script');
-			script.async = true;
-			script.src = 'https://www.googletagmanager.com/gtm.js?id=' + encodeURIComponent(gtmId);
-			document.head.appendChild(script);
-
-			var iframe = document.createElement('iframe');
-			iframe.src = 'https://www.googletagmanager.com/ns.html?id=' + encodeURIComponent(gtmId);
-			iframe.height = '0';
-			iframe.width = '0';
-			iframe.style.display = 'none';
-			iframe.style.visibility = 'hidden';
-
-			var noscript = document.createElement('noscript');
-			noscript.appendChild(iframe);
-			document.body.appendChild(noscript);
-		}
-
-		function injectGa4(ga4Id) {
-			var script = document.createElement('script');
-			script.async = true;
-			script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(ga4Id);
-			document.head.appendChild(script);
-
-			window.dataLayer = window.dataLayer || [];
-			window.gtag = window.gtag || function () {
-				window.dataLayer.push(arguments);
-			};
-
-			window.gtag('js', new Date());
-			window.gtag('config', ga4Id);
 		}
 	}
 })();

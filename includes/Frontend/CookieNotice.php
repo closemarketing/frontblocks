@@ -19,6 +19,11 @@ defined( 'ABSPATH' ) || exit;
  * loads Google Tag Manager / GA4 only after consent is granted, and keeps a
  * lightweight aggregate acceptance-rate counter.
  *
+ * The banner markup and assets are always enqueued/rendered (never gated by
+ * the visitor's own consent cookie) so that a full-page cache serves the exact
+ * same HTML to every visitor of a given URL. All consent-specific behavior —
+ * hiding the banner, and loading GTM/GA4 — happens client-side instead.
+ *
  * @since 1.0.0
  */
 class CookieNotice {
@@ -52,19 +57,40 @@ class CookieNotice {
 	const NONCE_ACTION = 'frbl_cookie_notice_nonce';
 
 	/**
+	 * Nonce action used to protect the read-only tracking-config AJAX endpoint.
+	 *
+	 * @var string
+	 */
+	const CONFIG_NONCE_ACTION = 'frbl_cookie_notice_config_nonce';
+
+	/**
+	 * Transient key prefix for one-time decision tokens (anti-replay for the logging endpoint).
+	 *
+	 * @var string
+	 */
+	const TOKEN_TRANSIENT_PREFIX = 'frbl_cn_token_';
+
+	/**
+	 * Cached nonce for the config-fetch endpoint, shared between enqueue_assets() and render_banner().
+	 *
+	 * @var string|null
+	 */
+	private $config_nonce = null;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		if ( ! is_admin() && $this->is_enabled() ) {
-			add_action( 'wp_head', array( $this, 'maybe_output_head_scripts' ), 1 );
-			add_action( 'wp_body_open', array( $this, 'maybe_output_body_scripts' ) );
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-			add_action( 'wp_footer', array( $this, 'maybe_render_banner' ) );
+			add_action( 'wp_footer', array( $this, 'render_banner' ) );
 		}
 
-		// The logging endpoint must stay available for logged-out and logged-in visitors alike.
+		// The endpoints must stay available for logged-out and logged-in visitors alike.
 		add_action( 'wp_ajax_frbl_log_cookie_consent', array( $this, 'log_consent_callback' ) );
 		add_action( 'wp_ajax_nopriv_frbl_log_cookie_consent', array( $this, 'log_consent_callback' ) );
+		add_action( 'wp_ajax_frbl_get_cookie_notice_config', array( $this, 'get_config_callback' ) );
+		add_action( 'wp_ajax_nopriv_frbl_get_cookie_notice_config', array( $this, 'get_config_callback' ) );
 	}
 
 	/**
@@ -93,83 +119,90 @@ class CookieNotice {
 	}
 
 	/**
-	 * Output the GTM script and GA4 base config on wp_head.
+	 * Check whether the current request is for the configured cookie policy page.
 	 *
-	 * Only runs for returning visitors who already accepted on a previous visit —
-	 * first-time visitors get these scripts injected via JS after clicking Accept,
-	 * never rendered in the initial page source.
+	 * Used to suppress the banner there so visitors can read the policy before
+	 * deciding — otherwise, with the popup layout, the notice would immediately
+	 * cover the policy content on that same page.
 	 *
-	 * @return void
+	 * @return bool
 	 */
-	public function maybe_output_head_scripts() {
-		if ( 'accepted' !== $this->get_consent() ) {
-			return;
+	private function is_policy_page() {
+		$options    = get_option( 'frontblocks_settings', array() );
+		$policy_url = (string) ( $options['cookie_notice_policy_url'] ?? '' );
+
+		if ( '' === $policy_url ) {
+			return false;
 		}
 
-		$options = get_option( 'frontblocks_settings', array() );
-		$gtm_id  = $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
-		$ga4_id  = $this->sanitize_ga4_id( $options['cookie_notice_ga4_id'] ?? '' );
+		$policy_host = wp_parse_url( $policy_url, PHP_URL_HOST );
+		$site_host   = wp_parse_url( home_url(), PHP_URL_HOST );
 
-		// Registered with a `false` src purely to hold the GTM bootstrap as an inline script.
-		if ( $gtm_id ) {
-			wp_register_script( 'frontblocks-cookie-notice-gtm', false, array(), FRBL_VERSION, false );
-			wp_enqueue_script( 'frontblocks-cookie-notice-gtm' );
-			wp_add_inline_script(
-				'frontblocks-cookie-notice-gtm',
-				"(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','" . esc_js( $gtm_id ) . "');"
-			);
+		if ( ! $policy_host || $policy_host !== $site_host ) {
+			return false;
 		}
 
-		if ( $ga4_id ) {
-			wp_enqueue_script( 'frontblocks-cookie-notice-ga4', 'https://www.googletagmanager.com/gtag/js?id=' . rawurlencode( $ga4_id ), array(), FRBL_VERSION, false );
-			wp_add_inline_script(
-				'frontblocks-cookie-notice-ga4',
-				"window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '" . esc_js( $ga4_id ) . "');"
-			);
-		}
+		$policy_path  = untrailingslashit( (string) wp_parse_url( $policy_url, PHP_URL_PATH ) );
+		$request_uri  = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
+		$current_path = untrailingslashit( (string) wp_parse_url( $request_uri, PHP_URL_PATH ) );
+
+		return '' !== $policy_path && $policy_path === $current_path;
 	}
 
 	/**
-	 * Output the GTM noscript iframe on wp_body_open.
-	 *
-	 * Same consent gating as maybe_output_head_scripts().
-	 *
-	 * @return void
-	 */
-	public function maybe_output_body_scripts() {
-		if ( 'accepted' !== $this->get_consent() ) {
-			return;
-		}
-
-		echo $this->get_body_scripts_markup(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	}
-
-	/**
-	 * Build the GTM noscript iframe markup for an already-consenting visitor.
+	 * Get (and cache) the nonce protecting the config-fetch endpoint.
 	 *
 	 * @return string
 	 */
-	private function get_body_scripts_markup() {
-		$options = get_option( 'frontblocks_settings', array() );
-		$gtm_id  = $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
-
-		if ( ! $gtm_id ) {
-			return '';
+	private function get_config_nonce() {
+		if ( null === $this->config_nonce ) {
+			$this->config_nonce = wp_create_nonce( self::CONFIG_NONCE_ACTION );
 		}
 
-		return '<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=' . esc_attr( $gtm_id ) . '" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>' . "\n";
+		return $this->config_nonce;
+	}
+
+	/**
+	 * Generate a one-time token for the next consent decision and store it as a transient.
+	 *
+	 * @return string
+	 */
+	private function generate_decision_token() {
+		$token = wp_generate_password( 32, false, false );
+
+		set_transient( self::TOKEN_TRANSIENT_PREFIX . $token, 1, HOUR_IN_SECONDS );
+
+		return $token;
+	}
+
+	/**
+	 * Verify and consume a one-time decision token, so the same token can never log a second decision.
+	 *
+	 * @param string $token Token submitted by the client.
+	 * @return bool
+	 */
+	private function consume_decision_token( $token ) {
+		$token = (string) $token;
+
+		if ( '' === $token || ! get_transient( self::TOKEN_TRANSIENT_PREFIX . $token ) ) {
+			return false;
+		}
+
+		delete_transient( self::TOKEN_TRANSIENT_PREFIX . $token );
+
+		return true;
 	}
 
 	/**
 	 * Enqueue the frontend banner assets.
 	 *
-	 * Skipped entirely once the visitor already made a decision — no scripts,
-	 * no styles, no markup for returning visitors.
+	 * Always enqueued (never gated by the visitor's consent cookie) so a full-page
+	 * cache can safely serve one cached HTML response to every visitor of a URL.
 	 *
 	 * @return void
 	 */
 	public function enqueue_assets() {
-		if ( '' !== $this->get_consent() ) {
+		if ( $this->is_policy_page() ) {
 			return;
 		}
 
@@ -196,34 +229,31 @@ class CookieNotice {
 			'frblCookieNotice',
 			array(
 				'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
-				'nonce'          => wp_create_nonce( self::NONCE_ACTION ),
+				'logNonce'       => wp_create_nonce( self::NONCE_ACTION ),
+				'configNonce'    => $this->get_config_nonce(),
+				'decisionToken'  => $this->generate_decision_token(),
 				'cookieName'     => self::COOKIE_NAME,
+				'cookiePath'     => defined( 'COOKIEPATH' ) && COOKIEPATH ? COOKIEPATH : '/',
 				'expirationDays' => $days > 0 ? $days : 365,
 			)
 		);
 	}
 
 	/**
-	 * Render the consent banner in the footer.
+	 * Render the consent banner (and its early consent-handling bootstrap script) in the footer.
 	 *
-	 * Skipped once the visitor already made a decision.
+	 * Always rendered (never gated by the visitor's consent cookie) for the same
+	 * cache-safety reason as enqueue_assets(). The bootstrap script immediately
+	 * hides the banner and requests tracking scripts client-side when a decision
+	 * cookie already exists, so a returning visitor never sees a flash of the banner.
 	 *
 	 * @return void
 	 */
-	public function maybe_render_banner() {
-		if ( '' !== $this->get_consent() ) {
+	public function render_banner() {
+		if ( $this->is_policy_page() ) {
 			return;
 		}
 
-		$this->render_banner();
-	}
-
-	/**
-	 * Render the cookie consent banner markup.
-	 *
-	 * @return void
-	 */
-	private function render_banner() {
 		$options = get_option( 'frontblocks_settings', array() );
 
 		$message      = trim( (string) ( $options['cookie_notice_message'] ?? '' ) );
@@ -302,6 +332,62 @@ class CookieNotice {
 				</div>
 			</div>
 		</div>
+		<script>
+		( function () {
+			var cookieMatch = document.cookie.match( /(?:^|; )frbl_cookie_consent=([^;]*)/ );
+			var consent     = cookieMatch ? decodeURIComponent( cookieMatch[ 1 ] ) : '';
+			var banner      = document.getElementById( 'frbl-cookie-notice' );
+
+			if ( banner && ( 'accepted' === consent || 'rejected' === consent ) ) {
+				banner.style.display = 'none';
+			}
+
+			window.frblCookieNoticeInject = window.frblCookieNoticeInject || function ( gtmId, ga4Id ) {
+				if ( gtmId ) {
+					window.dataLayer = window.dataLayer || [];
+					window.dataLayer.push( { 'gtm.start': new Date().getTime(), event: 'gtm.js' } );
+
+					var gtmScript = document.createElement( 'script' );
+					gtmScript.async = true;
+					gtmScript.src = 'https://www.googletagmanager.com/gtm.js?id=' + encodeURIComponent( gtmId );
+					document.head.appendChild( gtmScript );
+				}
+
+				if ( ga4Id ) {
+					var ga4Script = document.createElement( 'script' );
+					ga4Script.async = true;
+					ga4Script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent( ga4Id );
+					document.head.appendChild( ga4Script );
+
+					window.dataLayer = window.dataLayer || [];
+					window.gtag = window.gtag || function () {
+						window.dataLayer.push( arguments );
+					};
+					window.gtag( 'js', new Date() );
+					window.gtag( 'config', ga4Id );
+				}
+			};
+
+			if ( 'accepted' === consent ) {
+				var formData = new FormData();
+				formData.append( 'action', 'frbl_get_cookie_notice_config' );
+				formData.append( 'nonce', '<?php echo esc_js( $this->get_config_nonce() ); ?>' );
+
+				fetch( '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>', {
+					method: 'POST',
+					credentials: 'same-origin',
+					body: formData
+				} )
+					.then( function ( response ) { return response.json(); } )
+					.then( function ( response ) {
+						if ( response && response.success && response.data ) {
+							window.frblCookieNoticeInject( response.data.gtmId, response.data.ga4Id );
+						}
+					} )
+					.catch( function () {} );
+			}
+		} )();
+		</script>
 		<?php
 	}
 
@@ -357,11 +443,37 @@ class CookieNotice {
 	}
 
 	/**
-	 * AJAX callback: logs the visitor's decision and, when accepted, returns the
-	 * GTM/GA4 identifiers so the frontend script can inject them without a reload.
+	 * AJAX callback: returns the GTM/GA4 identifiers, but only when the requesting
+	 * browser's own consent cookie says 'accepted'.
 	 *
-	 * The identifiers are only ever sent to the browser here, after Accept was
-	 * clicked — they are never present in the page source beforehand.
+	 * Read-only and safe to call on every page load for a returning visitor — unlike
+	 * the logging endpoint, it never touches the aggregate counters.
+	 *
+	 * @return void
+	 */
+	public function get_config_callback() {
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+
+		if ( ! wp_verify_nonce( $nonce, self::CONFIG_NONCE_ACTION ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'frontblocks' ) ), 403 );
+		}
+
+		$response = array(
+			'gtmId' => '',
+			'ga4Id' => '',
+		);
+
+		if ( 'accepted' === $this->get_consent() ) {
+			$options           = get_option( 'frontblocks_settings', array() );
+			$response['gtmId'] = $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
+			$response['ga4Id'] = $this->sanitize_ga4_id( $options['cookie_notice_ga4_id'] ?? '' );
+		}
+
+		wp_send_json_success( $response );
+	}
+
+	/**
+	 * AJAX callback: logs the visitor's decision in the aggregate accepted/rejected counters.
 	 *
 	 * @return void
 	 */
@@ -372,6 +484,12 @@ class CookieNotice {
 			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'frontblocks' ) ), 403 );
 		}
 
+		$token = isset( $_POST['token'] ) ? sanitize_text_field( wp_unslash( $_POST['token'] ) ) : '';
+
+		if ( ! $this->consume_decision_token( $token ) ) {
+			wp_send_json_error( array( 'message' => __( 'This decision was already recorded.', 'frontblocks' ) ), 409 );
+		}
+
 		$decision = isset( $_POST['decision'] ) ? sanitize_key( wp_unslash( $_POST['decision'] ) ) : '';
 
 		if ( ! in_array( $decision, array( 'accepted', 'rejected' ), true ) ) {
@@ -380,15 +498,7 @@ class CookieNotice {
 
 		$this->maybe_increment_stat( $decision );
 
-		$response = array();
-
-		if ( 'accepted' === $decision ) {
-			$options           = get_option( 'frontblocks_settings', array() );
-			$response['gtmId'] = $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
-			$response['ga4Id'] = $this->sanitize_ga4_id( $options['cookie_notice_ga4_id'] ?? '' );
-		}
-
-		wp_send_json_success( $response );
+		wp_send_json_success();
 	}
 
 	/**
@@ -423,10 +533,17 @@ class CookieNotice {
 	private function increment_option_atomically( $option_name ) {
 		global $wpdb;
 
-		$updated = $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = option_value + 1 WHERE option_name = %s", $option_name ) );
+		$sql = $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = option_value + 1 WHERE option_name = %s", $option_name );
+
+		$updated = $wpdb->query( $sql );
 
 		if ( ! $updated ) {
-			add_option( $option_name, 1, '', 'no' );
+			// First time this counter is created. add_option() returns false if another
+			// request created the row first — in that case fall back to the atomic UPDATE
+			// so this increment isn't silently dropped.
+			if ( ! add_option( $option_name, 1, '', 'no' ) ) {
+				$wpdb->query( $sql );
+			}
 		}
 
 		wp_cache_delete( $option_name, 'options' );
