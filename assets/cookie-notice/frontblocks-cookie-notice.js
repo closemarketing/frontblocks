@@ -67,7 +67,9 @@
 				return;
 			}
 
-			var focusable = [rejectBtn, acceptBtn].filter(Boolean);
+			var focusable = Array.prototype.slice.call(
+				banner.querySelectorAll('a[href], button')
+			);
 
 			if (!focusable.length) {
 				return;
@@ -137,7 +139,6 @@
 			var formData = new FormData();
 			formData.append('action', 'frbl_log_cookie_consent');
 			formData.append('nonce', frblCookieNotice.logNonce);
-			formData.append('token', frblCookieNotice.decisionToken);
 			formData.append('decision', decision);
 
 			fetch(frblCookieNotice.ajaxUrl, {
@@ -152,7 +153,6 @@
 		function fetchAndInjectScripts() {
 			var formData = new FormData();
 			formData.append('action', 'frbl_get_cookie_notice_config');
-			formData.append('nonce', frblCookieNotice.configNonce);
 
 			fetch(frblCookieNotice.ajaxUrl, {
 				method: 'POST',

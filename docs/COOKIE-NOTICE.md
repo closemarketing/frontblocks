@@ -47,6 +47,11 @@ Enable it from **Appearance → FrontBlocks → Cookie Notice**.
   that. The frontend script then creates the actual `<script>` tags dynamically,
   so a first-time visitor sees tracking start without a page reload, and a
   returning visitor who already accepted gets it automatically on every page load.
+  This endpoint is deliberately unauthenticated: it's read-only, never touches the
+  aggregate counters, and only ever echoes back non-secret IDs that are already
+  public once GTM/GA4 loads — a nonce here would have to live in the cache-neutral
+  HTML this module renders and would go stale on any page a cache keeps around
+  longer than a nonce's lifetime, breaking tracking until the cache refreshes.
 
 ## Acceptance-rate stat
 
@@ -54,11 +59,14 @@ Every decision also POSTs to a nonce-protected logging endpoint
 (`frbl_log_cookie_consent`) that increments one of two WordPress options
 (`frontblocks_cookie_notice_accepted_count` / `..._rejected_count`) directly in
 the database with an atomic `UPDATE ... SET value = value + 1`, so concurrent
-visitors deciding at the same time don't lose each other's count. Each decision
-carries a one-time token so the same decision can't be replayed to inflate the
-numbers. Logged-in users with the `manage_options` capability (site admins) are
-excluded, so testing the banner while logged in doesn't skew the stats. The
-resulting acceptance rate is shown directly in the Cookie Notice settings section.
+visitors deciding at the same time don't lose each other's count. This is a
+best-effort, lightweight aggregate stat rather than precise per-visitor
+metering — the module can't embed a per-visitor deduplication token in its
+cache-neutral HTML without reintroducing the same caching problem the module is
+designed to avoid, so a replayed request could in principle nudge the count.
+Logged-in users with the `manage_options` capability (site admins) are excluded,
+so testing the banner while logged in doesn't skew the stats. The resulting
+acceptance rate is shown directly in the Cookie Notice settings section.
 
 ## `frblCookieConsent` event
 

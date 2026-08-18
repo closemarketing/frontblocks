@@ -57,27 +57,6 @@ class CookieNotice {
 	const NONCE_ACTION = 'frbl_cookie_notice_nonce';
 
 	/**
-	 * Nonce action used to protect the read-only tracking-config AJAX endpoint.
-	 *
-	 * @var string
-	 */
-	const CONFIG_NONCE_ACTION = 'frbl_cookie_notice_config_nonce';
-
-	/**
-	 * Transient key prefix for one-time decision tokens (anti-replay for the logging endpoint).
-	 *
-	 * @var string
-	 */
-	const TOKEN_TRANSIENT_PREFIX = 'frbl_cn_token_';
-
-	/**
-	 * Cached nonce for the config-fetch endpoint, shared between enqueue_assets() and render_banner().
-	 *
-	 * @var string|null
-	 */
-	private $config_nonce = null;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -150,50 +129,6 @@ class CookieNotice {
 	}
 
 	/**
-	 * Get (and cache) the nonce protecting the config-fetch endpoint.
-	 *
-	 * @return string
-	 */
-	private function get_config_nonce() {
-		if ( null === $this->config_nonce ) {
-			$this->config_nonce = wp_create_nonce( self::CONFIG_NONCE_ACTION );
-		}
-
-		return $this->config_nonce;
-	}
-
-	/**
-	 * Generate a one-time token for the next consent decision and store it as a transient.
-	 *
-	 * @return string
-	 */
-	private function generate_decision_token() {
-		$token = wp_generate_password( 32, false, false );
-
-		set_transient( self::TOKEN_TRANSIENT_PREFIX . $token, 1, HOUR_IN_SECONDS );
-
-		return $token;
-	}
-
-	/**
-	 * Verify and consume a one-time decision token, so the same token can never log a second decision.
-	 *
-	 * @param string $token Token submitted by the client.
-	 * @return bool
-	 */
-	private function consume_decision_token( $token ) {
-		$token = (string) $token;
-
-		if ( '' === $token || ! get_transient( self::TOKEN_TRANSIENT_PREFIX . $token ) ) {
-			return false;
-		}
-
-		delete_transient( self::TOKEN_TRANSIENT_PREFIX . $token );
-
-		return true;
-	}
-
-	/**
 	 * Enqueue the frontend banner assets.
 	 *
 	 * Always enqueued (never gated by the visitor's consent cookie) so a full-page
@@ -230,8 +165,6 @@ class CookieNotice {
 			array(
 				'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
 				'logNonce'       => wp_create_nonce( self::NONCE_ACTION ),
-				'configNonce'    => $this->get_config_nonce(),
-				'decisionToken'  => $this->generate_decision_token(),
 				'cookieName'     => self::COOKIE_NAME,
 				'cookiePath'     => defined( 'COOKIEPATH' ) && COOKIEPATH ? COOKIEPATH : '/',
 				'expirationDays' => $days > 0 ? $days : 365,
@@ -242,18 +175,35 @@ class CookieNotice {
 	/**
 	 * Render the consent banner (and its early consent-handling bootstrap script) in the footer.
 	 *
-	 * Always rendered (never gated by the visitor's consent cookie) for the same
-	 * cache-safety reason as enqueue_assets(). The bootstrap script immediately
+	 * The banner markup is always rendered the same way for every visitor of a
+	 * given URL — never gated by the visitor's own consent cookie — so a full-page
+	 * cache stays safe. The bootstrap script printed alongside it immediately
 	 * hides the banner and requests tracking scripts client-side when a decision
 	 * cookie already exists, so a returning visitor never sees a flash of the banner.
+	 *
+	 * The visible banner UI is suppressed on the configured cookie policy page (so
+	 * a popup layout can't block that page's own content), but the bootstrap
+	 * script still runs there — an already-accepted visitor must keep getting
+	 * tracking scripts on every page, including the policy page.
 	 *
 	 * @return void
 	 */
 	public function render_banner() {
-		if ( $this->is_policy_page() ) {
-			return;
+		$show_banner = ! $this->is_policy_page();
+
+		if ( $show_banner ) {
+			$this->render_banner_markup();
 		}
 
+		$this->render_consent_bootstrap_script();
+	}
+
+	/**
+	 * Render the visible banner markup.
+	 *
+	 * @return void
+	 */
+	private function render_banner_markup() {
 		$options = get_option( 'frontblocks_settings', array() );
 
 		$message      = trim( (string) ( $options['cookie_notice_message'] ?? '' ) );
@@ -332,6 +282,19 @@ class CookieNotice {
 				</div>
 			</div>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Print the inline bootstrap script: hides the banner immediately when a
+	 * decision cookie already exists, and — for an accepted visitor — fetches
+	 * and injects the tracking scripts. Runs on every page (including the
+	 * policy page, where render_banner_markup() is skipped).
+	 *
+	 * @return void
+	 */
+	private function render_consent_bootstrap_script() {
+		?>
 		<script>
 		( function () {
 			var cookieMatch = document.cookie.match( /(?:^|; )frbl_cookie_consent=([^;]*)/ );
@@ -371,7 +334,6 @@ class CookieNotice {
 			if ( 'accepted' === consent ) {
 				var formData = new FormData();
 				formData.append( 'action', 'frbl_get_cookie_notice_config' );
-				formData.append( 'nonce', '<?php echo esc_js( $this->get_config_nonce() ); ?>' );
 
 				fetch( '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>', {
 					method: 'POST',
@@ -446,24 +408,22 @@ class CookieNotice {
 	 * AJAX callback: returns the GTM/GA4 identifiers, but only when the requesting
 	 * browser's own consent cookie says 'accepted'.
 	 *
-	 * Read-only and safe to call on every page load for a returning visitor — unlike
-	 * the logging endpoint, it never touches the aggregate counters.
+	 * Deliberately unauthenticated: it's read-only, never touches the aggregate
+	 * counters, and only ever echoes back non-secret IDs that are already public
+	 * once GTM/GA4 loads. A nonce would have to be embedded in the cache-neutral
+	 * HTML this module renders, and would go stale on any page a full-page cache
+	 * keeps for longer than a WordPress nonce's lifetime — breaking tracking for
+	 * every visitor of that cached page until it expires from the cache.
 	 *
 	 * @return void
 	 */
 	public function get_config_callback() {
-		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
-
-		if ( ! wp_verify_nonce( $nonce, self::CONFIG_NONCE_ACTION ) ) {
-			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'frontblocks' ) ), 403 );
-		}
-
 		$response = array(
 			'gtmId' => '',
 			'ga4Id' => '',
 		);
 
-		if ( 'accepted' === $this->get_consent() ) {
+		if ( $this->is_enabled() && 'accepted' === $this->get_consent() ) {
 			$options           = get_option( 'frontblocks_settings', array() );
 			$response['gtmId'] = $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
 			$response['ga4Id'] = $this->sanitize_ga4_id( $options['cookie_notice_ga4_id'] ?? '' );
@@ -475,19 +435,23 @@ class CookieNotice {
 	/**
 	 * AJAX callback: logs the visitor's decision in the aggregate accepted/rejected counters.
 	 *
+	 * This is a best-effort, lightweight aggregate stat, not a precise per-visitor
+	 * metering system — the module explicitly renders cache-neutral HTML (see
+	 * render_banner()), so there is no page-embedded value this endpoint could use
+	 * to deduplicate a replayed request without also breaking under a full-page
+	 * cache, the same way a one-time token or short-lived nonce would.
+	 *
 	 * @return void
 	 */
 	public function log_consent_callback() {
+		if ( ! $this->is_enabled() ) {
+			wp_send_json_error( array( 'message' => __( 'Cookie Notice is disabled.', 'frontblocks' ) ), 403 );
+		}
+
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
 
 		if ( ! wp_verify_nonce( $nonce, self::NONCE_ACTION ) ) {
 			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'frontblocks' ) ), 403 );
-		}
-
-		$token = isset( $_POST['token'] ) ? sanitize_text_field( wp_unslash( $_POST['token'] ) ) : '';
-
-		if ( ! $this->consume_decision_token( $token ) ) {
-			wp_send_json_error( array( 'message' => __( 'This decision was already recorded.', 'frontblocks' ) ), 409 );
 		}
 
 		$decision = isset( $_POST['decision'] ) ? sanitize_key( wp_unslash( $_POST['decision'] ) ) : '';
