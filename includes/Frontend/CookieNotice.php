@@ -159,7 +159,7 @@ class CookieNotice {
 		$policy_post_id = url_to_postid( $policy_url );
 
 		if ( $policy_post_id ) {
-			return $policy_post_id === get_queried_object_id();
+			return get_queried_object_id() === $policy_post_id;
 		}
 
 		// url_to_postid() only resolves posts/pages; fall back to a plain path
