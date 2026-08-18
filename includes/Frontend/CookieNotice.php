@@ -31,11 +31,18 @@ class CookieNotice {
 	const COOKIE_NAME = 'frbl_cookie_consent';
 
 	/**
-	 * Option name storing the aggregate accepted/rejected counters.
+	 * Option name storing the aggregate accepted counter.
 	 *
 	 * @var string
 	 */
-	const STATS_OPTION = 'frontblocks_cookie_notice_stats';
+	const STATS_OPTION_ACCEPTED = 'frontblocks_cookie_notice_accepted_count';
+
+	/**
+	 * Option name storing the aggregate rejected counter.
+	 *
+	 * @var string
+	 */
+	const STATS_OPTION_REJECTED = 'frontblocks_cookie_notice_rejected_count';
 
 	/**
 	 * Nonce action used to protect the consent-logging AJAX endpoint.
@@ -249,12 +256,20 @@ class CookieNotice {
 			$classes[] = 'bottom-left' === $position ? 'frbl-cookie-notice--left' : 'frbl-cookie-notice--right';
 		}
 
-		$is_modal = 'popup' === $layout;
+		$is_modal      = 'popup' === $layout;
+		$accent_text   = $this->get_readable_text_color( $color );
+		$accent_link   = $this->get_readable_on_white_color( $color );
+		$style         = sprintf(
+			'--frbl-cookie-accent: %1$s; --frbl-cookie-accent-contrast: %2$s; --frbl-cookie-accent-on-light: %3$s;',
+			esc_attr( $color ),
+			esc_attr( $accent_text ),
+			esc_attr( $accent_link )
+		);
 		?>
 		<div
 			id="frbl-cookie-notice"
 			class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>"
-			style="--frbl-cookie-accent: <?php echo esc_attr( $color ); ?>;"
+			style="<?php echo esc_attr( $style ); ?>"
 			role="<?php echo $is_modal ? 'dialog' : 'region'; ?>"
 			<?php echo $is_modal ? 'aria-modal="true"' : ''; ?>
 			aria-label="<?php echo esc_attr__( 'Cookie consent', 'frontblocks' ); ?>"
@@ -288,6 +303,57 @@ class CookieNotice {
 			</div>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Pick black or white text, whichever contrasts better against a background color.
+	 *
+	 * @param string $hex_color Background color, e.g. '#687df9'.
+	 * @return string '#ffffff' or a near-black neutral.
+	 */
+	private function get_readable_text_color( $hex_color ) {
+		$rgb       = $this->hex_to_rgb( $hex_color );
+		$luminance = ( 0.299 * $rgb[0] + 0.587 * $rgb[1] + 0.114 * $rgb[2] ) / 255;
+
+		return $luminance > 0.6 ? '#111827' : '#ffffff';
+	}
+
+	/**
+	 * Ensure a color stays legible when used as text on the banner's white panel —
+	 * accent colors light enough to disappear against white fall back to a dark neutral.
+	 *
+	 * @param string $hex_color Requested accent color, e.g. '#687df9'.
+	 * @return string A color safe to use as text on a white background.
+	 */
+	private function get_readable_on_white_color( $hex_color ) {
+		$rgb       = $this->hex_to_rgb( $hex_color );
+		$luminance = ( 0.299 * $rgb[0] + 0.587 * $rgb[1] + 0.114 * $rgb[2] ) / 255;
+
+		return $luminance > 0.55 ? '#111827' : $hex_color;
+	}
+
+	/**
+	 * Convert a hex color (3 or 6 digits, with or without '#') to an [r, g, b] triple.
+	 *
+	 * @param string $hex_color Hex color string.
+	 * @return int[] Three-item array of 0-255 RGB values; black if the input is invalid.
+	 */
+	private function hex_to_rgb( $hex_color ) {
+		$hex = ltrim( (string) $hex_color, '#' );
+
+		if ( 3 === strlen( $hex ) ) {
+			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+		}
+
+		if ( 6 !== strlen( $hex ) || ! ctype_xdigit( $hex ) ) {
+			return array( 0, 0, 0 );
+		}
+
+		return array(
+			hexdec( substr( $hex, 0, 2 ) ),
+			hexdec( substr( $hex, 2, 2 ) ),
+			hexdec( substr( $hex, 4, 2 ) ),
+		);
 	}
 
 	/**
@@ -338,18 +404,32 @@ class CookieNotice {
 			return;
 		}
 
-		$stats = get_option( self::STATS_OPTION, array() );
+		$option_name = 'accepted' === $decision ? self::STATS_OPTION_ACCEPTED : self::STATS_OPTION_REJECTED;
 
-		if ( ! is_array( $stats ) ) {
-			$stats = array();
+		$this->increment_option_atomically( $option_name );
+	}
+
+	/**
+	 * Increment an integer option by 1 directly in the database.
+	 *
+	 * A plain get_option()/update_option() round trip races under concurrent
+	 * requests — two visitors deciding at the same moment can both read the same
+	 * value and one increment gets overwritten. A single UPDATE ... SET value = value + 1
+	 * lets the database serialize concurrent increments instead.
+	 *
+	 * @param string $option_name Option name storing a plain integer.
+	 * @return void
+	 */
+	private function increment_option_atomically( $option_name ) {
+		global $wpdb;
+
+		$updated = $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = option_value + 1 WHERE option_name = %s", $option_name ) );
+
+		if ( ! $updated ) {
+			add_option( $option_name, 1, '', 'no' );
 		}
 
-		$stats['accepted'] = (int) ( $stats['accepted'] ?? 0 );
-		$stats['rejected'] = (int) ( $stats['rejected'] ?? 0 );
-
-		++$stats[ $decision ];
-
-		update_option( self::STATS_OPTION, $stats, false );
+		wp_cache_delete( $option_name, 'options' );
 	}
 
 	/**

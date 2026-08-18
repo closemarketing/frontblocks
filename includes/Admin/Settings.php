@@ -2097,9 +2097,8 @@ class Settings {
 		$expiration     = (int) ( $options[ $this->option_cookie_notice_expiration_days ] ?? 365 );
 		$gtm_id         = (string) ( $options[ $this->option_cookie_notice_gtm_id ] ?? '' );
 		$ga4_id         = (string) ( $options[ $this->option_cookie_notice_ga4_id ] ?? '' );
-		$stats          = get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION, array() );
-		$accepted_count = (int) ( $stats['accepted'] ?? 0 );
-		$rejected_count = (int) ( $stats['rejected'] ?? 0 );
+		$accepted_count = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_ACCEPTED, 0 );
+		$rejected_count = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_REJECTED, 0 );
 		$total_count    = $accepted_count + $rejected_count;
 		$acceptance_pct = $total_count > 0 ? round( ( $accepted_count / $total_count ) * 100, 1 ) : 0;
 		?>

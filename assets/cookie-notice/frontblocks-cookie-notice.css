@@ -7,6 +7,8 @@
 
 .frbl-cookie-notice {
 	--frbl-cookie-accent: #687df9;
+	--frbl-cookie-accent-contrast: #ffffff;
+	--frbl-cookie-accent-on-light: #687df9;
 
 	position: fixed;
 	z-index: 999999;
@@ -39,7 +41,7 @@
 }
 
 .frbl-cookie-notice__link {
-	color: var(--frbl-cookie-accent);
+	color: var(--frbl-cookie-accent-on-light);
 	text-decoration: underline;
 	white-space: nowrap;
 }
@@ -78,7 +80,7 @@
 .frbl-cookie-notice__button--accept {
 	background-color: var(--frbl-cookie-accent);
 	border: 1px solid var(--frbl-cookie-accent);
-	color: #ffffff;
+	color: var(--frbl-cookie-accent-contrast);
 }
 
 .frbl-cookie-notice__button--reject {
@@ -145,6 +147,7 @@
 	align-items: center;
 	justify-content: center;
 	padding: 20px;
+	overflow-y: auto;
 	background-color: rgba(15, 23, 42, 0.55);
 }
 
@@ -153,6 +156,8 @@
 	padding: 28px;
 	max-width: 480px;
 	width: 100%;
+	max-height: calc(100vh - 40px);
+	overflow-y: auto;
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
@@ -188,6 +193,10 @@ body.frbl-cookie-notice-lock-scroll {
 	.frbl-cookie-notice--popup .frbl-cookie-notice__panel {
 		width: calc(100% - 24px);
 		max-width: none;
+	}
+
+	.frbl-cookie-notice--popup .frbl-cookie-notice__panel {
+		max-height: calc(100vh - 24px);
 	}
 
 	.frbl-cookie-notice--box {
