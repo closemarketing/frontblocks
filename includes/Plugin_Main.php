@@ -159,6 +159,9 @@ class Plugin_Main {
 		// Maintenance Mode module.
 		new Frontend\Maintenance();
 
+		// Cookie Notice module.
+		new Frontend\CookieNotice();
+
 		// User Text block is provided by FrontBlocks Pro when license is active.
 	}
 

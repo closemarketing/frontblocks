@@ -4,8 +4,8 @@ Tags: carrusel, slider, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 1.4.0
-Version: 1.4.0
+Stable tag: 1.5.0
+Version: 1.5.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -174,6 +174,9 @@ Register and manage events directly from WordPress. Enable the Events feature fr
 **Language Recommendation Banner:**
 Display a smart banner that detects the visitor's browser language and suggests switching to the matching version of the site. Enable the banner from the FrontBlocks settings page. The banner only appears when the site has a translated version matching the user's browser language, and respects user dismissal via a cookie.
 
+**Cookie Notice:**
+Show a lightweight, configurable cookie consent banner with Accept and Reject actions. Choose between a full-width bottom bar, a boxed panel (bottom-left or bottom-right) or a centered popup, and customize the message, button labels, cookie policy link, accent color and cookie expiration. Google Tag Manager and/or GA4 are only requested and loaded after a visitor accepts — never before — and returning visitors who already accepted get the scripts on normal page load. The settings page also shows a simple accepted/rejected acceptance-rate stat (admins are excluded from the count).
+
 **WooCommerce Features:**
 Included features for WooCommerce FrontBlocks PRO.
 
@@ -210,6 +213,9 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 2. Go to Settings > FrontBlocks > Features and enable the features you want to use.
 
 == Changelog ==
+
+== 1.5.0 ==
+*   Added: Cookie Notice — configurable cookie consent banner (full-width bar, boxed panel or centered popup) with Accept/Reject actions, custom message, accent color and expiration. Google Tag Manager and GA4 only load after consent is accepted, and an aggregate acceptance-rate stat is shown in the settings page.
 
 == 1.4.0 ==
 *   Added: Carousel Pattern — ready-to-use Hero Carousel pattern using native WordPress Cover blocks, registered in the Patterns tab under the FrontBlocks category.
