@@ -29,13 +29,6 @@ defined( 'ABSPATH' ) || exit;
 class CookieNotice {
 
 	/**
-	 * Name of the cookie storing the visitor's consent decision.
-	 *
-	 * @var string
-	 */
-	const COOKIE_NAME = 'frbl_cookie_consent';
-
-	/**
 	 * Option name storing the aggregate accepted counter.
 	 *
 	 * @var string
@@ -83,16 +76,35 @@ class CookieNotice {
 	}
 
 	/**
+	 * Name of the cookie storing the visitor's consent decision.
+	 *
+	 * On multisite, COOKIEPATH alone can't isolate the root site from its
+	 * subsites (the root site's path is '/', which every subsite path sits
+	 * under), so the blog ID is folded into the cookie name itself instead.
+	 *
+	 * @return string
+	 */
+	private function get_cookie_name() {
+		if ( is_multisite() ) {
+			return 'frbl_cookie_consent_' . get_current_blog_id();
+		}
+
+		return 'frbl_cookie_consent';
+	}
+
+	/**
 	 * Get the visitor's current consent decision from the cookie.
 	 *
 	 * @return string 'accepted', 'rejected', or '' when the visitor has not decided yet.
 	 */
 	private function get_consent() {
-		if ( ! isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
+		$cookie_name = $this->get_cookie_name();
+
+		if ( ! isset( $_COOKIE[ $cookie_name ] ) ) {
 			return '';
 		}
 
-		$consent = sanitize_key( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) );
+		$consent = sanitize_key( wp_unslash( $_COOKIE[ $cookie_name ] ) );
 
 		return in_array( $consent, array( 'accepted', 'rejected' ), true ) ? $consent : '';
 	}
@@ -165,7 +177,7 @@ class CookieNotice {
 			array(
 				'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
 				'logNonce'       => wp_create_nonce( self::NONCE_ACTION ),
-				'cookieName'     => self::COOKIE_NAME,
+				'cookieName'     => $this->get_cookie_name(),
 				'cookiePath'     => defined( 'COOKIEPATH' ) && COOKIEPATH ? COOKIEPATH : '/',
 				'expirationDays' => $days > 0 ? $days : 365,
 			)
@@ -294,10 +306,11 @@ class CookieNotice {
 	 * @return void
 	 */
 	private function render_consent_bootstrap_script() {
+		$cookie_name = $this->get_cookie_name();
 		?>
 		<script>
 		( function () {
-			var cookieMatch = document.cookie.match( /(?:^|; )frbl_cookie_consent=([^;]*)/ );
+			var cookieMatch = document.cookie.match( new RegExp( '(?:^|; )<?php echo esc_js( $cookie_name ); ?>=([^;]*)' ) );
 			var consent     = cookieMatch ? decodeURIComponent( cookieMatch[ 1 ] ) : '';
 			var banner      = document.getElementById( 'frbl-cookie-notice' );
 
@@ -354,30 +367,65 @@ class CookieNotice {
 	}
 
 	/**
-	 * Pick black or white text, whichever contrasts better against a background color.
+	 * Pick black or white text, whichever has the higher actual WCAG contrast
+	 * ratio against a background color (not just whichever "looks" darker/lighter).
 	 *
 	 * @param string $hex_color Background color, e.g. '#687df9'.
 	 * @return string '#ffffff' or a near-black neutral.
 	 */
 	private function get_readable_text_color( $hex_color ) {
-		$rgb       = $this->hex_to_rgb( $hex_color );
-		$luminance = ( 0.299 * $rgb[0] + 0.587 * $rgb[1] + 0.114 * $rgb[2] ) / 255;
+		$bg_luminance = $this->get_relative_luminance( $this->hex_to_rgb( $hex_color ) );
 
-		return $luminance > 0.6 ? '#111827' : '#ffffff';
+		$white_contrast = $this->get_contrast_ratio( $bg_luminance, 1 );
+		$black_contrast = $this->get_contrast_ratio( $bg_luminance, 0 );
+
+		return $white_contrast >= $black_contrast ? '#ffffff' : '#111827';
 	}
 
 	/**
 	 * Ensure a color stays legible when used as text on the banner's white panel —
-	 * accent colors light enough to disappear against white fall back to a dark neutral.
+	 * accent colors that don't reach a 4.5:1 contrast ratio against white fall
+	 * back to a dark neutral instead.
 	 *
 	 * @param string $hex_color Requested accent color, e.g. '#687df9'.
 	 * @return string A color safe to use as text on a white background.
 	 */
 	private function get_readable_on_white_color( $hex_color ) {
-		$rgb       = $this->hex_to_rgb( $hex_color );
-		$luminance = ( 0.299 * $rgb[0] + 0.587 * $rgb[1] + 0.114 * $rgb[2] ) / 255;
+		$luminance = $this->get_relative_luminance( $this->hex_to_rgb( $hex_color ) );
+		$contrast  = $this->get_contrast_ratio( $luminance, 1 );
 
-		return $luminance > 0.55 ? '#111827' : $hex_color;
+		return $contrast >= 4.5 ? $hex_color : '#111827';
+	}
+
+	/**
+	 * WCAG relative luminance of an sRGB color.
+	 *
+	 * @param int[] $rgb Three-item [r, g, b] array, each 0-255.
+	 * @return float Relative luminance between 0 (black) and 1 (white).
+	 */
+	private function get_relative_luminance( $rgb ) {
+		$channels = array();
+
+		foreach ( $rgb as $channel ) {
+			$channel    = $channel / 255;
+			$channels[] = $channel <= 0.03928 ? $channel / 12.92 : ( ( $channel + 0.055 ) / 1.055 ) ** 2.4;
+		}
+
+		return 0.2126 * $channels[0] + 0.7152 * $channels[1] + 0.0722 * $channels[2];
+	}
+
+	/**
+	 * WCAG contrast ratio between two relative luminances.
+	 *
+	 * @param float $luminance_a First relative luminance (0-1).
+	 * @param float $luminance_b Second relative luminance (0-1).
+	 * @return float Contrast ratio, from 1 (no contrast) to 21 (black on white).
+	 */
+	private function get_contrast_ratio( $luminance_a, $luminance_b ) {
+		$lighter = max( $luminance_a, $luminance_b );
+		$darker  = min( $luminance_a, $luminance_b );
+
+		return ( $lighter + 0.05 ) / ( $darker + 0.05 );
 	}
 
 	/**
