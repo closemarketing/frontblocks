@@ -304,6 +304,15 @@ class CookieNotice {
 	 * and injects the tracking scripts. Runs on every page (including the
 	 * policy page, where render_banner_markup() is skipped).
 	 *
+	 * This is an optimization, not the only implementation: it sets
+	 * window.frblCookieNoticeBootstrapped so the registered
+	 * frontblocks-cookie-notice.js file (enqueued in enqueue_assets()) knows
+	 * this already ran and skips redoing it. On a site whose Content Security
+	 * Policy blocks unnonced inline scripts, this one is simply never executed
+	 * by the browser, and that registered script performs the same bootstrap
+	 * itself instead — banner hiding and tracking still work there, just
+	 * without the no-flash guarantee this inline copy provides.
+	 *
 	 * @return void
 	 */
 	private function render_consent_bootstrap_script() {
@@ -371,6 +380,8 @@ class CookieNotice {
 					} )
 					.catch( function () {} );
 			}
+
+			window.frblCookieNoticeBootstrapped = true;
 		} )();
 		</script>
 		<?php
