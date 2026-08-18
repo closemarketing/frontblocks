@@ -95,6 +95,22 @@ class CookieNotice {
 	}
 
 	/**
+	 * Get the admin-ajax.php URL, forced to the current request's own scheme.
+	 *
+	 * admin_url() can return an https URL on an http frontend when the site
+	 * forces SSL only for wp-admin (e.g. FORCE_SSL_ADMIN). That makes the
+	 * consent AJAX request cross-origin: 'credentials: same-origin' on the
+	 * frontend then omits the consent cookie, and the browser's CORS check
+	 * would block the response regardless. Matching the current request's
+	 * scheme keeps the AJAX call same-origin.
+	 *
+	 * @return string
+	 */
+	private function get_ajax_url() {
+		return admin_url( 'admin-ajax.php', is_ssl() ? 'https' : 'http' );
+	}
+
+	/**
 	 * Get the visitor's current consent decision from the cookie.
 	 *
 	 * @return string 'accepted', 'rejected', or '' when the visitor has not decided yet.
@@ -135,26 +151,41 @@ class CookieNotice {
 			return false;
 		}
 
-		$policy_path  = untrailingslashit( (string) wp_parse_url( $policy_url, PHP_URL_PATH ) );
+		$policy_path  = $this->normalize_url_path( (string) wp_parse_url( $policy_url, PHP_URL_PATH ) );
 		$request_uri  = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
-		$current_path = untrailingslashit( (string) wp_parse_url( $request_uri, PHP_URL_PATH ) );
+		$current_path = $this->normalize_url_path( (string) wp_parse_url( $request_uri, PHP_URL_PATH ) );
 
-		return '' !== $policy_path && $policy_path === $current_path;
+		return $policy_path === $current_path;
+	}
+
+	/**
+	 * Normalize a URL path for comparison: strip a trailing slash, but keep the
+	 * site root as '/' rather than letting it collapse to an empty string (which
+	 * would otherwise never match anything and wrongly rule out the root as a
+	 * valid policy page).
+	 *
+	 * @param string $path Raw URL path.
+	 * @return string Normalized path, always at least '/'.
+	 */
+	private function normalize_url_path( $path ) {
+		$path = untrailingslashit( $path );
+
+		return '' === $path ? '/' : $path;
 	}
 
 	/**
 	 * Enqueue the frontend banner assets.
 	 *
-	 * Always enqueued (never gated by the visitor's consent cookie) so a full-page
-	 * cache can safely serve one cached HTML response to every visitor of a URL.
+	 * Always enqueued, on every page including the configured policy page —
+	 * never gated by the visitor's consent cookie, so a full-page cache can
+	 * safely serve one cached HTML response to every visitor of a URL. The
+	 * policy page only suppresses the visible banner markup (see
+	 * render_banner()); it still needs these assets so an accepted visitor
+	 * keeps getting tracking scripts there too.
 	 *
 	 * @return void
 	 */
 	public function enqueue_assets() {
-		if ( $this->is_policy_page() ) {
-			return;
-		}
-
 		$options = get_option( 'frontblocks_settings', array() );
 		$days    = (int) ( $options['cookie_notice_expiration_days'] ?? 365 );
 
@@ -177,7 +208,7 @@ class CookieNotice {
 			'frontblocks-cookie-notice',
 			'frblCookieNotice',
 			array(
-				'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
+				'ajaxUrl'        => $this->get_ajax_url(),
 				'cookieName'     => $this->get_cookie_name(),
 				'cookiePath'     => defined( 'COOKIEPATH' ) && COOKIEPATH ? COOKIEPATH : '/',
 				'expirationDays' => $days > 0 ? $days : 365,
@@ -296,6 +327,25 @@ class CookieNotice {
 			</div>
 		</div>
 		<?php
+		if ( $is_modal ) {
+			?>
+			<noscript>
+				<style>
+					.frbl-cookie-notice--popup {
+						position: static;
+						display: block;
+						overflow: visible;
+						background-color: transparent;
+						padding: 0;
+					}
+					.frbl-cookie-notice--popup .frbl-cookie-notice__panel {
+						max-width: none;
+						box-shadow: none;
+					}
+				</style>
+			</noscript>
+			<?php
+		}
 	}
 
 	/**
@@ -367,7 +417,7 @@ class CookieNotice {
 				var formData = new FormData();
 				formData.append( 'action', 'frbl_get_cookie_notice_config' );
 
-				fetch( '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>', {
+				fetch( '<?php echo esc_url( $this->get_ajax_url() ); ?>', {
 					method: 'POST',
 					credentials: 'same-origin',
 					body: formData
