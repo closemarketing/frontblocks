@@ -114,7 +114,7 @@ class CookieNotice {
 		}
 
 		if ( $ga4_id ) {
-			wp_enqueue_script( 'frontblocks-cookie-notice-ga4', 'https://www.googletagmanager.com/gtag/js?id=' . rawurlencode( $ga4_id ), array(), null, false );
+			wp_enqueue_script( 'frontblocks-cookie-notice-ga4', 'https://www.googletagmanager.com/gtag/js?id=' . rawurlencode( $ga4_id ), array(), FRBL_VERSION, false );
 			wp_add_inline_script(
 				'frontblocks-cookie-notice-ga4',
 				"window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '" . esc_js( $ga4_id ) . "');"
