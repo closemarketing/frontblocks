@@ -97,9 +97,9 @@ class CookieNotice {
 	/**
 	 * Get the admin-ajax.php URL, forced to the current request's own scheme.
 	 *
-	 * admin_url() can return an https URL on an http frontend when the site
-	 * forces SSL only for wp-admin (e.g. FORCE_SSL_ADMIN). That makes the
-	 * consent AJAX request cross-origin: 'credentials: same-origin' on the
+	 * The admin_url() function can return an https URL on an http frontend when
+	 * the site forces SSL only for wp-admin (e.g. FORCE_SSL_ADMIN). That makes
+	 * the consent AJAX request cross-origin: 'credentials: same-origin' on the
 	 * frontend then omits the consent cookie, and the browser's CORS check
 	 * would block the response regardless. Matching the current request's
 	 * scheme keeps the AJAX call same-origin.
