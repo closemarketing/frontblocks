@@ -155,7 +155,17 @@ class CookieNotice {
 		$request_uri  = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
 		$current_path = $this->normalize_url_path( (string) wp_parse_url( $request_uri, PHP_URL_PATH ) );
 
-		return $policy_path === $current_path;
+		if ( $policy_path !== $current_path ) {
+			return false;
+		}
+
+		// On sites using plain permalinks, the path alone (e.g. '/' for every
+		// '/?page_id=N' request) doesn't identify the page — the query string
+		// does, so it has to match too.
+		$policy_query  = $this->parse_query_pairs( (string) wp_parse_url( $policy_url, PHP_URL_QUERY ) );
+		$current_query = $this->parse_query_pairs( (string) wp_parse_url( $request_uri, PHP_URL_QUERY ) );
+
+		return $policy_query === $current_query;
 	}
 
 	/**
@@ -171,6 +181,23 @@ class CookieNotice {
 		$path = untrailingslashit( $path );
 
 		return '' === $path ? '/' : $path;
+	}
+
+	/**
+	 * Parse a URL query string into a sorted key/value array, so two query
+	 * strings that carry the same parameters in a different order still compare
+	 * as equal.
+	 *
+	 * @param string $query Raw query string, without the leading '?'.
+	 * @return array<string, mixed>
+	 */
+	private function parse_query_pairs( $query ) {
+		$pairs = array();
+
+		wp_parse_str( $query, $pairs );
+		ksort( $pairs );
+
+		return $pairs;
 	}
 
 	/**
