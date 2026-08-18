@@ -256,10 +256,10 @@ class CookieNotice {
 			$classes[] = 'bottom-left' === $position ? 'frbl-cookie-notice--left' : 'frbl-cookie-notice--right';
 		}
 
-		$is_modal      = 'popup' === $layout;
-		$accent_text   = $this->get_readable_text_color( $color );
-		$accent_link   = $this->get_readable_on_white_color( $color );
-		$style         = sprintf(
+		$is_modal    = 'popup' === $layout;
+		$accent_text = $this->get_readable_text_color( $color );
+		$accent_link = $this->get_readable_on_white_color( $color );
+		$style       = sprintf(
 			'--frbl-cookie-accent: %1$s; --frbl-cookie-accent-contrast: %2$s; --frbl-cookie-accent-on-light: %3$s;',
 			esc_attr( $color ),
 			esc_attr( $accent_text ),
