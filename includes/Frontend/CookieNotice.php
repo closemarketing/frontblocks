@@ -99,7 +99,27 @@ class CookieNotice {
 			return;
 		}
 
-		echo $this->get_head_scripts_markup(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		$options = get_option( 'frontblocks_settings', array() );
+		$gtm_id  = $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
+		$ga4_id  = $this->sanitize_ga4_id( $options['cookie_notice_ga4_id'] ?? '' );
+
+		// Registered with a `false` src purely to hold the GTM bootstrap as an inline script.
+		if ( $gtm_id ) {
+			wp_register_script( 'frontblocks-cookie-notice-gtm', false, array(), FRBL_VERSION, false );
+			wp_enqueue_script( 'frontblocks-cookie-notice-gtm' );
+			wp_add_inline_script(
+				'frontblocks-cookie-notice-gtm',
+				"(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','" . esc_js( $gtm_id ) . "');"
+			);
+		}
+
+		if ( $ga4_id ) {
+			wp_enqueue_script( 'frontblocks-cookie-notice-ga4', 'https://www.googletagmanager.com/gtag/js?id=' . rawurlencode( $ga4_id ), array(), null, false );
+			wp_add_inline_script(
+				'frontblocks-cookie-notice-ga4',
+				"window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '" . esc_js( $ga4_id ) . "');"
+			);
+		}
 	}
 
 	/**
@@ -115,30 +135,6 @@ class CookieNotice {
 		}
 
 		echo $this->get_body_scripts_markup(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	}
-
-	/**
-	 * Build the GTM/GA4 <head> markup for an already-consenting visitor.
-	 *
-	 * @return string
-	 */
-	private function get_head_scripts_markup() {
-		$options = get_option( 'frontblocks_settings', array() );
-		$gtm_id  = $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
-		$ga4_id  = $this->sanitize_ga4_id( $options['cookie_notice_ga4_id'] ?? '' );
-
-		$markup = '';
-
-		if ( $gtm_id ) {
-			$markup .= "<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','" . esc_js( $gtm_id ) . "');</script>\n";
-		}
-
-		if ( $ga4_id ) {
-			$markup .= '<script async src="https://www.googletagmanager.com/gtag/js?id=' . esc_attr( $ga4_id ) . '"></script>' . "\n";
-			$markup .= "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '" . esc_js( $ga4_id ) . "');</script>\n";
-		}
-
-		return $markup;
 	}
 
 	/**
