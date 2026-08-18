@@ -151,21 +151,24 @@ class CookieNotice {
 			return false;
 		}
 
+		// Resolve the configured URL to an actual post/page ID and compare it
+		// against the one WordPress resolved for this request — this is what
+		// correctly handles plain vs. pretty permalinks and ignores unrelated
+		// query parameters (UTM tags, cache busters, etc.) that a raw string
+		// comparison would otherwise treat as a different page.
+		$policy_post_id = url_to_postid( $policy_url );
+
+		if ( $policy_post_id ) {
+			return $policy_post_id === get_queried_object_id();
+		}
+
+		// url_to_postid() only resolves posts/pages; fall back to a plain path
+		// comparison for a policy URL pointing anywhere else on the site.
 		$policy_path  = $this->normalize_url_path( (string) wp_parse_url( $policy_url, PHP_URL_PATH ) );
 		$request_uri  = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
 		$current_path = $this->normalize_url_path( (string) wp_parse_url( $request_uri, PHP_URL_PATH ) );
 
-		if ( $policy_path !== $current_path ) {
-			return false;
-		}
-
-		// On sites using plain permalinks, the path alone (e.g. '/' for every
-		// '/?page_id=N' request) doesn't identify the page — the query string
-		// does, so it has to match too.
-		$policy_query  = $this->parse_query_pairs( (string) wp_parse_url( $policy_url, PHP_URL_QUERY ) );
-		$current_query = $this->parse_query_pairs( (string) wp_parse_url( $request_uri, PHP_URL_QUERY ) );
-
-		return $policy_query === $current_query;
+		return $policy_path === $current_path;
 	}
 
 	/**
@@ -181,23 +184,6 @@ class CookieNotice {
 		$path = untrailingslashit( $path );
 
 		return '' === $path ? '/' : $path;
-	}
-
-	/**
-	 * Parse a URL query string into a sorted key/value array, so two query
-	 * strings that carry the same parameters in a different order still compare
-	 * as equal.
-	 *
-	 * @param string $query Raw query string, without the leading '?'.
-	 * @return array<string, mixed>
-	 */
-	private function parse_query_pairs( $query ) {
-		$pairs = array();
-
-		wp_parse_str( $query, $pairs );
-		ksort( $pairs );
-
-		return $pairs;
 	}
 
 	/**
@@ -469,16 +455,19 @@ class CookieNotice {
 	 * ratio against a background color (not just whichever "looks" darker/lighter).
 	 *
 	 * @param string $hex_color Background color, e.g. '#687df9'.
-	 * @return string '#ffffff' or a near-black neutral.
+	 * @return string '#ffffff' or '#000000'.
 	 */
 	private function get_readable_text_color( $hex_color ) {
-		$bg_luminance   = $this->get_relative_luminance( $this->hex_to_rgb( $hex_color ) );
-		$dark_luminance = $this->get_relative_luminance( $this->hex_to_rgb( '#111827' ) );
+		$bg_luminance = $this->get_relative_luminance( $this->hex_to_rgb( $hex_color ) );
 
 		$white_contrast = $this->get_contrast_ratio( $bg_luminance, 1 );
-		$dark_contrast  = $this->get_contrast_ratio( $bg_luminance, $dark_luminance );
+		$black_contrast = $this->get_contrast_ratio( $bg_luminance, 0 );
 
-		return $white_contrast >= $dark_contrast ? '#ffffff' : '#111827';
+		// Pure black, not a lighter dark neutral: whichever of black/white has
+		// the lower contrast against any background is guaranteed to still
+		// reach ~4.58:1 at that background's worst-case luminance (~0.179),
+		// clearing the 4.5:1 button-text requirement for every allowed accent.
+		return $white_contrast >= $black_contrast ? '#ffffff' : '#000000';
 	}
 
 	/**
