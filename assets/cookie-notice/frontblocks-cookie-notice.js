@@ -16,7 +16,17 @@
 
 	function readCookie(name) {
 		var match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-		return match ? decodeURIComponent(match[1]) : '';
+
+		if (!match) {
+			return '';
+		}
+
+		try {
+			return decodeURIComponent(match[1]);
+		} catch (e) {
+			// Malformed percent-encoding: treat it the same as no cookie at all.
+			return '';
+		}
 	}
 
 	function init() {
@@ -136,18 +146,36 @@
 		}
 
 		function logDecision(decision) {
-			var formData = new FormData();
-			formData.append('action', 'frbl_log_cookie_consent');
-			formData.append('nonce', frblCookieNotice.logNonce);
-			formData.append('decision', decision);
+			var nonceForm = new FormData();
+			nonceForm.append('action', 'frbl_get_cookie_notice_log_nonce');
 
 			fetch(frblCookieNotice.ajaxUrl, {
 				method: 'POST',
 				credentials: 'same-origin',
-				body: formData
-			}).catch(function () {
-				// Best-effort: the aggregate stat is not critical to the consent flow.
-			});
+				body: nonceForm
+			})
+				.then(function (response) {
+					return response.json();
+				})
+				.then(function (response) {
+					if (!response || !response.success || !response.data) {
+						return;
+					}
+
+					var formData = new FormData();
+					formData.append('action', 'frbl_log_cookie_consent');
+					formData.append('nonce', response.data.nonce);
+					formData.append('decision', decision);
+
+					return fetch(frblCookieNotice.ajaxUrl, {
+						method: 'POST',
+						credentials: 'same-origin',
+						body: formData
+					});
+				})
+				.catch(function () {
+					// Best-effort: the aggregate stat is not critical to the consent flow.
+				});
 		}
 
 		function fetchAndInjectScripts() {

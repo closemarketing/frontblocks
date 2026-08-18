@@ -113,6 +113,8 @@
 	bottom: 20px;
 	max-width: 380px;
 	width: calc(100% - 40px);
+	max-height: calc(100vh - 40px);
+	overflow-y: auto;
 }
 
 .frbl-cookie-notice--box.frbl-cookie-notice--right {
@@ -203,6 +205,7 @@ body.frbl-cookie-notice-lock-scroll {
 		left: 12px;
 		right: 12px;
 		bottom: 12px;
+		max-height: calc(100vh - 24px);
 	}
 }
 

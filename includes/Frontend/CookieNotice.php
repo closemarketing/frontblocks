@@ -63,6 +63,8 @@ class CookieNotice {
 		add_action( 'wp_ajax_nopriv_frbl_log_cookie_consent', array( $this, 'log_consent_callback' ) );
 		add_action( 'wp_ajax_frbl_get_cookie_notice_config', array( $this, 'get_config_callback' ) );
 		add_action( 'wp_ajax_nopriv_frbl_get_cookie_notice_config', array( $this, 'get_config_callback' ) );
+		add_action( 'wp_ajax_frbl_get_cookie_notice_log_nonce', array( $this, 'get_log_nonce_callback' ) );
+		add_action( 'wp_ajax_nopriv_frbl_get_cookie_notice_log_nonce', array( $this, 'get_log_nonce_callback' ) );
 	}
 
 	/**
@@ -176,7 +178,6 @@ class CookieNotice {
 			'frblCookieNotice',
 			array(
 				'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
-				'logNonce'       => wp_create_nonce( self::NONCE_ACTION ),
 				'cookieName'     => $this->get_cookie_name(),
 				'cookiePath'     => defined( 'COOKIEPATH' ) && COOKIEPATH ? COOKIEPATH : '/',
 				'expirationDays' => $days > 0 ? $days : 365,
@@ -311,8 +312,17 @@ class CookieNotice {
 		<script>
 		( function () {
 			var cookieMatch = document.cookie.match( new RegExp( '(?:^|; )<?php echo esc_js( $cookie_name ); ?>=([^;]*)' ) );
-			var consent     = cookieMatch ? decodeURIComponent( cookieMatch[ 1 ] ) : '';
+			var consent     = '';
 			var banner      = document.getElementById( 'frbl-cookie-notice' );
+
+			if ( cookieMatch ) {
+				try {
+					consent = decodeURIComponent( cookieMatch[ 1 ] );
+				} catch ( e ) {
+					// Malformed percent-encoding: treat it the same as no cookie at all.
+					consent = '';
+				}
+			}
 
 			if ( banner && ( 'accepted' === consent || 'rejected' === consent ) ) {
 				banner.style.display = 'none';
@@ -374,12 +384,13 @@ class CookieNotice {
 	 * @return string '#ffffff' or a near-black neutral.
 	 */
 	private function get_readable_text_color( $hex_color ) {
-		$bg_luminance = $this->get_relative_luminance( $this->hex_to_rgb( $hex_color ) );
+		$bg_luminance   = $this->get_relative_luminance( $this->hex_to_rgb( $hex_color ) );
+		$dark_luminance = $this->get_relative_luminance( $this->hex_to_rgb( '#111827' ) );
 
 		$white_contrast = $this->get_contrast_ratio( $bg_luminance, 1 );
-		$black_contrast = $this->get_contrast_ratio( $bg_luminance, 0 );
+		$dark_contrast  = $this->get_contrast_ratio( $bg_luminance, $dark_luminance );
 
-		return $white_contrast >= $black_contrast ? '#ffffff' : '#111827';
+		return $white_contrast >= $dark_contrast ? '#ffffff' : '#111827';
 	}
 
 	/**
@@ -481,13 +492,32 @@ class CookieNotice {
 	}
 
 	/**
+	 * AJAX callback: returns a fresh nonce for the logging endpoint.
+	 *
+	 * Fetched live at the moment a visitor actually decides, instead of being
+	 * embedded in the cache-neutral HTML this module renders — a nonce baked
+	 * into that HTML would go stale on any page a full-page cache keeps around
+	 * longer than a WordPress nonce's lifetime, silently dropping every decision
+	 * logged from that cached response. Generating a nonce isn't a sensitive
+	 * action in itself (the same thing any login form does for a logged-out
+	 * visitor), so this endpoint needs no authentication of its own.
+	 *
+	 * @return void
+	 */
+	public function get_log_nonce_callback() {
+		wp_send_json_success( array( 'nonce' => wp_create_nonce( self::NONCE_ACTION ) ) );
+	}
+
+	/**
 	 * AJAX callback: logs the visitor's decision in the aggregate accepted/rejected counters.
 	 *
 	 * This is a best-effort, lightweight aggregate stat, not a precise per-visitor
 	 * metering system — the module explicitly renders cache-neutral HTML (see
 	 * render_banner()), so there is no page-embedded value this endpoint could use
 	 * to deduplicate a replayed request without also breaking under a full-page
-	 * cache, the same way a one-time token or short-lived nonce would.
+	 * cache, the same way a one-time token would. The nonce itself is fetched
+	 * fresh via get_log_nonce_callback() right before this call, so it stays
+	 * valid regardless of how long a cache keeps the page that triggered it.
 	 *
 	 * @return void
 	 */
