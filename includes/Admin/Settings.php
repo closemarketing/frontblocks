@@ -1396,8 +1396,8 @@ class Settings {
 					href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-optional-cta"
 					target="_blank"
 					rel="noopener noreferrer"
-					class="tw:inline-flex tw:items-center tw:border tw:border-transparent tw:text-sm tw:font-medium tw:rounded-lg tw:shadow-sm tw:text-white tw:transition-colors tw:duration-200"
-					style="background-color: #ef4444; padding: 10px 20px;"
+					class="tw:inline-flex tw:items-center tw:border tw:border-transparent tw:text-sm tw:font-medium tw:rounded-lg tw:shadow-sm tw:transition-colors tw:duration-200"
+					style="background-color: #ef4444; color: #fff; padding: 10px 20px;"
 					onmouseover="this.style.backgroundColor='#dc2626'"
 					onmouseout="this.style.backgroundColor='#ef4444'"
 				>
@@ -2369,8 +2369,8 @@ class Settings {
 					href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-pro-cta"
 					target="_blank"
 					rel="noopener noreferrer"
-					class="tw:inline-flex tw:items-center tw:px-6 tw:py-3 tw:border tw:border-transparent tw:text-base tw:font-medium tw:rounded-lg tw:shadow-sm tw:text-white tw:transition-colors tw:duration-200"
-					style="background-color: #ef4444;"
+					class="tw:inline-flex tw:items-center tw:px-6 tw:py-3 tw:border tw:border-transparent tw:text-base tw:font-medium tw:rounded-lg tw:shadow-sm tw:transition-colors tw:duration-200"
+					style="background-color: #ef4444; color: #fff;"
 					onmouseover="this.style.backgroundColor='#dc2626'"
 					onmouseout="this.style.backgroundColor='#ef4444'"
 				>
