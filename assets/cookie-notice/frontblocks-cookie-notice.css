@@ -157,19 +157,39 @@
 
 .frbl-cookie-notice--popup .frbl-cookie-notice__panel {
 	border-radius: 16px;
-	padding: 28px;
-	max-width: 480px;
+	padding: 40px 32px 32px;
+	max-width: 420px;
 	width: 100%;
 	max-height: calc(100vh - 40px);
 	overflow-y: auto;
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
+	align-items: center;
+	text-align: center;
+	gap: 16px;
 	box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
 }
 
+.frbl-cookie-notice__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 64px;
+	height: 64px;
+	flex-shrink: 0;
+	border-radius: 50%;
+	background-color: var(--frbl-cookie-accent);
+	color: var(--frbl-cookie-accent-contrast);
+}
+
+.frbl-cookie-notice__icon svg {
+	width: 32px;
+	height: 32px;
+}
+
 .frbl-cookie-notice--popup .frbl-cookie-notice__actions {
-	justify-content: flex-end;
+	justify-content: center;
+	width: 100%;
 }
 
 body.frbl-cookie-notice-lock-scroll {
