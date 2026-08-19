@@ -730,13 +730,30 @@
 	font-size: 1.125rem;
 }
 
+/* Sticky save bar — keeps the Save Settings button reachable without scrolling to the bottom of a long form. */
+.frbl-settings-save-bar {
+	position: sticky;
+	bottom: 1.5rem;
+	z-index: 20;
+	padding: 1.5rem;
+	background: rgba(255, 255, 255, 0.92);
+	backdrop-filter: blur(4px);
+	border: 1px solid #e5e7eb;
+	border-radius: 0.5rem;
+	box-shadow: 0 4px 12px -6px rgba(15, 23, 42, 0.12);
+}
+
 /* Responsive adjustments */
 @media (max-width: 640px) {
 	.frbl-settings-wrapper {
 		margin-left: 0;
 	}
-	
+
 	.frbl-settings-wrapper .tw\:flex.tw\:items-center.tw\:justify-between {
+		@apply tw:flex-col tw:items-start tw:space-y-4;
+	}
+
+	.frbl-settings-save-bar {
 		@apply tw:flex-col tw:items-start tw:space-y-4;
 	}
 }

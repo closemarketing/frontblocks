@@ -1165,7 +1165,7 @@ class Settings {
 					?>
 
 					<!-- Submit Button -->
-					<div class="tw:flex tw:items-center tw:justify-between tw:pt-6 tw:border-t tw:border-gray-200">
+					<div class="frbl-settings-save-bar tw:flex tw:items-center tw:justify-between">
 						<div class="tw:text-sm tw:text-gray-500">
 							<?php echo esc_html__( 'Changes will be applied immediately after saving.', 'frontblocks' ); ?>
 						</div>
