@@ -175,7 +175,7 @@ Register and manage events directly from WordPress. Enable the Events feature fr
 Display a smart banner that detects the visitor's browser language and suggests switching to the matching version of the site. Enable the banner from the FrontBlocks settings page. The banner only appears when the site has a translated version matching the user's browser language, and respects user dismissal via a cookie.
 
 **Cookie Notice:**
-Show a lightweight, configurable cookie consent banner with Accept and Reject actions. Choose between a full-width bottom bar, a boxed panel (bottom-left or bottom-right) or a centered popup, and customize the message, button labels, cookie policy link, accent color and cookie expiration. Google Tag Manager and/or GA4 are only requested and loaded after a visitor accepts — never before — and returning visitors who already accepted get the scripts on normal page load. The settings page also shows a simple accepted/rejected acceptance-rate stat (admins are excluded from the count).
+Show a lightweight, configurable cookie consent banner with Accept and Reject actions. Choose between a full-width bottom bar, a boxed panel (bottom-left or bottom-right) or a centered popup, and customize the message, button labels, cookie policy page, accent color and cookie expiration. Google Tag Manager and/or GA4 are only requested and loaded after a visitor accepts — never before — and returning visitors who already accepted get the scripts on normal page load. The settings page also shows a simple accepted/rejected acceptance-rate stat (admins are excluded from the count). Implements Google Consent Mode v2, so it also holds back tracking from other analytics/ads plugins that respect it — including **Google Site Kit** — until the visitor decides.
 
 **WooCommerce Features:**
 Included features for WooCommerce FrontBlocks PRO.
@@ -215,7 +215,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 == Changelog ==
 
 == 1.5.0 ==
-*   Added: Cookie Notice — configurable cookie consent banner (full-width bar, boxed panel or centered popup) with Accept/Reject actions, custom message, accent color and expiration. Google Tag Manager and GA4 only load after consent is accepted, and an aggregate acceptance-rate stat is shown in the settings page.
+*   Added: Cookie Notice — configurable cookie consent banner (full-width bar, boxed panel or centered popup) with Accept/Reject actions, custom message, accent color and expiration. Google Tag Manager and GA4 only load after consent is accepted, an aggregate acceptance-rate stat is shown in the settings page, and Google Consent Mode v2 support holds back tracking from other analytics/ads plugins (including Google Site Kit) until the visitor decides.
 
 == 1.4.0 ==
 *   Added: Carousel Pattern — ready-to-use Hero Carousel pattern using native WordPress Cover blocks, registered in the Patterns tab under the FrontBlocks category.

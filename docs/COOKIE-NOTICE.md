@@ -22,7 +22,7 @@ Enable it from **Appearance → FrontBlocks → Cookie Notice**.
 | --- | --- |
 | Message | The banner copy. Falls back to a default English sentence when left empty. |
 | Accept / Reject button label | Text for the two decision buttons. |
-| Cookie policy URL | Optional link shown next to the message ("Learn more"). When this URL points to a page on the same site, the banner is suppressed on that exact page so visitors can read the policy before deciding. |
+| Cookie policy page | Optional page picker (dropdown of the site's own pages), shown next to the message as a "Learn more" link resolved to that page's permalink. The banner is suppressed on that exact page so visitors can read the policy before deciding. |
 | Layout | `Full-width bar` (bottom bar), `Boxed panel` (bottom-left/bottom-right), or `Centered popup` (modal with a dimmed backdrop). |
 | Position | Only shown for the boxed panel layout — bottom-left or bottom-right. |
 | Accent color | Used for the Accept button and the policy link. A contrasting text color is computed automatically so the button and link stay legible even with a very light accent. |
@@ -53,6 +53,35 @@ Enable it from **Appearance → FrontBlocks → Cookie Notice**.
   HTML this module renders and would go stale on any page a cache keeps around
   longer than a nonce's lifetime, breaking tracking until the cache refreshes.
 
+## Compatibility with other analytics/ads plugins (Google Consent Mode)
+
+The GTM/GA4 fields above only gate what *this module* loads. They have no
+effect on tracking scripts injected by other plugins — most notably
+[Google Site Kit](https://wordpress.org/plugins/google-site-kit/), which
+enqueues its own `gtag.js` independently and would otherwise start collecting
+data before the visitor has made a choice.
+
+To close that gap, the module implements
+[Google Consent Mode v2](https://developers.google.com/tag-platform/security/guides/consent):
+
+- On every page, before any other script runs (`wp_head`, priority `1`), it
+  pushes a `consent` → `default` command to `window.dataLayer` — `denied` for
+  `ad_storage`, `ad_user_data`, `ad_personalization`, and `analytics_storage`,
+  or `granted` if the visitor already has a `frbl_cookie_consent=accepted`
+  cookie from a previous visit.
+- When a visitor accepts or rejects, the frontend script pushes a matching
+  `consent` → `update` command.
+
+Because Consent Mode works through `window.dataLayer` rather than through
+whichever plugin's script happens to process it, this holds back **any**
+Consent Mode-aware tag — Site Kit's own gtag snippet, a GTM container pasted
+manually into the theme, another plugin's analytics script — as long as this
+module's default fires first, which the priority-`1` hook guarantees for
+anything hooked at the normal `wp_head` priority (`10`) or later.
+
+No extra plugin (e.g. WP Consent API) or Site Kit configuration is required —
+this is plain Consent Mode, read directly off `window.dataLayer`.
+
 ## Acceptance-rate stat
 
 Every decision also POSTs to a nonce-protected logging endpoint
@@ -81,7 +110,7 @@ document.addEventListener('frblCookieConsent', function (event) {
 
 ## Out of scope
 
-- Category-based consent (analytics/marketing toggles as separate switches).
-- Google Consent Mode v2 signals (`gtag('consent', ...)`).
+- Category-based consent (analytics/marketing toggles as separate switches) —
+  Consent Mode is signaled as a single accept/reject decision, not per-category.
 - Per-visitor logging, timestamps, or a dashboard of responses over time.
 - Auto-scanning the site's existing scripts/cookies.

@@ -24,7 +24,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - Headline Marquee - Infinite scrolling marquee effect for headline/text blocks with customizable speed (Fast, Medium, Slow)
 - Modern Settings Page with Card-based Layout
 - Custom SVG Animations
-- **Cookie Notice** - Configurable cookie consent banner (bar/box/popup) that gates Google Tag Manager and GA4 behind consent
+- **Cookie Notice** - Configurable cookie consent banner (bar/box/popup) that gates Google Tag Manager and GA4 behind consent, with Google Consent Mode v2 support for compatibility with Google Site Kit and other analytics plugins
 
 ### PRO Features (FrontBlocks PRO)
 - **Custom Post Types Builder** - Create and manage custom post types with advanced configuration options:

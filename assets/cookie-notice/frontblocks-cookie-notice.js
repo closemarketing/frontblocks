@@ -184,6 +184,7 @@
 
 		function handleDecision(decision) {
 			setConsentCookie(decision);
+			updateConsentMode(decision);
 			hideBanner();
 			dispatchConsentEvent(decision);
 			logDecision(decision);
@@ -191,6 +192,18 @@
 			if (decision === 'accepted') {
 				fetchAndInjectScripts();
 			}
+		}
+
+		function updateConsentMode(decision) {
+			var granted = decision === 'accepted' ? 'granted' : 'denied';
+
+			window.dataLayer = window.dataLayer || [];
+			window.dataLayer.push(['consent', 'update', {
+				ad_storage: granted,
+				ad_user_data: granted,
+				ad_personalization: granted,
+				analytics_storage: granted
+			}]);
 		}
 
 		function setConsentCookie(decision) {

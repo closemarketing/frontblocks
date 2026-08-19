@@ -54,6 +54,11 @@ class CookieNotice {
 	 */
 	public function __construct() {
 		if ( ! is_admin() && $this->is_enabled() ) {
+			// Priority 1: must run before any analytics/ads tag (Google Site Kit,
+			// a manually pasted GTM/gtag snippet, etc.) reads its consent defaults —
+			// Google Consent Mode only holds those tags back if 'default' is queued
+			// on the page's dataLayer before they call gtag('config', ...).
+			add_action( 'wp_head', array( $this, 'render_consent_mode_default' ), 1 );
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 			add_action( 'wp_footer', array( $this, 'render_banner' ) );
 		}
@@ -333,6 +338,43 @@ class CookieNotice {
 			</noscript>
 			<?php
 		}
+	}
+
+	/**
+	 * Print the Google Consent Mode default state, before any other script.
+	 *
+	 * This is what actually blocks analytics/ads tags that read Consent Mode
+	 * (Google Site Kit's own gtag snippet, a manually pasted GTM container,
+	 * etc.) from firing before the visitor decides — the banner markup and its
+	 * own accept/reject buttons only control what *this plugin* loads via the
+	 * GTM/GA4 ID fields below; they have no effect on tags any other plugin
+	 * injects independently. Consent Mode is the standard way to reach those
+	 * too, because gtag() queues commands on window.dataLayer regardless of
+	 * which plugin's script eventually processes them — as long as this runs
+	 * first, it doesn't matter which plugin's gtag.js loads second.
+	 *
+	 * Reads the decision straight from the request cookie (not the PHP-side
+	 * get_consent(), which is the same lookup) so a returning visitor's already
+	 * granted/denied state is reflected immediately, with no flash of a
+	 * default-denied state while JS boots.
+	 *
+	 * @return void
+	 */
+	public function render_consent_mode_default() {
+		$consent = $this->get_consent();
+		$granted = 'accepted' === $consent ? 'granted' : 'denied';
+		?>
+		<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){ window.dataLayer.push( arguments ); }
+		gtag( 'consent', 'default', {
+			'ad_storage': '<?php echo esc_js( $granted ); ?>',
+			'ad_user_data': '<?php echo esc_js( $granted ); ?>',
+			'ad_personalization': '<?php echo esc_js( $granted ); ?>',
+			'analytics_storage': '<?php echo esc_js( $granted ); ?>'
+		} );
+		</script>
+		<?php
 	}
 
 	/**
