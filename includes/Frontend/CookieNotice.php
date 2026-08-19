@@ -59,6 +59,12 @@ class CookieNotice {
 			// Google Consent Mode only holds those tags back if 'default' is queued
 			// on the page's dataLayer before they call gtag('config', ...).
 			add_action( 'wp_head', array( $this, 'render_consent_mode_default' ), 1 );
+			// Also early (wp_head, not wp_footer): for an already-accepted visitor
+			// this is what actually requests GTM/GA4, so it needs to run long
+			// before a slow page finishes loading — a footer-only bootstrap risks
+			// missing an early interaction or a request that never reaches the
+			// footer at all, silently undercounting analytics.
+			add_action( 'wp_head', array( $this, 'render_consent_bootstrap_script' ), 2 );
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 			add_action( 'wp_footer', array( $this, 'render_banner' ) );
 		}
@@ -205,29 +211,24 @@ class CookieNotice {
 	}
 
 	/**
-	 * Render the consent banner (and its early consent-handling bootstrap script) in the footer.
+	 * Render the visible consent banner markup in the footer.
 	 *
-	 * The banner markup is always rendered the same way for every visitor of a
-	 * given URL — never gated by the visitor's own consent cookie — so a full-page
-	 * cache stays safe. The bootstrap script printed alongside it immediately
-	 * hides the banner and requests tracking scripts client-side when a decision
-	 * cookie already exists, so a returning visitor never sees a flash of the banner.
+	 * Always rendered the same way for every visitor of a given URL — never
+	 * gated by the visitor's own consent cookie — so a full-page cache stays
+	 * safe; render_consent_bootstrap_script() (hooked much earlier, on
+	 * wp_head) hides it immediately client-side when a decision cookie already
+	 * exists, so a returning visitor never sees it flash.
 	 *
-	 * The visible banner UI is suppressed on the configured cookie policy page (so
-	 * a popup layout can't block that page's own content), but the bootstrap
-	 * script still runs there — an already-accepted visitor must keep getting
-	 * tracking scripts on every page, including the policy page.
+	 * Suppressed on the configured cookie policy page so a popup layout can't
+	 * block that page's own content — the bootstrap script's tracking pickup
+	 * still runs there regardless, since it's on wp_head, not this method.
 	 *
 	 * @return void
 	 */
 	public function render_banner() {
-		$show_banner = ! $this->is_policy_page();
-
-		if ( $show_banner ) {
+		if ( ! $this->is_policy_page() ) {
 			$this->render_banner_markup();
 		}
-
-		$this->render_consent_bootstrap_script();
 	}
 
 	/**
@@ -380,8 +381,11 @@ class CookieNotice {
 	/**
 	 * Print the inline bootstrap script: hides the banner immediately when a
 	 * decision cookie already exists, and — for an accepted visitor — fetches
-	 * and injects the tracking scripts. Runs on every page (including the
-	 * policy page, where render_banner_markup() is skipped).
+	 * and injects the tracking scripts. Hooked on wp_head (not wp_footer,
+	 * where the banner markup itself renders) precisely so an already-accepted
+	 * visitor's tracking request fires as early as possible, on every page
+	 * including the policy page (where render_banner_markup() is skipped but
+	 * this still runs).
 	 *
 	 * This is an optimization, not the only implementation: it sets
 	 * window.frblCookieNoticeBootstrapped so the registered
@@ -394,14 +398,17 @@ class CookieNotice {
 	 *
 	 * @return void
 	 */
-	private function render_consent_bootstrap_script() {
+	public function render_consent_bootstrap_script() {
 		$cookie_name = $this->get_cookie_name();
 		?>
 		<script>
 		( function () {
+			// This runs on wp_head, before '#frbl-cookie-notice' exists in the DOM
+			// (it's printed later, in wp_footer) — so, unlike the registered
+			// frontblocks-cookie-notice.js file, it can only handle the tracking
+			// side of an already-decided visitor, not hiding the banner itself.
 			var cookieMatch = document.cookie.match( new RegExp( '(?:^|; )<?php echo esc_js( $cookie_name ); ?>=([^;]*)' ) );
 			var consent     = '';
-			var banner      = document.getElementById( 'frbl-cookie-notice' );
 
 			if ( cookieMatch ) {
 				try {
@@ -410,10 +417,6 @@ class CookieNotice {
 					// Malformed percent-encoding: treat it the same as no cookie at all.
 					consent = '';
 				}
-			}
-
-			if ( banner && ( 'accepted' === consent || 'rejected' === consent ) ) {
-				banner.style.display = 'none';
 			}
 
 			window.frblCookieNoticeInject = window.frblCookieNoticeInject || function ( gtmId, ga4Id ) {
@@ -484,14 +487,17 @@ class CookieNotice {
 	 * Pick black or white text, whichever has the higher actual WCAG contrast
 	 * ratio against a background color (not just whichever "looks" darker/lighter).
 	 *
+	 * Public static — pure color math with no instance state, also used by the
+	 * admin settings preview to show the same contrast the frontend actually renders.
+	 *
 	 * @param string $hex_color Background color, e.g. '#687df9'.
 	 * @return string '#ffffff' or '#000000'.
 	 */
-	private function get_readable_text_color( $hex_color ) {
-		$bg_luminance = $this->get_relative_luminance( $this->hex_to_rgb( $hex_color ) );
+	public static function get_readable_text_color( $hex_color ) {
+		$bg_luminance = self::get_relative_luminance( self::hex_to_rgb( $hex_color ) );
 
-		$white_contrast = $this->get_contrast_ratio( $bg_luminance, 1 );
-		$black_contrast = $this->get_contrast_ratio( $bg_luminance, 0 );
+		$white_contrast = self::get_contrast_ratio( $bg_luminance, 1 );
+		$black_contrast = self::get_contrast_ratio( $bg_luminance, 0 );
 
 		// Pure black, not a lighter dark neutral: whichever of black/white has
 		// the lower contrast against any background is guaranteed to still
@@ -505,12 +511,15 @@ class CookieNotice {
 	 * accent colors that don't reach a 4.5:1 contrast ratio against white fall
 	 * back to a dark neutral instead.
 	 *
+	 * Public static — pure color math with no instance state, also used by the
+	 * admin settings preview to show the same contrast the frontend actually renders.
+	 *
 	 * @param string $hex_color Requested accent color, e.g. '#687df9'.
 	 * @return string A color safe to use as text on a white background.
 	 */
-	private function get_readable_on_white_color( $hex_color ) {
-		$luminance = $this->get_relative_luminance( $this->hex_to_rgb( $hex_color ) );
-		$contrast  = $this->get_contrast_ratio( $luminance, 1 );
+	public static function get_readable_on_white_color( $hex_color ) {
+		$luminance = self::get_relative_luminance( self::hex_to_rgb( $hex_color ) );
+		$contrast  = self::get_contrast_ratio( $luminance, 1 );
 
 		return $contrast >= 4.5 ? $hex_color : '#111827';
 	}
@@ -521,7 +530,7 @@ class CookieNotice {
 	 * @param int[] $rgb Three-item [r, g, b] array, each 0-255.
 	 * @return float Relative luminance between 0 (black) and 1 (white).
 	 */
-	private function get_relative_luminance( $rgb ) {
+	private static function get_relative_luminance( $rgb ) {
 		$channels = array();
 
 		foreach ( $rgb as $channel ) {
@@ -539,7 +548,7 @@ class CookieNotice {
 	 * @param float $luminance_b Second relative luminance (0-1).
 	 * @return float Contrast ratio, from 1 (no contrast) to 21 (black on white).
 	 */
-	private function get_contrast_ratio( $luminance_a, $luminance_b ) {
+	private static function get_contrast_ratio( $luminance_a, $luminance_b ) {
 		$lighter = max( $luminance_a, $luminance_b );
 		$darker  = min( $luminance_a, $luminance_b );
 
@@ -552,7 +561,7 @@ class CookieNotice {
 	 * @param string $hex_color Hex color string.
 	 * @return int[] Three-item array of 0-255 RGB values; black if the input is invalid.
 	 */
-	private function hex_to_rgb( $hex_color ) {
+	private static function hex_to_rgb( $hex_color ) {
 		$hex = ltrim( (string) $hex_color, '#' );
 
 		if ( 3 === strlen( $hex ) ) {

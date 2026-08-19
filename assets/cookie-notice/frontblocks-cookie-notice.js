@@ -80,32 +80,41 @@
 	}
 
 	/**
-	 * Hide an already-decided banner and, for an accepted visitor, request the
-	 * tracking scripts. Normally an inline bootstrap script printed alongside the
-	 * banner already does this immediately (before this file even loads, avoiding
-	 * any flash of the banner) — this is the fallback for sites whose Content
-	 * Security Policy blocks that unnonced inline script, so tracking and the
-	 * banner still work correctly there, just without the no-flash guarantee.
+	 * For an already-decided visitor, request the tracking scripts (accepted)
+	 * or simply do nothing further (rejected). Normally an inline bootstrap
+	 * script printed on wp_head already does this as early as possible, well
+	 * before this file even loads — this is the fallback for sites whose
+	 * Content Security Policy blocks that unnonced inline script, so tracking
+	 * still starts there too, just later.
+	 *
+	 * Deliberately separate from hiding the banner (see hideBannerIfDecided()):
+	 * that inline copy runs on wp_head, before '#frbl-cookie-notice' exists in
+	 * the DOM at all, so it can never do the hiding itself — only this file,
+	 * running once the DOM is ready, can.
 	 */
-	function runBootstrapIfNeeded() {
+	function requestTrackingIfNeeded() {
 		if (window.frblCookieNoticeBootstrapped) {
 			return;
 		}
 
-		var consent = readCookie(frblCookieNotice.cookieName);
-		var banner = document.getElementById('frbl-cookie-notice');
-
-		if (banner && (consent === 'accepted' || consent === 'rejected')) {
-			banner.style.display = 'none';
-		}
-
 		defineInjectHelper();
 
-		if (consent === 'accepted') {
+		if (readCookie(frblCookieNotice.cookieName) === 'accepted') {
 			fetchAndInjectScripts();
 		}
 
 		window.frblCookieNoticeBootstrapped = true;
+	}
+
+	function hideBannerIfDecided(banner) {
+		var consent = readCookie(frblCookieNotice.cookieName);
+
+		if (banner && (consent === 'accepted' || consent === 'rejected')) {
+			banner.style.display = 'none';
+			return true;
+		}
+
+		return false;
 	}
 
 	function init() {
@@ -113,7 +122,7 @@
 			return;
 		}
 
-		runBootstrapIfNeeded();
+		requestTrackingIfNeeded();
 
 		var banner = document.getElementById('frbl-cookie-notice');
 
@@ -121,12 +130,8 @@
 			return;
 		}
 
-		var existingConsent = readCookie(frblCookieNotice.cookieName);
-
-		if (existingConsent === 'accepted' || existingConsent === 'rejected') {
-			// Already decided: runBootstrapIfNeeded() (here or via the inline
-			// bootstrap script) already hid the banner and requested tracking.
-			// Nothing left to wire up.
+		if (hideBannerIfDecided(banner)) {
+			// Already decided: nothing left to wire up.
 			return;
 		}
 
@@ -182,7 +187,15 @@
 			}
 		}
 
+		var decided = false;
+
 		function handleDecision(decision) {
+			if (decided) {
+				return;
+			}
+
+			decided = true;
+
 			setConsentCookie(decision);
 			updateConsentMode(decision);
 			hideBanner();

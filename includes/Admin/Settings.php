@@ -2222,7 +2222,32 @@ class Settings {
 					>
 						<option value=""><?php echo esc_html__( '— None —', 'frontblocks' ); ?></option>
 						<?php
-						$pages = get_pages( array( 'sort_column' => 'post_title' ) );
+						$pages_limit = 300;
+						$pages       = get_pages(
+							array(
+								'sort_column' => 'post_title',
+								'number'      => $pages_limit,
+							)
+						);
+
+						// The saved page may fall outside the limited list above (e.g. sorted
+						// past it alphabetically on a large site) — make sure it still shows up
+						// and stays selected instead of silently disappearing from the dropdown.
+						$selected_page_listed = 0 === $policy_page_id;
+						foreach ( $pages as $page ) {
+							if ( $policy_page_id === $page->ID ) {
+								$selected_page_listed = true;
+								break;
+							}
+						}
+
+						if ( ! $selected_page_listed ) {
+							$selected_page = get_post( $policy_page_id );
+							if ( $selected_page instanceof \WP_Post ) {
+								array_unshift( $pages, $selected_page );
+							}
+						}
+
 						foreach ( $pages as $page ) {
 							printf(
 								'<option value="%1$d" %2$s>%3$s</option>',
@@ -2233,6 +2258,17 @@ class Settings {
 						}
 						?>
 					</select>
+					<?php if ( count( $pages ) >= $pages_limit ) : ?>
+						<p class="tw:text-xs tw:text-amber-600 tw:mt-2">
+							<?php
+							printf(
+								/* translators: %d: number of pages shown in the dropdown. */
+								esc_html__( 'Showing the first %d pages. If the page you need is missing, search for it in the Pages list to find its ID and set it via the frontblocks_settings option.', 'frontblocks' ),
+								(int) $pages_limit
+							);
+							?>
+						</p>
+					<?php endif; ?>
 					<p class="tw:text-xs tw:text-gray-500 tw:mt-2">
 						<?php echo esc_html__( 'The banner is hidden on this page so visitors can read it before deciding. A "Learn more" link to it is added to the message.', 'frontblocks' ); ?>
 					</p>
@@ -2285,11 +2321,15 @@ class Settings {
 						<p class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
 							<?php echo esc_html__( 'Preview', 'frontblocks' ); ?>
 						</p>
+						<?php
+						$preview_accent_text = \FrontBlocks\Frontend\CookieNotice::get_readable_text_color( $color );
+						$preview_accent_link = \FrontBlocks\Frontend\CookieNotice::get_readable_on_white_color( $color );
+						?>
 						<div id="frbl-cookie-notice-preview-stage" class="frbl-cookie-notice-preview-stage">
 							<div
 								id="frbl-cookie-notice-preview"
 								class="frbl-cookie-notice frbl-cookie-notice-preview frbl-cookie-notice--<?php echo esc_attr( $layout ); ?><?php echo 'box' === $layout ? ' frbl-cookie-notice--' . ( 'bottom-left' === $position ? 'left' : 'right' ) : ''; ?>"
-								style="--frbl-cookie-accent: <?php echo esc_attr( $color ); ?>; --frbl-cookie-accent-contrast: #ffffff; --frbl-cookie-accent-on-light: <?php echo esc_attr( $color ); ?>;"
+								style="--frbl-cookie-accent: <?php echo esc_attr( $color ); ?>; --frbl-cookie-accent-contrast: <?php echo esc_attr( $preview_accent_text ); ?>; --frbl-cookie-accent-on-light: <?php echo esc_attr( $preview_accent_link ); ?>;"
 							>
 								<div class="frbl-cookie-notice__panel">
 									<span id="frbl-cookie-notice-preview-icon" class="frbl-cookie-notice__icon">
