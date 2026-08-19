@@ -146,81 +146,14 @@ class CookieNotice {
 	 * @return bool
 	 */
 	private function is_policy_page() {
-		$options    = get_option( 'frontblocks_settings', array() );
-		$policy_url = (string) ( $options['cookie_notice_policy_url'] ?? '' );
+		$options        = get_option( 'frontblocks_settings', array() );
+		$policy_page_id = (int) ( $options['cookie_notice_policy_page_id'] ?? 0 );
 
-		if ( '' === $policy_url ) {
+		if ( ! $policy_page_id ) {
 			return false;
 		}
 
-		$policy_host = wp_parse_url( $policy_url, PHP_URL_HOST );
-		$site_host   = wp_parse_url( home_url(), PHP_URL_HOST );
-
-		if ( ! $policy_host || $policy_host !== $site_host ) {
-			return false;
-		}
-
-		// Resolve the configured URL to an actual post/page ID and compare it
-		// against the one WordPress resolved for this request — this is what
-		// correctly handles plain vs. pretty permalinks and ignores unrelated
-		// query parameters (UTM tags, cache busters, etc.) that a raw string
-		// comparison would otherwise treat as a different page.
-		$policy_post_id = url_to_postid( $policy_url );
-
-		if ( $policy_post_id ) {
-			return get_queried_object_id() === $policy_post_id;
-		}
-
-		// url_to_postid() only resolves posts/pages; fall back to a path + query
-		// comparison for a policy URL identified some other way (e.g. a custom
-		// '/?cookie-policy=1' route) — the query string can't be dropped here
-		// the way it safely is above, since there's no WordPress-resolved
-		// object to fall back on for telling that route apart from any other
-		// request to the same bare path.
-		$policy_path  = $this->normalize_url_path( (string) wp_parse_url( $policy_url, PHP_URL_PATH ) );
-		$request_uri  = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
-		$current_path = $this->normalize_url_path( (string) wp_parse_url( $request_uri, PHP_URL_PATH ) );
-
-		if ( $policy_path !== $current_path ) {
-			return false;
-		}
-
-		$policy_query  = $this->parse_query_pairs( (string) wp_parse_url( $policy_url, PHP_URL_QUERY ) );
-		$current_query = $this->parse_query_pairs( (string) wp_parse_url( $request_uri, PHP_URL_QUERY ) );
-
-		return $policy_query === $current_query;
-	}
-
-	/**
-	 * Parse a URL query string into a sorted key/value array, so two query
-	 * strings that carry the same parameters in a different order still compare
-	 * as equal.
-	 *
-	 * @param string $query Raw query string, without the leading '?'.
-	 * @return array<string, mixed>
-	 */
-	private function parse_query_pairs( $query ) {
-		$pairs = array();
-
-		wp_parse_str( $query, $pairs );
-		ksort( $pairs );
-
-		return $pairs;
-	}
-
-	/**
-	 * Normalize a URL path for comparison: strip a trailing slash, but keep the
-	 * site root as '/' rather than letting it collapse to an empty string (which
-	 * would otherwise never match anything and wrongly rule out the root as a
-	 * valid policy page).
-	 *
-	 * @param string $path Raw URL path.
-	 * @return string Normalized path, always at least '/'.
-	 */
-	private function normalize_url_path( $path ) {
-		$path = untrailingslashit( $path );
-
-		return '' === $path ? '/' : $path;
+		return get_queried_object_id() === $policy_page_id;
 	}
 
 	/**
@@ -300,13 +233,14 @@ class CookieNotice {
 	private function render_banner_markup() {
 		$options = get_option( 'frontblocks_settings', array() );
 
-		$message      = trim( (string) ( $options['cookie_notice_message'] ?? '' ) );
-		$accept_label = trim( (string) ( $options['cookie_notice_accept_label'] ?? '' ) );
-		$reject_label = trim( (string) ( $options['cookie_notice_reject_label'] ?? '' ) );
-		$policy_url   = (string) ( $options['cookie_notice_policy_url'] ?? '' );
-		$layout       = (string) ( $options['cookie_notice_layout'] ?? 'bar' );
-		$position     = (string) ( $options['cookie_notice_position'] ?? 'bottom-right' );
-		$color        = (string) ( $options['cookie_notice_color'] ?? '#687df9' );
+		$message        = trim( (string) ( $options['cookie_notice_message'] ?? '' ) );
+		$accept_label   = trim( (string) ( $options['cookie_notice_accept_label'] ?? '' ) );
+		$reject_label   = trim( (string) ( $options['cookie_notice_reject_label'] ?? '' ) );
+		$policy_page_id = (int) ( $options['cookie_notice_policy_page_id'] ?? 0 );
+		$policy_url     = $policy_page_id ? (string) get_permalink( $policy_page_id ) : '';
+		$layout         = (string) ( $options['cookie_notice_layout'] ?? 'bar' );
+		$position       = (string) ( $options['cookie_notice_position'] ?? 'bottom-right' );
+		$color          = (string) ( $options['cookie_notice_color'] ?? '#687df9' );
 
 		if ( '' === $message ) {
 			$message = __( 'We use cookies to improve your experience on our website. By browsing this website, you agree to our use of cookies.', 'frontblocks' );
@@ -349,11 +283,9 @@ class CookieNotice {
 			aria-label="<?php echo esc_attr__( 'Cookie consent', 'frontblocks' ); ?>"
 		>
 			<div class="frbl-cookie-notice__panel">
-				<?php if ( $is_modal ) : ?>
-					<span class="frbl-cookie-notice__icon" aria-hidden="true">
-						<?php echo $this->get_cookie_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static inline SVG, no dynamic data. ?>
-					</span>
-				<?php endif; ?>
+				<span class="frbl-cookie-notice__icon" aria-hidden="true">
+					<?php echo $this->get_cookie_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static inline SVG, no dynamic data. ?>
+				</span>
 				<p class="frbl-cookie-notice__message">
 					<?php
 					echo esc_html( $message );
@@ -497,11 +429,12 @@ class CookieNotice {
 	 *
 	 * The badge's circular background comes from CSS (using the configured
 	 * accent color), so this only needs the glyph itself, colored via
-	 * `fill="currentColor"`.
+	 * `fill="currentColor"`. Public so the admin settings preview can reuse
+	 * the exact same markup shown on the frontend.
 	 *
 	 * @return string Raw SVG markup.
 	 */
-	private function get_cookie_icon_svg() {
+	public static function get_cookie_icon_svg() {
 		return '<svg width="242" height="242" viewBox="0 0 242 242" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M120.931 242C120.045 242 119.159 241.991 118.268 241.973C85.0089 241.264 54.2629 227.347 31.7023 202.787C-10.324 157.038 -10.4104 85.2933 31.5114 39.4584C59.026 9.38964 99.4661 -4.79939 139.638 1.44977C144.565 2.21332 148.137 6.66272 147.764 11.5712C147.155 19.761 150.128 27.7827 155.918 33.5774C158.345 35.9998 161.126 37.9268 164.171 39.3039C167.407 40.7628 169.58 43.7487 169.989 47.2892C170.689 53.6065 173.47 59.3467 178.024 63.9052C182.487 68.3637 188.404 71.2178 194.667 71.9405C198.185 72.345 201.157 74.5174 202.621 77.7488C204.002 80.812 205.92 83.5753 208.311 85.9705C214.11 91.7606 222.2 94.7057 230.317 94.1285C235.371 93.7649 239.67 97.3326 240.443 102.259C246.37 140.331 233.662 179.317 206.438 206.55C183.514 229.474 153.236 242 120.931 242ZM120.559 9.43963C89.4356 9.43963 59.7077 22.4243 38.3832 45.7394C-0.311723 88.043 -0.23447 154.266 38.5559 196.497C59.385 219.167 87.7631 232.01 118.468 232.665C149.346 233.374 178.124 221.703 199.857 199.969C224.99 174.827 236.725 138.841 231.244 103.695C220.055 104.145 209.438 100.26 201.73 92.5515C198.539 89.361 195.985 85.6705 194.14 81.5847C185.259 80.2258 177.397 76.4263 171.443 70.4907C165.462 64.5051 161.662 56.638 160.735 48.3345C156.272 45.9485 152.573 43.3852 149.346 40.1629C141.629 32.4457 137.675 21.7744 138.475 10.8758C132.484 9.91232 126.494 9.43963 120.559 9.43963ZM169.68 189.671C158.799 189.671 149.946 180.817 149.946 169.937C149.946 159.047 158.799 150.194 169.68 150.194C180.56 150.194 189.413 159.047 189.413 169.937C189.413 180.817 180.56 189.671 169.68 189.671ZM169.68 159.502C163.935 159.502 159.254 164.183 159.254 169.937C159.254 175.681 163.935 180.363 169.68 180.363C175.424 180.363 180.105 175.681 180.105 169.937C180.105 164.183 175.424 159.502 169.68 159.502ZM80.9776 179.817C66.2977 179.817 54.3539 167.873 54.3539 153.193C54.3539 138.514 66.2977 126.57 80.9776 126.57C95.6621 126.57 107.606 138.514 107.606 153.193C107.606 167.873 95.662 179.817 80.9776 179.817ZM80.9776 135.878C71.4289 135.878 63.6617 143.649 63.6617 153.193C63.6617 162.738 71.4289 170.509 80.9776 170.509C90.5264 170.509 98.2981 162.738 98.2981 153.193C98.2981 143.649 90.5263 135.878 80.9776 135.878ZM140.447 116.985C129.667 116.985 120.895 108.213 120.895 97.4326C120.895 86.6523 129.667 77.8807 140.447 77.8807C151.227 77.8807 159.999 86.6523 159.999 97.4326C159.999 108.213 151.227 116.985 140.447 116.985ZM140.447 87.1885C134.802 87.1885 130.203 91.7834 130.203 97.4326C130.203 103.082 134.802 107.677 140.447 107.677C146.092 107.677 150.691 103.082 150.691 97.4326C150.691 91.7833 146.092 87.1885 140.447 87.1885ZM68.7701 87.7021C59.7077 87.7021 52.3314 80.3258 52.3314 71.2588C52.3314 62.1963 59.7077 54.82 68.7701 54.82C77.8371 54.82 85.2134 62.1963 85.2134 71.2588C85.2134 80.3258 77.8371 87.7021 68.7701 87.7021ZM68.7701 64.1279C64.8388 64.1279 61.6393 67.3275 61.6393 71.2588C61.6393 75.1946 64.8388 78.3942 68.7701 78.3942C72.706 78.3942 75.9055 75.1946 75.9055 71.2588C75.9055 67.3275 72.706 64.1279 68.7701 64.1279Z" fill="currentColor"/></svg>';
 	}
 

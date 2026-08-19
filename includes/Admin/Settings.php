@@ -125,11 +125,11 @@ class Settings {
 	private $option_cookie_notice_reject_label = 'cookie_notice_reject_label';
 
 	/**
-	 * Option key for the cookie policy link.
+	 * Option key for the cookie policy page ID.
 	 *
 	 * @var string
 	 */
-	private $option_cookie_notice_policy_url = 'cookie_notice_policy_url';
+	private $option_cookie_notice_policy_page_id = 'cookie_notice_policy_page_id';
 
 	/**
 	 * Option key for the cookie notice layout variant.
@@ -380,6 +380,15 @@ class Settings {
 		wp_enqueue_style(
 			'frontblocks-admin-settings',
 			FRBL_PLUGIN_URL . 'assets/admin/settings.css',
+			array(),
+			FRBL_VERSION
+		);
+
+		// Reuse the real frontend banner styles so the settings-page preview
+		// renders pixel-identical to what visitors will actually see.
+		wp_enqueue_style(
+			'frontblocks-cookie-notice',
+			FRBL_PLUGIN_URL . 'assets/cookie-notice/frontblocks-cookie-notice.css',
 			array(),
 			FRBL_VERSION
 		);
@@ -729,12 +738,37 @@ class Settings {
 				}
 
 				const layoutSelect = document.getElementById('cookie_notice_layout');
+				const positionSelect = document.getElementById('cookie_notice_position');
 				const positionWrapper = document.getElementById('cookie-notice-position-wrapper');
+				const preview = document.getElementById('frbl-cookie-notice-preview');
 
 				if (layoutSelect && positionWrapper) {
 					layoutSelect.addEventListener('change', function () {
 						positionWrapper.style.display = layoutSelect.value === 'box' ? 'block' : 'none';
 					});
+				}
+
+				function updatePreviewLayout() {
+					if (!preview) {
+						return;
+					}
+
+					var layout = layoutSelect ? layoutSelect.value : 'bar';
+					var position = positionSelect ? positionSelect.value : 'bottom-right';
+
+					preview.className = 'frbl-cookie-notice frbl-cookie-notice-preview frbl-cookie-notice--' + layout;
+
+					if (layout === 'box') {
+						preview.className += ' frbl-cookie-notice--' + (position === 'bottom-left' ? 'left' : 'right');
+					}
+				}
+
+				if (layoutSelect) {
+					layoutSelect.addEventListener('change', updatePreviewLayout);
+				}
+
+				if (positionSelect) {
+					positionSelect.addEventListener('change', updatePreviewLayout);
 				}
 			});
 			"
@@ -2090,7 +2124,7 @@ class Settings {
 		$message        = (string) ( $options[ $this->option_cookie_notice_message ] ?? '' );
 		$accept_label   = (string) ( $options[ $this->option_cookie_notice_accept_label ] ?? '' );
 		$reject_label   = (string) ( $options[ $this->option_cookie_notice_reject_label ] ?? '' );
-		$policy_url     = (string) ( $options[ $this->option_cookie_notice_policy_url ] ?? '' );
+		$policy_page_id = (int) ( $options[ $this->option_cookie_notice_policy_page_id ] ?? 0 );
 		$layout         = (string) ( $options[ $this->option_cookie_notice_layout ] ?? 'bar' );
 		$position       = (string) ( $options[ $this->option_cookie_notice_position ] ?? 'bottom-right' );
 		$color          = (string) ( $options[ $this->option_cookie_notice_color ] ?? '#687df9' );
@@ -2178,17 +2212,30 @@ class Settings {
 						</div>
 					</div>
 
-					<label for="<?php echo esc_attr( $this->option_cookie_notice_policy_url ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mt-4 tw:mb-2">
-						<?php echo esc_html__( 'Cookie policy URL (optional)', 'frontblocks' ); ?>
+					<label for="<?php echo esc_attr( $this->option_cookie_notice_policy_page_id ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mt-4 tw:mb-2">
+						<?php echo esc_html__( 'Cookie policy page (optional)', 'frontblocks' ); ?>
 					</label>
-					<input
-						type="url"
-						id="<?php echo esc_attr( $this->option_cookie_notice_policy_url ); ?>"
-						name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_policy_url ); ?>]"
-						value="<?php echo esc_url( $policy_url ); ?>"
-						placeholder="https://example.com/cookie-policy"
+					<select
+						id="<?php echo esc_attr( $this->option_cookie_notice_policy_page_id ); ?>"
+						name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_policy_page_id ); ?>]"
 						class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
-					/>
+					>
+						<option value=""><?php echo esc_html__( '— None —', 'frontblocks' ); ?></option>
+						<?php
+						$pages = get_pages( array( 'sort_column' => 'post_title' ) );
+						foreach ( $pages as $page ) {
+							printf(
+								'<option value="%1$d" %2$s>%3$s</option>',
+								(int) $page->ID,
+								selected( $policy_page_id, $page->ID, false ),
+								esc_html( $page->post_title )
+							);
+						}
+						?>
+					</select>
+					<p class="tw:text-xs tw:text-gray-500 tw:mt-2">
+						<?php echo esc_html__( 'The banner is hidden on this page so visitors can read it before deciding. A "Learn more" link to it is added to the message.', 'frontblocks' ); ?>
+					</p>
 				</div>
 
 				<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200 tw:mb-4">
@@ -2231,6 +2278,36 @@ class Settings {
 								value="<?php echo esc_attr( $color ); ?>"
 								class="tw:h-10 tw:w-full tw:border tw:border-gray-300 tw:rounded-lg"
 							/>
+						</div>
+					</div>
+
+					<div class="tw:mt-4">
+						<p class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+							<?php echo esc_html__( 'Preview', 'frontblocks' ); ?>
+						</p>
+						<div id="frbl-cookie-notice-preview-stage" class="frbl-cookie-notice-preview-stage">
+							<div
+								id="frbl-cookie-notice-preview"
+								class="frbl-cookie-notice frbl-cookie-notice-preview frbl-cookie-notice--<?php echo esc_attr( $layout ); ?><?php echo 'box' === $layout ? ' frbl-cookie-notice--' . ( 'bottom-left' === $position ? 'left' : 'right' ) : ''; ?>"
+								style="--frbl-cookie-accent: <?php echo esc_attr( $color ); ?>; --frbl-cookie-accent-contrast: #ffffff; --frbl-cookie-accent-on-light: <?php echo esc_attr( $color ); ?>;"
+							>
+								<div class="frbl-cookie-notice__panel">
+									<span id="frbl-cookie-notice-preview-icon" class="frbl-cookie-notice__icon">
+										<?php echo \FrontBlocks\Frontend\CookieNotice::get_cookie_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static inline SVG, no dynamic data. ?>
+									</span>
+									<p class="frbl-cookie-notice__message">
+										<?php echo esc_html( '' !== $message ? $message : __( 'We use cookies to improve your experience on our website. By browsing this website, you agree to our use of cookies.', 'frontblocks' ) ); ?>
+									</p>
+									<div class="frbl-cookie-notice__actions">
+										<button type="button" class="frbl-cookie-notice__button frbl-cookie-notice__button--reject" disabled>
+											<?php echo esc_html( '' !== $reject_label ? $reject_label : __( 'Reject', 'frontblocks' ) ); ?>
+										</button>
+										<button type="button" class="frbl-cookie-notice__button frbl-cookie-notice__button--accept" disabled>
+											<?php echo esc_html( '' !== $accept_label ? $accept_label : __( 'Accept', 'frontblocks' ) ); ?>
+										</button>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 
@@ -3022,8 +3099,8 @@ class Settings {
 				$sanitized[ $key ] = sanitize_textarea_field( $val );
 			} elseif ( in_array( $key, array( $this->option_cookie_notice_accept_label, $this->option_cookie_notice_reject_label ), true ) ) {
 				$sanitized[ $key ] = sanitize_text_field( $val );
-			} elseif ( $this->option_cookie_notice_policy_url === $key ) {
-				$sanitized[ $key ] = esc_url_raw( $val );
+			} elseif ( $this->option_cookie_notice_policy_page_id === $key ) {
+				$sanitized[ $key ] = absint( $val );
 			} elseif ( $this->option_cookie_notice_layout === $key ) {
 				$sanitized[ $key ] = in_array( $val, array( 'bar', 'box', 'popup' ), true ) ? $val : 'bar';
 			} elseif ( $this->option_cookie_notice_position === $key ) {
