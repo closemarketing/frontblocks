@@ -95,19 +95,28 @@ class CookieNotice {
 	}
 
 	/**
-	 * Get the admin-ajax.php URL, forced to the current request's own scheme.
+	 * Get the admin-ajax.php URL, forced onto the frontend's own scheme and host.
 	 *
-	 * The admin_url() function can return an https URL on an http frontend when
-	 * the site forces SSL only for wp-admin (e.g. FORCE_SSL_ADMIN). That makes
-	 * the consent AJAX request cross-origin: 'credentials: same-origin' on the
-	 * frontend then omits the consent cookie, and the browser's CORS check
-	 * would block the response regardless. Matching the current request's
-	 * scheme keeps the AJAX call same-origin.
+	 * The admin_url() function can point at a different scheme (e.g.
+	 * FORCE_SSL_ADMIN on an http frontend) and even a different host (when
+	 * WP_HOME and WP_SITEURL are configured separately) than the page that's
+	 * about to fetch() it. 'credentials: same-origin' then omits the consent
+	 * cookie, and the browser's CORS check blocks the response regardless —
+	 * so only the admin-ajax.php path is taken from admin_url(); the scheme
+	 * and host always come from the current request and home_url() instead,
+	 * keeping the AJAX call same-origin with the frontend.
 	 *
 	 * @return string
 	 */
 	private function get_ajax_url() {
-		return admin_url( 'admin-ajax.php', is_ssl() ? 'https' : 'http' );
+		$home_parts = wp_parse_url( home_url() );
+		$ajax_path  = (string) wp_parse_url( admin_url( 'admin-ajax.php' ), PHP_URL_PATH );
+
+		$scheme = is_ssl() ? 'https' : 'http';
+		$host   = $home_parts['host'] ?? '';
+		$port   = isset( $home_parts['port'] ) ? ':' . $home_parts['port'] : '';
+
+		return $scheme . '://' . $host . $port . $ajax_path;
 	}
 
 	/**
@@ -162,13 +171,41 @@ class CookieNotice {
 			return get_queried_object_id() === $policy_post_id;
 		}
 
-		// url_to_postid() only resolves posts/pages; fall back to a plain path
-		// comparison for a policy URL pointing anywhere else on the site.
+		// url_to_postid() only resolves posts/pages; fall back to a path + query
+		// comparison for a policy URL identified some other way (e.g. a custom
+		// '/?cookie-policy=1' route) — the query string can't be dropped here
+		// the way it safely is above, since there's no WordPress-resolved
+		// object to fall back on for telling that route apart from any other
+		// request to the same bare path.
 		$policy_path  = $this->normalize_url_path( (string) wp_parse_url( $policy_url, PHP_URL_PATH ) );
 		$request_uri  = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
 		$current_path = $this->normalize_url_path( (string) wp_parse_url( $request_uri, PHP_URL_PATH ) );
 
-		return $policy_path === $current_path;
+		if ( $policy_path !== $current_path ) {
+			return false;
+		}
+
+		$policy_query  = $this->parse_query_pairs( (string) wp_parse_url( $policy_url, PHP_URL_QUERY ) );
+		$current_query = $this->parse_query_pairs( (string) wp_parse_url( $request_uri, PHP_URL_QUERY ) );
+
+		return $policy_query === $current_query;
+	}
+
+	/**
+	 * Parse a URL query string into a sorted key/value array, so two query
+	 * strings that carry the same parameters in a different order still compare
+	 * as equal.
+	 *
+	 * @param string $query Raw query string, without the leading '?'.
+	 * @return array<string, mixed>
+	 */
+	private function parse_query_pairs( $query ) {
+		$pairs = array();
+
+		wp_parse_str( $query, $pairs );
+		ksort( $pairs );
+
+		return $pairs;
 	}
 
 	/**
