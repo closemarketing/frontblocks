@@ -43,6 +43,7 @@ class ShapeAnimations {
 	private function init_hooks() {
 		add_action( 'init', array( $this, 'register_scripts' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ), 5 );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_editor_style' ), 5 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'register_shape_animation_attributes' ), 15 );
 		add_filter( 'render_block', array( $this, 'add_animation_classes_to_shape' ), 10, 2 );
 		add_action( 'wp_footer', array( $this, 'output_queued_styles' ), 5 );
@@ -85,14 +86,6 @@ class ShapeAnimations {
 	 * @return void
 	 */
 	public function enqueue_block_editor_assets() {
-		// Enqueue CSS for editor preview.
-		wp_enqueue_style(
-			'frontblocks-shape-animations-editor',
-			FRBL_PLUGIN_URL . 'assets/shape-animations/frontblocks-shape-animations.css',
-			array(),
-			FRBL_VERSION
-		);
-
 		// Enqueue Lottie library for editor preview.
 		wp_enqueue_script(
 			'lottie-player-editor',
@@ -114,6 +107,34 @@ class ShapeAnimations {
 		wp_set_script_translations(
 			'frontblocks-shape-animation-editor',
 			'frontblocks'
+		);
+	}
+
+	/**
+	 * Enqueue the shape animations style on both the frontend and the block
+	 * editor (including inside its iframed canvas).
+	 *
+	 * Hooked on enqueue_block_assets rather than enqueue_block_editor_assets:
+	 * the editor canvas is rendered in an iframe, and a style enqueued via the
+	 * editor-only hook is appended to the wp-admin document instead of that
+	 * iframe, which WordPress now flags as an incorrect registration.
+	 *
+	 * Frontend enqueueing is handled conditionally in
+	 * add_animation_classes_to_shape() instead, since the style is only
+	 * needed when a shape animation block is actually present.
+	 *
+	 * @return void
+	 */
+	public function enqueue_editor_style() {
+		if ( ! is_admin() ) {
+			return;
+		}
+
+		wp_enqueue_style(
+			'frontblocks-shape-animations-editor',
+			FRBL_PLUGIN_URL . 'assets/shape-animations/frontblocks-shape-animations.css',
+			array(),
+			FRBL_VERSION
 		);
 	}
 

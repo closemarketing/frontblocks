@@ -27,6 +27,7 @@ class ContainerEdgeAlignment {
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_frontend_assets' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_editor_style' ) );
 		add_filter( 'render_block', array( $this, 'add_edge_alignment_classes' ), 10, 2 );
 		add_filter( 'register_block_type_args', array( $this, 'register_native_block_attributes' ), 10, 2 );
 	}
@@ -50,6 +51,36 @@ class ContainerEdgeAlignment {
 			'frbl-edge-alignment-option',
 			'frontblocks'
 		);
+
+		// The stylesheet also contains the inspector panel rules
+		// (.frbl-edge-alignment-panel), which render in the parent admin
+		// document rather than the iframed canvas — keep it enqueued here
+		// too, in addition to enqueue_editor_style() below, so the panel
+		// keeps its styling.
+		wp_enqueue_style(
+			'frbl-edge-alignment-editor',
+			FRBL_PLUGIN_URL . 'assets/container-edge-alignment/frontblocks-edge-alignment.css',
+			array(),
+			FRBL_VERSION
+		);
+	}
+
+	/**
+	 * Enqueue the editor style inside the block editor's iframed canvas.
+	 *
+	 * Hooked on enqueue_block_assets: the editor canvas is rendered in an
+	 * iframe, and a style enqueued only via enqueue_block_editor_assets is
+	 * appended to the parent wp-admin document instead of that iframe, which
+	 * WordPress now flags as an incorrect registration. The same stylesheet
+	 * still needs enqueue_editor_assets() above for its inspector-panel rules.
+	 *
+	 * @return void
+	 */
+	public function enqueue_editor_style() {
+		// Frontend enqueueing is handled conditionally in add_edge_alignment_classes().
+		if ( ! is_admin() ) {
+			return;
+		}
 
 		wp_enqueue_style(
 			'frbl-edge-alignment-editor',
