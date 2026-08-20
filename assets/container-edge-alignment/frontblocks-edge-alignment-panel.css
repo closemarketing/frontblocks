@@ -1,0 +1,26 @@
+/**
+ * Container Edge Alignment — Inspector Panel Styles
+ *
+ * Styles for the block editor inspector panel (parent admin document).
+ * Kept separate from frontblocks-edge-alignment.css, which only carries
+ * canvas/frontend rules, so this file can stay on
+ * enqueue_block_editor_assets without triggering the "was added to the
+ * iframe incorrectly" warning for the canvas stylesheet.
+ */
+
+.frbl-edge-alignment-panel .frbl-edge-alignment-description {
+	font-size: 12px;
+	color: #757575;
+	margin: 0 0 16px 0;
+	line-height: 1.4;
+}
+
+.frbl-edge-alignment-panel .components-base-control {
+	margin-bottom: 16px;
+}
+
+.frbl-edge-alignment-panel .components-base-control__help {
+	font-size: 11px;
+	color: #757575;
+	margin-top: 4px;
+}
