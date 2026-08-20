@@ -1,0 +1,238 @@
+/**
+ * FrontBlocks Cookie Notice Styles
+ *
+ * @package FrontBlocks
+ * @version 1.0.0
+ */
+
+.frbl-cookie-notice {
+	--frbl-cookie-accent: #687df9;
+	--frbl-cookie-accent-contrast: #ffffff;
+	--frbl-cookie-accent-on-light: #687df9;
+
+	position: fixed;
+	z-index: 999999;
+	box-sizing: border-box;
+	font-family: inherit;
+	line-height: 1.5;
+	opacity: 1;
+	transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.frbl-cookie-notice * {
+	box-sizing: border-box;
+}
+
+.frbl-cookie-notice--hidden {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.frbl-cookie-notice__panel {
+	background-color: #ffffff;
+	color: #1f2937;
+	box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+}
+
+.frbl-cookie-notice__message {
+	margin: 0;
+	font-size: 14px;
+	color: #1f2937;
+}
+
+.frbl-cookie-notice__link {
+	color: var(--frbl-cookie-accent-on-light);
+	text-decoration: underline;
+	white-space: nowrap;
+}
+
+.frbl-cookie-notice__actions {
+	display: flex;
+	gap: 12px;
+	flex-shrink: 0;
+}
+
+.frbl-cookie-notice__button {
+	appearance: none;
+	border-radius: 6px;
+	padding: 10px 20px;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.2;
+	cursor: pointer;
+	transition: filter 0.15s ease, transform 0.15s ease;
+	white-space: nowrap;
+}
+
+.frbl-cookie-notice__button:hover {
+	filter: brightness(0.92);
+}
+
+.frbl-cookie-notice__button:active {
+	transform: scale(0.97);
+}
+
+.frbl-cookie-notice__button:focus-visible {
+	outline: 2px solid var(--frbl-cookie-accent-on-light);
+	outline-offset: 2px;
+}
+
+.frbl-cookie-notice__button--accept {
+	background-color: var(--frbl-cookie-accent);
+	border: 1px solid var(--frbl-cookie-accent);
+	color: var(--frbl-cookie-accent-contrast);
+}
+
+.frbl-cookie-notice__button--reject {
+	background-color: transparent;
+	border: 1px solid #9ca3af;
+	color: #1f2937;
+}
+
+/* Bar layout: full-width bottom bar. */
+.frbl-cookie-notice--bar {
+	inset: auto 0 0 0;
+	width: 100%;
+	max-height: 100vh;
+	overflow-y: auto;
+}
+
+.frbl-cookie-notice--bar .frbl-cookie-notice__panel {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	flex-wrap: wrap;
+	padding: 16px 24px;
+}
+
+.frbl-cookie-notice--bar .frbl-cookie-notice__message {
+	flex: 1 1 320px;
+}
+
+/* Box layout: boxed panel anchored bottom-left or bottom-right. */
+.frbl-cookie-notice--box {
+	bottom: 20px;
+	max-width: 380px;
+	width: calc(100% - 40px);
+	max-height: calc(100vh - 40px);
+	overflow-y: auto;
+}
+
+.frbl-cookie-notice--box.frbl-cookie-notice--right {
+	right: 20px;
+}
+
+.frbl-cookie-notice--box.frbl-cookie-notice--left {
+	left: 20px;
+}
+
+.frbl-cookie-notice--box .frbl-cookie-notice__panel {
+	border-radius: 12px;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.frbl-cookie-notice--box .frbl-cookie-notice__actions {
+	flex-direction: column;
+}
+
+.frbl-cookie-notice--box .frbl-cookie-notice__button {
+	width: 100%;
+	text-align: center;
+}
+
+/* Popup layout: centered modal with a dimmed backdrop. */
+.frbl-cookie-notice--popup {
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	overflow-y: auto;
+	background-color: rgba(15, 23, 42, 0.55);
+}
+
+.frbl-cookie-notice--popup .frbl-cookie-notice__panel {
+	border-radius: 16px;
+	padding: 40px 32px 32px;
+	max-width: 420px;
+	width: 100%;
+	max-height: calc(100vh - 40px);
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 16px;
+	box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
+}
+
+.frbl-cookie-notice__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 64px;
+	height: 64px;
+	flex-shrink: 0;
+	border-radius: 50%;
+	background-color: var(--frbl-cookie-accent);
+	color: var(--frbl-cookie-accent-contrast);
+}
+
+.frbl-cookie-notice__icon svg {
+	width: 32px;
+	height: 32px;
+}
+
+.frbl-cookie-notice--popup .frbl-cookie-notice__actions {
+	justify-content: center;
+	width: 100%;
+}
+
+body.frbl-cookie-notice-lock-scroll {
+	overflow: hidden;
+}
+
+@media (max-width: 600px) {
+	.frbl-cookie-notice--bar .frbl-cookie-notice__panel {
+		padding: 16px;
+	}
+
+	.frbl-cookie-notice--bar .frbl-cookie-notice__actions,
+	.frbl-cookie-notice--popup .frbl-cookie-notice__actions {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.frbl-cookie-notice--bar .frbl-cookie-notice__button,
+	.frbl-cookie-notice--popup .frbl-cookie-notice__button {
+		width: 100%;
+		text-align: center;
+	}
+
+	.frbl-cookie-notice--box,
+	.frbl-cookie-notice--popup .frbl-cookie-notice__panel {
+		width: calc(100% - 24px);
+		max-width: none;
+	}
+
+	.frbl-cookie-notice--popup .frbl-cookie-notice__panel {
+		max-height: calc(100vh - 24px);
+	}
+
+	.frbl-cookie-notice--box {
+		left: 12px;
+		right: 12px;
+		bottom: 12px;
+		max-height: calc(100vh - 24px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.frbl-cookie-notice {
+		transition: none;
+	}
+}
