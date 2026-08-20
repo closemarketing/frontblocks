@@ -216,6 +216,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == 1.5.0 ==
 *   Added: Cookie Notice — configurable cookie consent banner (full-width bar, boxed panel or centered popup) with Accept/Reject actions, custom message, accent color and expiration. Google Tag Manager and GA4 only load after consent is accepted, an aggregate acceptance-rate stat is shown in the settings page, and Google Consent Mode v2 support holds back tracking from other analytics/ads plugins (including Google Site Kit) until the visitor decides.
+*   Fixed: WordPress 7.1 compatibility — Reading Time, Gallery, Container Edge Alignment and Shape Animations now enqueue their block editor preview styles through `enqueue_block_assets` so they load correctly inside the editor's iframed canvas, resolving console warnings introduced by WordPress 7.1.
 
 == 1.4.0 ==
 *   Added: Carousel Pattern — ready-to-use Hero Carousel pattern using native WordPress Cover blocks, registered in the Patterns tab under the FrontBlocks category.
