@@ -18,6 +18,16 @@ class CookieNoticeSettingsSanitizationTest extends TestCase {
 	public function set_up() {
 		parent::set_up();
 		$this->settings = new Settings();
+
+		// sanitize_settings() rejects the call outright (returning the existing
+		// option untouched) without a valid nonce — every test below needs one
+		// present to actually exercise the sanitization logic under test.
+		$_POST['_wpnonce'] = wp_create_nonce( 'frontblocks_settings-options' );
+	}
+
+	public function tear_down() {
+		unset( $_POST['_wpnonce'] );
+		parent::tear_down();
 	}
 
 	public function test_enable_cookie_notice_is_cast_to_bool() {
