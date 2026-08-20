@@ -6,8 +6,9 @@
  */
 
 use FrontBlocks\Frontend\CookieNotice;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-class Test_Cookie_Notice_Contrast extends WP_UnitTestCase {
+class CookieNoticeContrastTest extends TestCase {
 
 	/**
 	 * The default accent (#687df9) must resolve to a dark neutral text color,

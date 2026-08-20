@@ -6,8 +6,9 @@
  */
 
 use FrontBlocks\Frontend\CookieNotice;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-class Test_Cookie_Notice_Policy_Page extends WP_UnitTestCase {
+class CookieNoticePolicyPageTest extends TestCase {
 
 	/**
 	 * @var int
@@ -33,7 +34,7 @@ class Test_Cookie_Notice_Policy_Page extends WP_UnitTestCase {
 		update_option(
 			'frontblocks_settings',
 			array(
-				'enable_cookie_notice'        => true,
+				'enable_cookie_notice'         => true,
 				'cookie_notice_policy_page_id' => $this->policy_page_id,
 			)
 		);

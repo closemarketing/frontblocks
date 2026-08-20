@@ -6,8 +6,9 @@
  */
 
 use FrontBlocks\Admin\Settings;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-class Test_Cookie_Notice_Settings_Sanitization extends WP_UnitTestCase {
+class CookieNoticeSettingsSanitizationTest extends TestCase {
 
 	/**
 	 * @var Settings
@@ -60,7 +61,7 @@ class Test_Cookie_Notice_Settings_Sanitization extends WP_UnitTestCase {
 	}
 
 	public function test_policy_page_id_is_cast_to_int() {
-		$page_id  = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		$page_id   = self::factory()->post->create( array( 'post_type' => 'page' ) );
 		$sanitized = $this->settings->sanitize_settings(
 			array( 'cookie_notice_policy_page_id' => (string) $page_id )
 		);

@@ -1,4 +1,4 @@
-name: PHPUnit
+name: Testing
 
 on:
   push:
@@ -35,20 +35,18 @@ concurrency:
 
 jobs:
   phpunit:
-    name: PHP 7.4 / WP latest
+    name: Run tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
-    # phpunit/phpunit is pinned to ^7 in composer.json (matching the platform.php
-    # 7.4 constraint) — PHPUnit 7 itself doesn't run on PHP 8+, so this stays a
-    # single job until that pin is deliberately upgraded, rather than adding a
-    # PHP 8.x leg that would just fail on the runner, not on the plugin's code.
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.3', '8.2', '8.1', '7.4']
     services:
-      mysql:
-        image: mysql:8.0
+      database:
+        image: mysql:latest
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
-          MYSQL_DATABASE: wordpress_test
+          MYSQL_ROOT_PASSWORD: root
         ports:
           - 3306:3306
         options: >-
@@ -56,15 +54,17 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-
     steps:
-      - uses: actions/checkout@v7
+      - name: Check out source code
+        uses: actions/checkout@v7
 
-      - uses: shivammathur/setup-php@v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
-          extensions: mysqli
-          tools: composer
+          php-version: ${{ matrix.php-version }}
+          tools: phpunit-polyfills:1.1
+          extensions: mbstring, xml, zip, intl, pdo, mysql
+          coverage: none
 
       - name: Install PHP dependencies
         uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda
@@ -74,8 +74,8 @@ jobs:
       - name: Install SVN (required to fetch the WordPress test suite)
         run: sudo apt-get update && sudo apt-get install -y subversion
 
-      - name: Set up the WordPress test suite
-        run: bash bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1 latest
+      - name: Setup tests
+        run: bash bin/install-wp-tests.sh wordpress_tests root root 127.0.0.1 latest true
 
-      - name: Run PHPUnit
+      - name: Run tests
         run: composer test

@@ -1,19 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <phpunit
 	bootstrap="tests/bootstrap.php"
+	backupGlobals="false"
 	colors="true"
-	beStrictAboutTestsThatDoNotTestAnything="true"
-	beStrictAboutOutputDuringTests="true"
->
+	convertErrorsToExceptions="true"
+	convertWarningsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertDeprecationsToExceptions="true"
+	>
 	<testsuites>
-		<testsuite name="FrontBlocks">
-			<directory prefix="test-" suffix=".php">./tests/php</directory>
+		<testsuite name="testing">
+			<directory suffix=".php">./tests/Unit/</directory>
 		</testsuite>
 	</testsuites>
-	<php>
-		<const name="WP_TESTS_DOMAIN" value="example.org" />
-		<const name="WP_TESTS_EMAIL" value="admin@example.org" />
-		<const name="WP_TESTS_TITLE" value="Test Blog" />
-		<const name="WP_PHP_BINARY" value="php" />
-	</php>
 </phpunit>
