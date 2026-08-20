@@ -26,8 +26,8 @@ class ReadingTime {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_reading_time_block' ), 20 );
-		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_script' ) );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_style' ) );
 		add_shortcode( 'frontblocks_reading_time', array( $this, 'reading_time_shortcode' ) );
 	}
 
@@ -65,11 +65,17 @@ class ReadingTime {
 	}
 
 	/**
-	 * Enqueue frontend styles.
+	 * Enqueue the block's style on both the frontend and the block editor
+	 * (including inside its iframed canvas).
+	 *
+	 * Hooked on enqueue_block_assets rather than enqueue_block_editor_assets:
+	 * the editor canvas is rendered in an iframe, and a style enqueued via the
+	 * editor-only hook is appended to the wp-admin document instead of that
+	 * iframe, which WordPress now flags as an incorrect registration.
 	 *
 	 * @return void
 	 */
-	public function enqueue_frontend_styles() {
+	public function enqueue_style() {
 		wp_register_style(
 			'frontblocks-reading-time-style',
 			FRBL_PLUGIN_URL . 'assets/reading-time/frontblocks-reading-time.css',
@@ -83,19 +89,11 @@ class ReadingTime {
 	}
 
 	/**
-	 * Enqueue block editor assets.
+	 * Enqueue the block editor's own script (and its React dependencies).
 	 *
 	 * @return void
 	 */
-	public function enqueue_block_editor_assets() {
-		// Enqueue styles for editor.
-		wp_enqueue_style(
-			'frontblocks-reading-time-style',
-			FRBL_PLUGIN_URL . 'assets/reading-time/frontblocks-reading-time.css',
-			array(),
-			FRBL_VERSION
-		);
-
+	public function enqueue_editor_script() {
 		// Register React if not already registered.
 		if ( ! wp_script_is( 'react', 'registered' ) ) {
 			wp_register_script(
