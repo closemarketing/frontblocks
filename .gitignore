@@ -41,7 +41,7 @@ node_modules/
 # dotenv environment variables file
 .env
 
-# Playwright / wp-env e2e test output
-/playwright-report/
-/test-results/
-.wp-env-cache/
+# PHPUnit
+.phpunit.result.cache
+/tests/wordpress/
+/tests/wordpress-tests-lib/
