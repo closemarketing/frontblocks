@@ -53,6 +53,13 @@ class GoogleSignIn {
 	private $options;
 
 	/**
+	 * Whether the bridging script has already been localized on this request.
+	 *
+	 * @var bool
+	 */
+	private $localized = false;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -61,6 +68,12 @@ class GoogleSignIn {
 		}
 
 		$this->options = Settings::get_options();
+
+		// The shortcodes and block are always available; they render nothing
+		// (or an admin-only notice) until Client ID and Secret are configured.
+		add_shortcode( 'frontblocks_google_login', array( $this, 'shortcode_login' ) );
+		add_shortcode( 'frontblocks_google_register', array( $this, 'shortcode_register' ) );
+		add_action( 'init', array( $this, 'register_block' ) );
 
 		// Feature is fully optional/off by default until Client ID and Secret are configured.
 		if ( ! Settings::is_configured() ) {
@@ -365,20 +378,42 @@ class GoogleSignIn {
 	}
 
 	/**
+	 * Enqueue assets and localize the bridging script at most once per request.
+	 *
+	 * @param string $redirect_to Where to send the browser after a successful sign-in.
+	 * @return void
+	 */
+	private function ensure_frontend_assets( $redirect_to ) {
+		$this->enqueue_assets();
+
+		if ( ! $this->localized ) {
+			$this->localize_script( $redirect_to );
+			$this->localized = true;
+		}
+	}
+
+	/**
+	 * Current front-end URL, validated as a safe redirect target.
+	 *
+	 * @return string
+	 */
+	private function current_url() {
+		return wp_validate_redirect( esc_url_raw( add_query_arg( array() ) ), home_url( '/' ) );
+	}
+
+	/**
 	 * Enqueue assets on wp-login.php.
 	 *
 	 * @return void
 	 */
 	public function enqueue_login_assets() {
-		$this->enqueue_assets();
-
 		$redirect_to = admin_url();
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- read-only redirect target, validated via wp_validate_redirect() below.
 		if ( isset( $_GET['redirect_to'] ) ) {
 			$redirect_to = wp_validate_redirect( sanitize_text_field( wp_unslash( $_GET['redirect_to'] ) ), admin_url() ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 
-		$this->localize_script( $redirect_to );
+		$this->ensure_frontend_assets( $redirect_to );
 	}
 
 	/**
@@ -426,11 +461,7 @@ class GoogleSignIn {
 			return;
 		}
 
-		$this->enqueue_assets();
-
-		$current_url = wp_validate_redirect( esc_url_raw( add_query_arg( array() ) ), home_url( '/' ) );
-
-		$this->localize_script( $current_url );
+		$this->ensure_frontend_assets( $this->current_url() );
 	}
 
 	/**
@@ -479,5 +510,118 @@ class GoogleSignIn {
 			<div class="frbl-google-signin-divider"><span><?php esc_html_e( 'or continue below', 'frontblocks' ); ?></span></div>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Render a standalone Google button, for use by the shortcodes and the block.
+	 *
+	 * @param string $mode     Either 'login' or 'register'.
+	 * @param string $redirect Optional redirect target after a successful sign-in.
+	 * @return string
+	 */
+	private function render_button_html( $mode, $redirect = '' ) {
+		if ( ! Settings::is_configured() ) {
+			return $this->not_configured_notice();
+		}
+
+		$redirect_to = '' !== $redirect ? $this->safe_redirect( $redirect ) : $this->current_url();
+		$this->ensure_frontend_assets( $redirect_to );
+
+		$text = ( 'register' === $mode ) ? 'signup_with' : 'signin_with';
+
+		ob_start();
+		?>
+		<div class="frbl-google-signin-wrapper">
+			<div
+				class="frbl-google-signin-button"
+				data-text="<?php echo esc_attr( $text ); ?>"
+				<?php echo '' !== $redirect ? 'data-redirect="' . esc_attr( $redirect_to ) . '"' : ''; ?>
+			></div>
+		</div>
+		<?php
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Notice shown to admins (only) when the shortcode/block is used before configuration.
+	 *
+	 * @return string
+	 */
+	private function not_configured_notice() {
+		if ( ! current_user_can( 'edit_theme_options' ) ) {
+			return '';
+		}
+
+		return '<p class="frbl-google-signin-notice">' . esc_html__( 'Google Sign-In is not configured yet. Add your Client ID and Client Secret under Appearance → FrontBlocks → Google Sign-In.', 'frontblocks' ) . '</p>';
+	}
+
+	/**
+	 * [frontblocks_google_login] shortcode: "Sign in with Google" button.
+	 *
+	 * @param array|string $atts Shortcode attributes.
+	 * @return string
+	 */
+	public function shortcode_login( $atts ) {
+		return $this->render_shortcode( 'login', $atts );
+	}
+
+	/**
+	 * [frontblocks_google_register] shortcode: "Sign up with Google" button.
+	 *
+	 * @param array|string $atts Shortcode attributes.
+	 * @return string
+	 */
+	public function shortcode_register( $atts ) {
+		return $this->render_shortcode( 'register', $atts );
+	}
+
+	/**
+	 * Shared shortcode handler.
+	 *
+	 * @param string       $mode Either 'login' or 'register'.
+	 * @param array|string $atts Shortcode attributes.
+	 * @return string
+	 */
+	private function render_shortcode( $mode, $atts ) {
+		$atts = shortcode_atts( array( 'redirect' => '' ), (array) $atts, 'frontblocks_google_' . $mode );
+
+		return $this->render_button_html( $mode, $atts['redirect'] );
+	}
+
+	/**
+	 * Register the "Google Login" block.
+	 *
+	 * @return void
+	 */
+	public function register_block() {
+		if ( ! function_exists( 'register_block_type' ) ) {
+			return;
+		}
+
+		wp_register_script(
+			'frontblocks-google-login-block-editor',
+			FRBL_PLUGIN_URL . 'assets/google-signin/frontblocks-google-signin-block.js',
+			array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n', 'wp-server-side-render' ),
+			FRBL_VERSION,
+			true
+		);
+
+		register_block_type(
+			FRBL_PLUGIN_PATH . 'includes/GoogleSignIn/block',
+			array( 'render_callback' => array( $this, 'render_block' ) )
+		);
+	}
+
+	/**
+	 * Render callback for the "Google Login" block.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return string
+	 */
+	public function render_block( $attributes ) {
+		$mode     = ( isset( $attributes['mode'] ) && 'register' === $attributes['mode'] ) ? 'register' : 'login';
+		$redirect = isset( $attributes['redirect'] ) ? (string) $attributes['redirect'] : '';
+
+		return $this->render_button_html( $mode, $redirect );
 	}
 }

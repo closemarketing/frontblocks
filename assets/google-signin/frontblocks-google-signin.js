@@ -68,6 +68,25 @@
 		buttons[ 0 ].parentNode.appendChild( notice );
 	}
 
+	/**
+	 * A button rendered by the [frontblocks_google_login]/[frontblocks_google_register]
+	 * shortcodes or the "Google Login" block may carry its own redirect target. Only
+	 * trust it when a single, unambiguous override is present on the page.
+	 */
+	function getRedirectOverride() {
+		var withRedirect = document.querySelectorAll( '.frbl-google-signin-button[data-redirect]' );
+		var values = [];
+
+		withRedirect.forEach( function ( el ) {
+			var value = el.getAttribute( 'data-redirect' );
+			if ( value ) {
+				values.push( value );
+			}
+		} );
+
+		return 1 === values.length ? values[ 0 ] : '';
+	}
+
 	function handleCredentialResponse( response ) {
 		var config = getConfig();
 		if ( ! config ) {
@@ -82,7 +101,7 @@
 			body: JSON.stringify( {
 				credential: response.credential,
 				nonce: config.nonce,
-				redirect_to: config.redirectTo || '',
+				redirect_to: getRedirectOverride() || config.redirectTo || '',
 			} ),
 		} )
 			.then( function ( res ) {
