@@ -253,11 +253,14 @@ class CookieNotice {
 		}
 
 		if ( '' === $accept_label ) {
-			$accept_label = __( 'Accept', 'frontblocks' );
+			// Filterable so an add-on that relabels the binary choice as "accept all" /
+			// "reject non-essential" (once it introduces per-category consent) doesn't
+			// need the site admin to retype the button copy themselves.
+			$accept_label = apply_filters( 'frbl_cookie_notice_default_accept_label', __( 'Accept', 'frontblocks' ) );
 		}
 
 		if ( '' === $reject_label ) {
-			$reject_label = __( 'Reject', 'frontblocks' );
+			$reject_label = apply_filters( 'frbl_cookie_notice_default_reject_label', __( 'Reject', 'frontblocks' ) );
 		}
 
 		if ( ! in_array( $layout, array( 'bar', 'box', 'popup' ), true ) ) {
@@ -302,6 +305,16 @@ class CookieNotice {
 					?>
 				</p>
 				<div class="frbl-cookie-notice__actions">
+					<?php
+					/**
+					 * Fires right before the reject/accept buttons, inside the same actions
+					 * row. Lets an add-on (e.g. per-category consent) insert its own button —
+					 * a "Customize" trigger — without forking this markup.
+					 *
+					 * @param array $options The 'frontblocks_settings' option array.
+					 */
+					do_action( 'frbl_cookie_notice_before_actions', $options );
+					?>
 					<button
 						type="button"
 						class="frbl-cookie-notice__button frbl-cookie-notice__button--reject"
@@ -339,6 +352,15 @@ class CookieNotice {
 			</noscript>
 			<?php
 		}
+
+		/**
+		 * Fires right after the banner markup, still inside the same wp_footer
+		 * output. Lets an add-on print extra markup that belongs to the same
+		 * consent flow — e.g. a "customize categories" dialog — right next to it.
+		 *
+		 * @param array $options The 'frontblocks_settings' option array.
+		 */
+		do_action( 'frbl_cookie_notice_after_banner', $options );
 	}
 
 	/**
@@ -364,15 +386,38 @@ class CookieNotice {
 	public function render_consent_mode_default() {
 		$consent = $this->get_consent();
 		$granted = 'accepted' === $consent ? 'granted' : 'denied';
+
+		/**
+		 * Filters the four Consent Mode signals before they're printed.
+		 *
+		 * Defaults to the same value for all four (this plugin only knows a
+		 * binary accept/reject decision). An add-on that tracks per-category
+		 * consent (analytics vs. marketing) can override this to send the
+		 * granular signals Consent Mode actually expects.
+		 *
+		 * @param array  $state   Associative array with keys 'ad_storage',
+		 *                        'ad_user_data', 'ad_personalization', 'analytics_storage'.
+		 * @param string $consent 'accepted', 'rejected', or '' when undecided.
+		 */
+		$state = apply_filters(
+			'frbl_cookie_notice_consent_mode_state',
+			array(
+				'ad_storage'         => $granted,
+				'ad_user_data'       => $granted,
+				'ad_personalization' => $granted,
+				'analytics_storage'  => $granted,
+			),
+			$consent
+		);
 		?>
 		<script>
 		window.dataLayer = window.dataLayer || [];
 		function gtag(){ window.dataLayer.push( arguments ); }
 		gtag( 'consent', 'default', {
-			'ad_storage': '<?php echo esc_js( $granted ); ?>',
-			'ad_user_data': '<?php echo esc_js( $granted ); ?>',
-			'ad_personalization': '<?php echo esc_js( $granted ); ?>',
-			'analytics_storage': '<?php echo esc_js( $granted ); ?>'
+			'ad_storage': '<?php echo esc_js( $state['ad_storage'] ?? $granted ); ?>',
+			'ad_user_data': '<?php echo esc_js( $state['ad_user_data'] ?? $granted ); ?>',
+			'ad_personalization': '<?php echo esc_js( $state['ad_personalization'] ?? $granted ); ?>',
+			'analytics_storage': '<?php echo esc_js( $state['analytics_storage'] ?? $granted ); ?>'
 		} );
 		</script>
 		<?php

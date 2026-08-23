@@ -108,9 +108,28 @@ document.addEventListener('frblCookieConsent', function (event) {
 });
 ```
 
+## Extension hooks
+
+This module fires a few hooks so an add-on can extend the banner without
+forking it — used by FrontBlocks PRO's Advanced Cookie Management to add a
+"Customize" (per-category) option:
+
+- `frbl_cookie_notice_before_actions( array $options )` — action, fires inside
+  the actions row, right before the Reject/Accept buttons.
+- `frbl_cookie_notice_after_banner( array $options )` — action, fires right
+  after the banner markup, still inside the same `wp_footer` output.
+- `frbl_cookie_notice_default_accept_label( string $default )` /
+  `frbl_cookie_notice_default_reject_label( string $default )` — filters,
+  used only when the admin left the corresponding label field empty.
+- `frbl_cookie_notice_consent_mode_state( array $state, string $consent )` —
+  filter, lets an add-on override the four Consent Mode signals (by default
+  all four mirror the single accept/reject `$consent`).
+
 ## Out of scope
 
-- Category-based consent (analytics/marketing toggles as separate switches) —
-  Consent Mode is signaled as a single accept/reject decision, not per-category.
 - Per-visitor logging, timestamps, or a dashboard of responses over time.
 - Auto-scanning the site's existing scripts/cookies.
+
+Category-based consent (Analytics/Marketing toggles as separate switches) is
+no longer out of scope for the plugin as a whole — see FrontBlocks PRO's
+Advanced Cookie Management, built on top of the hooks above.

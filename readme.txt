@@ -4,8 +4,8 @@ Tags: carrusel, slider, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.5.0
-Version: 1.5.0
+Stable tag: 1.6.0
+Version: 1.6.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -213,6 +213,9 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 2. Go to Settings > FrontBlocks > Features and enable the features you want to use.
 
 == Changelog ==
+
+== 1.6.0 ==
+*   Added: Cookie Notice extension hooks (`frbl_cookie_notice_before_actions`, `frbl_cookie_notice_after_banner`, `frbl_cookie_notice_consent_mode_state`, and default-label filters) so an add-on can extend the banner with per-category consent without forking it — used by FrontBlocks PRO's new Advanced Cookie Management.
 
 == 1.5.0 ==
 *   Added: Cookie Notice — configurable cookie consent banner (full-width bar, boxed panel or centered popup) with Accept/Reject actions, custom message, accent color and expiration. Google Tag Manager and GA4 only load after consent is accepted, an aggregate acceptance-rate stat is shown in the settings page, and Google Consent Mode v2 support holds back tracking from other analytics/ads plugins (including Google Site Kit) until the visitor decides.
