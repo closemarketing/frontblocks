@@ -428,6 +428,22 @@ class CookieNotice {
 				}
 			}
 
+			// An add-on reporting its own per-category consent as stale (see
+			// window.frblCookieNoticeIsConsentStale, already used to keep the
+			// banner/tracking bootstrap from trusting stale consent) means a
+			// fresh decision is needed — so deny by default here too, instead
+			// of falling back to this plugin's own (possibly still 'accepted')
+			// binary cookie, which would let an independently loaded, Consent
+			// Mode-aware tag (e.g. Site Kit) run before the visitor re-decides.
+			if ( typeof window.frblCookieNoticeIsConsentStale === 'function' && window.frblCookieNoticeIsConsentStale() ) {
+				state = {
+					ad_storage: 'denied',
+					ad_user_data: 'denied',
+					ad_personalization: 'denied',
+					analytics_storage: 'denied'
+				};
+			}
+
 			gtag( 'consent', 'default', state );
 		} )();
 		</script>
