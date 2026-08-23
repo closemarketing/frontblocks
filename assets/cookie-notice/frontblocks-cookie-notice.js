@@ -99,7 +99,9 @@
 
 		defineInjectHelper();
 
-		if (readCookie(frblCookieNotice.cookieName) === 'accepted') {
+		var isStale = typeof window.frblCookieNoticeIsConsentStale === 'function' && window.frblCookieNoticeIsConsentStale();
+
+		if (readCookie(frblCookieNotice.cookieName) === 'accepted' && !isStale) {
 			fetchAndInjectScripts();
 		}
 

@@ -174,41 +174,6 @@ class Settings {
 	private $option_cookie_notice_ga4_id = 'cookie_notice_ga4_id';
 
 	/**
-	 * Option key for advanced (per-category) cookie consent (PRO feature).
-	 *
-	 * @var string
-	 */
-	private $option_enable_advanced_cookies = 'enable_advanced_cookies';
-
-	/**
-	 * Option key for the "Customize" button label (PRO feature).
-	 *
-	 * @var string
-	 */
-	private $option_cookie_notice_customize_label = 'cookie_notice_customize_label';
-
-	/**
-	 * Option key for the Google Ads conversion ID (PRO feature).
-	 *
-	 * @var string
-	 */
-	private $option_cookie_notice_google_ads_id = 'cookie_notice_google_ads_id';
-
-	/**
-	 * Option key for the Meta (Facebook/Instagram) Pixel ID (PRO feature).
-	 *
-	 * @var string
-	 */
-	private $option_cookie_notice_meta_pixel_id = 'cookie_notice_meta_pixel_id';
-
-	/**
-	 * Option key for the Microsoft Clarity project ID (PRO feature).
-	 *
-	 * @var string
-	 */
-	private $option_cookie_notice_clarity_id = 'cookie_notice_clarity_id';
-
-	/**
 	 * Option key for popups feature.
 	 *
 	 * @var string
@@ -1006,14 +971,6 @@ class Settings {
 			'frontblocks_section_cookie_notice'
 		);
 
-		add_settings_field(
-			$this->option_enable_advanced_cookies,
-			__( 'Advanced Cookie Management (PRO)', 'frontblocks' ),
-			array( $this, 'field_enable_advanced_cookies' ),
-			$this->page_slug,
-			'frontblocks_section_cookie_notice'
-		);
-
 		// PRO Features section.
 		add_settings_section(
 			'frontblocks_section_woocommerce_features',
@@ -1574,6 +1531,46 @@ class Settings {
 			<?php echo esc_html__( 'Show a cookie consent banner and only load Google Tag Manager / GA4 after a visitor accepts.', 'frontblocks' ); ?>
 		</p>
 		<?php
+		$this->render_advanced_cookies_upsell();
+	}
+
+	/**
+	 * Show what FrontBlocks PRO's Advanced Cookie Management adds on top of
+	 * this banner. The feature's own settings (and the fields to configure
+	 * it) live entirely in the PRO plugin — this is only a plain message,
+	 * shown when PRO isn't active/licensed yet.
+	 *
+	 * @return void
+	 */
+	private function render_advanced_cookies_upsell() {
+		if ( frbl_is_pro_active() && $this->is_license_valid ) {
+			// Already unlocked: the PRO plugin renders its own settings section
+			// right below this one.
+			return;
+		}
+
+		if ( ! frbl_is_pro_active() ) {
+			echo '<div class="tw:bg-blue-50 tw:border-l-4 tw:border-blue-400 tw:p-4 tw:mb-4">';
+			echo '<p class="tw:text-sm tw:text-blue-700 tw:font-medium tw:mb-1">' . esc_html__( 'Want per-category consent?', 'frontblocks' ) . '</p>';
+			echo '<p class="tw:text-sm tw:text-blue-700">';
+			printf(
+				/* translators: %s: FrontBlocks PRO link */
+				esc_html__( '%s adds a "Customize" option so visitors can accept Analytics and Marketing cookies separately, with native Google Ads, Meta Pixel and Microsoft Clarity integrations that only load once accepted.', 'frontblocks' ),
+				'<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-cookie-notice" target="_blank" rel="noopener noreferrer" class="tw:font-medium tw:underline">FrontBlocks PRO</a>'
+			);
+			echo '</p>';
+			echo '</div>';
+		} else {
+			echo '<div class="tw:bg-yellow-50 tw:border-l-4 tw:border-yellow-400 tw:p-4 tw:mb-4">';
+			echo '<p class="tw:text-sm tw:text-yellow-700">';
+			printf(
+				/* translators: %s: License section link */
+				esc_html__( 'Advanced Cookie Management (per-category consent, Google Ads / Meta Pixel / Microsoft Clarity) is included with FrontBlocks PRO. Activate your license in the %s section below to unlock it.', 'frontblocks' ),
+				'<a href="#frontblocks_section_license" class="tw:font-medium tw:underline">' . esc_html__( 'License', 'frontblocks' ) . '</a>'
+			);
+			echo '</p>';
+			echo '</div>';
+		}
 	}
 
 	/**
@@ -2447,104 +2444,6 @@ class Settings {
 	}
 
 	/**
-	 * Render the advanced (per-category) cookie consent field (PRO feature).
-	 *
-	 * The toggle itself follows the same gating as any other PRO feature
-	 * (render_pro_toggle(): disabled unless a valid license is active). The
-	 * integration ID fields below it are rendered — and their values kept —
-	 * regardless of license state, the same way the GTM/GA4 fields above are,
-	 * so a lapsed license doesn't wipe out the site's configuration.
-	 *
-	 * @return void
-	 */
-	public function field_enable_advanced_cookies() {
-		$options          = get_option( 'frontblocks_settings', array() );
-		$customize_label  = (string) ( $options[ $this->option_cookie_notice_customize_label ] ?? '' );
-		$google_ads_id    = (string) ( $options[ $this->option_cookie_notice_google_ads_id ] ?? '' );
-		$meta_pixel_id    = (string) ( $options[ $this->option_cookie_notice_meta_pixel_id ] ?? '' );
-		$clarity_id       = (string) ( $options[ $this->option_cookie_notice_clarity_id ] ?? '' );
-		$fields_disabled  = ! $this->is_license_valid ? 'disabled' : '';
-		?>
-		<div class="frbl-cookie-notice-wrapper tw:mt-4 tw:pt-4 tw:border-t tw:border-gray-200">
-			<div class="tw:flex tw:items-center tw:justify-between tw:mb-2">
-				<label for="<?php echo esc_attr( $this->option_enable_advanced_cookies ); ?>" class="tw:text-base tw:font-medium tw:text-gray-900">
-					<?php echo esc_html__( 'Enable Advanced Cookie Management', 'frontblocks' ); ?>
-				</label>
-				<?php $this->render_pro_toggle( $this->option_enable_advanced_cookies ); ?>
-			</div>
-			<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
-				<?php echo esc_html__( 'Adds a "Customize" option so visitors can accept Analytics and Marketing cookies separately, and only loads the integrations below once the matching category is accepted.', 'frontblocks' ); ?>
-			</p>
-
-			<div class="tw:grid tw:grid-cols-1 tw:gap-4">
-				<div>
-					<label for="<?php echo esc_attr( $this->option_cookie_notice_customize_label ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
-						<?php echo esc_html__( 'Customize button label', 'frontblocks' ); ?>
-					</label>
-					<input
-						type="text"
-						id="<?php echo esc_attr( $this->option_cookie_notice_customize_label ); ?>"
-						name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_customize_label ); ?>]"
-						value="<?php echo esc_attr( $customize_label ); ?>"
-						placeholder="<?php echo esc_attr__( 'Customize', 'frontblocks' ); ?>"
-						class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
-						<?php echo esc_attr( $fields_disabled ); ?>
-					/>
-				</div>
-
-				<div class="tw:grid tw:grid-cols-1 tw:sm:grid-cols-3 tw:gap-4">
-					<div>
-						<label for="<?php echo esc_attr( $this->option_cookie_notice_google_ads_id ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
-							<?php echo esc_html__( 'Google Ads conversion ID', 'frontblocks' ); ?>
-						</label>
-						<input
-							type="text"
-							id="<?php echo esc_attr( $this->option_cookie_notice_google_ads_id ); ?>"
-							name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_google_ads_id ); ?>]"
-							value="<?php echo esc_attr( $google_ads_id ); ?>"
-							placeholder="AW-XXXXXXXXX"
-							class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
-							<?php echo esc_attr( $fields_disabled ); ?>
-						/>
-						<p class="tw:text-xs tw:text-gray-500 tw:mt-1"><?php echo esc_html__( 'Only loads once "Marketing" is accepted.', 'frontblocks' ); ?></p>
-					</div>
-					<div>
-						<label for="<?php echo esc_attr( $this->option_cookie_notice_meta_pixel_id ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
-							<?php echo esc_html__( 'Meta Pixel ID', 'frontblocks' ); ?>
-						</label>
-						<input
-							type="text"
-							id="<?php echo esc_attr( $this->option_cookie_notice_meta_pixel_id ); ?>"
-							name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_meta_pixel_id ); ?>]"
-							value="<?php echo esc_attr( $meta_pixel_id ); ?>"
-							placeholder="123456789012345"
-							class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
-							<?php echo esc_attr( $fields_disabled ); ?>
-						/>
-						<p class="tw:text-xs tw:text-gray-500 tw:mt-1"><?php echo esc_html__( 'Only loads once "Marketing" is accepted.', 'frontblocks' ); ?></p>
-					</div>
-					<div>
-						<label for="<?php echo esc_attr( $this->option_cookie_notice_clarity_id ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
-							<?php echo esc_html__( 'Microsoft Clarity project ID', 'frontblocks' ); ?>
-						</label>
-						<input
-							type="text"
-							id="<?php echo esc_attr( $this->option_cookie_notice_clarity_id ); ?>"
-							name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_clarity_id ); ?>]"
-							value="<?php echo esc_attr( $clarity_id ); ?>"
-							placeholder="abcdefghij"
-							class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
-							<?php echo esc_attr( $fields_disabled ); ?>
-						/>
-						<p class="tw:text-xs tw:text-gray-500 tw:mt-1"><?php echo esc_html__( 'Only loads once "Analytics" is accepted.', 'frontblocks' ); ?></p>
-					</div>
-				</div>
-			</div>
-		</div>
-		<?php
-	}
-
-	/**
 	 * Render toggle field for enable popups (PRO feature).
 	 *
 	 * @return void
@@ -3248,7 +3147,6 @@ class Settings {
 			$this->option_enable_fullpage_scroll,
 			$this->option_enable_language_banner,
 			$this->option_enable_popups,
-			$this->option_enable_advanced_cookies,
 			$this->option_checkout_inline,
 			$this->option_disable_cart_coupon,
 			$this->option_disable_cart_cross_sells,
@@ -3299,17 +3197,6 @@ class Settings {
 			} elseif ( $this->option_cookie_notice_ga4_id === $key ) {
 				$ga4_id            = strtoupper( sanitize_text_field( $val ) );
 				$sanitized[ $key ] = preg_match( '/^G-[A-Z0-9]+$/', $ga4_id ) ? $ga4_id : '';
-			} elseif ( $this->option_cookie_notice_customize_label === $key ) {
-				$sanitized[ $key ] = sanitize_text_field( $val );
-			} elseif ( $this->option_cookie_notice_google_ads_id === $key ) {
-				$google_ads_id     = strtoupper( sanitize_text_field( $val ) );
-				$sanitized[ $key ] = preg_match( '/^AW-[A-Z0-9]+$/', $google_ads_id ) ? $google_ads_id : '';
-			} elseif ( $this->option_cookie_notice_meta_pixel_id === $key ) {
-				$meta_pixel_id     = sanitize_text_field( $val );
-				$sanitized[ $key ] = preg_match( '/^\d{10,20}$/', $meta_pixel_id ) ? $meta_pixel_id : '';
-			} elseif ( $this->option_cookie_notice_clarity_id === $key ) {
-				$clarity_id        = sanitize_text_field( $val );
-				$sanitized[ $key ] = preg_match( '/^[a-z0-9]{6,20}$/i', $clarity_id ) ? $clarity_id : '';
 			}
 		}
 

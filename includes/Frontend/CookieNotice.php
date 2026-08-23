@@ -490,7 +490,14 @@ class CookieNotice {
 				}
 			};
 
-			if ( 'accepted' === consent ) {
+			// An add-on tracking per-category consent can define this (printed
+			// earlier than this script, at a lower wp_head priority) to say the
+			// stored consent is stale — e.g. the site admin just added a new
+			// integration — so tracking shouldn't start yet either, not just the
+			// banner staying hidden.
+			var isStale = typeof window.frblCookieNoticeIsConsentStale === 'function' && window.frblCookieNoticeIsConsentStale();
+
+			if ( 'accepted' === consent && ! isStale ) {
 				var formData = new FormData();
 				formData.append( 'action', 'frbl_get_cookie_notice_config' );
 
