@@ -74,6 +74,11 @@ class Plugin_Main {
 				require_once FRBL_PLUGIN_PATH . 'includes/Admin/Settings.php';
 			}
 			new Admin\Settings();
+
+			if ( ! class_exists( 'FrontBlocks\Admin\ReviewNotice' ) ) {
+				require_once FRBL_PLUGIN_PATH . 'includes/Admin/ReviewNotice.php';
+			}
+			new Admin\ReviewNotice();
 		}
 
 		// Container Edge Alignment for GenerateBlocks.

@@ -4,7 +4,7 @@ Tags: carrusel, slider, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 Version: 1.5.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -213,6 +213,9 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 2. Go to Settings > FrontBlocks > Features and enable the features you want to use.
 
 == Changelog ==
+
+== 1.5.1 ==
+*   Added: Dismissible admin notice inviting users to leave a review on WordPress.org, shown 14 days after activation.
 
 == 1.5.0 ==
 *   Added: Cookie Notice — configurable cookie consent banner (full-width bar, boxed panel or centered popup) with Accept/Reject actions, custom message, accent color and expiration. Google Tag Manager and GA4 only load after consent is accepted, an aggregate acceptance-rate stat is shown in the settings page, and Google Consent Mode v2 support holds back tracking from other analytics/ads plugins (including Google Site Kit) until the visitor decides.
