@@ -121,9 +121,16 @@ forking it — used by FrontBlocks PRO's Advanced Cookie Management to add a
 - `frbl_cookie_notice_default_accept_label( string $default )` /
   `frbl_cookie_notice_default_reject_label( string $default )` — filters,
   used only when the admin left the corresponding label field empty.
-- `frbl_cookie_notice_consent_mode_state( array $state, string $consent )` —
-  filter, lets an add-on override the four Consent Mode signals (by default
-  all four mirror the single accept/reject `$consent`).
+- `window.frblCookieNoticeConsentModeState()` — client-side JS, not a PHP
+  hook: if defined, `render_consent_mode_default()` calls it and uses its
+  return value (an object with the four Consent Mode keys) instead of the
+  binary accept/reject default, so an add-on can send granular per-category
+  signals. Must return `null` when it has no valid decision yet (falls back
+  to the binary default), and must be defined *before* this method's own
+  script runs (an earlier `wp_head` priority). Deliberately client-side, not
+  a PHP filter reading a cookie server-side: this method's printed HTML is
+  identical for every visitor of a URL, which a PHP-side per-visitor value
+  would break under a full-page cache.
 
 ## Out of scope
 

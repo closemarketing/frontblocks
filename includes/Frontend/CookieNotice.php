@@ -376,49 +376,48 @@ class CookieNotice {
 	 * which plugin's script eventually processes them — as long as this runs
 	 * first, it doesn't matter which plugin's gtag.js loads second.
 	 *
-	 * Reads the decision straight from the request cookie (not the PHP-side
-	 * get_consent(), which is the same lookup) so a returning visitor's already
-	 * granted/denied state is reflected immediately, with no flash of a
-	 * default-denied state while JS boots.
+	 * Only the cookie *name* (a fixed string) is embedded server-side — the
+	 * decision itself is read from document.cookie client-side, in the browser,
+	 * exactly like render_consent_bootstrap_script() below. This keeps the
+	 * printed HTML identical for every visitor of a given URL, so a full-page
+	 * cache stays safe; an earlier version of this method embedded the
+	 * granted/denied value directly, which a full-page cache could then have
+	 * served to the wrong visitor.
 	 *
 	 * @return void
 	 */
 	public function render_consent_mode_default() {
-		$consent = $this->get_consent();
-		$granted = 'accepted' === $consent ? 'granted' : 'denied';
-
-		/**
-		 * Filters the four Consent Mode signals before they're printed.
-		 *
-		 * Defaults to the same value for all four (this plugin only knows a
-		 * binary accept/reject decision). An add-on that tracks per-category
-		 * consent (analytics vs. marketing) can override this to send the
-		 * granular signals Consent Mode actually expects.
-		 *
-		 * @param array  $state   Associative array with keys 'ad_storage',
-		 *                        'ad_user_data', 'ad_personalization', 'analytics_storage'.
-		 * @param string $consent 'accepted', 'rejected', or '' when undecided.
-		 */
-		$state = apply_filters(
-			'frbl_cookie_notice_consent_mode_state',
-			array(
-				'ad_storage'         => $granted,
-				'ad_user_data'       => $granted,
-				'ad_personalization' => $granted,
-				'analytics_storage'  => $granted,
-			),
-			$consent
-		);
+		$cookie_name = $this->get_cookie_name();
 		?>
 		<script>
 		window.dataLayer = window.dataLayer || [];
 		function gtag(){ window.dataLayer.push( arguments ); }
-		gtag( 'consent', 'default', {
-			'ad_storage': '<?php echo esc_js( $state['ad_storage'] ?? $granted ); ?>',
-			'ad_user_data': '<?php echo esc_js( $state['ad_user_data'] ?? $granted ); ?>',
-			'ad_personalization': '<?php echo esc_js( $state['ad_personalization'] ?? $granted ); ?>',
-			'analytics_storage': '<?php echo esc_js( $state['analytics_storage'] ?? $granted ); ?>'
-		} );
+		( function () {
+			var cookieMatch = document.cookie.match( new RegExp( '(?:^|; )<?php echo esc_js( $cookie_name ); ?>=([^;]*)' ) );
+			var consent = cookieMatch ? decodeURIComponent( cookieMatch[ 1 ] ) : '';
+			var granted = 'accepted' === consent ? 'granted' : 'denied';
+			var state = {
+				ad_storage: granted,
+				ad_user_data: granted,
+				ad_personalization: granted,
+				analytics_storage: granted
+			};
+
+			// An add-on tracking per-category consent (analytics vs. marketing)
+			// can define this — reading its own cookie the same way, client-side —
+			// to send the granular signals Consent Mode actually expects instead
+			// of this binary default. Must be defined by the time this script
+			// runs, i.e. at an earlier wp_head priority than this method's own.
+			if ( typeof window.frblCookieNoticeConsentModeState === 'function' ) {
+				var overrideState = window.frblCookieNoticeConsentModeState();
+
+				if ( overrideState ) {
+					state = overrideState;
+				}
+			}
+
+			gtag( 'consent', 'default', state );
+		} )();
 		</script>
 		<?php
 	}
