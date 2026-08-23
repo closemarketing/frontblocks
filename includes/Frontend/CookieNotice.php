@@ -394,7 +394,19 @@ class CookieNotice {
 		function gtag(){ window.dataLayer.push( arguments ); }
 		( function () {
 			var cookieMatch = document.cookie.match( new RegExp( '(?:^|; )<?php echo esc_js( $cookie_name ); ?>=([^;]*)' ) );
-			var consent = cookieMatch ? decodeURIComponent( cookieMatch[ 1 ] ) : '';
+			var consent = '';
+
+			if ( cookieMatch ) {
+				try {
+					consent = decodeURIComponent( cookieMatch[ 1 ] );
+				} catch ( e ) {
+					// Malformed percent-encoding: treat it the same as no cookie at all,
+					// same as the bootstrap script below — a thrown, uncaught error here
+					// would abort before gtag('consent', 'default', ...) ever runs.
+					consent = '';
+				}
+			}
+
 			var granted = 'accepted' === consent ? 'granted' : 'denied';
 			var state = {
 				ad_storage: granted,
