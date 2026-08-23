@@ -29,25 +29,8 @@ class ReviewNotice {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'activated_plugin', array( $this, 'set_activation_date' ) );
 		add_action( 'admin_notices', array( $this, 'review_notice' ) );
 		add_action( 'wp_ajax_frbl_dismiss_review_notice', array( $this, 'dismiss_review_notice' ) );
-	}
-
-	/**
-	 * Store plugin activation date on first activation.
-	 *
-	 * @param string $plugin Plugin basename being activated.
-	 * @return void
-	 */
-	public function set_activation_date( $plugin ) {
-		if ( plugin_basename( FRBL_PLUGIN ) !== $plugin ) {
-			return;
-		}
-
-		if ( ! get_option( 'frbl_activation_date' ) ) {
-			update_option( 'frbl_activation_date', time(), false );
-		}
 	}
 
 	/**
@@ -89,7 +72,7 @@ class ReviewNotice {
 
 		if ( ! $debug ) {
 			$days_active = ( time() - (int) $activation_date ) / DAY_IN_SECONDS;
-			if ( $days_active < self::DAYS_UNTIL_NOTICE ) {
+			if ( self::DAYS_UNTIL_NOTICE > $days_active ) {
 				return;
 			}
 		}
@@ -99,7 +82,7 @@ class ReviewNotice {
 		$notice_title = esc_html__( 'Enjoying FrontBlocks?', 'frontblocks' );
 
 		$notice_message = sprintf(
-			/* translators: %s is the review URL */
+			/* translators: %s is the review URL. */
 			__( 'Thank you for using FrontBlocks! If you find it helpful, please take a moment to <a href="%s" target="_blank" rel="noopener noreferrer">leave a review on WordPress.org</a>. It really helps the plugin grow!', 'frontblocks' ),
 			esc_url( $review_url )
 		);
@@ -156,6 +139,10 @@ class ReviewNotice {
 	public function dismiss_review_notice() {
 		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'frbl_dismiss_review' ) ) {
 			wp_die( esc_html__( 'Security check failed.', 'frontblocks' ) );
+		}
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do this.', 'frontblocks' ), 403 );
 		}
 
 		update_user_meta( get_current_user_id(), 'frbl_review_notice_dismissed', true );

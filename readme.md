@@ -25,6 +25,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - Modern Settings Page with Card-based Layout
 - Custom SVG Animations
 - **Cookie Notice** - Configurable cookie consent banner (bar/box/popup) that gates Google Tag Manager and GA4 behind consent, with Google Consent Mode v2 support for compatibility with Google Site Kit and other analytics plugins
+- **Review Notice** - Dismissible admin notice inviting site owners to leave a WordPress.org review, shown 14 days after activation
 
 ### PRO Features (FrontBlocks PRO)
 - **Custom Post Types Builder** - Create and manage custom post types with advanced configuration options:
@@ -63,6 +64,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - [Changelog Full Page](./docs/CHANGELOG-FULLPAGE.md) - Full Page feature changelog
 - [Carousel Pattern](./docs/CAROUSEL-PATTERN.md) - Hero carousel pattern with native WordPress blocks
 - [Cookie Notice](./docs/COOKIE-NOTICE.md) - Consent banner and consent-gated Google Tag Manager / GA4 loading
+- [Review Notice](./docs/REVIEW-NOTICE.md) - Dismissible WordPress.org review prompt
 
 ## Release
 Actions for making a release:

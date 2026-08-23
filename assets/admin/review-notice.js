@@ -20,17 +20,23 @@
 			data.append('action', 'frbl_dismiss_review_notice');
 			data.append('nonce', frblReviewNotice.nonce);
 
-			fetch(frblReviewNotice.ajaxurl, {
+			return fetch(frblReviewNotice.ajaxurl, {
 				method: 'POST',
 				body: data
 			});
 		}
 
-		// "No thanks" button.
+		// "No thanks" button: only hide once the dismissal is actually saved —
+		// hiding unconditionally would let the notice reappear on the next
+		// eligible page after a dropped request or an expired nonce, despite
+		// having looked dismissed just now.
 		noThanks.addEventListener('click', function (e) {
 			e.preventDefault();
-			sendDismiss();
-			notice.style.display = 'none';
+			sendDismiss().then(function (response) {
+				if (response.ok) {
+					notice.style.display = 'none';
+				}
+			});
 		});
 
 		// WordPress built-in dismiss button (.notice-dismiss).
