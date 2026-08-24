@@ -51,6 +51,7 @@ class ImageManagement {
 		add_filter( 'intermediate_image_sizes_advanced', array( $this, 'filter_intermediate_sizes_advanced' ) );
 		add_filter( 'intermediate_image_sizes', array( $this, 'filter_intermediate_sizes' ) );
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'maybe_generate_modern_formats' ), 10, 2 );
+		add_action( 'delete_attachment', array( $this, 'delete_variant_files' ) );
 
 		if ( ! is_admin() ) {
 			add_filter( 'wp_content_img_tag', array( $this, 'filter_content_img_tag' ), 10, 3 );
@@ -204,10 +205,15 @@ class ImageManagement {
 			return $metadata;
 		}
 
-		$formats  = 'both' === $target ? array( 'webp', 'avif' ) : array( $target );
-		$dir      = trailingslashit( dirname( $file ) );
-		$variants = (array) ( $metadata[ self::VARIANTS_META_KEY ] ?? array() );
+		$formats = 'both' === $target ? array( 'webp', 'avif' ) : array( $target );
+		$dir     = trailingslashit( dirname( $file ) );
 
+		// Remove previously generated variants first, so switching formats
+		// (e.g. "both" -> "webp") or re-running after a size change doesn't
+		// leave stale files behind.
+		self::delete_variant_files_from_map( $dir, (array) ( $metadata[ self::VARIANTS_META_KEY ] ?? array() ) );
+
+		$variants         = array();
 		$variants['full'] = self::generate_variant_files( $file, $formats, $quality );
 
 		if ( ! empty( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
@@ -285,6 +291,46 @@ class ImageManagement {
 		self::generate_variants_for_metadata( $attachment_id, $metadata, $target, (int) ( $options['image_format_quality'] ?? 82 ) );
 
 		return true;
+	}
+
+	/**
+	 * Delete generated WebP/AVIF variant files when their attachment is
+	 * deleted. WordPress core has no knowledge of these files (they aren't
+	 * part of the standard intermediate-size metadata it manages), so
+	 * without this they would be orphaned on disk forever.
+	 *
+	 * @param int $attachment_id Attachment ID being deleted.
+	 * @return void
+	 */
+	public function delete_variant_files( $attachment_id ) {
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$variants = (array) ( $metadata[ self::VARIANTS_META_KEY ] ?? array() );
+
+		$file = get_attached_file( $attachment_id );
+		if ( ! $file || empty( $variants ) ) {
+			return;
+		}
+
+		self::delete_variant_files_from_map( trailingslashit( dirname( $file ) ), $variants );
+	}
+
+	/**
+	 * Delete a set of previously generated variant files on disk.
+	 *
+	 * @param string $dir      Directory the files live in (trailing slash included).
+	 * @param array  $variants Map of size name => format => filename, as stored
+	 *                         in the VARIANTS_META_KEY metadata entry.
+	 * @return void
+	 */
+	private static function delete_variant_files_from_map( $dir, $variants ) {
+		foreach ( $variants as $size_variants ) {
+			foreach ( (array) $size_variants as $filename ) {
+				$path = $dir . $filename;
+				if ( file_exists( $path ) ) {
+					wp_delete_file( $path );
+				}
+			}
+		}
 	}
 
 	/**
