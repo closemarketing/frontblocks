@@ -253,11 +253,14 @@ class CookieNotice {
 		}
 
 		if ( '' === $accept_label ) {
-			$accept_label = __( 'Accept', 'frontblocks' );
+			// Filterable so an add-on that relabels the binary choice as "accept all" /
+			// "reject non-essential" (once it introduces per-category consent) doesn't
+			// need the site admin to retype the button copy themselves.
+			$accept_label = apply_filters( 'frbl_cookie_notice_default_accept_label', __( 'Accept', 'frontblocks' ) );
 		}
 
 		if ( '' === $reject_label ) {
-			$reject_label = __( 'Reject', 'frontblocks' );
+			$reject_label = apply_filters( 'frbl_cookie_notice_default_reject_label', __( 'Reject', 'frontblocks' ) );
 		}
 
 		if ( ! in_array( $layout, array( 'bar', 'box', 'popup' ), true ) ) {
@@ -302,6 +305,16 @@ class CookieNotice {
 					?>
 				</p>
 				<div class="frbl-cookie-notice__actions">
+					<?php
+					/**
+					 * Fires right before the reject/accept buttons, inside the same actions
+					 * row. Lets an add-on (e.g. per-category consent) insert its own button —
+					 * a "Customize" trigger — without forking this markup.
+					 *
+					 * @param array $options The 'frontblocks_settings' option array.
+					 */
+					do_action( 'frbl_cookie_notice_before_actions', $options );
+					?>
 					<button
 						type="button"
 						class="frbl-cookie-notice__button frbl-cookie-notice__button--reject"
@@ -339,6 +352,15 @@ class CookieNotice {
 			</noscript>
 			<?php
 		}
+
+		/**
+		 * Fires right after the banner markup, still inside the same wp_footer
+		 * output. Lets an add-on print extra markup that belongs to the same
+		 * consent flow — e.g. a "customize categories" dialog — right next to it.
+		 *
+		 * @param array $options The 'frontblocks_settings' option array.
+		 */
+		do_action( 'frbl_cookie_notice_after_banner', $options );
 	}
 
 	/**
@@ -354,26 +376,76 @@ class CookieNotice {
 	 * which plugin's script eventually processes them — as long as this runs
 	 * first, it doesn't matter which plugin's gtag.js loads second.
 	 *
-	 * Reads the decision straight from the request cookie (not the PHP-side
-	 * get_consent(), which is the same lookup) so a returning visitor's already
-	 * granted/denied state is reflected immediately, with no flash of a
-	 * default-denied state while JS boots.
+	 * Only the cookie *name* (a fixed string) is embedded server-side — the
+	 * decision itself is read from document.cookie client-side, in the browser,
+	 * exactly like render_consent_bootstrap_script() below. This keeps the
+	 * printed HTML identical for every visitor of a given URL, so a full-page
+	 * cache stays safe; an earlier version of this method embedded the
+	 * granted/denied value directly, which a full-page cache could then have
+	 * served to the wrong visitor.
 	 *
 	 * @return void
 	 */
 	public function render_consent_mode_default() {
-		$consent = $this->get_consent();
-		$granted = 'accepted' === $consent ? 'granted' : 'denied';
+		$cookie_name = $this->get_cookie_name();
 		?>
 		<script>
 		window.dataLayer = window.dataLayer || [];
 		function gtag(){ window.dataLayer.push( arguments ); }
-		gtag( 'consent', 'default', {
-			'ad_storage': '<?php echo esc_js( $granted ); ?>',
-			'ad_user_data': '<?php echo esc_js( $granted ); ?>',
-			'ad_personalization': '<?php echo esc_js( $granted ); ?>',
-			'analytics_storage': '<?php echo esc_js( $granted ); ?>'
-		} );
+		( function () {
+			var cookieMatch = document.cookie.match( new RegExp( '(?:^|; )<?php echo esc_js( $cookie_name ); ?>=([^;]*)' ) );
+			var consent = '';
+
+			if ( cookieMatch ) {
+				try {
+					consent = decodeURIComponent( cookieMatch[ 1 ] );
+				} catch ( e ) {
+					// Malformed percent-encoding: treat it the same as no cookie at all,
+					// same as the bootstrap script below — a thrown, uncaught error here
+					// would abort before gtag('consent', 'default', ...) ever runs.
+					consent = '';
+				}
+			}
+
+			var granted = 'accepted' === consent ? 'granted' : 'denied';
+			var state = {
+				ad_storage: granted,
+				ad_user_data: granted,
+				ad_personalization: granted,
+				analytics_storage: granted
+			};
+
+			// An add-on tracking per-category consent (analytics vs. marketing)
+			// can define this — reading its own cookie the same way, client-side —
+			// to send the granular signals Consent Mode actually expects instead
+			// of this binary default. Must be defined by the time this script
+			// runs, i.e. at an earlier wp_head priority than this method's own.
+			if ( typeof window.frblCookieNoticeConsentModeState === 'function' ) {
+				var overrideState = window.frblCookieNoticeConsentModeState();
+
+				if ( overrideState ) {
+					state = overrideState;
+				}
+			}
+
+			// An add-on reporting its own per-category consent as stale (see
+			// window.frblCookieNoticeIsConsentStale, already used to keep the
+			// banner/tracking bootstrap from trusting stale consent) means a
+			// fresh decision is needed — so deny by default here too, instead
+			// of falling back to this plugin's own (possibly still 'accepted')
+			// binary cookie, which would let an independently loaded, Consent
+			// Mode-aware tag (e.g. Site Kit) run before the visitor re-decides.
+			if ( typeof window.frblCookieNoticeIsConsentStale === 'function' && window.frblCookieNoticeIsConsentStale() ) {
+				state = {
+					ad_storage: 'denied',
+					ad_user_data: 'denied',
+					ad_personalization: 'denied',
+					analytics_storage: 'denied'
+				};
+			}
+
+			gtag( 'consent', 'default', state );
+		} )();
 		</script>
 		<?php
 	}
@@ -445,7 +517,14 @@ class CookieNotice {
 				}
 			};
 
-			if ( 'accepted' === consent ) {
+			// An add-on tracking per-category consent can define this (printed
+			// earlier than this script, at a lower wp_head priority) to say the
+			// stored consent is stale — e.g. the site admin just added a new
+			// integration — so tracking shouldn't start yet either, not just the
+			// banner staying hidden.
+			var isStale = typeof window.frblCookieNoticeIsConsentStale === 'function' && window.frblCookieNoticeIsConsentStale();
+
+			if ( 'accepted' === consent && ! isStale ) {
 				var formData = new FormData();
 				formData.append( 'action', 'frbl_get_cookie_notice_config' );
 

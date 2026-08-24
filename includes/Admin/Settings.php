@@ -1531,6 +1531,46 @@ class Settings {
 			<?php echo esc_html__( 'Show a cookie consent banner and only load Google Tag Manager / GA4 after a visitor accepts.', 'frontblocks' ); ?>
 		</p>
 		<?php
+		$this->render_advanced_cookies_upsell();
+	}
+
+	/**
+	 * Show what FrontBlocks PRO's Advanced Cookie Management adds on top of
+	 * this banner. The feature's own settings (and the fields to configure
+	 * it) live entirely in the PRO plugin — this is only a plain message,
+	 * shown when PRO isn't active/licensed yet.
+	 *
+	 * @return void
+	 */
+	private function render_advanced_cookies_upsell() {
+		if ( frbl_is_pro_active() && $this->is_license_valid ) {
+			// Already unlocked: the PRO plugin renders its own settings section
+			// right below this one.
+			return;
+		}
+
+		if ( ! frbl_is_pro_active() ) {
+			echo '<div class="tw:bg-blue-50 tw:border-l-4 tw:border-blue-400 tw:p-4 tw:mb-4">';
+			echo '<p class="tw:text-sm tw:text-blue-700 tw:font-medium tw:mb-1">' . esc_html__( 'Want per-category consent?', 'frontblocks' ) . '</p>';
+			echo '<p class="tw:text-sm tw:text-blue-700">';
+			printf(
+				/* translators: %s: FrontBlocks PRO link */
+				esc_html__( '%s adds a "Customize" option so visitors can accept Analytics and Marketing cookies separately, with native Google Ads, Meta Pixel and Microsoft Clarity integrations that only load once accepted.', 'frontblocks' ),
+				'<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-cookie-notice" target="_blank" rel="noopener noreferrer" class="tw:font-medium tw:underline">FrontBlocks PRO</a>'
+			);
+			echo '</p>';
+			echo '</div>';
+		} else {
+			echo '<div class="tw:bg-yellow-50 tw:border-l-4 tw:border-yellow-400 tw:p-4 tw:mb-4">';
+			echo '<p class="tw:text-sm tw:text-yellow-700">';
+			printf(
+				/* translators: %s: License section link */
+				esc_html__( 'Advanced Cookie Management (per-category consent, Google Ads / Meta Pixel / Microsoft Clarity) is included with FrontBlocks PRO. Activate your license in the %s section below to unlock it.', 'frontblocks' ),
+				'<a href="#frontblocks_section_license" class="tw:font-medium tw:underline">' . esc_html__( 'License', 'frontblocks' ) . '</a>'
+			);
+			echo '</p>';
+			echo '</div>';
+		}
 	}
 
 	/**
