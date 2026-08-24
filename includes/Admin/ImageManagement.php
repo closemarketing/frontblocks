@@ -94,6 +94,9 @@ class ImageManagement {
 	private function get_registered_sizes_info() {
 		global $_wp_additional_image_sizes;
 
+		$options          = get_option( 'frontblocks_settings', array() );
+		$own_custom_names = wp_list_pluck( (array) ( $options['image_sizes_custom'] ?? array() ), 'name' );
+
 		$sizes = array();
 
 		foreach ( FrontendImageManagement::CORE_SIZES as $name ) {
@@ -107,7 +110,10 @@ class ImageManagement {
 		}
 
 		foreach ( (array) $_wp_additional_image_sizes as $name => $data ) {
-			if ( in_array( $name, FrontendImageManagement::CORE_SIZES, true ) ) {
+			// Our own custom sizes are registered via add_image_size() too,
+			// but are listed separately (and are editable/removable) in the
+			// "custom" section below — skip them here to avoid duplicates.
+			if ( in_array( $name, FrontendImageManagement::CORE_SIZES, true ) || in_array( $name, $own_custom_names, true ) ) {
 				continue;
 			}
 			$sizes[] = array(
