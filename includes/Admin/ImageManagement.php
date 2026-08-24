@@ -373,7 +373,7 @@ class ImageManagement {
 	public function ajax_list_attachment_ids() {
 		check_ajax_referer( 'frbl_image_management', 'nonce' );
 
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( 'edit_theme_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'frontblocks' ) ), 403 );
 		}
 
@@ -398,7 +398,7 @@ class ImageManagement {
 	public function ajax_bulk_regenerate() {
 		check_ajax_referer( 'frbl_image_management', 'nonce' );
 
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( 'edit_theme_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'frontblocks' ) ), 403 );
 		}
 
@@ -433,7 +433,7 @@ class ImageManagement {
 	public function ajax_bulk_convert() {
 		check_ajax_referer( 'frbl_image_management', 'nonce' );
 
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( 'edit_theme_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'frontblocks' ) ), 403 );
 		}
 
