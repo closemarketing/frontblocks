@@ -55,6 +55,7 @@ class ImageManagement {
 
 		if ( ! is_admin() ) {
 			add_filter( 'wp_content_img_tag', array( $this, 'filter_content_img_tag' ), 10, 3 );
+			add_filter( 'post_thumbnail_html', array( $this, 'filter_post_thumbnail_html' ), 10, 3 );
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_picture_styles' ) );
 		}
 	}
@@ -388,6 +389,22 @@ class ImageManagement {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Same <picture> rewrite as filter_content_img_tag(), applied to
+	 * featured images. the_post_thumbnail() markup never passes through
+	 * wp_content_img_tag (that filter only covers the_content/the_excerpt),
+	 * so without this, hero/archive-card featured images would never get
+	 * modern-format delivery.
+	 *
+	 * @param string $html              Featured image <img> markup.
+	 * @param int    $post_id           Post ID (unused).
+	 * @param int    $post_thumbnail_id Attachment ID of the featured image.
+	 * @return string
+	 */
+	public function filter_post_thumbnail_html( $html, $post_id, $post_thumbnail_id ) {
+		return $this->filter_content_img_tag( $html, 'post_thumbnail', $post_thumbnail_id );
 	}
 
 	/**

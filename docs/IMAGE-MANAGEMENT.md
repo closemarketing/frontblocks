@@ -45,7 +45,8 @@ configuration, not the form's current unsaved state.
   saved alongside the original via `wp_get_image_editor()`. Generated variant
   filenames are stored in the attachment's metadata (`frbl_image_variants`).
 - **Frontend delivery** rewrites `<img>` tags in post content
-  (`wp_content_img_tag`) into a `<picture>` element with `<source
+  (`wp_content_img_tag`) and featured images (`post_thumbnail_html`) into a
+  `<picture>` element with `<source
   type="image/avif">` / `<source type="image/webp">` entries pointing at the
   generated variants, keeping the original `<img>` as the last child so
   browsers without modern-format support — or an image with no generated
