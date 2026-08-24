@@ -138,11 +138,11 @@ class ReviewNotice {
 	 */
 	public function dismiss_review_notice() {
 		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'frbl_dismiss_review' ) ) {
-			wp_die( esc_html__( 'Security check failed.', 'frontblocks' ), 403 );
+			wp_die( esc_html__( 'Security check failed.', 'frontblocks' ), '', array( 'response' => 403 ) );
 		}
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to do this.', 'frontblocks' ), 403 );
+			wp_die( esc_html__( 'You do not have permission to do this.', 'frontblocks' ), '', array( 'response' => 403 ) );
 		}
 
 		update_user_meta( get_current_user_id(), 'frbl_review_notice_dismissed', true );
