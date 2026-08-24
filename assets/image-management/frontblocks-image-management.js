@@ -46,6 +46,15 @@
 			} );
 		}
 
+		function escapeHtml( value ) {
+			return String( value )
+				.replace( /&/g, '&amp;' )
+				.replace( /</g, '&lt;' )
+				.replace( />/g, '&gt;' )
+				.replace( /"/g, '&quot;' )
+				.replace( /'/g, '&#039;' );
+		}
+
 		function formatBytes( bytes ) {
 			if ( ! bytes ) {
 				return '—';
@@ -78,9 +87,9 @@
 				const usage      = formatBytes( ( payload.usage || {} )[ size.name ] || 0 );
 
 				return (
-					'<tr data-size="' + size.name + '">' +
-					'<td>' + size.name + '</td>' +
-					'<td>' + size.source + '</td>' +
+					'<tr data-size="' + escapeHtml( size.name ) + '">' +
+					'<td>' + escapeHtml( size.name ) + '</td>' +
+					'<td>' + escapeHtml( size.source ) + '</td>' +
 					'<td><input type="number" class="frbl-size-width" min="0" value="' + width + '" style="width:70px" /></td>' +
 					'<td><input type="number" class="frbl-size-height" min="0" value="' + height + '" style="width:70px" /></td>' +
 					'<td><input type="checkbox" class="frbl-size-crop" ' + ( crop ? 'checked' : '' ) + ' /></td>' +
@@ -93,7 +102,7 @@
 			const customRows = state.custom.map( function ( size, index ) {
 				return (
 					'<tr data-custom-index="' + index + '">' +
-					'<td><input type="text" class="frbl-custom-name" value="' + size.name + '" style="width:120px" /></td>' +
+					'<td><input type="text" class="frbl-custom-name" value="' + escapeHtml( size.name ) + '" style="width:120px" /></td>' +
 					'<td>custom</td>' +
 					'<td><input type="number" class="frbl-custom-width" min="0" value="' + size.width + '" style="width:70px" /></td>' +
 					'<td><input type="number" class="frbl-custom-height" min="0" value="' + size.height + '" style="width:70px" /></td>' +
