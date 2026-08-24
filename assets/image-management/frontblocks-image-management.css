@@ -1,0 +1,26 @@
+.frbl-settings-wrapper .frbl-image-management table.widefat td,
+.frbl-settings-wrapper .frbl-image-management table.widefat th {
+	padding: 8px 10px;
+	vertical-align: middle;
+}
+
+.frbl-settings-wrapper .frbl-image-bulk-progress__bar {
+	background: #e2e8f0;
+	border-radius: 9999px;
+	height: 8px;
+	overflow: hidden;
+	width: 100%;
+}
+
+.frbl-settings-wrapper .frbl-image-bulk-progress__fill {
+	background: #687df9;
+	height: 100%;
+	transition: width 0.2s ease;
+	width: 0%;
+}
+
+.frbl-settings-wrapper .frbl-image-bulk-progress__label {
+	color: #6b7280;
+	font-size: 12px;
+	margin: 6px 0 0;
+}

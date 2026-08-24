@@ -1,0 +1,10 @@
+.frbl-picture {
+	display: inline-block;
+	line-height: 0;
+}
+
+.frbl-picture img {
+	display: block;
+	height: auto;
+	max-width: 100%;
+}

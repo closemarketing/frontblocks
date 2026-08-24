@@ -74,6 +74,12 @@ class Plugin_Main {
 				require_once FRBL_PLUGIN_PATH . 'includes/Admin/Settings.php';
 			}
 			new Admin\Settings();
+
+			// Image Management admin UI (settings section + bulk actions).
+			if ( ! class_exists( 'FrontBlocks\Admin\ImageManagement' ) ) {
+				require_once FRBL_PLUGIN_PATH . 'includes/Admin/ImageManagement.php';
+			}
+			new Admin\ImageManagement();
 		}
 
 		// Container Edge Alignment for GenerateBlocks.
@@ -161,6 +167,9 @@ class Plugin_Main {
 
 		// Cookie Notice module.
 		new Frontend\CookieNotice();
+
+		// Image Management module (size control + WebP/AVIF delivery).
+		new Frontend\ImageManagement();
 
 		// User Text block is provided by FrontBlocks Pro when license is active.
 	}
