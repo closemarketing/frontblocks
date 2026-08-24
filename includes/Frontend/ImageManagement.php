@@ -294,6 +294,63 @@ class ImageManagement {
 	}
 
 	/**
+	 * Delete the on-disk files (and any modern-format variants) for sizes
+	 * that are currently disabled, and remove them from the attachment's
+	 * metadata. Disabling a size only stops *future* generation — without
+	 * this, the disk-usage savings shown in the settings table are never
+	 * actually reclaimed for existing media.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 * @return bool True if any file was removed, false otherwise.
+	 */
+	public static function cleanup_disabled_size_files( $attachment_id ) {
+		$options  = get_option( 'frontblocks_settings', array() );
+		$disabled = (array) ( $options['image_sizes_disabled'] ?? array() );
+
+		if ( empty( $disabled ) ) {
+			return false;
+		}
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$file     = get_attached_file( $attachment_id );
+
+		if ( ! $file || empty( $metadata['sizes'] ) || ! is_array( $metadata['sizes'] ) ) {
+			return false;
+		}
+
+		$dir      = trailingslashit( dirname( $file ) );
+		$variants = (array) ( $metadata[ self::VARIANTS_META_KEY ] ?? array() );
+		$removed  = array();
+
+		foreach ( $disabled as $size_name ) {
+			if ( empty( $metadata['sizes'][ $size_name ]['file'] ) ) {
+				continue;
+			}
+
+			$size_path = $dir . $metadata['sizes'][ $size_name ]['file'];
+			if ( file_exists( $size_path ) ) {
+				wp_delete_file( $size_path );
+			}
+
+			if ( ! empty( $variants[ $size_name ] ) ) {
+				self::delete_variant_files_from_map( $dir, array( $variants[ $size_name ] ) );
+			}
+
+			unset( $metadata['sizes'][ $size_name ] );
+			$removed[] = $size_name;
+		}
+
+		$changed = ! empty( $removed );
+
+		if ( $changed ) {
+			$metadata[ self::VARIANTS_META_KEY ] = array_diff_key( $variants, array_flip( $removed ) );
+			wp_update_attachment_metadata( $attachment_id, $metadata );
+		}
+
+		return $changed;
+	}
+
+	/**
 	 * Delete generated WebP/AVIF variant files when their attachment is
 	 * deleted. WordPress core has no knowledge of these files (they aren't
 	 * part of the standard intermediate-size metadata it manages), so

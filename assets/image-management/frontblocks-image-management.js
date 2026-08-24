@@ -249,6 +249,7 @@
 
 		const regenerateButton = document.getElementById( 'frbl-bulk-regenerate' );
 		const convertButton    = document.getElementById( 'frbl-bulk-convert' );
+		const cleanupButton    = document.getElementById( 'frbl-bulk-cleanup' );
 
 		if ( regenerateButton ) {
 			regenerateButton.addEventListener( 'click', function () {
@@ -259,6 +260,12 @@
 		if ( convertButton ) {
 			convertButton.addEventListener( 'click', function () {
 				runBulkAction( 'frbl_bulk_convert_images', convertButton );
+			} );
+		}
+
+		if ( cleanupButton ) {
+			cleanupButton.addEventListener( 'click', function () {
+				runBulkAction( 'frbl_bulk_cleanup_disabled_sizes', cleanupButton );
 			} );
 		}
 	} );

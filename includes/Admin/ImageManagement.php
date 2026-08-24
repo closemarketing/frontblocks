@@ -39,6 +39,7 @@ class ImageManagement {
 		add_action( 'wp_ajax_frbl_list_image_attachment_ids', array( $this, 'ajax_list_attachment_ids' ) );
 		add_action( 'wp_ajax_frbl_bulk_regenerate_thumbnails', array( $this, 'ajax_bulk_regenerate' ) );
 		add_action( 'wp_ajax_frbl_bulk_convert_images', array( $this, 'ajax_bulk_convert' ) );
+		add_action( 'wp_ajax_frbl_bulk_cleanup_disabled_sizes', array( $this, 'ajax_bulk_cleanup_disabled_sizes' ) );
 	}
 
 	/**
@@ -214,6 +215,7 @@ class ImageManagement {
 					<div class="tw:flex tw:gap-3 tw:mb-3">
 						<button type="button" class="button" id="frbl-bulk-regenerate"><?php echo esc_html__( 'Regenerate thumbnails', 'frontblocks' ); ?></button>
 						<button type="button" class="button" id="frbl-bulk-convert"><?php echo esc_html__( 'Convert to modern formats', 'frontblocks' ); ?></button>
+						<button type="button" class="button" id="frbl-bulk-cleanup"><?php echo esc_html__( 'Delete files for disabled sizes', 'frontblocks' ); ?></button>
 					</div>
 					<div id="frbl-image-bulk-progress" class="frbl-image-bulk-progress" style="display: none;">
 						<div class="frbl-image-bulk-progress__bar"><div class="frbl-image-bulk-progress__fill"></div></div>
@@ -442,6 +444,30 @@ class ImageManagement {
 
 		foreach ( $ids as $attachment_id ) {
 			$results[ $attachment_id ] = FrontendImageManagement::convert_attachment( $attachment_id );
+		}
+
+		wp_send_json_success( array( 'results' => $results ) );
+	}
+
+	/**
+	 * AJAX: delete on-disk files for currently disabled sizes, for a batch
+	 * of attachment IDs, to actually reclaim the disk space the sizes
+	 * table's estimate is showing.
+	 *
+	 * @return void
+	 */
+	public function ajax_bulk_cleanup_disabled_sizes() {
+		check_ajax_referer( 'frbl_image_management', 'nonce' );
+
+		if ( ! current_user_can( 'edit_theme_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'frontblocks' ) ), 403 );
+		}
+
+		$ids     = array_map( 'absint', (array) ( $_POST['ids'] ?? array() ) ); // phpcs:ignore WordPress.Security.NonceVerification -- verified above.
+		$results = array();
+
+		foreach ( $ids as $attachment_id ) {
+			$results[ $attachment_id ] = FrontendImageManagement::cleanup_disabled_size_files( $attachment_id );
 		}
 
 		wp_send_json_success( array( 'results' => $results ) );

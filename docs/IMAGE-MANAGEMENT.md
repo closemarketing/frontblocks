@@ -25,6 +25,7 @@ Enable it from **Appearance → FrontBlocks → Image Management**.
 | Quality | Compression quality (1–100) used when generating WebP/AVIF variants. |
 | Regenerate thumbnails | Bulk-regenerates intermediate sizes for existing media library items, using the currently saved size settings. Processed in small batches with a progress bar. |
 | Convert to modern formats | Bulk-generates WebP/AVIF variants for existing media library items, using the currently saved format settings. Processed in small batches with a progress bar. |
+| Delete files for disabled sizes | Bulk-deletes the on-disk files (and any generated WebP/AVIF variants) for sizes currently marked disabled, across existing media library items — this is what actually reclaims the disk space the sizes table estimates. Disabling a size on its own only stops future generation. |
 
 Save your settings before running either bulk action — both use the saved
 configuration, not the form's current unsaved state.
@@ -50,6 +51,12 @@ configuration, not the form's current unsaved state.
   browsers without modern-format support — or an image with no generated
   variant — fall back to it automatically. No server-side Accept-header
   sniffing or server configuration is required.
+- **Cleanup** happens automatically in two cases: generated variants are
+  re-created from scratch (old files removed first) whenever an attachment's
+  metadata is regenerated or converted, so switching formats never leaves
+  stale files behind; and all of an attachment's variants are deleted when
+  the attachment itself is deleted, since WordPress core has no knowledge of
+  these extra files and would otherwise leave them orphaned on disk.
 
 ## Out of scope
 
