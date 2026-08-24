@@ -93,6 +93,8 @@
 					'<td><input type="number" class="frbl-size-width" min="0" value="' + width + '" style="width:70px" /></td>' +
 					'<td><input type="number" class="frbl-size-height" min="0" value="' + height + '" style="width:70px" /></td>' +
 					'<td><input type="checkbox" class="frbl-size-crop" ' + ( crop ? 'checked' : '' ) + ' /></td>' +
+					'<td>—</td>' +
+					'<td>—</td>' +
 					'<td>' + usage + '</td>' +
 					'<td><input type="checkbox" class="frbl-size-disable" ' + ( isDisabled ? 'checked' : '' ) + ' /></td>' +
 					'</tr>'
@@ -107,6 +109,8 @@
 					'<td><input type="number" class="frbl-custom-width" min="0" value="' + size.width + '" style="width:70px" /></td>' +
 					'<td><input type="number" class="frbl-custom-height" min="0" value="' + size.height + '" style="width:70px" /></td>' +
 					'<td><input type="checkbox" class="frbl-custom-crop" ' + ( size.crop ? 'checked' : '' ) + ' /></td>' +
+					'<td><input type="text" class="frbl-custom-label" placeholder="' + escapeHtml( size.name ) + '" value="' + escapeHtml( size.label || '' ) + '" style="width:110px" /></td>' +
+					'<td><input type="checkbox" class="frbl-custom-show-in-picker" ' + ( size.show_in_picker ? 'checked' : '' ) + ' /></td>' +
 					'<td>—</td>' +
 					'<td><button type="button" class="button-link frbl-custom-remove">&times;</button></td>' +
 					'</tr>'
@@ -116,10 +120,11 @@
 			tableContainer.innerHTML =
 				'<table class="widefat striped">' +
 				'<thead><tr>' +
-				'<th>Name</th><th>Source</th><th>Width</th><th>Height</th><th>Hard crop</th><th>Est. size</th><th>Disabled</th>' +
+				'<th>Name</th><th>Source</th><th>Width</th><th>Height</th><th>Hard crop</th><th>Label</th><th>Show in picker</th><th>Est. size</th><th>Disabled</th>' +
 				'</tr></thead>' +
 				'<tbody>' + rows.join( '' ) + customRows.join( '' ) + '</tbody>' +
 				'</table>' +
+				'<p style="margin: 6px 0 0; color: #6b7280; font-size: 12px;">"Show in picker" adds a custom size, under its label, to the image size dropdown shown when inserting or editing an image.</p>' +
 				'<button type="button" class="button tw:mt-3" id="frbl-add-custom-size">Add custom size</button>';
 
 			attachRowHandlers();
@@ -157,10 +162,12 @@
 
 				function updateCustom() {
 					state.custom[ index ] = {
-						name:   row.querySelector( '.frbl-custom-name' ).value.trim(),
-						width:  parseInt( row.querySelector( '.frbl-custom-width' ).value, 10 ) || 0,
-						height: parseInt( row.querySelector( '.frbl-custom-height' ).value, 10 ) || 0,
-						crop:   row.querySelector( '.frbl-custom-crop' ).checked,
+						name:           row.querySelector( '.frbl-custom-name' ).value.trim(),
+						width:          parseInt( row.querySelector( '.frbl-custom-width' ).value, 10 ) || 0,
+						height:         parseInt( row.querySelector( '.frbl-custom-height' ).value, 10 ) || 0,
+						crop:           row.querySelector( '.frbl-custom-crop' ).checked,
+						label:          row.querySelector( '.frbl-custom-label' ).value.trim(),
+						show_in_picker: row.querySelector( '.frbl-custom-show-in-picker' ).checked,
 					};
 					syncConfigInput();
 				}
@@ -169,6 +176,8 @@
 				row.querySelector( '.frbl-custom-width' ).addEventListener( 'change', updateCustom );
 				row.querySelector( '.frbl-custom-height' ).addEventListener( 'change', updateCustom );
 				row.querySelector( '.frbl-custom-crop' ).addEventListener( 'change', updateCustom );
+				row.querySelector( '.frbl-custom-label' ).addEventListener( 'change', updateCustom );
+				row.querySelector( '.frbl-custom-show-in-picker' ).addEventListener( 'change', updateCustom );
 
 				row.querySelector( '.frbl-custom-remove' ).addEventListener( 'click', function () {
 					state.custom.splice( index, 1 );
@@ -180,7 +189,7 @@
 			const addButton = document.getElementById( 'frbl-add-custom-size' );
 			if ( addButton ) {
 				addButton.addEventListener( 'click', function () {
-					state.custom.push( { name: '', width: 300, height: 300, crop: false } );
+					state.custom.push( { name: '', width: 300, height: 300, crop: false, label: '', show_in_picker: false } );
 					syncConfigInput();
 					renderTable();
 				} );
