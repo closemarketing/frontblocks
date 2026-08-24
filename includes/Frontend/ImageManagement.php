@@ -14,13 +14,13 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Registers/overrides image sizes, generates modern-format variants on
- * upload, and rewrites content images into <picture> markup on the
- * frontend when a modern-format variant is available.
+ * upload, and rewrites image markup on the frontend to serve them.
  */
 class ImageManagement {
 
 	/**
-	 * Metadata key used to store generated WebP/AVIF variant paths.
+	 * Metadata key used to store generated modern-format variants, keyed
+	 * per size and then per MIME type: array( 'file' => basename, 'filesize' => bytes ).
 	 *
 	 * @var string
 	 */
@@ -33,6 +33,16 @@ class ImageManagement {
 	 * @var string[]
 	 */
 	const CORE_SIZES = array( 'thumbnail', 'medium', 'medium_large', 'large' );
+
+	/**
+	 * Map of short format key => MIME type.
+	 *
+	 * @var array
+	 */
+	const FORMAT_MIME_TYPES = array(
+		'avif' => 'image/avif',
+		'webp' => 'image/webp',
+	);
 
 	/**
 	 * Constructor.
@@ -50,6 +60,7 @@ class ImageManagement {
 		add_action( 'after_setup_theme', array( $this, 'register_custom_and_override_sizes' ), 999 );
 		add_filter( 'intermediate_image_sizes_advanced', array( $this, 'filter_intermediate_sizes_advanced' ) );
 		add_filter( 'intermediate_image_sizes', array( $this, 'filter_intermediate_sizes' ) );
+		add_filter( 'image_size_names_choose', array( $this, 'filter_image_size_names_choose' ) );
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'maybe_generate_modern_formats' ), 10, 2 );
 		add_action( 'delete_attachment', array( $this, 'delete_variant_files' ) );
 
@@ -61,12 +72,12 @@ class ImageManagement {
 	}
 
 	/**
-	 * Enqueue the small stylesheet used by the <picture> wrapper markup.
+	 * Enqueue the small stylesheet used by the optional <picture> wrapper markup.
 	 *
 	 * @return void
 	 */
 	public function enqueue_picture_styles() {
-		if ( ! $this->is_enabled() ) {
+		if ( ! $this->is_enabled() || ! $this->uses_picture_element() ) {
 			return;
 		}
 
@@ -95,6 +106,19 @@ class ImageManagement {
 	public function is_enabled() {
 		$options = $this->get_options();
 		return (bool) ( $options['enable_image_management'] ?? false );
+	}
+
+	/**
+	 * Whether the frontend should wrap images in a <picture> element with
+	 * one <source> per generated format, instead of rewriting the <img>
+	 * src/srcset in place. Direct rewriting is the default: modern-format
+	 * browser support is high enough that the extra markup usually isn't
+	 * needed, and it keeps output closer to what themes already produce.
+	 *
+	 * @return bool
+	 */
+	private function uses_picture_element() {
+		return (bool) ( $this->get_options()['image_format_use_picture'] ?? false );
 	}
 
 	/**
@@ -127,6 +151,31 @@ class ImageManagement {
 			}
 			add_image_size( $size['name'], (int) ( $size['width'] ?? 0 ), (int) ( $size['height'] ?? 0 ), (bool) ( $size['crop'] ?? false ) );
 		}
+	}
+
+	/**
+	 * Add custom sizes flagged "show in picker" to the image-size dropdown
+	 * shown when inserting/editing an image in the block and media editors.
+	 * Sizes are otherwise invisible there unless a theme explicitly labels them.
+	 *
+	 * @param array $sizes Map of size name => label.
+	 * @return array
+	 */
+	public function filter_image_size_names_choose( $sizes ) {
+		if ( ! $this->is_enabled() ) {
+			return $sizes;
+		}
+
+		$custom = (array) ( $this->get_options()['image_sizes_custom'] ?? array() );
+
+		foreach ( $custom as $size ) {
+			if ( empty( $size['name'] ) || empty( $size['show_in_picker'] ) ) {
+				continue;
+			}
+			$sizes[ $size['name'] ] = ! empty( $size['label'] ) ? $size['label'] : $size['name'];
+		}
+
+		return $sizes;
 	}
 
 	/**
@@ -190,7 +239,9 @@ class ImageManagement {
 
 	/**
 	 * Generate WebP/AVIF variants for every file referenced in an
-	 * attachment's metadata (full size + intermediate sizes).
+	 * attachment's metadata (full size + intermediate sizes). The original
+	 * file is never modified or deleted — generated variants are always
+	 * additional files alongside it.
 	 *
 	 * Shared by the upload-time hook and the bulk-convert AJAX handler.
 	 *
@@ -206,7 +257,7 @@ class ImageManagement {
 			return $metadata;
 		}
 
-		$formats = 'both' === $target ? array( 'webp', 'avif' ) : array( $target );
+		$formats = 'both' === $target ? array( 'avif', 'webp' ) : array( $target );
 		$dir     = trailingslashit( dirname( $file ) );
 
 		// Remove previously generated variants first, so switching formats
@@ -239,15 +290,15 @@ class ImageManagement {
 	 * @param string   $source_path Absolute path to the source image.
 	 * @param string[] $formats     'webp' and/or 'avif'.
 	 * @param int      $quality     Compression quality (1-100).
-	 * @return array Map of format => generated file basename.
+	 * @return array Map of MIME type => array( 'file' => basename, 'filesize' => bytes ).
 	 */
 	private static function generate_variant_files( $source_path, $formats, $quality ) {
 		$generated = array();
 
 		foreach ( $formats as $format ) {
-			$mime = 'webp' === $format ? 'image/webp' : 'image/avif';
+			$mime = self::FORMAT_MIME_TYPES[ $format ] ?? '';
 
-			if ( ! wp_image_editor_supports( array( 'mime_type' => $mime ) ) ) {
+			if ( '' === $mime || ! wp_image_editor_supports( array( 'mime_type' => $mime ) ) ) {
 				continue;
 			}
 
@@ -261,9 +312,14 @@ class ImageManagement {
 			$target_path = preg_replace( '/\.[^.]+$/', '.' . $format, $source_path );
 			$saved       = $editor->save( $target_path, $mime );
 
-			if ( ! is_wp_error( $saved ) && ! empty( $saved['path'] ) ) {
-				$generated[ $format ] = basename( $saved['path'] );
+			if ( is_wp_error( $saved ) || empty( $saved['path'] ) ) {
+				continue;
 			}
+
+			$generated[ $mime ] = array(
+				'file'     => basename( $saved['path'] ),
+				'filesize' => file_exists( $saved['path'] ) ? filesize( $saved['path'] ) : 0, // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_filesize -- local media library file we just created, not a remote/user-controlled path.
+			);
 		}
 
 		return $generated;
@@ -376,14 +432,17 @@ class ImageManagement {
 	 * Delete a set of previously generated variant files on disk.
 	 *
 	 * @param string $dir      Directory the files live in (trailing slash included).
-	 * @param array  $variants Map of size name => format => filename, as stored
-	 *                         in the VARIANTS_META_KEY metadata entry.
+	 * @param array  $variants Map of size name => MIME type => array( 'file' => basename, ... ),
+	 *                         as stored in the VARIANTS_META_KEY metadata entry.
 	 * @return void
 	 */
 	private static function delete_variant_files_from_map( $dir, $variants ) {
 		foreach ( $variants as $size_variants ) {
-			foreach ( (array) $size_variants as $filename ) {
-				$path = $dir . $filename;
+			foreach ( (array) $size_variants as $variant ) {
+				if ( empty( $variant['file'] ) ) {
+					continue;
+				}
+				$path = $dir . $variant['file'];
 				if ( file_exists( $path ) ) {
 					wp_delete_file( $path );
 				}
@@ -392,11 +451,10 @@ class ImageManagement {
 	}
 
 	/**
-	 * Same <picture> rewrite as filter_content_img_tag(), applied to
-	 * featured images. the_post_thumbnail() markup never passes through
-	 * wp_content_img_tag (that filter only covers the_content/the_excerpt),
-	 * so without this, hero/archive-card featured images would never get
-	 * modern-format delivery.
+	 * Same rewrite as filter_content_img_tag(), applied to featured images.
+	 * the_post_thumbnail() markup never passes through wp_content_img_tag
+	 * (that filter only covers the_content/the_excerpt), so without this,
+	 * hero/archive-card featured images would never get modern-format delivery.
 	 *
 	 * @param string $html              Featured image <img> markup.
 	 * @param int    $post_id           Post ID (unused).
@@ -408,9 +466,13 @@ class ImageManagement {
 	}
 
 	/**
-	 * Rewrite a content <img> tag into a <picture> element with modern-format
-	 * <source> tags when variants exist for the attachment, keeping the
-	 * original <img> as the fallback.
+	 * Serve generated modern-format variants for a content/featured image,
+	 * either by rewriting its src/srcset in place (default — lighter markup,
+	 * relies on the browser only requesting a format it supports via the
+	 * srcset it's given) or, when the "picture" setting is enabled, by
+	 * wrapping the original <img> in a <picture> element with one <source>
+	 * per format, which additionally protects against a browser silently
+	 * getting no image at all if a variant file goes missing.
 	 *
 	 * @param string $filtered_image Full <img ...> tag markup.
 	 * @param string $context        Filter context (unused).
@@ -438,29 +500,148 @@ class ImageManagement {
 			return $filtered_image;
 		}
 
-		$base_url = trailingslashit( dirname( $src_match[1] ) );
-		$sources  = '';
+		// AVIF first when both are available: it's the smaller format, and
+		// this module only ever generates a format the server actually
+		// supports producing.
+		$mime = null;
+		foreach ( array( 'image/avif', 'image/webp' ) as $candidate ) {
+			if ( ! empty( $variants[ $size_key ][ $candidate ]['file'] ) ) {
+				$mime = $candidate;
+				break;
+			}
+		}
+		if ( null === $mime ) {
+			return $filtered_image;
+		}
 
-		foreach ( array( 'avif', 'webp' ) as $format ) {
-			if ( empty( $variants[ $size_key ][ $format ] ) ) {
+		$base_url = trailingslashit( dirname( $src_match[1] ) );
+
+		return $this->uses_picture_element()
+			? $this->wrap_in_picture( $filtered_image, $variants, $metadata, $base_url )
+			: $this->rewrite_src_in_place( $filtered_image, $variants, $metadata, $base_url, $mime );
+	}
+
+	/**
+	 * Rewrite the <img> tag's src and every URL in its srcset to point at
+	 * the matching modern-format variant, falling back to leaving a
+	 * candidate URL untouched if no variant was generated for its size
+	 * (e.g. a size added after this attachment was last converted).
+	 *
+	 * @param string $image_tag Full <img ...> tag markup.
+	 * @param array  $variants  Full variants map for the attachment (size => mime => file data).
+	 * @param array  $metadata  Attachment metadata, used to resolve each srcset URL's size.
+	 * @param string $base_url  Directory URL the variant files live in.
+	 * @param string $mime      Target MIME type to switch to.
+	 * @return string
+	 */
+	private function rewrite_src_in_place( $image_tag, $variants, $metadata, $base_url, $mime ) {
+		$image_tag = preg_replace_callback(
+			'/\bsrc=(["\'])([^"\']+)\1/',
+			function ( $matches ) use ( $variants, $metadata, $base_url, $mime ) {
+				return 'src=' . $matches[1] . esc_url( $this->variant_url_for( $matches[2], $variants, $metadata, $base_url, $mime ) ) . $matches[1];
+			},
+			$image_tag,
+			1
+		);
+
+		return preg_replace_callback(
+			'/\bsrcset=(["\'])([^"\']+)\1/',
+			function ( $matches ) use ( $variants, $metadata, $base_url, $mime ) {
+				return 'srcset=' . $matches[1] . esc_attr( $this->rewrite_srcset( $matches[2], $variants, $metadata, $base_url, $mime ) ) . $matches[1];
+			},
+			$image_tag,
+			1
+		);
+	}
+
+	/**
+	 * Rewrite every "url widthDescriptor" candidate in a srcset attribute
+	 * value, swapping each one for its matching modern-format variant.
+	 *
+	 * @param string $srcset   Original srcset attribute value.
+	 * @param array  $variants Full variants map for the attachment.
+	 * @param array  $metadata Attachment metadata.
+	 * @param string $base_url Directory URL the variant files live in.
+	 * @param string $mime     Target MIME type to switch to.
+	 * @return string
+	 */
+	private function rewrite_srcset( $srcset, $variants, $metadata, $base_url, $mime ) {
+		$candidates = array_map( 'trim', explode( ',', $srcset ) );
+
+		foreach ( $candidates as &$candidate ) {
+			if ( ! preg_match( '/^(\S+)(\s+.+)?$/', $candidate, $parts ) ) {
 				continue;
 			}
-			$mime     = 'avif' === $format ? 'image/avif' : 'image/webp';
+			$variant_url = $this->variant_url_for( $parts[1], $variants, $metadata, $base_url, $mime );
+			$candidate   = $variant_url . ( $parts[2] ?? '' );
+		}
+
+		return implode( ', ', $candidates );
+	}
+
+	/**
+	 * Resolve a single image URL to its matching modern-format variant URL,
+	 * or return it unchanged if its size has no variant in the target format.
+	 *
+	 * @param string $url      Original image URL.
+	 * @param array  $variants Full variants map for the attachment.
+	 * @param array  $metadata Attachment metadata.
+	 * @param string $base_url Directory URL the variant files live in.
+	 * @param string $mime     Target MIME type to switch to.
+	 * @return string
+	 */
+	private function variant_url_for( $url, $variants, $metadata, $base_url, $mime ) {
+		$size_key = $this->match_variant_size( $url, $metadata );
+
+		if ( null === $size_key || empty( $variants[ $size_key ][ $mime ]['file'] ) ) {
+			return $url;
+		}
+
+		return $base_url . $variants[ $size_key ][ $mime ]['file'];
+	}
+
+	/**
+	 * Wrap the original <img> tag in a <picture> element with one <source>
+	 * per generated format, keeping the <img> itself as the last child so
+	 * browsers without modern-format support fall back to it automatically.
+	 *
+	 * @param string $image_tag Full <img ...> tag markup.
+	 * @param array  $variants  Full variants map for the attachment.
+	 * @param array  $metadata  Attachment metadata, used to resolve the matched size.
+	 * @param string $base_url  Directory URL the variant files live in.
+	 * @return string
+	 */
+	private function wrap_in_picture( $image_tag, $variants, $metadata, $base_url ) {
+		if ( ! preg_match( '/src=["\']([^"\']+)["\']/', $image_tag, $src_match ) ) {
+			return $image_tag;
+		}
+
+		$size_key = $this->match_variant_size( $src_match[1], $metadata );
+		if ( null === $size_key || empty( $variants[ $size_key ] ) ) {
+			return $image_tag;
+		}
+
+		$sources = '';
+
+		foreach ( array( 'image/avif', 'image/webp' ) as $mime ) {
+			if ( empty( $variants[ $size_key ][ $mime ]['file'] ) ) {
+				continue;
+			}
 			$sources .= sprintf(
 				'<source type="%1$s" srcset="%2$s" />',
 				esc_attr( $mime ),
-				esc_url( $base_url . $variants[ $size_key ][ $format ] )
+				esc_url( $base_url . $variants[ $size_key ][ $mime ]['file'] )
 			);
 		}
 
 		if ( '' === $sources ) {
-			return $filtered_image;
+			return $image_tag;
 		}
 
 		// The <img> tag itself is already WP-escaped markup; only the
-		// <source> URLs we add above are freshly built, and those go
+		// <source> URLs added above are freshly built, and those go
 		// through esc_url()/esc_attr() above.
-		return '<picture class="frbl-picture">' . $sources . $filtered_image . '</picture>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		return '<picture class="frbl-picture">' . $sources . $image_tag . '</picture>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
