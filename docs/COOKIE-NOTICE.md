@@ -108,9 +108,35 @@ document.addEventListener('frblCookieConsent', function (event) {
 });
 ```
 
+## Extension hooks
+
+This module fires a few hooks so an add-on can extend the banner without
+forking it — used by FrontBlocks PRO's Advanced Cookie Management to add a
+"Customize" (per-category) option:
+
+- `frbl_cookie_notice_before_actions( array $options )` — action, fires inside
+  the actions row, right before the Reject/Accept buttons.
+- `frbl_cookie_notice_after_banner( array $options )` — action, fires right
+  after the banner markup, still inside the same `wp_footer` output.
+- `frbl_cookie_notice_default_accept_label( string $default )` /
+  `frbl_cookie_notice_default_reject_label( string $default )` — filters,
+  used only when the admin left the corresponding label field empty.
+- `window.frblCookieNoticeConsentModeState()` — client-side JS, not a PHP
+  hook: if defined, `render_consent_mode_default()` calls it and uses its
+  return value (an object with the four Consent Mode keys) instead of the
+  binary accept/reject default, so an add-on can send granular per-category
+  signals. Must return `null` when it has no valid decision yet (falls back
+  to the binary default), and must be defined *before* this method's own
+  script runs (an earlier `wp_head` priority). Deliberately client-side, not
+  a PHP filter reading a cookie server-side: this method's printed HTML is
+  identical for every visitor of a URL, which a PHP-side per-visitor value
+  would break under a full-page cache.
+
 ## Out of scope
 
-- Category-based consent (analytics/marketing toggles as separate switches) —
-  Consent Mode is signaled as a single accept/reject decision, not per-category.
 - Per-visitor logging, timestamps, or a dashboard of responses over time.
 - Auto-scanning the site's existing scripts/cookies.
+
+Category-based consent (Analytics/Marketing toggles as separate switches) is
+no longer out of scope for the plugin as a whole — see FrontBlocks PRO's
+Advanced Cookie Management, built on top of the hooks above.

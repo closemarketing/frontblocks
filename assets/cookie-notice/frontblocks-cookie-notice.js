@@ -99,7 +99,9 @@
 
 		defineInjectHelper();
 
-		if (readCookie(frblCookieNotice.cookieName) === 'accepted') {
+		var isStale = typeof window.frblCookieNoticeIsConsentStale === 'function' && window.frblCookieNoticeIsConsentStale();
+
+		if (readCookie(frblCookieNotice.cookieName) === 'accepted' && !isStale) {
 			fetchAndInjectScripts();
 		}
 
@@ -108,6 +110,14 @@
 
 	function hideBannerIfDecided(banner) {
 		var consent = readCookie(frblCookieNotice.cookieName);
+
+		// An add-on tracking per-category consent (analytics vs. marketing) can
+		// define this to say "the categories cookie is stale — e.g. the site
+		// admin just added a new integration — so re-prompt even though the
+		// legacy accepted/rejected cookie here still looks decided."
+		if (typeof window.frblCookieNoticeIsConsentStale === 'function' && window.frblCookieNoticeIsConsentStale()) {
+			return false;
+		}
 
 		if (banner && (consent === 'accepted' || consent === 'rejected')) {
 			banner.style.display = 'none';
@@ -159,6 +169,26 @@
 		if (rejectBtn) {
 			rejectBtn.addEventListener('click', function () {
 				handleDecision('rejected');
+			});
+		}
+
+		var customizeBtn = banner.querySelector('[data-frbl-cookie-action="customize"]');
+
+		if (customizeBtn) {
+			// Deliberately not routed through handleDecision(): clicking it isn't a
+			// decision by itself, just a request to see more detail. An add-on
+			// listens for this to open its own categories dialog.
+			customizeBtn.addEventListener('click', function () {
+				var event;
+
+				try {
+					event = new CustomEvent('frblCookieNoticeCustomize');
+				} catch (e) {
+					event = document.createEvent('CustomEvent');
+					event.initCustomEvent('frblCookieNoticeCustomize', true, true, null);
+				}
+
+				document.dispatchEvent(event);
 			});
 		}
 
