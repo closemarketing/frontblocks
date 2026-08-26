@@ -82,6 +82,19 @@ anything hooked at the normal `wp_head` priority (`10`) or later.
 No extra plugin (e.g. WP Consent API) or Site Kit configuration is required —
 this is plain Consent Mode, read directly off `window.dataLayer`.
 
+## GTM4WP and cache compatibility
+
+When [Google Tag Manager for WordPress (GTM4WP)](https://wordpress.org/plugins/duracelltomi-google-tag-manager/)
+is active and configured with the same container ID, FrontBlocks shows an admin
+warning if GTM4WP is still outputting its container code. Disable GTM4WP's
+container-code injection and leave its data layer enabled; FrontBlocks then
+loads the shared container only after the visitor accepts.
+
+Cookie Notice settings are part of the cached frontend output. When they change,
+FrontBlocks clears the WP Rocket cache automatically if WP Rocket is active. For
+other full-page cache plugins, purge the cache after saving or use the action
+below to add a cache integration.
+
 ## Acceptance-rate stat
 
 Every decision also POSTs to a nonce-protected logging endpoint
@@ -121,6 +134,9 @@ forking it — used by FrontBlocks PRO's Advanced Cookie Management to add a
 - `frbl_cookie_notice_default_accept_label( string $default )` /
   `frbl_cookie_notice_default_reject_label( string $default )` — filters,
   used only when the admin left the corresponding label field empty.
+- `frbl_cookie_notice_settings_updated( array $old_options, array $new_options )`
+  — action, fires after Cookie Notice settings that affect frontend output change.
+  Cache integrations can use it to purge their cached pages.
 - `window.frblCookieNoticeConsentModeState()` — client-side JS, not a PHP
   hook: if defined, `render_consent_mode_default()` calls it and uses its
   return value (an object with the four Consent Mode keys) instead of the
