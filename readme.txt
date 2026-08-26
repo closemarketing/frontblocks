@@ -214,15 +214,15 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Changelog ==
 
-== 1.5.1 ==
+= 1.5.1 =
 *   Added: Dismissible admin notice inviting users to leave a review on WordPress.org, shown 14 days after activation.
 *   Added: Cookie Notice extension hooks (`frbl_cookie_notice_before_actions`, `frbl_cookie_notice_after_banner`, default-label filters, and the client-side `window.frblCookieNoticeConsentModeState()` override) so an add-on can extend the banner with per-category consent without forking it — used by FrontBlocks PRO's new Advanced Cookie Management.
 
-== 1.5.0 ==
+= 1.5.0 =
 *   Added: Cookie Notice — configurable cookie consent banner (full-width bar, boxed panel or centered popup) with Accept/Reject actions, custom message, accent color and expiration. Google Tag Manager and GA4 only load after consent is accepted, an aggregate acceptance-rate stat is shown in the settings page, and Google Consent Mode v2 support holds back tracking from other analytics/ads plugins (including Google Site Kit) until the visitor decides.
 *   Fixed: WordPress 7.1 compatibility — Reading Time, Gallery, Container Edge Alignment and Shape Animations now enqueue their block editor preview styles through `enqueue_block_assets` so they load correctly inside the editor's iframed canvas, resolving console warnings introduced by WordPress 7.1.
 
-== 1.4.0 ==
+= 1.4.0 =
 *   Added: Carousel Pattern — ready-to-use Hero Carousel pattern using native WordPress Cover blocks, registered in the Patterns tab under the FrontBlocks category.
 *   Added: Language Recommendation Banner — settings integration to enable a smart banner that suggests switching to the user's browser language.
 *   Added: Hover Background Scale — adds smooth zoom effect on background images when hovering over blocks (GenerateBlocks Query Loop and standard CSS backgrounds).
@@ -241,7 +241,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 *   Added: [PRO] Language Recommendation Banner — smart banner that suggests switching to the user's browser language.
 *   Fixed: [PRO] Duplicate settings entry in PRO Showcase panel.
 
-== 1.3.6 ==
+= 1.3.6 =
 *   Added: SVG Uploads — allows administrators to upload SVG files to the WordPress media library with automatic server-side sanitization.
 *   Added: Login Block — native Gutenberg block for login form with toggle options and customizable UI.
 *   Added: Meta Native — display custom field meta values inside native WordPress blocks directly from the editor.
@@ -255,12 +255,12 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 *   Improved: Block and function names prefixed with `frontblocks-` for consistency and conflict prevention.
 *   Dev: Added WordPress Playground PR preview — one-click preview button added to every pull request.
 
-== 1.3.5 ==
+= 1.3.5 =
 *   Added: FAQ Schema — automatically generates FAQPage JSON-LD structured data from accordion blocks (core/details) marked as FAQ items, improving SEO visibility in search engines.
 *   Added: Carousel/Slider support for WordPress core Query Loop block (core/query) — use the FrontBlocks carousel options directly on native Query Loop blocks.
 *   Improved: Counter block now works with native WordPress blocks (core/heading, core/paragraph) in addition to GenerateBlocks text and headline blocks.
 
-== 1.3.4 ==
+= 1.3.4 =
 *   Added: Text Animation block with 30+ animation types — fade-in, typewriter, shuffle-text, slide-up/down/left/right, drop-in, swing, pulse, flash, rubber-band, wave, stretch, squeeze, roll-in, glitch, glitch-rgb, random-reveal, flicker, block-reveal, tracking-expand, terminal-type, solid-outline, water-drop, shadow-pop, scale-in, blur-in, glow-in, bounce-in, flip-in, rotate-in.
 *   Added: Text Animation block — full typography controls (tag, font family, size, weight, style, color, background, alignment, padding, margin, max-width).
 *   Added: Text Animation block — live animated preview in the Gutenberg editor.
@@ -268,7 +268,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 *   Added: Before/After block — keyboard-accessible draggable handle with left/right arrow indicators.
 *   Improved: Conditional asset loading for Carousel, Animations, Text Animation, and Before/After — scripts/styles only enqueue on pages where the feature is used.
 
-== 1.3.3 ==
+= 1.3.3 =
 *   Fixed: Carousel bullets display and behavior.
 *   Fixed: Carousel editor styling and functionality.
 *   Fixed: Carousel in native (core) blocks.
@@ -280,7 +280,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 *   Improved: Shape animations option component.
 *   Improved: PHPStan compliance and code quality.
 
-== 1.3.2 ==
+= 1.3.2 =
 *   Added: FrontBlocks Hover Effects - Smooth background image zoom on hover for Query Loops, grids, and cards.
 *   Added: Configurable scale amount (1.0-2.0) for hover background zoom effect.
 *   Added: Support for GenerateBlocks --inline-bg-image and standard CSS background-image.
@@ -312,7 +312,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 *   PRO: Responsive design with mobile-optimized navigation.
 *   Improved: Carousel/Slider - Added individual controls for desktop, laptop, tablet, and mobile view items instead of hardcoded values.
 
-== 1.3.1 ==
+= 1.3.1 =
 *   Improved: Custom SVG Animations now uses file upload instead of textarea for importing JSON files.
 *   Added: Download example JSON button for Custom SVG Animations feature.
 *   Added: Clear button to remove imported animation files.
@@ -320,7 +320,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 *   Improved: Better user experience with file import workflow for Shape animations.
 *   Fixed: File input now properly resets after clearing, allowing immediate re-import of files.
 
-== 1.3.0 ==
+= 1.3.0 =
 *   Added: Container Effects with Glass Effect (Glassmorphism) - Apply customizable glass effect with adjustable blur intensity (0-50px) to any block.
 *   Improved: Complete redesign of the Settings page with modern card-based layout.
 *   Improved: Each feature now displays in its own card with icon, title, and toggle switch.
@@ -339,10 +339,10 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 *   PRO: Horizontal Product Form Layout - Align price, quantity, and add to cart button in one row.
 *   Added: Remove box shadow in Carrusel bullets.
 
-== 1.2.1 ==
+= 1.2.1 =
 *   Fixed: Carousel/Slider not working correctly.
 
-== 1.2.0 ==
+= 1.2.0 =
 *   Improved: Settings page.
 *   Added: Toggle to disable animations on mobile.
 *   PRO: Deactivate Product Tabs setting.
