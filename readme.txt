@@ -13,6 +13,10 @@ Plugin extending Gutenberg and GeneratePress with carousel, slider, animations, 
 
 == Description ==
 
+FrontBlocks is a lightweight toolkit that extends the WordPress Block Editor (aka Gutenberg) with layout controls, interactive blocks, and content enhancements. Build richer pages with the blocks you already use, without relying on a page builder or custom code.
+
+Turn Query Loops and grids into carousels, add animations and visual effects, improve layouts, and enable practical site utilities. FrontBlocks works with native WordPress blocks as well as supported GenerateBlocks elements, with optional integrations for WooCommerce, GenerateBlocks/GeneratePress and Gravity Forms.
+
 **Container Edge Alignment**
 Add custom controls to GenerateBlocks Container blocks and native WordPress Group/Container blocks to remove padding from the left or right side, creating edge-to-edge layouts. This feature only appears for containers using GeneratePress global max-width settings, perfect for creating asymmetric layouts where content extends to one browser edge while maintaining proper spacing on the other side.
 
