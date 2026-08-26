@@ -73,6 +73,22 @@ function frbl_set_activation_redirect() {
 register_activation_hook( __FILE__, 'frbl_set_activation_redirect' );
 
 /**
+ * Record the activation date used by the review notice (see
+ * FrontBlocks\Admin\ReviewNotice). Done here, via register_activation_hook(),
+ * rather than from that class's own constructor: that class is only
+ * instantiated on 'plugins_loaded', which — for a plugin's own first
+ * activation — has already fired (or won't fire again) by the time
+ * WordPress includes this file and runs the activation hooks, so an
+ * 'activated_plugin' listener registered there would never catch it.
+ */
+function frbl_set_activation_date() {
+	if ( ! get_option( 'frbl_activation_date' ) ) {
+		update_option( 'frbl_activation_date', time(), false );
+	}
+}
+register_activation_hook( __FILE__, 'frbl_set_activation_date' );
+
+/**
  * Check if FrontBlocks PRO is active.
  *
  * @return bool

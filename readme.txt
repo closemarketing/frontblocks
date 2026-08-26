@@ -215,6 +215,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 == Changelog ==
 
 = 1.5.1 =
+*   Added: Dismissible admin notice inviting users to leave a review on WordPress.org, shown 14 days after activation.
 *   Added: Cookie Notice extension hooks (`frbl_cookie_notice_before_actions`, `frbl_cookie_notice_after_banner`, default-label filters, and the client-side `window.frblCookieNoticeConsentModeState()` override) so an add-on can extend the banner with per-category consent without forking it — used by FrontBlocks PRO's new Advanced Cookie Management.
 
 = 1.5.0 =
