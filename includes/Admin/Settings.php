@@ -345,6 +345,8 @@ class Settings {
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
 		add_action( 'admin_head', array( $this, 'add_menu_icon_styles' ) );
+		add_action( 'update_option_frontblocks_settings', array( $this, 'handle_frontblocks_settings_updated' ), 10, 3 );
+		add_action( 'add_option_frontblocks_settings', array( $this, 'handle_frontblocks_settings_added' ), 10, 2 );
 	}
 
 	/**
@@ -1299,6 +1301,8 @@ class Settings {
 					</div>
 					<?php
 				endif;
+
+				$this->render_cookie_notice_cache_notice();
 				?>
 
 				<!-- Settings Form -->
@@ -2437,8 +2441,199 @@ class Settings {
 							/>
 						</div>
 					</div>
+
+					<?php if ( $enabled && $this->is_gtm4wp_container_loading( $gtm_id ) ) : ?>
+						<div class="tw:mt-4 tw:p-4 tw:bg-amber-50 tw:border tw:border-amber-200 tw:rounded-lg" role="alert">
+							<p class="tw:text-sm tw:font-medium tw:text-amber-900 tw:mt-0 tw:mb-2">
+								<?php echo esc_html__( 'Google Tag Manager may load twice.', 'frontblocks' ); ?>
+							</p>
+							<p class="tw:text-sm tw:text-amber-800 tw:m-0">
+								<?php
+								printf(
+									wp_kses(
+										/* translators: %s: Google Tag Manager for WordPress settings page URL. */
+										__( 'The same container is enabled in Google Tag Manager for WordPress. Disable its container-code injection in <a href="%s">its settings</a> so FrontBlocks can load it only after consent. Its data layer can remain enabled.', 'frontblocks' ),
+										array( 'a' => array( 'href' => array() ) )
+									),
+									esc_url( admin_url( 'admin.php?page=gtm4wp-settings' ) )
+								);
+								?>
+							</p>
+						</div>
+					<?php endif; ?>
 				</div>
 			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Handle a saved FrontBlocks settings option.
+	 *
+	 * @param mixed  $old_value Previous option value.
+	 * @param mixed  $new_value New option value.
+	 * @param string $option_name Option name.
+	 * @return void
+	 */
+	public function handle_frontblocks_settings_updated( $old_value, $new_value, $option_name ) {
+		if ( 'frontblocks_settings' !== $option_name || ! is_array( $old_value ) || ! is_array( $new_value ) || ! $this->cookie_notice_settings_changed( $old_value, $new_value ) ) {
+			return;
+		}
+
+		$this->handle_cookie_notice_settings_changed( $old_value, $new_value );
+	}
+
+	/**
+	 * Handle the first save of the FrontBlocks settings option.
+	 *
+	 * @param string $option_name Option name.
+	 * @param mixed  $new_value New option value.
+	 * @return void
+	 */
+	public function handle_frontblocks_settings_added( $option_name, $new_value ) {
+		if ( ! is_array( $new_value ) || ! $this->cookie_notice_settings_changed( array(), $new_value ) ) {
+			return;
+		}
+
+		$this->handle_cookie_notice_settings_changed( array(), $new_value );
+	}
+
+	/**
+	 * Invalidate page caches after a Cookie Notice setting changes.
+	 *
+	 * @param array $old_options Previous settings.
+	 * @param array $new_options New settings.
+	 * @return void
+	 */
+	private function handle_cookie_notice_settings_changed( $old_options, $new_options ) {
+		$cache_was_purged = false;
+
+		if ( function_exists( 'rocket_clean_domain' ) ) {
+			rocket_clean_domain();
+			$cache_was_purged = true;
+		}
+
+		/**
+		 * Fires after Cookie Notice settings affecting frontend output have changed.
+		 *
+		 * Cache integrations can use this action to invalidate cached pages.
+		 *
+		 * @param array $old_options Previous FrontBlocks settings.
+		 * @param array $new_options New FrontBlocks settings.
+		 */
+		do_action( 'frbl_cookie_notice_settings_updated', $old_options, $new_options );
+
+		$user_id = get_current_user_id();
+		if ( $user_id ) {
+			set_transient( 'frbl_cookie_notice_cache_notice_' . $user_id, $cache_was_purged ? 'wp-rocket' : 'manual', MINUTE_IN_SECONDS );
+		}
+	}
+
+	/**
+	 * Check whether Cookie Notice settings have changed from their frontend defaults.
+	 *
+	 * @param array $old_options Previous settings.
+	 * @param array $new_options New settings.
+	 * @return bool
+	 */
+	private function cookie_notice_settings_changed( $old_options, $new_options ) {
+		$defaults = array(
+			$this->option_enable_cookie_notice          => false,
+			$this->option_cookie_notice_message         => '',
+			$this->option_cookie_notice_accept_label    => '',
+			$this->option_cookie_notice_reject_label    => '',
+			$this->option_cookie_notice_policy_page_id  => 0,
+			$this->option_cookie_notice_layout          => 'bar',
+			$this->option_cookie_notice_position        => 'bottom-right',
+			$this->option_cookie_notice_color           => '#687df9',
+			$this->option_cookie_notice_expiration_days => 365,
+			$this->option_cookie_notice_gtm_id          => '',
+			$this->option_cookie_notice_ga4_id          => '',
+		);
+
+		foreach ( $defaults as $key => $default ) {
+			$old_value = array_key_exists( $key, $old_options ) ? $old_options[ $key ] : $default;
+			$new_value = array_key_exists( $key, $new_options ) ? $new_options[ $key ] : $default;
+
+			if ( $old_value !== $new_value ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check whether GTM4WP is set to load the same container as Cookie Notice.
+	 *
+	 * @param string $frontblocks_gtm_id FrontBlocks GTM container ID.
+	 * @return bool
+	 */
+	private function is_gtm4wp_container_loading( $frontblocks_gtm_id ) {
+		if ( '' === $frontblocks_gtm_id || ( ! defined( 'GTM4WP_OPTIONS' ) && ! function_exists( 'gtm4wp_the_gtm_tag' ) ) ) {
+			return false;
+		}
+
+		$gtm4wp_options = get_option( 'gtm4wp-options', array() );
+		if ( ! is_array( $gtm4wp_options ) ) {
+			return false;
+		}
+
+		$placement_off = defined( 'GTM4WP_PLACEMENT_OFF' ) ? (int) GTM4WP_PLACEMENT_OFF : 3;
+		$placement     = isset( $gtm4wp_options['gtm-code-placement'] ) ? (int) $gtm4wp_options['gtm-code-placement'] : 0;
+
+		if ( $placement_off === $placement ) {
+			return false;
+		}
+
+		$container_ids = array_filter(
+			array_map(
+				'trim',
+				explode( ',', (string) ( $gtm4wp_options['gtm-code'] ?? '' ) )
+			)
+		);
+
+		if ( isset( $gtm4wp_options['gtm-containers'] ) && is_array( $gtm4wp_options['gtm-containers'] ) ) {
+			foreach ( $gtm4wp_options['gtm-containers'] as $container ) {
+				if ( is_array( $container ) && ! empty( $container['id'] ) ) {
+					$container_ids[] = (string) $container['id'];
+				}
+			}
+		}
+
+		$container_ids = array_map( 'strtoupper', $container_ids );
+
+		return in_array( strtoupper( $frontblocks_gtm_id ), $container_ids, true );
+	}
+
+	/**
+	 * Render a one-time cache notice after Cookie Notice settings are saved.
+	 *
+	 * @return void
+	 */
+	private function render_cookie_notice_cache_notice() {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return;
+		}
+
+		$notice = get_transient( 'frbl_cookie_notice_cache_notice_' . $user_id );
+		if ( ! $notice ) {
+			return;
+		}
+
+		delete_transient( 'frbl_cookie_notice_cache_notice_' . $user_id );
+		?>
+		<div style="background-color: #eff6ff; border-left: 4px solid #60a5fa; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
+			<p class="tw:text-sm tw:font-medium" style="color: #1d4ed8; margin: 0;">
+				<?php
+				if ( 'wp-rocket' === $notice ) {
+					esc_html_e( 'Cookie Notice settings were updated and the WP Rocket cache was cleared.', 'frontblocks' );
+				} else {
+					esc_html_e( 'Cookie Notice settings were updated. If you use a full-page cache, purge it now so visitors receive the new configuration.', 'frontblocks' );
+				}
+				?>
+			</p>
 		</div>
 		<?php
 	}

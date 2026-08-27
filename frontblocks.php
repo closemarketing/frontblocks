@@ -3,7 +3,7 @@
  * Plugin Name: FrontBlocks for Gutenberg/GeneratePress
  * Plugin URI:  https://wordpress.org/plugins/frontblocks/
  * Description: Blocks and helpers that extends Gutenberg and GeneratePress blocks.
- * Version:     1.5.1
+ * Version:     1.5.2-beta.1
  * Author:      Closemarketing
  * Author URI:  https://close.marketing
  * Text Domain: frontblocks
@@ -26,7 +26,7 @@
 
 defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
-define( 'FRBL_VERSION', '1.5.1' );
+define( 'FRBL_VERSION', '1.5.2-beta.1' );
 define( 'FRBL_PLUGIN', __FILE__ );
 define( 'FRBL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'FRBL_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
