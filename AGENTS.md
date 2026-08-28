@@ -133,6 +133,7 @@ Every frontend feature follows the same pattern:
 3. Add assets in the matching `assets/` subdirectory.
 4. Update `readme.md` with the new feature.
 5. Add documentation to `/docs/` and link it from `readme.md`.
+6. If the new feature replaces functionality commonly provided by a third-party plugin, register that plugin via the `frontblocks_redundant_plugins` filter so the Redundant Plugins Notice can flag it — see `docs/REDUNDANT-PLUGINS.md`.
 
 ## What NOT to Do
 
