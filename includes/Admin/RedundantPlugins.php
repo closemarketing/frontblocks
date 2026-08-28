@@ -105,6 +105,7 @@ class RedundantPlugins {
 				'enabled' => (bool) ( $settings['enable_cookie_notice'] ?? false ),
 				'plugins' => array(
 					'gdpr-cookie-compliance/moove-gdpr.php' => 'GDPR Cookie Compliance',
+					'cookie-law-info/cookie-law-info.php' => 'CookieYes',
 				),
 				'doc_url' => admin_url( 'themes.php?page=frontblocks-settings' ),
 			),

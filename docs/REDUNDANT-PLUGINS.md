@@ -39,7 +39,7 @@ Notes:
 - The array key (`image-optimization` above) is the entry id — keep it unique and stable, since it's also the key used to store per-entry dismissals.
 - `plugins` accepts more than one basename per entry when several third-party plugins cover the same functionality (as in the example above).
 - `enabled` should reflect the real on/off state of the FrontBlocks feature (e.g. read from `get_option( 'frontblocks_settings', array() )` for opt-in features), so the notice doesn't fire for a feature the site owner hasn't turned on.
-- See `RedundantPlugins::get_default_entries()` for the two entries FrontBlocks core ships: SVG Upload (vs. *Safe SVG* / *SVG Support*) and Cookie Notice (vs. *GDPR Cookie Compliance*).
+- See `RedundantPlugins::get_default_entries()` for the two entries FrontBlocks core ships: SVG Upload (vs. *Safe SVG* / *SVG Support*) and Cookie Notice (vs. *GDPR Cookie Compliance* / *CookieYes*).
 
 ## Debugging
 

@@ -40,10 +40,11 @@ class RedundantPluginsTest extends TestCase {
 		$this->assertFalse( $entries['cookie-notice']['enabled'] );
 	}
 
-	public function test_cookie_notice_entry_lists_gdpr_cookie_compliance() {
+	public function test_cookie_notice_entry_lists_supported_cookie_plugins() {
 		$entries = RedundantPlugins::get_entries();
 
 		$this->assertArrayHasKey( 'gdpr-cookie-compliance/moove-gdpr.php', $entries['cookie-notice']['plugins'] );
+		$this->assertArrayHasKey( 'cookie-law-info/cookie-law-info.php', $entries['cookie-notice']['plugins'] );
 	}
 
 	/**
