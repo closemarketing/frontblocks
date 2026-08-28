@@ -74,6 +74,16 @@ class Plugin_Main {
 				require_once FRBL_PLUGIN_PATH . 'includes/Admin/Settings.php';
 			}
 			new Admin\Settings();
+
+			if ( ! class_exists( 'FrontBlocks\Admin\ReviewNotice' ) ) {
+				require_once FRBL_PLUGIN_PATH . 'includes/Admin/ReviewNotice.php';
+			}
+			new Admin\ReviewNotice();
+
+			if ( ! class_exists( 'FrontBlocks\Admin\RedundantPlugins' ) ) {
+				require_once FRBL_PLUGIN_PATH . 'includes/Admin/RedundantPlugins.php';
+			}
+			new Admin\RedundantPlugins();
 		}
 
 		// Google Sign-In module (wp-admin login, WooCommerce My Account & Checkout).
@@ -129,6 +139,9 @@ class Plugin_Main {
 		// Back Button module.
 		new Frontend\BackButton();
 
+		// Scroll to Top module.
+		new Frontend\ScrollTop();
+
 		// Events module.
 		new Frontend\Events();
 
@@ -164,6 +177,12 @@ class Plugin_Main {
 
 		// Download Button module (download option for the native button block).
 		new Frontend\DownloadButton();
+
+		// Maintenance Mode module.
+		new Frontend\Maintenance();
+
+		// Cookie Notice module.
+		new Frontend\CookieNotice();
 
 		// User Text block is provided by FrontBlocks Pro when license is active.
 	}

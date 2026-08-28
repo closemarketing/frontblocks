@@ -248,6 +248,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	flex-wrap: wrap;
 	gap: 1rem;
 	min-height: 3rem;
 }
@@ -280,7 +281,7 @@
 /* Feature Info */
 .frbl-feature-info {
 	flex: 1;
-	min-width: 0;
+	min-width: 160px;
 	display: flex;
 	align-items: center;
 	flex-direction: column;
@@ -336,6 +337,25 @@
 	flex-shrink: 0;
 	display: flex;
 	align-items: center;
+}
+
+/*
+ * Sub-settings panels (Scroll to Top position, Events type, etc.) are rendered
+ * inside .frbl-feature-toggle and moved below the card by JS once the field is
+ * enabled. This is a CSS-only fallback so the card still lays out correctly
+ * (instead of squeezing the title/description into a sliver) if JS hasn't run yet.
+ */
+.frbl-feature-toggle:has( input:checked ):has( > div[id$='-settings-wrapper'] ),
+.frbl-feature-toggle:has( input:checked ):has( > div[id$='-type-wrapper'] ) {
+	flex: 1 1 100%;
+	flex-wrap: wrap;
+	justify-content: space-between;
+}
+
+.frbl-feature-toggle > div[id$='-settings-wrapper'],
+.frbl-feature-toggle > div[id$='-type-wrapper'] {
+	flex: 1 1 100%;
+	width: 100%;
 }
 
 /* PRO info-only cards (no toggle, same layout as active cards) */
@@ -710,14 +730,67 @@
 	font-size: 1.125rem;
 }
 
+/* Sticky save bar — keeps the Save Settings button reachable without scrolling to the bottom of a long form. */
+.frbl-settings-save-bar {
+	position: sticky;
+	bottom: 1.5rem;
+	z-index: 20;
+	padding: 1.5rem;
+	background: rgba(255, 255, 255, 0.92);
+	backdrop-filter: blur(4px);
+	border: 1px solid #e5e7eb;
+	border-radius: 0.5rem;
+	box-shadow: 0 4px 12px -6px rgba(15, 23, 42, 0.12);
+}
+
+/* Cookie notice live preview: renders the real frontend banner markup/styles
+   confined to a small "stage" instead of position: fixed over the whole screen. */
+.frbl-cookie-notice-preview-stage {
+	position: relative;
+	height: 360px;
+	background: transparent;
+}
+
+.frbl-cookie-notice-preview {
+	position: absolute !important;
+	z-index: 1;
+	max-width: calc(100% - 24px);
+}
+
+.frbl-cookie-notice-preview.frbl-cookie-notice--bar {
+	inset: auto 0 0 0;
+}
+
+.frbl-cookie-notice-preview.frbl-cookie-notice--box {
+	bottom: 12px;
+}
+
+.frbl-cookie-notice-preview.frbl-cookie-notice--box.frbl-cookie-notice--right {
+	right: 12px;
+}
+
+.frbl-cookie-notice-preview.frbl-cookie-notice--box.frbl-cookie-notice--left {
+	left: 12px;
+}
+
+.frbl-cookie-notice-preview.frbl-cookie-notice--popup {
+	position: absolute !important;
+	inset: 0;
+	background-color: rgba(15, 23, 42, 0.35);
+	padding: 12px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 640px) {
 	.frbl-settings-wrapper {
 		margin-left: 0;
 	}
-	
+
 	.frbl-settings-wrapper .tw\:flex.tw\:items-center.tw\:justify-between {
 		@apply tw:flex-col tw:items-start tw:space-y-4;
 	}
-}
 
+	.frbl-settings-save-bar {
+		@apply tw:flex-col tw:items-start tw:space-y-4;
+	}
+}

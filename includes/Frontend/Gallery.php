@@ -33,7 +33,8 @@ class Gallery {
 	 */
 	private function init_hooks() {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 10 );
-		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_script' ) );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_editor_style' ) );
 		add_filter( 'render_block_core/gallery', array( $this, 'add_custom_attributes_to_gallery_block' ), 10, 2 );
 		add_action( 'init', array( $this, 'register_custom_attributes' ), 5 );
 	}
@@ -78,11 +79,11 @@ class Gallery {
 	}
 
 	/**
-	 * Enqueue block editor assets.
+	 * Enqueue the block editor's own script.
 	 *
 	 * @return void
 	 */
-	public function enqueue_block_editor_assets() {
+	public function enqueue_editor_script() {
 		wp_enqueue_script(
 			'frontblocks-gallery-option',
 			FRBL_PLUGIN_URL . 'assets/gallery/frontblocks-gallery-option.js',
@@ -96,8 +97,26 @@ class Gallery {
 			'frontblocks-gallery-option',
 			'frontblocks'
 		);
+	}
 
-		// Enqueue gallery styles in editor for live preview.
+	/**
+	 * Enqueue the gallery style on both the frontend and the block editor
+	 * (including inside its iframed canvas).
+	 *
+	 * Hooked on enqueue_block_assets rather than enqueue_block_editor_assets:
+	 * the editor canvas is rendered in an iframe, and a style enqueued via the
+	 * editor-only hook is appended to the wp-admin document instead of that
+	 * iframe, which WordPress now flags as an incorrect registration.
+	 *
+	 * @return void
+	 */
+	public function enqueue_editor_style() {
+		// Frontend enqueueing is handled conditionally in enqueue_scripts() and
+		// add_custom_attributes_to_gallery_block().
+		if ( ! is_admin() ) {
+			return;
+		}
+
 		wp_enqueue_style(
 			'frontblocks-gallery',
 			FRBL_PLUGIN_URL . 'assets/gallery/frontblocks-gallery.css',

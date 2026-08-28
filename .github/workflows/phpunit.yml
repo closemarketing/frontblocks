@@ -1,0 +1,82 @@
+name: Testing
+
+on:
+  push:
+    branches:
+      - trunk
+      - 'release/**'
+    paths:
+      - '.github/workflows/phpunit.yml'
+      - '**.php'
+      - 'phpunit.xml.dist'
+      - 'bin/install-wp-tests.sh'
+      - 'composer.json'
+      - 'composer.lock'
+  pull_request:
+    branches:
+      - trunk
+      - 'release/**'
+      - 'feature/**'
+    paths:
+      - '.github/workflows/phpunit.yml'
+      - '**.php'
+      - 'phpunit.xml.dist'
+      - 'bin/install-wp-tests.sh'
+      - 'composer.json'
+      - 'composer.lock'
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/trunk' }}
+
+jobs:
+  phpunit:
+    name: Run tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.3', '8.2', '8.1', '7.4']
+    services:
+      database:
+        image: mysql:latest
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_tests
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          tools: phpunit-polyfills:1.1
+          extensions: mbstring, xml, zip, intl, pdo, mysql
+          coverage: none
+
+      - name: Install PHP dependencies
+        uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda
+        with:
+          composer-options: '--prefer-dist'
+
+      - name: Install SVN (required to fetch the WordPress test suite)
+        run: sudo apt-get update && sudo apt-get install -y subversion
+
+      - name: Setup tests
+        run: bash bin/install-wp-tests.sh wordpress_tests root root 127.0.0.1 latest true
+
+      - name: Run tests
+        run: composer test
