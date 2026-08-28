@@ -374,8 +374,6 @@ class Settings {
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
 		add_action( 'admin_head', array( $this, 'add_menu_icon_styles' ) );
-		add_action( 'update_option_frontblocks_settings', array( $this, 'handle_frontblocks_settings_updated' ), 10, 3 );
-		add_action( 'add_option_frontblocks_settings', array( $this, 'handle_frontblocks_settings_added' ), 10, 2 );
 	}
 
 	/**
@@ -2209,10 +2207,11 @@ class Settings {
 		$tracking_type    = (string) ( $options[ $this->option_cookie_notice_tracking_type ] ?? '' );
 		$tracking_id      = (string) ( $options[ $this->option_cookie_notice_tracking_id ] ?? '' );
 		$tracking_snippet = \FrontBlocks\Frontend\CookieNotice::build_tracking_snippet( $tracking_type, $tracking_id );
+		$site_kit_tags    = $this->get_google_site_kit_managed_tags();
 		$accepted_count   = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_ACCEPTED, 0 );
 		$rejected_count   = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_REJECTED, 0 );
 		$total_count      = $accepted_count + $rejected_count;
-		$acceptance_pct = $total_count > 0 ? round( ( $accepted_count / $total_count ) * 100, 1 ) : 0;
+		$acceptance_pct   = $total_count > 0 ? round( ( $accepted_count / $total_count ) * 100, 1 ) : 0;
 		?>
 		<div class="frbl-cookie-notice-wrapper">
 			<div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
@@ -2475,39 +2474,50 @@ class Settings {
 				</div>
 
 				<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200">
-					<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
-						<?php echo esc_html__( 'Scripts are only requested after a visitor accepts — never before.', 'frontblocks' ); ?>
-					</p>
-					<div class="tw:grid tw:grid-cols-2 tw:gap-4">
-						<div>
-							<label for="<?php echo esc_attr( $this->option_cookie_notice_gtm_id ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
-								<?php echo esc_html__( 'Google Tag Manager ID', 'frontblocks' ); ?>
-							</label>
-							<input
-								type="text"
-								id="<?php echo esc_attr( $this->option_cookie_notice_gtm_id ); ?>"
-								name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_gtm_id ); ?>]"
-								value="<?php echo esc_attr( $gtm_id ); ?>"
-								placeholder="GTM-XXXXXXX"
-								class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
-							/>
-						</div>
-						<div>
-							<label for="<?php echo esc_attr( $this->option_cookie_notice_ga4_id ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
-								<?php echo esc_html__( 'GA4 Measurement ID', 'frontblocks' ); ?>
-							</label>
-							<input
-								type="text"
-								id="<?php echo esc_attr( $this->option_cookie_notice_ga4_id ); ?>"
-								name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_ga4_id ); ?>]"
-								value="<?php echo esc_attr( $ga4_id ); ?>"
-								placeholder="G-XXXXXXXXXX"
-								class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
-							/>
-						</div>
-					</div>
+					<?php if ( $site_kit_tags['gtm'] || $site_kit_tags['ga4'] ) : ?>
+						<p class="tw:text-sm tw:text-gray-600 tw:m-0">
+							<?php echo esc_html__( 'Google Site Kit manages the configured Google tag. FrontBlocks applies Consent Mode to it, so no duplicate ID is needed here.', 'frontblocks' ); ?>
+						</p>
+					<?php endif; ?>
 
-					<?php if ( $enabled && $this->is_gtm4wp_container_loading( $gtm_id ) ) : ?>
+					<?php if ( ! $site_kit_tags['gtm'] || ! $site_kit_tags['ga4'] ) : ?>
+						<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
+							<?php echo esc_html__( 'Scripts are only requested after a visitor accepts — never before.', 'frontblocks' ); ?>
+						</p>
+						<div class="tw:grid tw:grid-cols-1 tw:gap-4<?php echo ! $site_kit_tags['gtm'] && ! $site_kit_tags['ga4'] ? ' tw:grid-cols-2' : ''; ?>">
+							<?php if ( ! $site_kit_tags['gtm'] ) : ?>
+							<div>
+								<label for="<?php echo esc_attr( $this->option_cookie_notice_gtm_id ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+									<?php echo esc_html__( 'Google Tag Manager ID', 'frontblocks' ); ?>
+								</label>
+								<input
+									type="text"
+									id="<?php echo esc_attr( $this->option_cookie_notice_gtm_id ); ?>"
+									name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_gtm_id ); ?>]"
+									value="<?php echo esc_attr( $gtm_id ); ?>"
+									placeholder="GTM-XXXXXXX"
+									class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
+								/>
+							</div>
+							<?php endif; ?>
+							<?php if ( ! $site_kit_tags['ga4'] ) : ?>
+							<div>
+								<label for="<?php echo esc_attr( $this->option_cookie_notice_ga4_id ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+									<?php echo esc_html__( 'GA4 Measurement ID', 'frontblocks' ); ?>
+								</label>
+								<input
+									type="text"
+									id="<?php echo esc_attr( $this->option_cookie_notice_ga4_id ); ?>"
+									name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_ga4_id ); ?>]"
+									value="<?php echo esc_attr( $ga4_id ); ?>"
+									placeholder="G-XXXXXXXXXX"
+									class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
+								/>
+							</div>
+							<?php endif; ?>
+						</div>
+
+						<?php if ( $enabled && $this->is_gtm4wp_container_loading( $gtm_id ) ) : ?>
 						<div class="tw:mt-4 tw:p-4 tw:bg-amber-50 tw:border tw:border-amber-200 tw:rounded-lg" role="alert">
 							<p class="tw:text-sm tw:font-medium tw:text-amber-900 tw:mt-0 tw:mb-2">
 								<?php echo esc_html__( 'Google Tag Manager may load twice.', 'frontblocks' ); ?>
@@ -2520,11 +2530,12 @@ class Settings {
 										__( 'The same container is enabled in Google Tag Manager for WordPress. Disable its container-code injection in <a href="%s">its settings</a> so FrontBlocks can load it only after consent. Its data layer can remain enabled.', 'frontblocks' ),
 										array( 'a' => array( 'href' => array() ) )
 									),
-									esc_url( admin_url( 'admin.php?page=gtm4wp-settings' ) )
+									esc_url( admin_url( 'options-general.php?page=gtm4wp-settings' ) )
 								);
 								?>
 							</p>
 						</div>
+						<?php endif; ?>
 					<?php endif; ?>
 
 					<div class="tw:mt-4">
@@ -2541,9 +2552,9 @@ class Settings {
 						<?php if ( '' !== $tracking_type ) : ?>
 							<?php
 							$tracking_labels = array(
-								'clientify_analytics_plus'    => __( 'Clientify Analytics Plus', 'frontblocks' ),
+								'clientify_analytics_plus' => __( 'Clientify Analytics Plus', 'frontblocks' ),
 								'clientify_analytics_classic' => __( 'Clientify Analytics (classic)', 'frontblocks' ),
-								'brevo'                        => __( 'Brevo', 'frontblocks' ),
+								'brevo'                    => __( 'Brevo', 'frontblocks' ),
 							);
 							?>
 							<p class="tw:text-xs tw:text-green-600 tw:mt-2 tw:mb-0">
@@ -2579,106 +2590,6 @@ class Settings {
 			</div>
 		</div>
 		<?php
-	}
-
-	/**
-	 * Handle a saved FrontBlocks settings option.
-	 *
-	 * @param mixed  $old_value Previous option value.
-	 * @param mixed  $new_value New option value.
-	 * @param string $option_name Option name.
-	 * @return void
-	 */
-	public function handle_frontblocks_settings_updated( $old_value, $new_value, $option_name ) {
-		if ( 'frontblocks_settings' !== $option_name || ! is_array( $old_value ) || ! is_array( $new_value ) || ! $this->cookie_notice_settings_changed( $old_value, $new_value ) ) {
-			return;
-		}
-
-		$this->handle_cookie_notice_settings_changed( $old_value, $new_value );
-	}
-
-	/**
-	 * Handle the first save of the FrontBlocks settings option.
-	 *
-	 * @param string $option_name Option name.
-	 * @param mixed  $new_value New option value.
-	 * @return void
-	 */
-	public function handle_frontblocks_settings_added( $option_name, $new_value ) {
-		if ( ! is_array( $new_value ) || ! $this->cookie_notice_settings_changed( array(), $new_value ) ) {
-			return;
-		}
-
-		$this->handle_cookie_notice_settings_changed( array(), $new_value );
-	}
-
-	/**
-	 * Invalidate page caches after a Cookie Notice setting changes.
-	 *
-	 * @param array $old_options Previous settings.
-	 * @param array $new_options New settings.
-	 * @return void
-	 */
-	private function handle_cookie_notice_settings_changed( $old_options, $new_options ) {
-		$cache_was_purged = false;
-
-		if ( function_exists( 'rocket_clean_domain' ) ) {
-			rocket_clean_domain();
-			$cache_was_purged = true;
-		}
-
-		/**
-		 * Fires after Cookie Notice settings affecting frontend output have changed.
-		 *
-		 * Cache integrations can use this action to invalidate cached pages.
-		 *
-		 * @param array $old_options Previous FrontBlocks settings.
-		 * @param array $new_options New FrontBlocks settings.
-		 */
-		do_action( 'frbl_cookie_notice_settings_updated', $old_options, $new_options );
-
-		$user_id = get_current_user_id();
-		if ( $user_id ) {
-			set_transient( 'frbl_cookie_notice_cache_notice_' . $user_id, $cache_was_purged ? 'wp-rocket' : 'manual', MINUTE_IN_SECONDS );
-		}
-	}
-
-	/**
-	 * Check whether Cookie Notice settings have changed from their frontend defaults.
-	 *
-	 * @param array $old_options Previous settings.
-	 * @param array $new_options New settings.
-	 * @return bool
-	 */
-	private function cookie_notice_settings_changed( $old_options, $new_options ) {
-		$defaults = array(
-			$this->option_enable_cookie_notice          => false,
-			$this->option_cookie_notice_message         => '',
-			$this->option_cookie_notice_accept_label    => '',
-			$this->option_cookie_notice_reject_label    => '',
-			$this->option_cookie_notice_policy_page_id  => 0,
-			$this->option_cookie_notice_layout          => 'bar',
-			$this->option_cookie_notice_position        => 'bottom-right',
-			$this->option_cookie_notice_color           => '#687df9',
-			$this->option_cookie_notice_bg_color        => '#ffffff',
-			$this->option_cookie_notice_radius          => 'small',
-			$this->option_cookie_notice_expiration_days => 365,
-			$this->option_cookie_notice_gtm_id          => '',
-			$this->option_cookie_notice_ga4_id          => '',
-			$this->option_cookie_notice_tracking_type   => '',
-			$this->option_cookie_notice_tracking_id     => '',
-		);
-
-		foreach ( $defaults as $key => $default ) {
-			$old_value = array_key_exists( $key, $old_options ) ? $old_options[ $key ] : $default;
-			$new_value = array_key_exists( $key, $new_options ) ? $new_options[ $key ] : $default;
-
-			if ( $old_value !== $new_value ) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**
@@ -2722,6 +2633,34 @@ class Settings {
 		$container_ids = array_map( 'strtoupper', $container_ids );
 
 		return in_array( strtoupper( $frontblocks_gtm_id ), $container_ids, true );
+	}
+
+	/**
+	 * Get the Google tags that Site Kit is configured to place.
+	 *
+	 * @return array{gtm: bool, ga4: bool}
+	 */
+	private function get_google_site_kit_managed_tags() {
+		$tags = array(
+			'gtm' => false,
+			'ga4' => false,
+		);
+
+		if ( ! defined( 'GOOGLESITEKIT_VERSION' ) && ! class_exists( '\\Google\\Site_Kit\\Plugin' ) ) {
+			return $tags;
+		}
+
+		$tag_manager_settings = get_option( 'googlesitekit_tagmanager_settings', array() );
+		if ( is_array( $tag_manager_settings ) && ! empty( $tag_manager_settings['containerID'] ) && ( ! isset( $tag_manager_settings['useSnippet'] ) || $tag_manager_settings['useSnippet'] ) ) {
+			$tags['gtm'] = true;
+		}
+
+		$analytics_settings = get_option( 'googlesitekit_analytics-4_settings', array() );
+		if ( is_array( $analytics_settings ) && ! empty( $analytics_settings['measurementID'] ) && ( ! isset( $analytics_settings['useSnippet'] ) || $analytics_settings['useSnippet'] ) ) {
+			$tags['ga4'] = true;
+		}
+
+		return $tags;
 	}
 
 	/**

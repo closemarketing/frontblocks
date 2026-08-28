@@ -4,8 +4,8 @@ Tags: carrusel, slider, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.5.1
-Version: 1.5.1
+Stable tag: 1.5.2
+Version: 1.5.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -181,6 +181,9 @@ Display a smart banner that detects the visitor's browser language and suggests 
 **Cookie Notice:**
 Show a lightweight, configurable cookie consent banner with Accept and Reject actions. Choose between a full-width bottom bar, a boxed panel (bottom-left or bottom-right) or a centered popup, and customize the message, button labels, cookie policy page, accent color and cookie expiration. Google Tag Manager and/or GA4 are only requested and loaded after a visitor accepts — never before — and returning visitors who already accepted get the scripts on normal page load. The settings page also shows a simple accepted/rejected acceptance-rate stat (admins are excluded from the count). Implements Google Consent Mode v2, so it also holds back tracking from other analytics/ads plugins that respect it — including **Google Site Kit** — until the visitor decides.
 
+**Advanced Cookie Management (FrontBlocks PRO):**
+Extend Cookie Notice with separate Necessary, Analytics and Marketing preferences, a customizable preferences dialog and a reusable trigger that lets visitors update their choices later. Google Ads, Meta Pixel and Microsoft Clarity only run after the relevant category is accepted. It also supports the official Meta Pixel for WordPress plugin by holding its Pixel and Conversions API signals until Marketing consent.
+
 **WooCommerce Features:**
 Included features for WooCommerce FrontBlocks PRO.
 
@@ -223,6 +226,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 *   Fixed: Cookie Notice no longer flashes into view for a returning, already-decided visitor — the banner now renders hidden by default and is only revealed once JS determines a decision is still needed, instead of appearing and then being hidden a moment later.
 *   Added: Cookie Notice entrance animation tailored to each layout — the bar slides up, the boxed panel slides in from its anchored edge, and the popup fades in after a short delay.
 *   Added: Cookie Notice Clientify and Brevo tracking support — paste the snippet either tool gave you into a single field and it's auto-detected, then only loaded after a visitor accepts, same as Google Tag Manager/GA4.
+* Improved Cookie Notice compatibility with Google Site Kit, GTM4WP and cached pages.
 
 = 1.5.1 =
 *   Added: Dismissible admin notice inviting users to leave a review on WordPress.org, shown 14 days after activation.

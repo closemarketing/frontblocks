@@ -108,7 +108,11 @@ module's default fires first, which the priority-`1` hook guarantees for
 anything hooked at the normal `wp_head` priority (`10`) or later.
 
 No extra plugin (e.g. WP Consent API) or Site Kit configuration is required —
-this is plain Consent Mode, read directly off `window.dataLayer`.
+this is plain Consent Mode, read directly off `window.dataLayer`. When Site Kit
+is configured to place a tag, FrontBlocks hides the matching manual GTM or GA4
+field and does not load its previously saved ID, preventing duplicate Google
+tags. Site Kit can remain active without affecting FrontBlocks when the matching
+module is unconfigured or its snippet placement is disabled.
 
 ## GTM4WP and cache compatibility
 
