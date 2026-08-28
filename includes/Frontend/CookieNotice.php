@@ -777,26 +777,53 @@ class CookieNotice {
 			'ga4Id' => '',
 		);
 
-		if ( $this->is_enabled() && ! $this->is_google_site_kit_active() && 'accepted' === $this->get_consent() ) {
-			$options           = get_option( 'frontblocks_settings', array() );
-			$response['gtmId'] = $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
-			$response['ga4Id'] = $this->sanitize_ga4_id( $options['cookie_notice_ga4_id'] ?? '' );
+		if ( $this->is_enabled() && 'accepted' === $this->get_consent() ) {
+			$options       = get_option( 'frontblocks_settings', array() );
+			$site_kit_tags = $this->get_google_site_kit_managed_tags();
+
+			if ( ! $site_kit_tags['gtm'] ) {
+				$response['gtmId'] = $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
+			}
+
+			if ( ! $site_kit_tags['ga4'] ) {
+				$response['ga4Id'] = $this->sanitize_ga4_id( $options['cookie_notice_ga4_id'] ?? '' );
+			}
 		}
 
 		wp_send_json_success( $response );
 	}
 
 	/**
-	 * Check whether Google Site Kit is active.
+	 * Get the Google tags that Site Kit is configured to place.
 	 *
-	 * Site Kit loads its own Google tag and receives this module's Consent Mode
-	 * commands. Returning FrontBlocks' legacy manual IDs here as well would load
-	 * the same Google services twice after consent.
+	 * Site Kit may be active without placing a tag. Only suppress the matching
+	 * FrontBlocks ID when its Site Kit module has both an identifier and snippet
+	 * placement enabled, avoiding duplicated tags without disabling tracking on
+	 * partially configured Site Kit installations.
 	 *
-	 * @return bool
+	 * @return array{gtm: bool, ga4: bool}
 	 */
-	private function is_google_site_kit_active() {
-		return defined( 'GOOGLESITEKIT_VERSION' ) || class_exists( '\\Google\\Site_Kit\\Plugin' );
+	private function get_google_site_kit_managed_tags() {
+		$tags = array(
+			'gtm' => false,
+			'ga4' => false,
+		);
+
+		if ( ! defined( 'GOOGLESITEKIT_VERSION' ) && ! class_exists( '\\Google\\Site_Kit\\Plugin' ) ) {
+			return $tags;
+		}
+
+		$tag_manager_settings = get_option( 'googlesitekit_tagmanager_settings', array() );
+		if ( is_array( $tag_manager_settings ) && ! empty( $tag_manager_settings['containerID'] ) && ( ! isset( $tag_manager_settings['useSnippet'] ) || $tag_manager_settings['useSnippet'] ) ) {
+			$tags['gtm'] = true;
+		}
+
+		$analytics_settings = get_option( 'googlesitekit_analytics-4_settings', array() );
+		if ( is_array( $analytics_settings ) && ! empty( $analytics_settings['measurementID'] ) && ( ! isset( $analytics_settings['useSnippet'] ) || $analytics_settings['useSnippet'] ) ) {
+			$tags['ga4'] = true;
+		}
+
+		return $tags;
 	}
 
 	/**

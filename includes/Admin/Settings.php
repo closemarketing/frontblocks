@@ -2161,23 +2161,23 @@ class Settings {
 	 * @return void
 	 */
 	public function field_enable_cookie_notice() {
-		$options         = get_option( 'frontblocks_settings', array() );
-		$enabled         = (bool) ( $options[ $this->option_enable_cookie_notice ] ?? false );
-		$message         = (string) ( $options[ $this->option_cookie_notice_message ] ?? '' );
-		$accept_label    = (string) ( $options[ $this->option_cookie_notice_accept_label ] ?? '' );
-		$reject_label    = (string) ( $options[ $this->option_cookie_notice_reject_label ] ?? '' );
-		$policy_page_id  = (int) ( $options[ $this->option_cookie_notice_policy_page_id ] ?? 0 );
-		$layout          = (string) ( $options[ $this->option_cookie_notice_layout ] ?? 'bar' );
-		$position        = (string) ( $options[ $this->option_cookie_notice_position ] ?? 'bottom-right' );
-		$color           = (string) ( $options[ $this->option_cookie_notice_color ] ?? '#687df9' );
-		$expiration      = (int) ( $options[ $this->option_cookie_notice_expiration_days ] ?? 365 );
-		$gtm_id          = (string) ( $options[ $this->option_cookie_notice_gtm_id ] ?? '' );
-		$ga4_id          = (string) ( $options[ $this->option_cookie_notice_ga4_id ] ?? '' );
-		$site_kit_active = $this->is_google_site_kit_active();
-		$accepted_count  = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_ACCEPTED, 0 );
-		$rejected_count  = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_REJECTED, 0 );
-		$total_count     = $accepted_count + $rejected_count;
-		$acceptance_pct  = $total_count > 0 ? round( ( $accepted_count / $total_count ) * 100, 1 ) : 0;
+		$options        = get_option( 'frontblocks_settings', array() );
+		$enabled        = (bool) ( $options[ $this->option_enable_cookie_notice ] ?? false );
+		$message        = (string) ( $options[ $this->option_cookie_notice_message ] ?? '' );
+		$accept_label   = (string) ( $options[ $this->option_cookie_notice_accept_label ] ?? '' );
+		$reject_label   = (string) ( $options[ $this->option_cookie_notice_reject_label ] ?? '' );
+		$policy_page_id = (int) ( $options[ $this->option_cookie_notice_policy_page_id ] ?? 0 );
+		$layout         = (string) ( $options[ $this->option_cookie_notice_layout ] ?? 'bar' );
+		$position       = (string) ( $options[ $this->option_cookie_notice_position ] ?? 'bottom-right' );
+		$color          = (string) ( $options[ $this->option_cookie_notice_color ] ?? '#687df9' );
+		$expiration     = (int) ( $options[ $this->option_cookie_notice_expiration_days ] ?? 365 );
+		$gtm_id         = (string) ( $options[ $this->option_cookie_notice_gtm_id ] ?? '' );
+		$ga4_id         = (string) ( $options[ $this->option_cookie_notice_ga4_id ] ?? '' );
+		$site_kit_tags  = $this->get_google_site_kit_managed_tags();
+		$accepted_count = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_ACCEPTED, 0 );
+		$rejected_count = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_REJECTED, 0 );
+		$total_count    = $accepted_count + $rejected_count;
+		$acceptance_pct = $total_count > 0 ? round( ( $accepted_count / $total_count ) * 100, 1 ) : 0;
 		?>
 		<div class="frbl-cookie-notice-wrapper">
 			<div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
@@ -2409,15 +2409,18 @@ class Settings {
 				</div>
 
 				<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200">
-					<?php if ( $site_kit_active ) : ?>
+					<?php if ( $site_kit_tags['gtm'] || $site_kit_tags['ga4'] ) : ?>
 						<p class="tw:text-sm tw:text-gray-600 tw:m-0">
-							<?php echo esc_html__( 'Google Site Kit is active and manages the Google tag. FrontBlocks applies Consent Mode to it, so no Google Tag Manager or GA4 ID is needed here.', 'frontblocks' ); ?>
+							<?php echo esc_html__( 'Google Site Kit manages the configured Google tag. FrontBlocks applies Consent Mode to it, so no duplicate ID is needed here.', 'frontblocks' ); ?>
 						</p>
-					<?php else : ?>
+					<?php endif; ?>
+
+					<?php if ( ! $site_kit_tags['gtm'] || ! $site_kit_tags['ga4'] ) : ?>
 						<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
 							<?php echo esc_html__( 'Scripts are only requested after a visitor accepts — never before.', 'frontblocks' ); ?>
 						</p>
-						<div class="tw:grid tw:grid-cols-2 tw:gap-4">
+						<div class="tw:grid tw:grid-cols-1 tw:gap-4<?php echo ! $site_kit_tags['gtm'] && ! $site_kit_tags['ga4'] ? ' tw:grid-cols-2' : ''; ?>">
+							<?php if ( ! $site_kit_tags['gtm'] ) : ?>
 							<div>
 								<label for="<?php echo esc_attr( $this->option_cookie_notice_gtm_id ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
 									<?php echo esc_html__( 'Google Tag Manager ID', 'frontblocks' ); ?>
@@ -2431,6 +2434,8 @@ class Settings {
 									class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
 								/>
 							</div>
+							<?php endif; ?>
+							<?php if ( ! $site_kit_tags['ga4'] ) : ?>
 							<div>
 								<label for="<?php echo esc_attr( $this->option_cookie_notice_ga4_id ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
 									<?php echo esc_html__( 'GA4 Measurement ID', 'frontblocks' ); ?>
@@ -2444,6 +2449,7 @@ class Settings {
 									class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
 								/>
 							</div>
+							<?php endif; ?>
 						</div>
 
 						<?php if ( $enabled && $this->is_gtm4wp_container_loading( $gtm_id ) ) : ?>
@@ -2516,12 +2522,31 @@ class Settings {
 	}
 
 	/**
-	 * Check whether Google Site Kit is active.
+	 * Get the Google tags that Site Kit is configured to place.
 	 *
-	 * @return bool
+	 * @return array{gtm: bool, ga4: bool}
 	 */
-	private function is_google_site_kit_active() {
-		return defined( 'GOOGLESITEKIT_VERSION' ) || class_exists( '\\Google\\Site_Kit\\Plugin' );
+	private function get_google_site_kit_managed_tags() {
+		$tags = array(
+			'gtm' => false,
+			'ga4' => false,
+		);
+
+		if ( ! defined( 'GOOGLESITEKIT_VERSION' ) && ! class_exists( '\\Google\\Site_Kit\\Plugin' ) ) {
+			return $tags;
+		}
+
+		$tag_manager_settings = get_option( 'googlesitekit_tagmanager_settings', array() );
+		if ( is_array( $tag_manager_settings ) && ! empty( $tag_manager_settings['containerID'] ) && ( ! isset( $tag_manager_settings['useSnippet'] ) || $tag_manager_settings['useSnippet'] ) ) {
+			$tags['gtm'] = true;
+		}
+
+		$analytics_settings = get_option( 'googlesitekit_analytics-4_settings', array() );
+		if ( is_array( $analytics_settings ) && ! empty( $analytics_settings['measurementID'] ) && ( ! isset( $analytics_settings['useSnippet'] ) || $analytics_settings['useSnippet'] ) ) {
+			$tags['ga4'] = true;
+		}
+
+		return $tags;
 	}
 
 	/**
