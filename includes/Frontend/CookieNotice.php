@@ -53,6 +53,10 @@ class CookieNotice {
 	 * Constructor.
 	 */
 	public function __construct() {
+		// These listeners must be available outside wp-admin for cron and integrations.
+		add_action( 'update_option_frontblocks_settings', array( $this, 'handle_frontblocks_settings_updated' ), 10, 3 );
+		add_action( 'add_option_frontblocks_settings', array( $this, 'handle_frontblocks_settings_added' ), 10, 2 );
+
 		if ( ! is_admin() && $this->is_enabled() ) {
 			// Priority 1: must run before any analytics/ads tag (Google Site Kit,
 			// a manually pasted GTM/gtag snippet, etc.) reads its consent defaults —
@@ -76,6 +80,102 @@ class CookieNotice {
 		add_action( 'wp_ajax_nopriv_frbl_get_cookie_notice_config', array( $this, 'get_config_callback' ) );
 		add_action( 'wp_ajax_frbl_get_cookie_notice_log_nonce', array( $this, 'get_log_nonce_callback' ) );
 		add_action( 'wp_ajax_nopriv_frbl_get_cookie_notice_log_nonce', array( $this, 'get_log_nonce_callback' ) );
+	}
+
+	/**
+	 * Handle a saved FrontBlocks settings option.
+	 *
+	 * @param mixed  $old_value Previous option value.
+	 * @param mixed  $new_value New option value.
+	 * @param string $option_name Option name.
+	 * @return void
+	 */
+	public function handle_frontblocks_settings_updated( $old_value, $new_value, $option_name ) {
+		if ( 'frontblocks_settings' !== $option_name || ! is_array( $old_value ) || ! is_array( $new_value ) || ! $this->settings_changed( $old_value, $new_value ) ) {
+			return;
+		}
+
+		$this->handle_settings_changed( $old_value, $new_value );
+	}
+
+	/**
+	 * Handle the first save of the FrontBlocks settings option.
+	 *
+	 * @param string $option_name Option name.
+	 * @param mixed  $new_value New option value.
+	 * @return void
+	 */
+	public function handle_frontblocks_settings_added( $option_name, $new_value ) {
+		if ( ! is_array( $new_value ) || ! $this->settings_changed( array(), $new_value ) ) {
+			return;
+		}
+
+		$this->handle_settings_changed( array(), $new_value );
+	}
+
+	/**
+	 * Invalidate page caches after Cookie Notice settings change.
+	 *
+	 * @param array $old_options Previous settings.
+	 * @param array $new_options New settings.
+	 * @return void
+	 */
+	private function handle_settings_changed( $old_options, $new_options ) {
+		$cache_was_purged = false;
+
+		if ( function_exists( 'rocket_clean_domain' ) ) {
+			rocket_clean_domain();
+			$cache_was_purged = true;
+		}
+
+		/**
+		 * Fires after Cookie Notice settings affecting frontend output have changed.
+		 *
+		 * Cache integrations can use this action to invalidate cached pages.
+		 *
+		 * @param array $old_options Previous FrontBlocks settings.
+		 * @param array $new_options New FrontBlocks settings.
+		 */
+		do_action( 'frbl_cookie_notice_settings_updated', $old_options, $new_options );
+
+		$user_id = get_current_user_id();
+		if ( $user_id ) {
+			set_transient( 'frbl_cookie_notice_cache_notice_' . $user_id, $cache_was_purged ? 'wp-rocket' : 'manual', MINUTE_IN_SECONDS );
+		}
+	}
+
+	/**
+	 * Check whether Cookie Notice settings changed from their frontend defaults.
+	 *
+	 * @param array $old_options Previous settings.
+	 * @param array $new_options New settings.
+	 * @return bool
+	 */
+	private function settings_changed( $old_options, $new_options ) {
+		$defaults = array(
+			'enable_cookie_notice'          => false,
+			'cookie_notice_message'         => '',
+			'cookie_notice_accept_label'    => '',
+			'cookie_notice_reject_label'    => '',
+			'cookie_notice_policy_page_id'  => 0,
+			'cookie_notice_layout'          => 'bar',
+			'cookie_notice_position'        => 'bottom-right',
+			'cookie_notice_color'           => '#687df9',
+			'cookie_notice_expiration_days' => 365,
+			'cookie_notice_gtm_id'          => '',
+			'cookie_notice_ga4_id'          => '',
+		);
+
+		foreach ( $defaults as $key => $default ) {
+			$old_value = array_key_exists( $key, $old_options ) ? $old_options[ $key ] : $default;
+			$new_value = array_key_exists( $key, $new_options ) ? $new_options[ $key ] : $default;
+
+			if ( $old_value !== $new_value ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -677,13 +777,26 @@ class CookieNotice {
 			'ga4Id' => '',
 		);
 
-		if ( $this->is_enabled() && 'accepted' === $this->get_consent() ) {
+		if ( $this->is_enabled() && ! $this->is_google_site_kit_active() && 'accepted' === $this->get_consent() ) {
 			$options           = get_option( 'frontblocks_settings', array() );
 			$response['gtmId'] = $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
 			$response['ga4Id'] = $this->sanitize_ga4_id( $options['cookie_notice_ga4_id'] ?? '' );
 		}
 
 		wp_send_json_success( $response );
+	}
+
+	/**
+	 * Check whether Google Site Kit is active.
+	 *
+	 * Site Kit loads its own Google tag and receives this module's Consent Mode
+	 * commands. Returning FrontBlocks' legacy manual IDs here as well would load
+	 * the same Google services twice after consent.
+	 *
+	 * @return bool
+	 */
+	private function is_google_site_kit_active() {
+		return defined( 'GOOGLESITEKIT_VERSION' ) || class_exists( '\\Google\\Site_Kit\\Plugin' );
 	}
 
 	/**

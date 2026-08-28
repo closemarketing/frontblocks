@@ -80,7 +80,10 @@ module's default fires first, which the priority-`1` hook guarantees for
 anything hooked at the normal `wp_head` priority (`10`) or later.
 
 No extra plugin (e.g. WP Consent API) or Site Kit configuration is required —
-this is plain Consent Mode, read directly off `window.dataLayer`.
+this is plain Consent Mode, read directly off `window.dataLayer`. When Site Kit
+is active, FrontBlocks hides its manual GTM/GA4 fields and does not load any
+previously saved IDs, preventing duplicate Google tags. Those saved IDs remain
+available if Site Kit is later deactivated.
 
 ## GTM4WP and cache compatibility
 
