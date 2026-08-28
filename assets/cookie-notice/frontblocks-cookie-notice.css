@@ -66,7 +66,8 @@
 	background-color: var(--frbl-cookie-bg);
 	color: var(--frbl-cookie-text);
 	border-radius: var(--frbl-cookie-radius);
-	box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+	overflow: hidden;
+	box-shadow: none;
 }
 
 .frbl-cookie-notice__message {
@@ -134,6 +135,13 @@
 	overflow-y: auto;
 }
 
+/* GeneratePress sets the content width in PHP, so match its centered page
+   container when FrontBlocks receives that value from the active theme. */
+.frbl-cookie-notice--bar.frbl-cookie-notice--generatepress {
+	left: max(20px, calc((100vw - var(--frbl-cookie-content-width)) / 2));
+	right: max(20px, calc((100vw - var(--frbl-cookie-content-width)) / 2));
+}
+
 .frbl-cookie-notice--bar .frbl-cookie-notice__panel {
 	display: flex;
 	align-items: center;
@@ -188,7 +196,7 @@
 	justify-content: center;
 	padding: 20px;
 	overflow-y: auto;
-	background-color: rgba(15, 23, 42, 0.55);
+	background-color: transparent;
 }
 
 .frbl-cookie-notice--popup .frbl-cookie-notice__panel {
@@ -202,7 +210,7 @@
 	align-items: center;
 	text-align: center;
 	gap: 16px;
-	box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
+	box-shadow: none;
 }
 
 .frbl-cookie-notice__icon {

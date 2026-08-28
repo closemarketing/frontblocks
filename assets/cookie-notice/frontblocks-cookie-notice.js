@@ -30,7 +30,7 @@
 	}
 
 	function defineInjectHelper() {
-		window.frblCookieNoticeInject = window.frblCookieNoticeInject || function (gtmId, ga4Id, trackingType, trackingId) {
+		window.frblCookieNoticeInject = window.frblCookieNoticeInject || function (gtmId, ga4Id, trackingIntegrations) {
 			if (gtmId) {
 				window.dataLayer = window.dataLayer || [];
 				window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
@@ -55,12 +55,24 @@
 				window.gtag('config', ga4Id);
 			}
 
-			if (trackingId && trackingType === 'clientify_analytics_plus') {
+			if (!Array.isArray(trackingIntegrations)) {
+				trackingIntegrations = [];
+			}
+
+			trackingIntegrations.forEach(function (integration) {
+				var trackingType = integration && integration.type ? integration.type : '';
+				var trackingId = integration && integration.id ? integration.id : '';
+
+				if (!trackingId) {
+					return;
+				}
+
+			if (trackingType === 'clientify_analytics_plus') {
 				var clientifyPixel = document.createElement('script');
 				clientifyPixel.defer = true;
 				clientifyPixel.src = 'https://analyticsplusdev.clientify.net/analytics_plus/pixel/' + encodeURIComponent(trackingId);
 				document.head.appendChild(clientifyPixel);
-			} else if (trackingId && trackingType === 'clientify_analytics_classic') {
+			} else if (trackingType === 'clientify_analytics_classic') {
 				(function (d, w, u, o) {
 					w[o] = w[o] || function () {
 						(w[o].q = w[o].q || []).push(arguments);
@@ -73,7 +85,7 @@
 				window.ana('setTrackerUrl', 'https://analytics.clientify.net');
 				window.ana('setTrackingCode', trackingId);
 				window.ana('trackPageview');
-			} else if (trackingId && trackingType === 'brevo') {
+			} else if (trackingType === 'brevo') {
 				var brevoScript = document.createElement('script');
 				brevoScript.async = true;
 				brevoScript.src = 'https://cdn.brevo.com/js/sdk-loader.js';
@@ -81,7 +93,8 @@
 
 				window.Brevo = window.Brevo || [];
 				window.Brevo.push(['init', { client_key: trackingId }]);
-			}
+				}
+			});
 		};
 	}
 
@@ -99,7 +112,7 @@
 			})
 			.then(function (response) {
 				if (response && response.success && response.data && window.frblCookieNoticeInject) {
-					window.frblCookieNoticeInject(response.data.gtmId, response.data.ga4Id, response.data.trackingType, response.data.trackingId);
+					window.frblCookieNoticeInject(response.data.gtmId, response.data.ga4Id, response.data.trackingIntegrations);
 				}
 			})
 			.catch(function () {

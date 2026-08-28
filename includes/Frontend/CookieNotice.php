@@ -161,17 +161,20 @@ class CookieNotice {
 	 */
 	private function settings_changed( $old_options, $new_options ) {
 		$defaults = array(
-			'enable_cookie_notice'          => false,
-			'cookie_notice_message'         => '',
-			'cookie_notice_accept_label'    => '',
-			'cookie_notice_reject_label'    => '',
-			'cookie_notice_policy_page_id'  => 0,
-			'cookie_notice_layout'          => 'bar',
-			'cookie_notice_position'        => 'bottom-right',
-			'cookie_notice_color'           => '#687df9',
-			'cookie_notice_expiration_days' => 365,
-			'cookie_notice_gtm_id'          => '',
-			'cookie_notice_ga4_id'          => '',
+			'enable_cookie_notice'                => false,
+			'cookie_notice_message'               => '',
+			'cookie_notice_accept_label'          => '',
+			'cookie_notice_reject_label'          => '',
+			'cookie_notice_policy_page_id'        => 0,
+			'cookie_notice_layout'                => 'bar',
+			'cookie_notice_position'              => 'bottom-right',
+			'cookie_notice_color'                 => '#687df9',
+			'cookie_notice_bg_color'              => '#ffffff',
+			'cookie_notice_radius'                => 'small',
+			'cookie_notice_expiration_days'       => 365,
+			'cookie_notice_gtm_id'                => '',
+			'cookie_notice_ga4_id'                => '',
+			'cookie_notice_tracking_integrations' => array(),
 		);
 
 		foreach ( $defaults as $key => $default ) {
@@ -383,7 +386,12 @@ class CookieNotice {
 		// of the entrance animation for a visitor who still needs to decide (the
 		// script removes it once that's determined). See the noscript style
 		// below for the no-JS fallback.
-		$classes = array( 'frbl-cookie-notice', 'frbl-cookie-notice--' . $layout, 'frbl-cookie-notice--init' );
+		$classes       = array( 'frbl-cookie-notice', 'frbl-cookie-notice--' . $layout, 'frbl-cookie-notice--init' );
+		$content_width = function_exists( 'generate_get_option' ) ? absint( generate_get_option( 'container_width' ) ) : 0;
+
+		if ( $content_width > 0 ) {
+			$classes[] = 'frbl-cookie-notice--generatepress';
+		}
 
 		if ( 'box' === $layout ) {
 			$classes[] = 'bottom-left' === $position ? 'frbl-cookie-notice--left' : 'frbl-cookie-notice--right';
@@ -402,6 +410,10 @@ class CookieNotice {
 			esc_attr( $panel_text ),
 			esc_attr( $this->get_radius_value( $radius ) )
 		);
+
+		if ( $content_width > 0 ) {
+			$style .= sprintf( ' --frbl-cookie-content-width: %dpx;', $content_width );
+		}
 		?>
 		<div
 			id="frbl-cookie-notice"
@@ -625,7 +637,7 @@ class CookieNotice {
 				}
 			}
 
-			window.frblCookieNoticeInject = window.frblCookieNoticeInject || function ( gtmId, ga4Id, trackingType, trackingId ) {
+			window.frblCookieNoticeInject = window.frblCookieNoticeInject || function ( gtmId, ga4Id, trackingIntegrations ) {
 				if ( gtmId ) {
 					window.dataLayer = window.dataLayer || [];
 					window.dataLayer.push( { 'gtm.start': new Date().getTime(), event: 'gtm.js' } );
@@ -650,12 +662,24 @@ class CookieNotice {
 					window.gtag( 'config', ga4Id );
 				}
 
-				if ( trackingId && 'clientify_analytics_plus' === trackingType ) {
+				if ( ! Array.isArray( trackingIntegrations ) ) {
+					trackingIntegrations = [];
+				}
+
+				trackingIntegrations.forEach( function ( integration ) {
+					var trackingType = integration && integration.type ? integration.type : '';
+					var trackingId = integration && integration.id ? integration.id : '';
+
+					if ( ! trackingId ) {
+						return;
+					}
+
+				if ( 'clientify_analytics_plus' === trackingType ) {
 					var clientifyPixel = document.createElement( 'script' );
 					clientifyPixel.defer = true;
 					clientifyPixel.src = 'https://analyticsplusdev.clientify.net/analytics_plus/pixel/' + encodeURIComponent( trackingId );
 					document.head.appendChild( clientifyPixel );
-				} else if ( trackingId && 'clientify_analytics_classic' === trackingType ) {
+				} else if ( 'clientify_analytics_classic' === trackingType ) {
 					( function ( d, w, u, o ) {
 						w[ o ] = w[ o ] || function () {
 							( w[ o ].q = w[ o ].q || [] ).push( arguments );
@@ -668,7 +692,7 @@ class CookieNotice {
 					window.ana( 'setTrackerUrl', 'https://analytics.clientify.net' );
 					window.ana( 'setTrackingCode', trackingId );
 					window.ana( 'trackPageview' );
-				} else if ( trackingId && 'brevo' === trackingType ) {
+				} else if ( 'brevo' === trackingType ) {
 					var brevoScript = document.createElement( 'script' );
 					brevoScript.async = true;
 					brevoScript.src = 'https://cdn.brevo.com/js/sdk-loader.js';
@@ -676,7 +700,8 @@ class CookieNotice {
 
 					window.Brevo = window.Brevo || [];
 					window.Brevo.push( [ 'init', { client_key: trackingId } ] );
-				}
+					}
+				} );
 			};
 
 			// An add-on tracking per-category consent can define this (printed
@@ -698,7 +723,7 @@ class CookieNotice {
 					.then( function ( response ) { return response.json(); } )
 					.then( function ( response ) {
 						if ( response && response.success && response.data ) {
-							window.frblCookieNoticeInject( response.data.gtmId, response.data.ga4Id, response.data.trackingType, response.data.trackingId );
+							window.frblCookieNoticeInject( response.data.gtmId, response.data.ga4Id, response.data.trackingIntegrations );
 						}
 					} )
 					.catch( function () {} );
@@ -854,19 +879,17 @@ class CookieNotice {
 	 */
 	public function get_config_callback() {
 		$response = array(
-			'gtmId'        => '',
-			'ga4Id'        => '',
-			'trackingType' => '',
-			'trackingId'   => '',
+			'gtmId'                => '',
+			'ga4Id'                => '',
+			'trackingIntegrations' => array(),
 		);
 
 		if ( $this->is_enabled() && 'accepted' === $this->get_consent() ) {
-			$options                  = get_option( 'frontblocks_settings', array() );
-			$site_kit_tags            = $this->get_google_site_kit_managed_tags();
-			$response['gtmId']        = $site_kit_tags['gtm'] ? '' : $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
-			$response['ga4Id']        = $site_kit_tags['ga4'] ? '' : $this->sanitize_ga4_id( $options['cookie_notice_ga4_id'] ?? '' );
-			$response['trackingType'] = $this->sanitize_tracking_type( $options['cookie_notice_tracking_type'] ?? '' );
-			$response['trackingId']   = '' !== $response['trackingType'] ? sanitize_text_field( $options['cookie_notice_tracking_id'] ?? '' ) : '';
+			$options                          = get_option( 'frontblocks_settings', array() );
+			$site_kit_tags                    = $this->get_google_site_kit_managed_tags();
+			$response['gtmId']                = $site_kit_tags['gtm'] ? '' : $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
+			$response['ga4Id']                = $site_kit_tags['ga4'] ? '' : $this->sanitize_ga4_id( $options['cookie_notice_ga4_id'] ?? '' );
+			$response['trackingIntegrations'] = self::get_tracking_integrations( $options );
 		}
 
 		wp_send_json_success( $response );
@@ -1096,45 +1119,53 @@ class CookieNotice {
 	}
 
 	/**
-	 * Rebuild the canonical snippet for a detected type/id pair, so the admin
-	 * settings field can show back a clean, re-paste-able snippet instead of
-	 * whatever formatting/whitespace the admin's original paste happened to have.
+	 * Return the safe, normalized integration records stored in the settings.
 	 *
-	 * Public static — used by the admin settings page to prefill the field.
+	 * Raw tracking code is never persisted. The legacy single-integration
+	 * options are read only as a migration path and are converted on the next
+	 * settings save.
 	 *
-	 * @param string $type One of TRACKING_TYPES.
-	 * @param string $id   The stored id/code for that type.
-	 * @return string The canonical snippet, or '' if type/id is empty or unrecognized.
+	 * @param array $options FrontBlocks settings.
+	 * @return array<int, array{type: string, id: string}> Supported integration records.
 	 */
-	public static function build_tracking_snippet( $type, $id ) {
-		if ( '' === $type || '' === $id || ! in_array( $type, self::TRACKING_TYPES, true ) ) {
-			return '';
+	public static function get_tracking_integrations( $options ) {
+		if ( ! is_array( $options ) ) {
+			return array();
 		}
 
-		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript -- These strings are stored for the admin field and injected after consent by the frontend loader.
-		switch ( $type ) {
-			case 'clientify_analytics_plus':
-				return sprintf(
-					"<!--Clientify Tracking Begins-->\n<script defer src=\"https://analyticsplusdev.clientify.net/analytics_plus/pixel/%s\"></script>\n<!--Clientify Tracking Ends-->",
-					esc_attr( $id )
-				);
-
-			case 'clientify_analytics_classic':
-				return sprintf(
-					"<!--Clientify Tracking Begins-->\n<script type=\"text/javascript\">\nif (typeof trackerCode === 'undefined') {\n\t(function (d, w, u, o) {\n\t\tw[o] = w[o] || function () {\n\t\t\t(w[o].q = w[o].q || []).push(arguments)\n\t\t};\n\t\ta = d.createElement('script'),\n\t\t\tm = d.getElementsByTagName('script')[0];\n\t\ta.async = 1; a.src = u;\n\t\tm.parentNode.insertBefore(a, m)\n\t})(document, window, 'https://analytics.clientify.net/tracker.js', 'ana');\n\tana('setTrackerUrl', 'https://analytics.clientify.net');\n\tana('setTrackingCode', '%s');\n\tana('trackPageview');\n}\n</script>\n<!--Clientify Tracking Ends-->",
-					esc_js( $id )
-				);
-
-			case 'brevo':
-				return sprintf(
-					"<script src=\"https://cdn.brevo.com/js/sdk-loader.js\" async></script>\n<script>\n\twindow.Brevo = window.Brevo || [];\n\tBrevo.push([\n\t\t\"init\",\n\t\t{\n\t\t\tclient_key: \"%s\"\n\t\t}\n\t]);\n</script>",
-					esc_js( $id )
-				);
-
-			default:
-				return '';
+		$stored = array_key_exists( 'cookie_notice_tracking_integrations', $options ) ? $options['cookie_notice_tracking_integrations'] : null;
+		if ( null === $stored ) {
+			$legacy_type = $options['cookie_notice_tracking_type'] ?? '';
+			$legacy_id   = $options['cookie_notice_tracking_id'] ?? '';
+			$stored      = array(
+				array(
+					'type' => $legacy_type,
+					'id'   => $legacy_id,
+				),
+			);
 		}
-		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
+
+		if ( ! is_array( $stored ) ) {
+			return array();
+		}
+
+		$integrations = array();
+		foreach ( $stored as $integration ) {
+			if ( ! is_array( $integration ) ) {
+				continue;
+			}
+
+			$type = $integration['type'] ?? '';
+			$id   = sanitize_text_field( $integration['id'] ?? '' );
+			if ( in_array( $type, self::TRACKING_TYPES, true ) && '' !== $id ) {
+				$integrations[ $type ] = array(
+					'type' => $type,
+					'id'   => $id,
+				);
+			}
+		}
+
+		return array_values( $integrations );
 	}
 
 	/**

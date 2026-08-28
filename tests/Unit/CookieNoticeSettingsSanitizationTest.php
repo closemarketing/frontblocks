@@ -118,32 +118,58 @@ class CookieNoticeSettingsSanitizationTest extends TestCase {
 		$this->assertSame( 'small', $sanitized['cookie_notice_radius'] );
 	}
 
-	public function test_recognized_tracking_snippet_is_stored_as_type_and_id() {
+	public function test_recognized_tracking_code_is_added_as_a_safe_integration_record() {
 		$snippet   = '<script defer src="https://analyticsplusdev.clientify.net/analytics_plus/pixel/TestPixel1"></script>';
-		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_snippet' => $snippet ) );
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_integration_code' => $snippet ) );
 
-		$this->assertSame( 'clientify_analytics_plus', $sanitized['cookie_notice_tracking_type'] );
-		$this->assertSame( 'TestPixel1', $sanitized['cookie_notice_tracking_id'] );
+		$this->assertSame(
+			array(
+				array(
+					'type' => 'clientify_analytics_plus',
+					'id'   => 'TestPixel1',
+				),
+			),
+			$sanitized['cookie_notice_tracking_integrations']
+		);
+		$this->assertArrayNotHasKey( 'cookie_notice_tracking_integration_code', $sanitized );
 	}
 
-	public function test_unrecognized_tracking_snippet_is_rejected_and_reports_an_error() {
+	public function test_unrecognized_tracking_code_is_rejected_and_reports_an_error() {
 		$before_count = $this->count_tracking_notice_errors();
 
-		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_snippet' => '<script src="https://example.com/unsupported.js"></script>' ) );
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_integration_code' => '<script src="https://example.com/unsupported.js"></script>' ) );
 
-		$this->assertSame( '', $sanitized['cookie_notice_tracking_type'] );
-		$this->assertSame( '', $sanitized['cookie_notice_tracking_id'] );
+		$this->assertSame( array(), $sanitized['cookie_notice_tracking_integrations'] );
 		$this->assertSame( $before_count + 1, $this->count_tracking_notice_errors(), 'Expected exactly one new admin notice for the unrecognized tracking snippet.' );
 	}
 
-	public function test_blank_tracking_snippet_clears_stored_type_and_id_without_an_error() {
+	public function test_blank_tracking_code_leaves_the_integration_list_empty_without_an_error() {
 		$before_count = $this->count_tracking_notice_errors();
 
-		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_snippet' => '' ) );
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_integration_code' => '' ) );
 
-		$this->assertSame( '', $sanitized['cookie_notice_tracking_type'] );
-		$this->assertSame( '', $sanitized['cookie_notice_tracking_id'] );
+		$this->assertSame( array(), $sanitized['cookie_notice_tracking_integrations'] );
 		$this->assertSame( $before_count, $this->count_tracking_notice_errors(), 'A blank snippet must not add an admin notice.' );
+	}
+
+	public function test_tracking_integration_can_be_removed() {
+		update_option(
+			'frontblocks_settings',
+			array(
+				'cookie_notice_tracking_integrations' => array(
+					array( 'type' => 'brevo', 'id' => 'brevo-key' ),
+				),
+			)
+		);
+
+		$sanitized = $this->settings->sanitize_settings(
+			array(
+				'cookie_notice_tracking_integration_code' => '',
+				'cookie_notice_tracking_remove'           => array( 'brevo' ),
+			)
+		);
+
+		$this->assertSame( array(), $sanitized['cookie_notice_tracking_integrations'] );
 	}
 
 	/**

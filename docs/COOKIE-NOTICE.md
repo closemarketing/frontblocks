@@ -51,7 +51,7 @@ Enable it from **Appearance → FrontBlocks → Cookie Notice**.
 - **Reject**: only sets the cookie. Nothing is ever requested from Google.
 - **Accept**: the cookie is set immediately, and the browser asks a small
   read-only AJAX endpoint (`frbl_get_cookie_notice_config`) for the configured
-  GTM/GA4 IDs (and the detected Clientify/Brevo type + id, if any). The endpoint
+  GTM/GA4 IDs (and the detected Clientify/Brevo integration records, if any). The endpoint
   only returns them when the *browser's own* cookie says `accepted` — nothing is
   ever present in the page's HTML source before that. The frontend script then
   creates the actual `<script>` tags dynamically, so a first-time visitor sees
@@ -69,13 +69,11 @@ Unlike the GTM/GA4 fields (a single plain ID typed in by hand), Clientify and
 Brevo hand out a full `<script>` snippet to paste — and Clientify alone has two
 differently-shaped snippets depending on which of their products the client is
 on (their current Analytics Plus pixel, or the classic Analytics tracker.js +
-`ana(...)` calls). Rather than a settings field per tool/variant, there is a
-single "Additional tracking snippet" field: whatever is pasted is matched
-against the three known patterns in `CookieNotice::detect_tracking_snippet()`,
-and only the type + the one id/code it needs is stored — never the raw pasted
-markup itself. `CookieNotice::build_tracking_snippet()` does the reverse, so
-the settings field can show back a clean, re-paste-able snippet instead of
-whatever whitespace/formatting the original paste happened to have.
+`ana(...)` calls). The settings screen provides an add-only tracking-code
+field and a list of saved integrations. Whatever is pasted is matched against
+the three known patterns in `CookieNotice::detect_tracking_snippet()`: only the
+provider type and the one required id/code are stored; the raw pasted markup is
+always discarded. Entries can be removed individually from that list.
 
 A snippet that doesn't match any of the three patterns is rejected (an admin
 notice points to [close.technology/contacto](https://close.technology/contacto)

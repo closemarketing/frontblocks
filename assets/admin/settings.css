@@ -12,6 +12,11 @@
     --tw-color-red-200: oklch(88.5% 0.062 18.334);
     --tw-color-red-600: oklch(57.7% 0.245 27.325);
     --tw-color-red-700: oklch(50.5% 0.213 27.518);
+    --tw-color-amber-50: oklch(98.7% 0.022 95.277);
+    --tw-color-amber-200: oklch(92.4% 0.12 95.746);
+    --tw-color-amber-600: oklch(66.6% 0.179 58.318);
+    --tw-color-amber-800: oklch(47.3% 0.137 46.201);
+    --tw-color-amber-900: oklch(41.4% 0.112 45.904);
     --tw-color-yellow-50: oklch(98.7% 0.026 102.212);
     --tw-color-yellow-200: oklch(94.5% 0.129 101.54);
     --tw-color-yellow-400: oklch(85.2% 0.199 91.936);
@@ -297,6 +302,9 @@
   .frbl-settings-wrapper .tw\:flex-shrink-0 {
     flex-shrink: 0;
   }
+  .frbl-settings-wrapper .tw\:grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
   .frbl-settings-wrapper .tw\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -314,6 +322,11 @@
   }
   .frbl-settings-wrapper .tw\:gap-4 {
     gap: calc(var(--tw-spacing) * 4);
+  }
+  :where(.frbl-settings-wrapper .tw\:space-y-2 > :not(:last-child)) {
+    --tw-space-y-reverse: 0;
+    margin-block-start: calc(calc(var(--tw-spacing) * 2) * var(--tw-space-y-reverse));
+    margin-block-end: calc(calc(var(--tw-spacing) * 2) * calc(1 - var(--tw-space-y-reverse)));
   }
   :where(.frbl-settings-wrapper .tw\:space-y-6 > :not(:last-child)) {
     --tw-space-y-reverse: 0;
@@ -352,6 +365,9 @@
     border-left-style: var(--tw-border-style);
     border-left-width: 4px;
   }
+  .frbl-settings-wrapper .tw\:border-amber-200 {
+    border-color: var(--tw-color-amber-200);
+  }
   .frbl-settings-wrapper .tw\:border-blue-400 {
     border-color: var(--tw-color-blue-400);
   }
@@ -372,6 +388,9 @@
   }
   .frbl-settings-wrapper .tw\:border-yellow-400 {
     border-color: var(--tw-color-yellow-400);
+  }
+  .frbl-settings-wrapper .tw\:bg-amber-50 {
+    background-color: var(--tw-color-amber-50);
   }
   .frbl-settings-wrapper .tw\:bg-blue-50 {
     background-color: var(--tw-color-blue-50);
@@ -406,6 +425,9 @@
     --tw-gradient-to: var(--tw-color-white);
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
+  .frbl-settings-wrapper .tw\:p-3 {
+    padding: calc(var(--tw-spacing) * 3);
+  }
   .frbl-settings-wrapper .tw\:p-4 {
     padding: calc(var(--tw-spacing) * 4);
   }
@@ -438,6 +460,9 @@
   }
   .frbl-settings-wrapper .tw\:text-center {
     text-align: center;
+  }
+  .frbl-settings-wrapper .tw\:font-mono {
+    font-family: var(--tw-font-mono);
   }
   .frbl-settings-wrapper .tw\:text-2xl {
     font-size: var(--tw-text-2xl);
@@ -478,6 +503,18 @@
   .frbl-settings-wrapper .tw\:font-semibold {
     --tw-font-weight: var(--tw-font-weight-semibold);
     font-weight: var(--tw-font-weight-semibold);
+  }
+  .frbl-settings-wrapper .tw\:whitespace-nowrap {
+    white-space: nowrap;
+  }
+  .frbl-settings-wrapper .tw\:text-amber-600 {
+    color: var(--tw-color-amber-600);
+  }
+  .frbl-settings-wrapper .tw\:text-amber-800 {
+    color: var(--tw-color-amber-800);
+  }
+  .frbl-settings-wrapper .tw\:text-amber-900 {
+    color: var(--tw-color-amber-900);
   }
   .frbl-settings-wrapper .tw\:text-blue-400 {
     color: var(--tw-color-blue-400);
@@ -1154,16 +1191,7 @@
 .frbl-cookie-notice-preview-stage {
   position: relative;
   height: 360px;
-  background-color: #f1f5f9;
-  background-image: linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
-		linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
-		linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
-		linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
-  background-size: 16px 16px;
-  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
-  border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
-  overflow: hidden;
+  background: transparent;
 }
 .frbl-cookie-notice-preview {
   position: absolute !important;
@@ -1375,4 +1403,3 @@
     }
   }
 }
-

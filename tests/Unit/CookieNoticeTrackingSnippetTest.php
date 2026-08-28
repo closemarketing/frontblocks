@@ -99,35 +99,36 @@ HTML;
 	}
 
 	/**
-	 * build_tracking_snippet() must round-trip: what it generates for a
-	 * detected type/id must itself detect back to the same type/id, so the
-	 * admin settings field can safely prefill from stored values.
+	 * Stored integration records are normalized and invalid records are ignored.
 	 */
-	public function test_build_tracking_snippet_round_trips_through_detection() {
-		foreach (
+	public function test_tracking_integrations_are_normalized_without_raw_code() {
+		$integrations = CookieNotice::get_tracking_integrations(
 			array(
-				array( 'clientify_analytics_plus', 'RoundTripPixel1' ),
-				array( 'clientify_analytics_classic', 'CF-11111-22222-RTID' ),
-				array( 'brevo', 'roundtripclientkey000001' ),
-			) as $case
-		) {
-			list( $type, $id ) = $case;
+				'cookie_notice_tracking_integrations' => array(
+					array( 'type' => 'brevo', 'id' => 'first-key' ),
+					array( 'type' => 'invalid', 'id' => 'discard-me' ),
+					array( 'type' => 'brevo', 'id' => 'latest-key' ),
+				),
+			)
+		);
 
-			$snippet  = CookieNotice::build_tracking_snippet( $type, $id );
-			$detected = CookieNotice::detect_tracking_snippet( $snippet );
-
-			$this->assertSame( $type, $detected['type'], "Round trip failed for type: {$type}" );
-			$this->assertSame( $id, $detected['id'], "Round trip failed for id: {$id}" );
-		}
+		$this->assertSame( array( array( 'type' => 'brevo', 'id' => 'latest-key' ) ), $integrations );
 	}
 
 	/**
-	 * An empty type/id, or an unknown type, must not produce a snippet at all.
+	 * Existing sites using the former single type/id settings retain tracking
+	 * until their next settings save migrates them to the integrations list.
 	 */
-	public function test_build_tracking_snippet_returns_empty_for_invalid_input() {
-		$this->assertSame( '', CookieNotice::build_tracking_snippet( '', '' ) );
-		$this->assertSame( '', CookieNotice::build_tracking_snippet( 'brevo', '' ) );
-		$this->assertSame( '', CookieNotice::build_tracking_snippet( 'not-a-real-type', 'some-id' ) );
+	public function test_legacy_tracking_options_are_read_as_an_integration() {
+		$this->assertSame(
+			array( array( 'type' => 'brevo', 'id' => 'legacy-key' ) ),
+			CookieNotice::get_tracking_integrations(
+				array(
+					'cookie_notice_tracking_type' => 'brevo',
+					'cookie_notice_tracking_id'   => 'legacy-key',
+				)
+			)
+		);
 	}
 
 	/**
