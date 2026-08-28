@@ -6,6 +6,7 @@
  */
 
 use FrontBlocks\Admin\Settings;
+use FrontBlocks\Frontend\CookieNotice;
 use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
@@ -16,7 +17,7 @@ class CookieNoticeIntegrationsTest extends TestCase {
 	/**
 	 * Settings instance under test.
 	 *
-	 * @var Settings
+	 * @var CookieNotice
 	 */
 	private $settings;
 
@@ -27,7 +28,7 @@ class CookieNoticeIntegrationsTest extends TestCase {
 	 */
 	public function set_up() {
 		parent::set_up();
-		$this->settings = new Settings();
+		$this->settings = new CookieNotice();
 	}
 
 	/**
@@ -45,7 +46,8 @@ class CookieNoticeIntegrationsTest extends TestCase {
 
 		$old_options = array( 'enable_cookie_notice' => false );
 		$new_options = array( 'enable_cookie_notice' => true );
-		$this->settings->handle_frontblocks_settings_updated( $old_options, $new_options, 'frontblocks_settings' );
+		update_option( 'frontblocks_settings', $old_options );
+		update_option( 'frontblocks_settings', $new_options );
 
 		remove_action( 'frbl_cookie_notice_settings_updated', $callback, 10 );
 
@@ -97,9 +99,10 @@ class CookieNoticeIntegrationsTest extends TestCase {
 
 		$method = new ReflectionMethod( Settings::class, 'is_gtm4wp_container_loading' );
 		$method->setAccessible( true );
+		$settings = new Settings();
 
-		$this->assertTrue( $method->invoke( $this->settings, 'GTM-ABC123' ) );
-		$this->assertFalse( $method->invoke( $this->settings, 'GTM-OTHER' ) );
+		$this->assertTrue( $method->invoke( $settings, 'GTM-ABC123' ) );
+		$this->assertFalse( $method->invoke( $settings, 'GTM-OTHER' ) );
 	}
 
 	/**
@@ -122,7 +125,8 @@ class CookieNoticeIntegrationsTest extends TestCase {
 
 		$method = new ReflectionMethod( Settings::class, 'is_gtm4wp_container_loading' );
 		$method->setAccessible( true );
+		$settings = new Settings();
 
-		$this->assertFalse( $method->invoke( $this->settings, 'GTM-ABC123' ) );
+		$this->assertFalse( $method->invoke( $settings, 'GTM-ABC123' ) );
 	}
 }
