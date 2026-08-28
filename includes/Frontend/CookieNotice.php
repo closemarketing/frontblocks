@@ -247,6 +247,8 @@ class CookieNotice {
 		$layout         = (string) ( $options['cookie_notice_layout'] ?? 'bar' );
 		$position       = (string) ( $options['cookie_notice_position'] ?? 'bottom-right' );
 		$color          = (string) ( $options['cookie_notice_color'] ?? '#687df9' );
+		$bg_color       = (string) ( $options['cookie_notice_bg_color'] ?? '#ffffff' );
+		$radius         = (string) ( $options['cookie_notice_radius'] ?? 'small' );
 
 		if ( '' === $message ) {
 			$message = __( 'We use cookies to improve your experience on our website. By browsing this website, you agree to our use of cookies.', 'frontblocks' );
@@ -267,7 +269,13 @@ class CookieNotice {
 			$layout = 'bar';
 		}
 
-		$classes = array( 'frbl-cookie-notice', 'frbl-cookie-notice--' . $layout );
+		// '--init' starts the banner invisible/off-screen: it's what keeps an
+		// already-decided visitor from ever seeing it flash into view before
+		// frontblocks-cookie-notice.js hides it, and doubles as the "from" state
+		// of the entrance animation for a visitor who still needs to decide (the
+		// script removes it once that's determined). See the noscript style
+		// below for the no-JS fallback.
+		$classes = array( 'frbl-cookie-notice', 'frbl-cookie-notice--' . $layout, 'frbl-cookie-notice--init' );
 
 		if ( 'box' === $layout ) {
 			$classes[] = 'bottom-left' === $position ? 'frbl-cookie-notice--left' : 'frbl-cookie-notice--right';
@@ -276,11 +284,15 @@ class CookieNotice {
 		$is_modal    = 'popup' === $layout;
 		$accent_text = $this->get_readable_text_color( $color );
 		$accent_link = $this->get_readable_on_white_color( $color );
+		$panel_text  = $this->get_readable_text_color( $bg_color );
 		$style       = sprintf(
-			'--frbl-cookie-accent: %1$s; --frbl-cookie-accent-contrast: %2$s; --frbl-cookie-accent-on-light: %3$s;',
+			'--frbl-cookie-accent: %1$s; --frbl-cookie-accent-contrast: %2$s; --frbl-cookie-accent-on-light: %3$s; --frbl-cookie-bg: %4$s; --frbl-cookie-text: %5$s; --frbl-cookie-radius: %6$s;',
 			esc_attr( $color ),
 			esc_attr( $accent_text ),
-			esc_attr( $accent_link )
+			esc_attr( $accent_link ),
+			esc_attr( $bg_color ),
+			esc_attr( $panel_text ),
+			esc_attr( $this->get_radius_value( $radius ) )
 		);
 		?>
 		<div
@@ -332,6 +344,20 @@ class CookieNotice {
 				</div>
 			</div>
 		</div>
+		<?php
+		// Without JS, nothing would ever remove '--init' (see the class list
+		// above), so the banner would stay invisible forever — this resets it
+		// back to plain visible/static for a no-JS visitor.
+		?>
+		<noscript>
+			<style>
+				#frbl-cookie-notice.frbl-cookie-notice--init {
+					opacity: 1;
+					pointer-events: auto;
+					transform: none;
+				}
+			</style>
+		</noscript>
 		<?php
 		if ( $is_modal ) {
 			?>
@@ -560,6 +586,25 @@ class CookieNotice {
 	 */
 	public static function get_cookie_icon_svg() {
 		return '<svg width="242" height="242" viewBox="0 0 242 242" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M120.931 242C120.045 242 119.159 241.991 118.268 241.973C85.0089 241.264 54.2629 227.347 31.7023 202.787C-10.324 157.038 -10.4104 85.2933 31.5114 39.4584C59.026 9.38964 99.4661 -4.79939 139.638 1.44977C144.565 2.21332 148.137 6.66272 147.764 11.5712C147.155 19.761 150.128 27.7827 155.918 33.5774C158.345 35.9998 161.126 37.9268 164.171 39.3039C167.407 40.7628 169.58 43.7487 169.989 47.2892C170.689 53.6065 173.47 59.3467 178.024 63.9052C182.487 68.3637 188.404 71.2178 194.667 71.9405C198.185 72.345 201.157 74.5174 202.621 77.7488C204.002 80.812 205.92 83.5753 208.311 85.9705C214.11 91.7606 222.2 94.7057 230.317 94.1285C235.371 93.7649 239.67 97.3326 240.443 102.259C246.37 140.331 233.662 179.317 206.438 206.55C183.514 229.474 153.236 242 120.931 242ZM120.559 9.43963C89.4356 9.43963 59.7077 22.4243 38.3832 45.7394C-0.311723 88.043 -0.23447 154.266 38.5559 196.497C59.385 219.167 87.7631 232.01 118.468 232.665C149.346 233.374 178.124 221.703 199.857 199.969C224.99 174.827 236.725 138.841 231.244 103.695C220.055 104.145 209.438 100.26 201.73 92.5515C198.539 89.361 195.985 85.6705 194.14 81.5847C185.259 80.2258 177.397 76.4263 171.443 70.4907C165.462 64.5051 161.662 56.638 160.735 48.3345C156.272 45.9485 152.573 43.3852 149.346 40.1629C141.629 32.4457 137.675 21.7744 138.475 10.8758C132.484 9.91232 126.494 9.43963 120.559 9.43963ZM169.68 189.671C158.799 189.671 149.946 180.817 149.946 169.937C149.946 159.047 158.799 150.194 169.68 150.194C180.56 150.194 189.413 159.047 189.413 169.937C189.413 180.817 180.56 189.671 169.68 189.671ZM169.68 159.502C163.935 159.502 159.254 164.183 159.254 169.937C159.254 175.681 163.935 180.363 169.68 180.363C175.424 180.363 180.105 175.681 180.105 169.937C180.105 164.183 175.424 159.502 169.68 159.502ZM80.9776 179.817C66.2977 179.817 54.3539 167.873 54.3539 153.193C54.3539 138.514 66.2977 126.57 80.9776 126.57C95.6621 126.57 107.606 138.514 107.606 153.193C107.606 167.873 95.662 179.817 80.9776 179.817ZM80.9776 135.878C71.4289 135.878 63.6617 143.649 63.6617 153.193C63.6617 162.738 71.4289 170.509 80.9776 170.509C90.5264 170.509 98.2981 162.738 98.2981 153.193C98.2981 143.649 90.5263 135.878 80.9776 135.878ZM140.447 116.985C129.667 116.985 120.895 108.213 120.895 97.4326C120.895 86.6523 129.667 77.8807 140.447 77.8807C151.227 77.8807 159.999 86.6523 159.999 97.4326C159.999 108.213 151.227 116.985 140.447 116.985ZM140.447 87.1885C134.802 87.1885 130.203 91.7834 130.203 97.4326C130.203 103.082 134.802 107.677 140.447 107.677C146.092 107.677 150.691 103.082 150.691 97.4326C150.691 91.7833 146.092 87.1885 140.447 87.1885ZM68.7701 87.7021C59.7077 87.7021 52.3314 80.3258 52.3314 71.2588C52.3314 62.1963 59.7077 54.82 68.7701 54.82C77.8371 54.82 85.2134 62.1963 85.2134 71.2588C85.2134 80.3258 77.8371 87.7021 68.7701 87.7021ZM68.7701 64.1279C64.8388 64.1279 61.6393 67.3275 61.6393 71.2588C61.6393 75.1946 64.8388 78.3942 68.7701 78.3942C72.706 78.3942 75.9055 75.1946 75.9055 71.2588C75.9055 67.3275 72.706 64.1279 68.7701 64.1279Z" fill="currentColor"/></svg>';
+	}
+
+	/**
+	 * Map a corner-rounding preset to its CSS value.
+	 *
+	 * Public static — also used by the admin settings preview so it renders the
+	 * exact same rounding the frontend does.
+	 *
+	 * @param string $preset 'none', 'small', or 'large'.
+	 * @return string CSS length, e.g. '12px'.
+	 */
+	public static function get_radius_value( $preset ) {
+		$radii = array(
+			'none'  => '0px',
+			'small' => '12px',
+			'large' => '24px',
+		);
+
+		return $radii[ $preset ] ?? $radii['small'];
 	}
 
 	/**

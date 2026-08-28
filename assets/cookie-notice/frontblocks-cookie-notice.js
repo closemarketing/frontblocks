@@ -150,15 +150,7 @@
 		var isPopup = banner.classList.contains('frbl-cookie-notice--popup');
 		var previouslyFocused = document.activeElement;
 
-		if (isPopup) {
-			document.body.classList.add('frbl-cookie-notice-lock-scroll');
-
-			if (acceptBtn) {
-				acceptBtn.focus({ preventScroll: true });
-			}
-
-			document.addEventListener('keydown', trapFocus);
-		}
+		revealBanner();
 
 		if (acceptBtn) {
 			acceptBtn.addEventListener('click', function () {
@@ -190,6 +182,31 @@
 
 				document.dispatchEvent(event);
 			});
+		}
+
+		/**
+		 * Reveal the banner: removes the '--init' class printed by PHP so the
+		 * CSS transition animates it in (slide up for the bar, slide in from
+		 * its anchored edge for the box, scale/fade in for the popup). The
+		 * popup gets a short extra delay first, per its layout's own request,
+		 * so it doesn't feel jarring the instant the page loads.
+		 */
+		function revealBanner() {
+			var delay = isPopup ? 150 : 20;
+
+			window.setTimeout(function () {
+				banner.classList.remove('frbl-cookie-notice--init');
+
+				if (isPopup) {
+					document.body.classList.add('frbl-cookie-notice-lock-scroll');
+
+					if (acceptBtn) {
+						acceptBtn.focus({ preventScroll: true });
+					}
+
+					document.addEventListener('keydown', trapFocus);
+				}
+			}, delay);
 		}
 
 		function trapFocus(event) {

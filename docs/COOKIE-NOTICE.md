@@ -23,9 +23,11 @@ Enable it from **Appearance → FrontBlocks → Cookie Notice**.
 | Message | The banner copy. Falls back to a default English sentence when left empty. |
 | Accept / Reject button label | Text for the two decision buttons. |
 | Cookie policy page | Optional page picker (dropdown of the site's own pages), shown next to the message as a "Learn more" link resolved to that page's permalink. The banner is suppressed on that exact page so visitors can read the policy before deciding. |
-| Layout | `Full-width bar` (bottom bar), `Boxed panel` (bottom-left/bottom-right), or `Centered popup` (modal with a dimmed backdrop). |
+| Layout | `Full-width bar` (floating bottom bar), `Boxed panel` (bottom-left/bottom-right), or `Centered popup` (modal with a dimmed backdrop). |
 | Position | Only shown for the boxed panel layout — bottom-left or bottom-right. |
 | Accent color | Used for the Accept button and the policy link. A contrasting text color is computed automatically so the button and link stay legible even with a very light accent. |
+| Background color | The notice panel's background. A contrasting text color is computed automatically for the message and Reject button, the same way the accent color's own contrast is handled. |
+| Corner rounding | `None`, `Slightly rounded`, or `Very rounded` — applies to the notice panel across all three layouts. |
 | Cookie expiration (days) | How long the visitor's decision is remembered. |
 | Google Tag Manager ID | `GTM-XXXXXXX`. Left empty, GTM is never loaded. |
 | GA4 Measurement ID | `G-XXXXXXXXXX`. Left empty, GA4 is never loaded. |
@@ -36,9 +38,15 @@ Enable it from **Appearance → FrontBlocks → Cookie Notice**.
   HTML identical for every visitor of a given URL, so a full-page cache (a very
   common setup on agency-managed GeneratePress sites) can safely cache and reuse
   the page without ever mixing up one visitor's consent state with another's.
-- All consent-specific behavior happens client-side: a small inline script printed
-  right after the banner checks the `frbl_cookie_consent` cookie and immediately
-  hides the banner if the visitor already decided, before the page finishes loading.
+- All consent-specific behavior happens client-side: the banner is printed already
+  invisible/off-screen (a `frbl-cookie-notice--init` class, reset by a `<noscript>`
+  rule for browsers without JS), and `frontblocks-cookie-notice.js` reveals it only
+  after checking the `frbl_cookie_consent` cookie — an already-decided visitor's
+  banner simply stays hidden and is removed from the flow, instead of flashing into
+  view first and being hidden a moment later. A visitor who still needs to decide
+  sees it slide/fade in instead of appearing instantly: the bar slides up from the
+  bottom, the boxed panel slides in from its anchored edge, and the popup fades in
+  after a short delay so it doesn't feel jarring on page load.
 - **Reject**: only sets the cookie. Nothing is ever requested from Google.
 - **Accept**: the cookie is set immediately, and the browser asks a small
   read-only AJAX endpoint (`frbl_get_cookie_notice_config`) for the configured

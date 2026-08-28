@@ -153,6 +153,20 @@ class Settings {
 	private $option_cookie_notice_color = 'cookie_notice_color';
 
 	/**
+	 * Option key for the cookie notice panel background color.
+	 *
+	 * @var string
+	 */
+	private $option_cookie_notice_bg_color = 'cookie_notice_bg_color';
+
+	/**
+	 * Option key for the cookie notice panel corner rounding.
+	 *
+	 * @var string
+	 */
+	private $option_cookie_notice_radius = 'cookie_notice_radius';
+
+	/**
 	 * Option key for the cookie notice expiration (in days).
 	 *
 	 * @var string
@@ -2172,6 +2186,8 @@ class Settings {
 		$layout         = (string) ( $options[ $this->option_cookie_notice_layout ] ?? 'bar' );
 		$position       = (string) ( $options[ $this->option_cookie_notice_position ] ?? 'bottom-right' );
 		$color          = (string) ( $options[ $this->option_cookie_notice_color ] ?? '#687df9' );
+		$bg_color       = (string) ( $options[ $this->option_cookie_notice_bg_color ] ?? '#ffffff' );
+		$radius         = (string) ( $options[ $this->option_cookie_notice_radius ] ?? 'small' );
 		$expiration     = (int) ( $options[ $this->option_cookie_notice_expiration_days ] ?? 365 );
 		$gtm_id         = (string) ( $options[ $this->option_cookie_notice_gtm_id ] ?? '' );
 		$ga4_id         = (string) ( $options[ $this->option_cookie_notice_ga4_id ] ?? '' );
@@ -2361,6 +2377,35 @@ class Settings {
 						</div>
 					</div>
 
+					<div class="tw:grid tw:grid-cols-2 tw:gap-4 tw:mt-4">
+						<div>
+							<label for="<?php echo esc_attr( $this->option_cookie_notice_bg_color ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+								<?php echo esc_html__( 'Background color', 'frontblocks' ); ?>
+							</label>
+							<input
+								type="color"
+								id="<?php echo esc_attr( $this->option_cookie_notice_bg_color ); ?>"
+								name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_bg_color ); ?>]"
+								value="<?php echo esc_attr( $bg_color ); ?>"
+								class="tw:h-10 tw:w-full tw:border tw:border-gray-300 tw:rounded-lg"
+							/>
+						</div>
+						<div>
+							<label for="<?php echo esc_attr( $this->option_cookie_notice_radius ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+								<?php echo esc_html__( 'Corner rounding', 'frontblocks' ); ?>
+							</label>
+							<select
+								id="<?php echo esc_attr( $this->option_cookie_notice_radius ); ?>"
+								name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_radius ); ?>]"
+								class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
+							>
+								<option value="none" <?php selected( $radius, 'none' ); ?>><?php echo esc_html__( 'None', 'frontblocks' ); ?></option>
+								<option value="small" <?php selected( $radius, 'small' ); ?>><?php echo esc_html__( 'Slightly rounded', 'frontblocks' ); ?></option>
+								<option value="large" <?php selected( $radius, 'large' ); ?>><?php echo esc_html__( 'Very rounded', 'frontblocks' ); ?></option>
+							</select>
+						</div>
+					</div>
+
 					<div class="tw:mt-4">
 						<p class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
 							<?php echo esc_html__( 'Preview', 'frontblocks' ); ?>
@@ -2368,12 +2413,14 @@ class Settings {
 						<?php
 						$preview_accent_text = \FrontBlocks\Frontend\CookieNotice::get_readable_text_color( $color );
 						$preview_accent_link = \FrontBlocks\Frontend\CookieNotice::get_readable_on_white_color( $color );
+						$preview_panel_text  = \FrontBlocks\Frontend\CookieNotice::get_readable_text_color( $bg_color );
+						$preview_radius      = \FrontBlocks\Frontend\CookieNotice::get_radius_value( $radius );
 						?>
 						<div id="frbl-cookie-notice-preview-stage" class="frbl-cookie-notice-preview-stage">
 							<div
 								id="frbl-cookie-notice-preview"
 								class="frbl-cookie-notice frbl-cookie-notice-preview frbl-cookie-notice--<?php echo esc_attr( $layout ); ?><?php echo 'box' === $layout ? ' frbl-cookie-notice--' . ( 'bottom-left' === $position ? 'left' : 'right' ) : ''; ?>"
-								style="--frbl-cookie-accent: <?php echo esc_attr( $color ); ?>; --frbl-cookie-accent-contrast: <?php echo esc_attr( $preview_accent_text ); ?>; --frbl-cookie-accent-on-light: <?php echo esc_attr( $preview_accent_link ); ?>;"
+								style="--frbl-cookie-accent: <?php echo esc_attr( $color ); ?>; --frbl-cookie-accent-contrast: <?php echo esc_attr( $preview_accent_text ); ?>; --frbl-cookie-accent-on-light: <?php echo esc_attr( $preview_accent_link ); ?>; --frbl-cookie-bg: <?php echo esc_attr( $bg_color ); ?>; --frbl-cookie-text: <?php echo esc_attr( $preview_panel_text ); ?>; --frbl-cookie-radius: <?php echo esc_attr( $preview_radius ); ?>;"
 							>
 								<div class="frbl-cookie-notice__panel">
 									<span id="frbl-cookie-notice-preview-icon" class="frbl-cookie-notice__icon">
@@ -2546,6 +2593,8 @@ class Settings {
 			$this->option_cookie_notice_layout          => 'bar',
 			$this->option_cookie_notice_position        => 'bottom-right',
 			$this->option_cookie_notice_color           => '#687df9',
+			$this->option_cookie_notice_bg_color        => '#ffffff',
+			$this->option_cookie_notice_radius          => 'small',
 			$this->option_cookie_notice_expiration_days => 365,
 			$this->option_cookie_notice_gtm_id          => '',
 			$this->option_cookie_notice_ga4_id          => '',
@@ -3383,6 +3432,11 @@ class Settings {
 			} elseif ( $this->option_cookie_notice_color === $key ) {
 				$hex_color         = sanitize_hex_color( $val );
 				$sanitized[ $key ] = $hex_color ? $hex_color : '#687df9';
+			} elseif ( $this->option_cookie_notice_bg_color === $key ) {
+				$hex_color         = sanitize_hex_color( $val );
+				$sanitized[ $key ] = $hex_color ? $hex_color : '#ffffff';
+			} elseif ( $this->option_cookie_notice_radius === $key ) {
+				$sanitized[ $key ] = in_array( $val, array( 'none', 'small', 'large' ), true ) ? $val : 'small';
 			} elseif ( $this->option_cookie_notice_expiration_days === $key ) {
 				$days              = absint( $val );
 				$sanitized[ $key ] = $days > 0 ? min( $days, 730 ) : 365;

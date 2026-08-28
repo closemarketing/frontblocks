@@ -218,6 +218,11 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Changelog ==
 
+= 1.5.2 =
+*   Added: Cookie Notice background color and corner rounding (none/slightly/very rounded) settings, and a floating full-width bar layout (no longer flush against the viewport edge).
+*   Fixed: Cookie Notice no longer flashes into view for a returning, already-decided visitor — the banner now renders hidden by default and is only revealed once JS determines a decision is still needed, instead of appearing and then being hidden a moment later.
+*   Added: Cookie Notice entrance animation tailored to each layout — the bar slides up, the boxed panel slides in from its anchored edge, and the popup fades in after a short delay.
+
 = 1.5.1 =
 *   Added: Dismissible admin notice inviting users to leave a review on WordPress.org, shown 14 days after activation.
 *   Added: Cookie Notice extension hooks (`frbl_cookie_notice_before_actions`, `frbl_cookie_notice_after_banner`, default-label filters, and the client-side `window.frblCookieNoticeConsentModeState()` override) so an add-on can extend the banner with per-category consent without forking it — used by FrontBlocks PRO's new Advanced Cookie Management.

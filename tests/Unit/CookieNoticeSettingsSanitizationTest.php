@@ -95,6 +95,29 @@ class CookieNoticeSettingsSanitizationTest extends TestCase {
 		$this->assertSame( '#687df9', $sanitized['cookie_notice_color'] );
 	}
 
+	public function test_valid_hex_background_color_is_preserved() {
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_bg_color' => '#111827' ) );
+		$this->assertSame( '#111827', $sanitized['cookie_notice_bg_color'] );
+	}
+
+	public function test_invalid_hex_background_color_falls_back_to_default() {
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_bg_color' => 'not-a-hex-color' ) );
+		$this->assertSame( '#ffffff', $sanitized['cookie_notice_bg_color'] );
+	}
+
+	public function test_radius_only_accepts_known_values() {
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_radius' => 'none' ) );
+		$this->assertSame( 'none', $sanitized['cookie_notice_radius'] );
+
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_radius' => 'large' ) );
+		$this->assertSame( 'large', $sanitized['cookie_notice_radius'] );
+	}
+
+	public function test_radius_falls_back_to_small_for_unknown_values() {
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_radius' => 'extra-bevel' ) );
+		$this->assertSame( 'small', $sanitized['cookie_notice_radius'] );
+	}
+
 	public function test_expiration_days_is_capped_at_730() {
 		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_expiration_days' => '99999' ) );
 		$this->assertSame( 730, $sanitized['cookie_notice_expiration_days'] );
