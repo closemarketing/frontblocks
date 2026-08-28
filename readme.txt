@@ -222,6 +222,10 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 == Changelog ==
 
 = 1.5.2 =
+*   Added: Cookie Notice background color and corner rounding (none/slightly/very rounded) settings, and a floating full-width bar layout (no longer flush against the viewport edge).
+*   Fixed: Cookie Notice no longer flashes into view for a returning, already-decided visitor — the banner now renders hidden by default and is only revealed once JS determines a decision is still needed, instead of appearing and then being hidden a moment later.
+*   Added: Cookie Notice entrance animation tailored to each layout — the bar slides up, the boxed panel slides in from its anchored edge, and the popup fades in after a short delay.
+*   Added: Cookie Notice Clientify and Brevo tracking support — paste the snippet either tool gave you into a single field and it's auto-detected, then only loaded after a visitor accepts, same as Google Tag Manager/GA4.
 * Improved Cookie Notice compatibility with Google Site Kit, GTM4WP and cached pages.
 
 = 1.5.1 =

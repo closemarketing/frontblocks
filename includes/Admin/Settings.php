@@ -153,6 +153,20 @@ class Settings {
 	private $option_cookie_notice_color = 'cookie_notice_color';
 
 	/**
+	 * Option key for the cookie notice panel background color.
+	 *
+	 * @var string
+	 */
+	private $option_cookie_notice_bg_color = 'cookie_notice_bg_color';
+
+	/**
+	 * Option key for the cookie notice panel corner rounding.
+	 *
+	 * @var string
+	 */
+	private $option_cookie_notice_radius = 'cookie_notice_radius';
+
+	/**
 	 * Option key for the cookie notice expiration (in days).
 	 *
 	 * @var string
@@ -172,6 +186,13 @@ class Settings {
 	 * @var string
 	 */
 	private $option_cookie_notice_ga4_id = 'cookie_notice_ga4_id';
+
+	/**
+	 * Option key for the additional tracking integrations.
+	 *
+	 * @var string
+	 */
+	private $option_cookie_notice_tracking_integrations = 'cookie_notice_tracking_integrations';
 
 	/**
 	 * Option key for popups feature.
@@ -739,6 +760,7 @@ class Settings {
 
 				const layoutSelect = document.getElementById('cookie_notice_layout');
 				const positionSelect = document.getElementById('cookie_notice_position');
+				const radiusSelect = document.getElementById('cookie_notice_radius');
 				const positionWrapper = document.getElementById('cookie-notice-position-wrapper');
 				const preview = document.getElementById('frbl-cookie-notice-preview');
 
@@ -761,6 +783,11 @@ class Settings {
 					if (layout === 'box') {
 						preview.className += ' frbl-cookie-notice--' + (position === 'bottom-left' ? 'left' : 'right');
 					}
+
+					if (radiusSelect) {
+						var radii = { none: '0', small: '12px', large: '24px' };
+						preview.style.setProperty('--frbl-cookie-radius', radii[radiusSelect.value] || radii.small);
+					}
 				}
 
 				if (layoutSelect) {
@@ -769,6 +796,10 @@ class Settings {
 
 				if (positionSelect) {
 					positionSelect.addEventListener('change', updatePreviewLayout);
+				}
+
+				if (radiusSelect) {
+					radiusSelect.addEventListener('change', updatePreviewLayout);
 				}
 			});
 			"
@@ -2161,23 +2192,26 @@ class Settings {
 	 * @return void
 	 */
 	public function field_enable_cookie_notice() {
-		$options        = get_option( 'frontblocks_settings', array() );
-		$enabled        = (bool) ( $options[ $this->option_enable_cookie_notice ] ?? false );
-		$message        = (string) ( $options[ $this->option_cookie_notice_message ] ?? '' );
-		$accept_label   = (string) ( $options[ $this->option_cookie_notice_accept_label ] ?? '' );
-		$reject_label   = (string) ( $options[ $this->option_cookie_notice_reject_label ] ?? '' );
-		$policy_page_id = (int) ( $options[ $this->option_cookie_notice_policy_page_id ] ?? 0 );
-		$layout         = (string) ( $options[ $this->option_cookie_notice_layout ] ?? 'bar' );
-		$position       = (string) ( $options[ $this->option_cookie_notice_position ] ?? 'bottom-right' );
-		$color          = (string) ( $options[ $this->option_cookie_notice_color ] ?? '#687df9' );
-		$expiration     = (int) ( $options[ $this->option_cookie_notice_expiration_days ] ?? 365 );
-		$gtm_id         = (string) ( $options[ $this->option_cookie_notice_gtm_id ] ?? '' );
-		$ga4_id         = (string) ( $options[ $this->option_cookie_notice_ga4_id ] ?? '' );
-		$site_kit_tags  = $this->get_google_site_kit_managed_tags();
-		$accepted_count = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_ACCEPTED, 0 );
-		$rejected_count = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_REJECTED, 0 );
-		$total_count    = $accepted_count + $rejected_count;
-		$acceptance_pct = $total_count > 0 ? round( ( $accepted_count / $total_count ) * 100, 1 ) : 0;
+		$options               = get_option( 'frontblocks_settings', array() );
+		$enabled               = (bool) ( $options[ $this->option_enable_cookie_notice ] ?? false );
+		$message               = (string) ( $options[ $this->option_cookie_notice_message ] ?? '' );
+		$accept_label          = (string) ( $options[ $this->option_cookie_notice_accept_label ] ?? '' );
+		$reject_label          = (string) ( $options[ $this->option_cookie_notice_reject_label ] ?? '' );
+		$policy_page_id        = (int) ( $options[ $this->option_cookie_notice_policy_page_id ] ?? 0 );
+		$layout                = (string) ( $options[ $this->option_cookie_notice_layout ] ?? 'bar' );
+		$position              = (string) ( $options[ $this->option_cookie_notice_position ] ?? 'bottom-right' );
+		$color                 = (string) ( $options[ $this->option_cookie_notice_color ] ?? '#687df9' );
+		$bg_color              = (string) ( $options[ $this->option_cookie_notice_bg_color ] ?? '#ffffff' );
+		$radius                = (string) ( $options[ $this->option_cookie_notice_radius ] ?? 'small' );
+		$expiration            = (int) ( $options[ $this->option_cookie_notice_expiration_days ] ?? 365 );
+		$gtm_id                = (string) ( $options[ $this->option_cookie_notice_gtm_id ] ?? '' );
+		$ga4_id                = (string) ( $options[ $this->option_cookie_notice_ga4_id ] ?? '' );
+		$tracking_integrations = \FrontBlocks\Frontend\CookieNotice::get_tracking_integrations( $options );
+		$site_kit_tags         = $this->get_google_site_kit_managed_tags();
+		$accepted_count        = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_ACCEPTED, 0 );
+		$rejected_count        = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_REJECTED, 0 );
+		$total_count           = $accepted_count + $rejected_count;
+		$acceptance_pct        = $total_count > 0 ? round( ( $accepted_count / $total_count ) * 100, 1 ) : 0;
 		?>
 		<div class="frbl-cookie-notice-wrapper">
 			<div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
@@ -2360,6 +2394,35 @@ class Settings {
 						</div>
 					</div>
 
+					<div class="tw:grid tw:grid-cols-2 tw:gap-4 tw:mt-4">
+						<div>
+							<label for="<?php echo esc_attr( $this->option_cookie_notice_bg_color ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+								<?php echo esc_html__( 'Background color', 'frontblocks' ); ?>
+							</label>
+							<input
+								type="color"
+								id="<?php echo esc_attr( $this->option_cookie_notice_bg_color ); ?>"
+								name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_bg_color ); ?>]"
+								value="<?php echo esc_attr( $bg_color ); ?>"
+								class="tw:h-10 tw:w-full tw:border tw:border-gray-300 tw:rounded-lg"
+							/>
+						</div>
+						<div>
+							<label for="<?php echo esc_attr( $this->option_cookie_notice_radius ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+								<?php echo esc_html__( 'Corner rounding', 'frontblocks' ); ?>
+							</label>
+							<select
+								id="<?php echo esc_attr( $this->option_cookie_notice_radius ); ?>"
+								name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_radius ); ?>]"
+								class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
+							>
+								<option value="none" <?php selected( $radius, 'none' ); ?>><?php echo esc_html__( 'None', 'frontblocks' ); ?></option>
+								<option value="small" <?php selected( $radius, 'small' ); ?>><?php echo esc_html__( 'Slightly rounded', 'frontblocks' ); ?></option>
+								<option value="large" <?php selected( $radius, 'large' ); ?>><?php echo esc_html__( 'Very rounded', 'frontblocks' ); ?></option>
+							</select>
+						</div>
+					</div>
+
 					<div class="tw:mt-4">
 						<p class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
 							<?php echo esc_html__( 'Preview', 'frontblocks' ); ?>
@@ -2367,12 +2430,14 @@ class Settings {
 						<?php
 						$preview_accent_text = \FrontBlocks\Frontend\CookieNotice::get_readable_text_color( $color );
 						$preview_accent_link = \FrontBlocks\Frontend\CookieNotice::get_readable_on_white_color( $color );
+						$preview_panel_text  = \FrontBlocks\Frontend\CookieNotice::get_readable_text_color( $bg_color );
+						$preview_radius      = \FrontBlocks\Frontend\CookieNotice::get_radius_value( $radius );
 						?>
 						<div id="frbl-cookie-notice-preview-stage" class="frbl-cookie-notice-preview-stage">
 							<div
 								id="frbl-cookie-notice-preview"
 								class="frbl-cookie-notice frbl-cookie-notice-preview frbl-cookie-notice--<?php echo esc_attr( $layout ); ?><?php echo 'box' === $layout ? ' frbl-cookie-notice--' . ( 'bottom-left' === $position ? 'left' : 'right' ) : ''; ?>"
-								style="--frbl-cookie-accent: <?php echo esc_attr( $color ); ?>; --frbl-cookie-accent-contrast: <?php echo esc_attr( $preview_accent_text ); ?>; --frbl-cookie-accent-on-light: <?php echo esc_attr( $preview_accent_link ); ?>;"
+								style="--frbl-cookie-accent: <?php echo esc_attr( $color ); ?>; --frbl-cookie-accent-contrast: <?php echo esc_attr( $preview_accent_text ); ?>; --frbl-cookie-accent-on-light: <?php echo esc_attr( $preview_accent_link ); ?>; --frbl-cookie-bg: <?php echo esc_attr( $bg_color ); ?>; --frbl-cookie-text: <?php echo esc_attr( $preview_panel_text ); ?>; --frbl-cookie-radius: <?php echo esc_attr( $preview_radius ); ?>;"
 							>
 								<div class="frbl-cookie-notice__panel">
 									<span id="frbl-cookie-notice-preview-icon" class="frbl-cookie-notice__icon">
@@ -2472,6 +2537,66 @@ class Settings {
 						</div>
 						<?php endif; ?>
 					<?php endif; ?>
+
+					<div class="tw:mt-4">
+						<?php
+						$tracking_labels = array(
+							'clientify_analytics_plus'    => __( 'Clientify Analytics Plus', 'frontblocks' ),
+							'clientify_analytics_classic' => __( 'Clientify Analytics (classic)', 'frontblocks' ),
+							'brevo'                       => __( 'Brevo', 'frontblocks' ),
+						);
+						?>
+						<p class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+							<?php echo esc_html__( 'Added tracking integrations', 'frontblocks' ); ?>
+						</p>
+						<?php if ( $tracking_integrations ) : ?>
+							<ul class="tw:space-y-2 tw:mb-4">
+								<?php foreach ( $tracking_integrations as $integration ) : ?>
+									<li class="tw:flex tw:items-center tw:justify-between tw:gap-4 tw:p-3 tw:bg-gray-50 tw:border tw:border-gray-200 tw:rounded-lg">
+										<span class="tw:text-sm tw:text-gray-700">
+											<strong><?php echo esc_html( $tracking_labels[ $integration['type'] ] ?? $integration['type'] ); ?></strong>
+											<span class="tw:font-mono tw:text-xs">(<?php echo esc_html( $integration['id'] ); ?>)</span>
+										</span>
+										<label class="tw:text-sm tw:text-red-700 tw:whitespace-nowrap">
+											<input type="checkbox" name="frontblocks_settings[cookie_notice_tracking_remove][]" value="<?php echo esc_attr( $integration['type'] ); ?>" />
+											<?php echo esc_html__( 'Remove', 'frontblocks' ); ?>
+										</label>
+									</li>
+								<?php endforeach; ?>
+							</ul>
+						<?php else : ?>
+							<p class="tw:text-sm tw:text-gray-500 tw:mb-4"><?php echo esc_html__( 'No additional tracking integrations have been added.', 'frontblocks' ); ?></p>
+						<?php endif; ?>
+						<label for="cookie_notice_tracking_integration_code" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+							<?php echo esc_html__( 'Add a tracking integration', 'frontblocks' ); ?>
+						</label>
+						<input
+							type="text"
+							id="cookie_notice_tracking_integration_code"
+							name="frontblocks_settings[cookie_notice_tracking_integration_code]"
+							value=""
+							placeholder="<?php echo esc_attr__( 'Paste a Clientify or Brevo tracking code…', 'frontblocks' ); ?>"
+							class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:font-mono tw:text-xs tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
+						/>
+						<p class="tw:text-xs tw:text-gray-500 tw:mt-2 tw:mb-0">
+							<?php
+							printf(
+								wp_kses(
+									/* translators: %s: contact page URL. */
+									__( 'For security reasons, only a supported integration ID is extracted and saved; the pasted code is discarded. Need another tool supported? <a href="%s" target="_blank" rel="noopener noreferrer">Contact us</a>.', 'frontblocks' ),
+									array(
+										'a' => array(
+											'href'   => array(),
+											'target' => array(),
+											'rel'    => array(),
+										),
+									)
+								),
+								esc_url( 'https://close.technology/contacto' )
+							);
+							?>
+						</p>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -3326,6 +3451,11 @@ class Settings {
 			} elseif ( $this->option_cookie_notice_color === $key ) {
 				$hex_color         = sanitize_hex_color( $val );
 				$sanitized[ $key ] = $hex_color ? $hex_color : '#687df9';
+			} elseif ( $this->option_cookie_notice_bg_color === $key ) {
+				$hex_color         = sanitize_hex_color( $val );
+				$sanitized[ $key ] = $hex_color ? $hex_color : '#ffffff';
+			} elseif ( $this->option_cookie_notice_radius === $key ) {
+				$sanitized[ $key ] = in_array( $val, array( 'none', 'small', 'large' ), true ) ? $val : 'small';
 			} elseif ( $this->option_cookie_notice_expiration_days === $key ) {
 				$days              = absint( $val );
 				$sanitized[ $key ] = $days > 0 ? min( $days, 730 ) : 365;
@@ -3336,6 +3466,53 @@ class Settings {
 				$ga4_id            = strtoupper( sanitize_text_field( $val ) );
 				$sanitized[ $key ] = preg_match( '/^G-[A-Z0-9]+$/', $ga4_id ) ? $ga4_id : '';
 			}
+		}
+
+		if ( array_key_exists( 'cookie_notice_tracking_integration_code', $value ) || array_key_exists( 'cookie_notice_tracking_remove', $value ) ) {
+			$tracking_integrations = \FrontBlocks\Frontend\CookieNotice::get_tracking_integrations( $current_options );
+			$remove_types          = isset( $value['cookie_notice_tracking_remove'] ) && is_array( $value['cookie_notice_tracking_remove'] ) ? array_map( 'sanitize_key', $value['cookie_notice_tracking_remove'] ) : array();
+			$tracking_integrations = array_values(
+				array_filter(
+					$tracking_integrations,
+					static function ( $integration ) use ( $remove_types ) {
+						return ! in_array( $integration['type'], $remove_types, true );
+					}
+				)
+			);
+
+			$raw_code = (string) ( $value['cookie_notice_tracking_integration_code'] ?? '' );
+			$detected = \FrontBlocks\Frontend\CookieNotice::detect_tracking_snippet( $raw_code );
+
+			if ( null === $detected && '' !== trim( $raw_code ) ) {
+				add_settings_error(
+					'frontblocks_settings',
+					'frbl_cookie_notice_tracking_unrecognized',
+					sprintf(
+						/* translators: %s: contact page URL. */
+						esc_html__( 'The tracking code was not recognized and was not saved. Need support for this tool? Contact us at %s.', 'frontblocks' ),
+						'close.technology/contacto'
+					),
+					'error'
+				);
+			}
+
+			if ( $detected ) {
+				$tracking_integrations   = array_values(
+					array_filter(
+						$tracking_integrations,
+						static function ( $integration ) use ( $detected ) {
+							return $integration['type'] !== $detected['type'];
+						}
+					)
+				);
+				$tracking_integrations[] = array(
+					'type' => $detected['type'],
+					'id'   => sanitize_text_field( $detected['id'] ),
+				);
+			}
+
+			$sanitized[ $this->option_cookie_notice_tracking_integrations ] = $tracking_integrations;
+			unset( $sanitized['cookie_notice_tracking_type'], $sanitized['cookie_notice_tracking_id'] );
 		}
 
 		// Ensure mutual exclusion: if both description options are enabled, keep only the last one changed.

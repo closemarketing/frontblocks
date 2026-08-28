@@ -30,7 +30,7 @@
 	}
 
 	function defineInjectHelper() {
-		window.frblCookieNoticeInject = window.frblCookieNoticeInject || function (gtmId, ga4Id) {
+		window.frblCookieNoticeInject = window.frblCookieNoticeInject || function (gtmId, ga4Id, trackingIntegrations) {
 			if (gtmId) {
 				window.dataLayer = window.dataLayer || [];
 				window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
@@ -54,6 +54,47 @@
 				window.gtag('js', new Date());
 				window.gtag('config', ga4Id);
 			}
+
+			if (!Array.isArray(trackingIntegrations)) {
+				trackingIntegrations = [];
+			}
+
+			trackingIntegrations.forEach(function (integration) {
+				var trackingType = integration && integration.type ? integration.type : '';
+				var trackingId = integration && integration.id ? integration.id : '';
+
+				if (!trackingId) {
+					return;
+				}
+
+			if (trackingType === 'clientify_analytics_plus') {
+				var clientifyPixel = document.createElement('script');
+				clientifyPixel.defer = true;
+				clientifyPixel.src = 'https://analyticsplusdev.clientify.net/analytics_plus/pixel/' + encodeURIComponent(trackingId);
+				document.head.appendChild(clientifyPixel);
+			} else if (trackingType === 'clientify_analytics_classic') {
+				(function (d, w, u, o) {
+					w[o] = w[o] || function () {
+						(w[o].q = w[o].q || []).push(arguments);
+					};
+					var a = d.createElement('script'),
+						m = d.getElementsByTagName('script')[0];
+					a.async = 1; a.src = u;
+					m.parentNode.insertBefore(a, m);
+				})(document, window, 'https://analytics.clientify.net/tracker.js', 'ana');
+				window.ana('setTrackerUrl', 'https://analytics.clientify.net');
+				window.ana('setTrackingCode', trackingId);
+				window.ana('trackPageview');
+			} else if (trackingType === 'brevo') {
+				var brevoScript = document.createElement('script');
+				brevoScript.async = true;
+				brevoScript.src = 'https://cdn.brevo.com/js/sdk-loader.js';
+				document.head.appendChild(brevoScript);
+
+				window.Brevo = window.Brevo || [];
+				window.Brevo.push(['init', { client_key: trackingId }]);
+				}
+			});
 		};
 	}
 
@@ -71,7 +112,7 @@
 			})
 			.then(function (response) {
 				if (response && response.success && response.data && window.frblCookieNoticeInject) {
-					window.frblCookieNoticeInject(response.data.gtmId, response.data.ga4Id);
+					window.frblCookieNoticeInject(response.data.gtmId, response.data.ga4Id, response.data.trackingIntegrations);
 				}
 			})
 			.catch(function () {
@@ -150,15 +191,7 @@
 		var isPopup = banner.classList.contains('frbl-cookie-notice--popup');
 		var previouslyFocused = document.activeElement;
 
-		if (isPopup) {
-			document.body.classList.add('frbl-cookie-notice-lock-scroll');
-
-			if (acceptBtn) {
-				acceptBtn.focus({ preventScroll: true });
-			}
-
-			document.addEventListener('keydown', trapFocus);
-		}
+		revealBanner();
 
 		if (acceptBtn) {
 			acceptBtn.addEventListener('click', function () {
@@ -190,6 +223,31 @@
 
 				document.dispatchEvent(event);
 			});
+		}
+
+		/**
+		 * Reveal the banner: removes the '--init' class printed by PHP so the
+		 * CSS transition animates it in (slide up for the bar, slide in from
+		 * its anchored edge for the box, scale/fade in for the popup). The
+		 * popup gets a short extra delay first, per its layout's own request,
+		 * so it doesn't feel jarring the instant the page loads.
+		 */
+		function revealBanner() {
+			var delay = isPopup ? 150 : 20;
+
+			window.setTimeout(function () {
+				banner.classList.remove('frbl-cookie-notice--init');
+
+				if (isPopup) {
+					document.body.classList.add('frbl-cookie-notice-lock-scroll');
+
+					if (acceptBtn) {
+						acceptBtn.focus({ preventScroll: true });
+					}
+
+					document.addEventListener('keydown', trapFocus);
+				}
+			}, delay);
 		}
 
 		function trapFocus(event) {
