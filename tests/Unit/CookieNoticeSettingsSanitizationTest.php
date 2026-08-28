@@ -118,6 +118,54 @@ class CookieNoticeSettingsSanitizationTest extends TestCase {
 		$this->assertSame( 'small', $sanitized['cookie_notice_radius'] );
 	}
 
+	public function test_recognized_tracking_snippet_is_stored_as_type_and_id() {
+		$snippet   = '<script defer src="https://analyticsplusdev.clientify.net/analytics_plus/pixel/TestPixel1"></script>';
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_snippet' => $snippet ) );
+
+		$this->assertSame( 'clientify_analytics_plus', $sanitized['cookie_notice_tracking_type'] );
+		$this->assertSame( 'TestPixel1', $sanitized['cookie_notice_tracking_id'] );
+	}
+
+	public function test_unrecognized_tracking_snippet_is_rejected_and_reports_an_error() {
+		$before_count = $this->count_tracking_notice_errors();
+
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_snippet' => '<script src="https://example.com/unsupported.js"></script>' ) );
+
+		$this->assertSame( '', $sanitized['cookie_notice_tracking_type'] );
+		$this->assertSame( '', $sanitized['cookie_notice_tracking_id'] );
+		$this->assertSame( $before_count + 1, $this->count_tracking_notice_errors(), 'Expected exactly one new admin notice for the unrecognized tracking snippet.' );
+	}
+
+	public function test_blank_tracking_snippet_clears_stored_type_and_id_without_an_error() {
+		$before_count = $this->count_tracking_notice_errors();
+
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_snippet' => '' ) );
+
+		$this->assertSame( '', $sanitized['cookie_notice_tracking_type'] );
+		$this->assertSame( '', $sanitized['cookie_notice_tracking_id'] );
+		$this->assertSame( $before_count, $this->count_tracking_notice_errors(), 'A blank snippet must not add an admin notice.' );
+	}
+
+	/**
+	 * Count how many "unrecognized tracking snippet" admin notices are
+	 * currently queued, so tests can assert a delta instead of an absolute
+	 * count — WordPress's settings-errors list is a process-wide global that
+	 * earlier tests (in this file or elsewhere) may have already added to.
+	 *
+	 * @return int
+	 */
+	private function count_tracking_notice_errors() {
+		$count = 0;
+
+		foreach ( get_settings_errors( 'frontblocks_settings' ) as $error ) {
+			if ( 'frbl_cookie_notice_tracking_unrecognized' === $error['code'] ) {
+				++$count;
+			}
+		}
+
+		return $count;
+	}
+
 	public function test_expiration_days_is_capped_at_730() {
 		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_expiration_days' => '99999' ) );
 		$this->assertSame( 730, $sanitized['cookie_notice_expiration_days'] );

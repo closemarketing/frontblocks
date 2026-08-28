@@ -31,6 +31,7 @@ Enable it from **Appearance → FrontBlocks → Cookie Notice**.
 | Cookie expiration (days) | How long the visitor's decision is remembered. |
 | Google Tag Manager ID | `GTM-XXXXXXX`. Left empty, GTM is never loaded. |
 | GA4 Measurement ID | `G-XXXXXXXXXX`. Left empty, GA4 is never loaded. |
+| Additional tracking snippet (Clientify / Brevo) | Paste the full `<script>` snippet Clientify or Brevo gave you — the admin doesn't pick which tool it is. On save, the snippet is auto-detected against the supported patterns (Clientify Analytics Plus, classic Clientify Analytics, or Brevo) and only the id/code it needs is stored; the field then shows a "Detected: ..." confirmation and re-displays a clean, re-paste-able canonical snippet. An unrecognized snippet is rejected with an admin notice pointing to [close.technology/contacto](https://close.technology/contacto). |
 
 ## How consent gating works
 
@@ -50,16 +51,35 @@ Enable it from **Appearance → FrontBlocks → Cookie Notice**.
 - **Reject**: only sets the cookie. Nothing is ever requested from Google.
 - **Accept**: the cookie is set immediately, and the browser asks a small
   read-only AJAX endpoint (`frbl_get_cookie_notice_config`) for the configured
-  GTM/GA4 IDs. The endpoint only returns them when the *browser's own* cookie
-  says `accepted` — the IDs are never present in the page's HTML source before
-  that. The frontend script then creates the actual `<script>` tags dynamically,
-  so a first-time visitor sees tracking start without a page reload, and a
-  returning visitor who already accepted gets it automatically on every page load.
-  This endpoint is deliberately unauthenticated: it's read-only, never touches the
-  aggregate counters, and only ever echoes back non-secret IDs that are already
-  public once GTM/GA4 loads — a nonce here would have to live in the cache-neutral
-  HTML this module renders and would go stale on any page a cache keeps around
-  longer than a nonce's lifetime, breaking tracking until the cache refreshes.
+  GTM/GA4 IDs (and the detected Clientify/Brevo type + id, if any). The endpoint
+  only returns them when the *browser's own* cookie says `accepted` — nothing is
+  ever present in the page's HTML source before that. The frontend script then
+  creates the actual `<script>` tags dynamically, so a first-time visitor sees
+  tracking start without a page reload, and a returning visitor who already
+  accepted gets it automatically on every page load. This endpoint is deliberately
+  unauthenticated: it's read-only, never touches the aggregate counters, and only
+  ever echoes back non-secret ids that are already public once the corresponding
+  script loads — a nonce here would have to live in the cache-neutral HTML this
+  module renders and would go stale on any page a cache keeps around longer than
+  a nonce's lifetime, breaking tracking until the cache refreshes.
+
+## Clientify and Brevo detection
+
+Unlike the GTM/GA4 fields (a single plain ID typed in by hand), Clientify and
+Brevo hand out a full `<script>` snippet to paste — and Clientify alone has two
+differently-shaped snippets depending on which of their products the client is
+on (their current Analytics Plus pixel, or the classic Analytics tracker.js +
+`ana(...)` calls). Rather than a settings field per tool/variant, there is a
+single "Additional tracking snippet" field: whatever is pasted is matched
+against the three known patterns in `CookieNotice::detect_tracking_snippet()`,
+and only the type + the one id/code it needs is stored — never the raw pasted
+markup itself. `CookieNotice::build_tracking_snippet()` does the reverse, so
+the settings field can show back a clean, re-paste-able snippet instead of
+whatever whitespace/formatting the original paste happened to have.
+
+A snippet that doesn't match any of the three patterns is rejected (an admin
+notice points to [close.technology/contacto](https://close.technology/contacto)
+for adding support for it) rather than silently doing nothing.
 
 ## Compatibility with other analytics/ads plugins (Google Consent Mode)
 
@@ -155,6 +175,14 @@ forking it — used by FrontBlocks PRO's Advanced Cookie Management to add a
   a PHP filter reading a cookie server-side: this method's printed HTML is
   identical for every visitor of a URL, which a PHP-side per-visitor value
   would break under a full-page cache.
+- `frbl_cookie_notice_integration_category( string $category, string $type )`
+  — filter, lets an add-on override which consent category
+  (`CookieNotice::get_integration_default_category()`) an integration falls
+  under by default: `'analytics'` for `gtm`/`ga4`, `'marketing'` for every
+  Clientify/Brevo variant. This plugin's own gating stays a plain
+  accept/reject binary regardless of category — it's FrontBlocks PRO's
+  Advanced Cookie Management that reads this to decide which category gate
+  an integration needs when the visitor granted only some categories.
 
 ## Out of scope
 

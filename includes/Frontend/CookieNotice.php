@@ -50,6 +50,14 @@ class CookieNotice {
 	const NONCE_ACTION = 'frbl_cookie_notice_nonce';
 
 	/**
+	 * Additional tracking tools detectable from a pasted snippet (see
+	 * detect_tracking_snippet()), beyond the dedicated GTM/GA4 ID fields.
+	 *
+	 * @var string[]
+	 */
+	const TRACKING_TYPES = array( 'clientify_analytics_plus', 'clientify_analytics_classic', 'brevo' );
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -517,7 +525,7 @@ class CookieNotice {
 				}
 			}
 
-			window.frblCookieNoticeInject = window.frblCookieNoticeInject || function ( gtmId, ga4Id ) {
+			window.frblCookieNoticeInject = window.frblCookieNoticeInject || function ( gtmId, ga4Id, trackingType, trackingId ) {
 				if ( gtmId ) {
 					window.dataLayer = window.dataLayer || [];
 					window.dataLayer.push( { 'gtm.start': new Date().getTime(), event: 'gtm.js' } );
@@ -541,6 +549,34 @@ class CookieNotice {
 					window.gtag( 'js', new Date() );
 					window.gtag( 'config', ga4Id );
 				}
+
+				if ( trackingId && 'clientify_analytics_plus' === trackingType ) {
+					var clientifyPixel = document.createElement( 'script' );
+					clientifyPixel.defer = true;
+					clientifyPixel.src = 'https://analyticsplusdev.clientify.net/analytics_plus/pixel/' + encodeURIComponent( trackingId );
+					document.head.appendChild( clientifyPixel );
+				} else if ( trackingId && 'clientify_analytics_classic' === trackingType ) {
+					( function ( d, w, u, o ) {
+						w[ o ] = w[ o ] || function () {
+							( w[ o ].q = w[ o ].q || [] ).push( arguments );
+						};
+						var a = d.createElement( 'script' ),
+							m = d.getElementsByTagName( 'script' )[ 0 ];
+						a.async = 1; a.src = u;
+						m.parentNode.insertBefore( a, m );
+					} )( document, window, 'https://analytics.clientify.net/tracker.js', 'ana' );
+					window.ana( 'setTrackerUrl', 'https://analytics.clientify.net' );
+					window.ana( 'setTrackingCode', trackingId );
+					window.ana( 'trackPageview' );
+				} else if ( trackingId && 'brevo' === trackingType ) {
+					var brevoScript = document.createElement( 'script' );
+					brevoScript.async = true;
+					brevoScript.src = 'https://cdn.brevo.com/js/sdk-loader.js';
+					document.head.appendChild( brevoScript );
+
+					window.Brevo = window.Brevo || [];
+					window.Brevo.push( [ 'init', { client_key: trackingId } ] );
+				}
 			};
 
 			// An add-on tracking per-category consent can define this (printed
@@ -562,7 +598,7 @@ class CookieNotice {
 					.then( function ( response ) { return response.json(); } )
 					.then( function ( response ) {
 						if ( response && response.success && response.data ) {
-							window.frblCookieNoticeInject( response.data.gtmId, response.data.ga4Id );
+							window.frblCookieNoticeInject( response.data.gtmId, response.data.ga4Id, response.data.trackingType, response.data.trackingId );
 						}
 					} )
 					.catch( function () {} );
@@ -718,14 +754,18 @@ class CookieNotice {
 	 */
 	public function get_config_callback() {
 		$response = array(
-			'gtmId' => '',
-			'ga4Id' => '',
+			'gtmId'        => '',
+			'ga4Id'        => '',
+			'trackingType' => '',
+			'trackingId'   => '',
 		);
 
 		if ( $this->is_enabled() && 'accepted' === $this->get_consent() ) {
-			$options           = get_option( 'frontblocks_settings', array() );
-			$response['gtmId'] = $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
-			$response['ga4Id'] = $this->sanitize_ga4_id( $options['cookie_notice_ga4_id'] ?? '' );
+			$options                  = get_option( 'frontblocks_settings', array() );
+			$response['gtmId']        = $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
+			$response['ga4Id']        = $this->sanitize_ga4_id( $options['cookie_notice_ga4_id'] ?? '' );
+			$response['trackingType'] = $this->sanitize_tracking_type( $options['cookie_notice_tracking_type'] ?? '' );
+			$response['trackingId']   = '' !== $response['trackingType'] ? sanitize_text_field( $options['cookie_notice_tracking_id'] ?? '' ) : '';
 		}
 
 		wp_send_json_success( $response );
@@ -853,5 +893,145 @@ class CookieNotice {
 		$value = strtoupper( trim( (string) $value ) );
 
 		return preg_match( '/^G-[A-Z0-9]+$/', $value ) ? $value : '';
+	}
+
+	/**
+	 * Validate a stored tracking integration type against the ones this
+	 * plugin actually knows how to inject.
+	 *
+	 * @param string $value Raw stored value.
+	 * @return string One of TRACKING_TYPES, or '' if unrecognized.
+	 */
+	private function sanitize_tracking_type( $value ) {
+		return in_array( $value, self::TRACKING_TYPES, true ) ? $value : '';
+	}
+
+	/**
+	 * Detect which supported tool a pasted tracking snippet belongs to, and
+	 * pull out the single id/code it needs to be rebuilt later.
+	 *
+	 * The admin settings field only asks for "paste your tracking snippet" —
+	 * it deliberately doesn't ask which tool or product it's from, so this is
+	 * what tells them apart. Order matters: Clientify's two products are only
+	 * distinguishable by which loader URL they reference, so both are checked
+	 * before falling through to Brevo.
+	 *
+	 * Public static — also used by the admin settings page to detect what was
+	 * just pasted and by the settings sanitizer to decide what to store.
+	 *
+	 * @param string $raw Raw snippet as pasted by the admin.
+	 * @return array{type: string, id: string}|null The detected type/id pair, or null if unrecognized.
+	 */
+	public static function detect_tracking_snippet( $raw ) {
+		$raw = (string) $raw;
+
+		if ( '' === trim( $raw ) ) {
+			return null;
+		}
+
+		if ( preg_match( '#analyticsplusdev\.clientify\.net/analytics_plus/pixel/([A-Za-z0-9_-]+)#', $raw, $matches ) ) {
+			return array(
+				'type' => 'clientify_analytics_plus',
+				'id'   => $matches[1],
+			);
+		}
+
+		// The classic snippet calls a generic ana(...) dispatcher with the
+		// method name as its first string argument — e.g.
+		// ana('setTrackingCode', 'CF-12345-12345-ABCDE') — not a
+		// setTrackingCode(...) call itself.
+		if ( false !== strpos( $raw, 'analytics.clientify.net/tracker.js' )
+			&& preg_match( '#ana\(\s*[\'"]setTrackingCode[\'"]\s*,\s*[\'"]([^\'"]+)[\'"]#', $raw, $matches )
+		) {
+			return array(
+				'type' => 'clientify_analytics_classic',
+				'id'   => $matches[1],
+			);
+		}
+
+		if ( false !== strpos( $raw, 'cdn.brevo.com/js/sdk-loader.js' )
+			&& preg_match( '#client_key\s*:\s*[\'"]([^\'"]+)[\'"]#', $raw, $matches )
+		) {
+			return array(
+				'type' => 'brevo',
+				'id'   => $matches[1],
+			);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Rebuild the canonical snippet for a detected type/id pair, so the admin
+	 * settings field can show back a clean, re-paste-able snippet instead of
+	 * whatever formatting/whitespace the admin's original paste happened to have.
+	 *
+	 * Public static — used by the admin settings page to prefill the field.
+	 *
+	 * @param string $type One of TRACKING_TYPES.
+	 * @param string $id   The stored id/code for that type.
+	 * @return string The canonical snippet, or '' if type/id is empty or unrecognized.
+	 */
+	public static function build_tracking_snippet( $type, $id ) {
+		if ( '' === $type || '' === $id || ! in_array( $type, self::TRACKING_TYPES, true ) ) {
+			return '';
+		}
+
+		switch ( $type ) {
+			case 'clientify_analytics_plus':
+				return sprintf(
+					"<!--Clientify Tracking Begins-->\n<script defer src=\"https://analyticsplusdev.clientify.net/analytics_plus/pixel/%s\"></script>\n<!--Clientify Tracking Ends-->",
+					esc_attr( $id )
+				);
+
+			case 'clientify_analytics_classic':
+				return sprintf(
+					"<!--Clientify Tracking Begins-->\n<script type=\"text/javascript\">\nif (typeof trackerCode === 'undefined') {\n\t(function (d, w, u, o) {\n\t\tw[o] = w[o] || function () {\n\t\t\t(w[o].q = w[o].q || []).push(arguments)\n\t\t};\n\t\ta = d.createElement('script'),\n\t\t\tm = d.getElementsByTagName('script')[0];\n\t\ta.async = 1; a.src = u;\n\t\tm.parentNode.insertBefore(a, m)\n\t})(document, window, 'https://analytics.clientify.net/tracker.js', 'ana');\n\tana('setTrackerUrl', 'https://analytics.clientify.net');\n\tana('setTrackingCode', '%s');\n\tana('trackPageview');\n}\n</script>\n<!--Clientify Tracking Ends-->",
+					esc_js( $id )
+				);
+
+			case 'brevo':
+				return sprintf(
+					"<script src=\"https://cdn.brevo.com/js/sdk-loader.js\" async></script>\n<script>\n\twindow.Brevo = window.Brevo || [];\n\tBrevo.push([\n\t\t\"init\",\n\t\t{\n\t\t\tclient_key: \"%s\"\n\t\t}\n\t]);\n</script>",
+					esc_js( $id )
+				);
+
+			default:
+				return '';
+		}
+	}
+
+	/**
+	 * The consent category an integration falls under by default, for
+	 * FrontBlocks PRO's Advanced Cookie Management to key its per-category
+	 * gating on — this plugin's own gating stays a plain accept/reject
+	 * binary regardless of category.
+	 *
+	 * @param string $type Integration type: 'gtm', 'ga4', or one of TRACKING_TYPES.
+	 * @return string Category slug, e.g. 'analytics' or 'marketing'.
+	 */
+	public static function get_integration_default_category( $type ) {
+		$categories = array(
+			'gtm'                         => 'analytics',
+			'ga4'                         => 'analytics',
+			'clientify_analytics_plus'    => 'marketing',
+			'clientify_analytics_classic' => 'marketing',
+			'brevo'                       => 'marketing',
+		);
+
+		$category = $categories[ $type ] ?? 'marketing';
+
+		/**
+		 * Filters which consent category an integration defaults to.
+		 *
+		 * FrontBlocks PRO's Advanced Cookie Management reads this to decide
+		 * which category gate (e.g. "Analytics" vs "Marketing") an
+		 * integration falls under when the visitor granted only some
+		 * categories, instead of this plugin's own binary accept/reject.
+		 *
+		 * @param string $category Default category slug ('analytics' or 'marketing').
+		 * @param string $type     Integration type ('gtm', 'ga4', 'clientify_analytics_plus', 'clientify_analytics_classic', 'brevo').
+		 */
+		return apply_filters( 'frbl_cookie_notice_integration_category', $category, $type );
 	}
 }

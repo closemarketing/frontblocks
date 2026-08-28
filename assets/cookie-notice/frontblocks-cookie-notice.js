@@ -30,7 +30,7 @@
 	}
 
 	function defineInjectHelper() {
-		window.frblCookieNoticeInject = window.frblCookieNoticeInject || function (gtmId, ga4Id) {
+		window.frblCookieNoticeInject = window.frblCookieNoticeInject || function (gtmId, ga4Id, trackingType, trackingId) {
 			if (gtmId) {
 				window.dataLayer = window.dataLayer || [];
 				window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
@@ -54,6 +54,34 @@
 				window.gtag('js', new Date());
 				window.gtag('config', ga4Id);
 			}
+
+			if (trackingId && trackingType === 'clientify_analytics_plus') {
+				var clientifyPixel = document.createElement('script');
+				clientifyPixel.defer = true;
+				clientifyPixel.src = 'https://analyticsplusdev.clientify.net/analytics_plus/pixel/' + encodeURIComponent(trackingId);
+				document.head.appendChild(clientifyPixel);
+			} else if (trackingId && trackingType === 'clientify_analytics_classic') {
+				(function (d, w, u, o) {
+					w[o] = w[o] || function () {
+						(w[o].q = w[o].q || []).push(arguments);
+					};
+					var a = d.createElement('script'),
+						m = d.getElementsByTagName('script')[0];
+					a.async = 1; a.src = u;
+					m.parentNode.insertBefore(a, m);
+				})(document, window, 'https://analytics.clientify.net/tracker.js', 'ana');
+				window.ana('setTrackerUrl', 'https://analytics.clientify.net');
+				window.ana('setTrackingCode', trackingId);
+				window.ana('trackPageview');
+			} else if (trackingId && trackingType === 'brevo') {
+				var brevoScript = document.createElement('script');
+				brevoScript.async = true;
+				brevoScript.src = 'https://cdn.brevo.com/js/sdk-loader.js';
+				document.head.appendChild(brevoScript);
+
+				window.Brevo = window.Brevo || [];
+				window.Brevo.push(['init', { client_key: trackingId }]);
+			}
 		};
 	}
 
@@ -71,7 +99,7 @@
 			})
 			.then(function (response) {
 				if (response && response.success && response.data && window.frblCookieNoticeInject) {
-					window.frblCookieNoticeInject(response.data.gtmId, response.data.ga4Id);
+					window.frblCookieNoticeInject(response.data.gtmId, response.data.ga4Id, response.data.trackingType, response.data.trackingId);
 				}
 			})
 			.catch(function () {

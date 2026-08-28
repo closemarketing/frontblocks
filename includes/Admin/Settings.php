@@ -188,6 +188,21 @@ class Settings {
 	private $option_cookie_notice_ga4_id = 'cookie_notice_ga4_id';
 
 	/**
+	 * Option key for the auto-detected additional tracking integration type
+	 * (Clientify/Brevo), derived from the pasted snippet.
+	 *
+	 * @var string
+	 */
+	private $option_cookie_notice_tracking_type = 'cookie_notice_tracking_type';
+
+	/**
+	 * Option key for the id/code extracted from that pasted tracking snippet.
+	 *
+	 * @var string
+	 */
+	private $option_cookie_notice_tracking_id = 'cookie_notice_tracking_id';
+
+	/**
 	 * Option key for popups feature.
 	 *
 	 * @var string
@@ -2177,23 +2192,26 @@ class Settings {
 	 * @return void
 	 */
 	public function field_enable_cookie_notice() {
-		$options        = get_option( 'frontblocks_settings', array() );
-		$enabled        = (bool) ( $options[ $this->option_enable_cookie_notice ] ?? false );
-		$message        = (string) ( $options[ $this->option_cookie_notice_message ] ?? '' );
-		$accept_label   = (string) ( $options[ $this->option_cookie_notice_accept_label ] ?? '' );
-		$reject_label   = (string) ( $options[ $this->option_cookie_notice_reject_label ] ?? '' );
-		$policy_page_id = (int) ( $options[ $this->option_cookie_notice_policy_page_id ] ?? 0 );
-		$layout         = (string) ( $options[ $this->option_cookie_notice_layout ] ?? 'bar' );
-		$position       = (string) ( $options[ $this->option_cookie_notice_position ] ?? 'bottom-right' );
-		$color          = (string) ( $options[ $this->option_cookie_notice_color ] ?? '#687df9' );
-		$bg_color       = (string) ( $options[ $this->option_cookie_notice_bg_color ] ?? '#ffffff' );
-		$radius         = (string) ( $options[ $this->option_cookie_notice_radius ] ?? 'small' );
-		$expiration     = (int) ( $options[ $this->option_cookie_notice_expiration_days ] ?? 365 );
-		$gtm_id         = (string) ( $options[ $this->option_cookie_notice_gtm_id ] ?? '' );
-		$ga4_id         = (string) ( $options[ $this->option_cookie_notice_ga4_id ] ?? '' );
-		$accepted_count = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_ACCEPTED, 0 );
-		$rejected_count = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_REJECTED, 0 );
-		$total_count    = $accepted_count + $rejected_count;
+		$options          = get_option( 'frontblocks_settings', array() );
+		$enabled          = (bool) ( $options[ $this->option_enable_cookie_notice ] ?? false );
+		$message          = (string) ( $options[ $this->option_cookie_notice_message ] ?? '' );
+		$accept_label     = (string) ( $options[ $this->option_cookie_notice_accept_label ] ?? '' );
+		$reject_label     = (string) ( $options[ $this->option_cookie_notice_reject_label ] ?? '' );
+		$policy_page_id   = (int) ( $options[ $this->option_cookie_notice_policy_page_id ] ?? 0 );
+		$layout           = (string) ( $options[ $this->option_cookie_notice_layout ] ?? 'bar' );
+		$position         = (string) ( $options[ $this->option_cookie_notice_position ] ?? 'bottom-right' );
+		$color            = (string) ( $options[ $this->option_cookie_notice_color ] ?? '#687df9' );
+		$bg_color         = (string) ( $options[ $this->option_cookie_notice_bg_color ] ?? '#ffffff' );
+		$radius           = (string) ( $options[ $this->option_cookie_notice_radius ] ?? 'small' );
+		$expiration       = (int) ( $options[ $this->option_cookie_notice_expiration_days ] ?? 365 );
+		$gtm_id           = (string) ( $options[ $this->option_cookie_notice_gtm_id ] ?? '' );
+		$ga4_id           = (string) ( $options[ $this->option_cookie_notice_ga4_id ] ?? '' );
+		$tracking_type    = (string) ( $options[ $this->option_cookie_notice_tracking_type ] ?? '' );
+		$tracking_id      = (string) ( $options[ $this->option_cookie_notice_tracking_id ] ?? '' );
+		$tracking_snippet = \FrontBlocks\Frontend\CookieNotice::build_tracking_snippet( $tracking_type, $tracking_id );
+		$accepted_count   = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_ACCEPTED, 0 );
+		$rejected_count   = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_REJECTED, 0 );
+		$total_count      = $accepted_count + $rejected_count;
 		$acceptance_pct = $total_count > 0 ? round( ( $accepted_count / $total_count ) * 100, 1 ) : 0;
 		?>
 		<div class="frbl-cookie-notice-wrapper">
@@ -2508,6 +2526,55 @@ class Settings {
 							</p>
 						</div>
 					<?php endif; ?>
+
+					<div class="tw:mt-4">
+						<label for="cookie_notice_tracking_snippet" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+							<?php echo esc_html__( 'Additional tracking snippet (Clientify / Brevo)', 'frontblocks' ); ?>
+						</label>
+						<textarea
+							id="cookie_notice_tracking_snippet"
+							name="frontblocks_settings[cookie_notice_tracking_snippet]"
+							rows="4"
+							placeholder="<?php echo esc_attr__( 'Paste the tracking snippet Clientify or Brevo gave you…', 'frontblocks' ); ?>"
+							class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:font-mono tw:text-xs tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
+						><?php echo esc_textarea( $tracking_snippet ); ?></textarea>
+						<?php if ( '' !== $tracking_type ) : ?>
+							<?php
+							$tracking_labels = array(
+								'clientify_analytics_plus'    => __( 'Clientify Analytics Plus', 'frontblocks' ),
+								'clientify_analytics_classic' => __( 'Clientify Analytics (classic)', 'frontblocks' ),
+								'brevo'                        => __( 'Brevo', 'frontblocks' ),
+							);
+							?>
+							<p class="tw:text-xs tw:text-green-600 tw:mt-2 tw:mb-0">
+								<?php
+								printf(
+									/* translators: %s: detected integration name. */
+									esc_html__( 'Detected: %s', 'frontblocks' ),
+									esc_html( $tracking_labels[ $tracking_type ] ?? $tracking_type )
+								);
+								?>
+							</p>
+						<?php endif; ?>
+						<p class="tw:text-xs tw:text-gray-500 tw:mt-2 tw:mb-0">
+							<?php
+							printf(
+								wp_kses(
+									/* translators: %s: contact page URL. */
+									__( 'We automatically detect which tool the pasted snippet is from — no need to pick one. Need another tool supported? <a href="%s" target="_blank" rel="noopener noreferrer">Contact us</a>.', 'frontblocks' ),
+									array(
+										'a' => array(
+											'href'   => array(),
+											'target' => array(),
+											'rel'    => array(),
+										),
+									)
+								),
+								esc_url( 'https://close.technology/contacto' )
+							);
+							?>
+						</p>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -2598,6 +2665,8 @@ class Settings {
 			$this->option_cookie_notice_expiration_days => 365,
 			$this->option_cookie_notice_gtm_id          => '',
 			$this->option_cookie_notice_ga4_id          => '',
+			$this->option_cookie_notice_tracking_type   => '',
+			$this->option_cookie_notice_tracking_id     => '',
 		);
 
 		foreach ( $defaults as $key => $default ) {
@@ -3446,6 +3515,24 @@ class Settings {
 			} elseif ( $this->option_cookie_notice_ga4_id === $key ) {
 				$ga4_id            = strtoupper( sanitize_text_field( $val ) );
 				$sanitized[ $key ] = preg_match( '/^G-[A-Z0-9]+$/', $ga4_id ) ? $ga4_id : '';
+			} elseif ( 'cookie_notice_tracking_snippet' === $key ) {
+				$detected = \FrontBlocks\Frontend\CookieNotice::detect_tracking_snippet( $val );
+
+				if ( null === $detected && '' !== trim( (string) $val ) ) {
+					add_settings_error(
+						'frontblocks_settings',
+						'frbl_cookie_notice_tracking_unrecognized',
+						sprintf(
+							/* translators: %s: contact page URL. */
+							esc_html__( 'The pasted tracking snippet was not recognized and was not saved. Need support for this tool? Contact us at %s.', 'frontblocks' ),
+							'close.technology/contacto'
+						),
+						'error'
+					);
+				}
+
+				$sanitized[ $this->option_cookie_notice_tracking_type ] = $detected ? $detected['type'] : '';
+				$sanitized[ $this->option_cookie_notice_tracking_id ]   = $detected ? sanitize_text_field( $detected['id'] ) : '';
 			}
 		}
 
