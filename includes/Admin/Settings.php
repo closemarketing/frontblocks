@@ -805,6 +805,124 @@ class Settings {
 			"
 		);
 
+		// Isolated inline script for the tabbed admin shell: tab switching, bulk
+		// enable/disable, discard, and "unsaved changes" tracking on the save bar.
+		wp_add_inline_script(
+			'jquery',
+			"
+			document.addEventListener('DOMContentLoaded', function() {
+				var tabButtons = document.querySelectorAll('[data-tab-target]');
+				var tabPanels  = document.querySelectorAll('[data-tab-panel]');
+
+				function activateTab(tabId) {
+					var found = false;
+
+					tabPanels.forEach(function (panel) {
+						var match = panel.getAttribute('data-tab-panel') === tabId;
+						panel.hidden = ! match;
+						found = found || match;
+					});
+
+					if (! found) {
+						return;
+					}
+
+					tabButtons.forEach(function (btn) {
+						if (! btn.classList.contains('frbl-tab-btn')) {
+							return;
+						}
+						var active = btn.getAttribute('data-tab-target') === tabId;
+						btn.classList.toggle('is-active', active);
+						btn.setAttribute('aria-selected', active ? 'true' : 'false');
+					});
+				}
+
+				tabButtons.forEach(function (btn) {
+					btn.addEventListener('click', function () {
+						activateTab(btn.getAttribute('data-tab-target'));
+					});
+				});
+
+				// Legacy inline links pointing at '#frontblocks_section_license'
+				// (upsell notices) should open the License tab instead of jumping
+				// to a hidden anchor.
+				document.addEventListener('click', function (event) {
+					var link = event.target.closest('a[href=\"#frontblocks_section_license\"]');
+					if (link) {
+						event.preventDefault();
+						activateTab('license');
+					}
+				});
+
+				var initialTab = 'blocks';
+				var hash = window.location.hash.replace('#', '');
+				if (hash === 'frontblocks_section_license') {
+					hash = 'license';
+				}
+				if (hash && document.querySelector('[data-tab-panel=\"' + hash + '\"]')) {
+					initialTab = hash;
+				}
+				activateTab(initialTab);
+
+				// Keep the active tab across a save (WordPress redirects back to
+				// the referring URL after options.php processes the form).
+				var form = document.getElementById('frbl-settings-form');
+				var referer = form ? form.querySelector('input[name=\"_wp_http_referer\"]') : null;
+
+				if (form && referer) {
+					form.addEventListener('submit', function () {
+						var active = document.querySelector('.frbl-tab-btn.is-active');
+						var tabId  = active ? active.getAttribute('data-tab-target') : initialTab;
+						var url    = referer.value.split('#')[0];
+						referer.value = url + '#' + tabId;
+					});
+				}
+
+				// Bulk enable/disable within the active tab.
+				document.querySelectorAll('[data-bulk-action]').forEach(function (btn) {
+					btn.addEventListener('click', function () {
+						var panel = btn.closest('[data-tab-panel]');
+						if (! panel) {
+							return;
+						}
+						var enable = btn.getAttribute('data-bulk-action') === 'enable';
+						panel.querySelectorAll('input[type=\"checkbox\"]:not(:disabled)').forEach(function (checkbox) {
+							if (checkbox.checked !== enable) {
+								checkbox.checked = enable;
+								checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+							}
+						});
+					});
+				});
+
+				// 'Unsaved changes' indicator on the sticky save bar.
+				var saveStatus = document.querySelector('[data-save-status]');
+				var savedText    = " . wp_json_encode( __( 'All changes saved.', 'frontblocks' ) ) . ";
+				var unsavedText  = " . wp_json_encode( __( 'Unsaved changes — applied on the front end immediately after saving.', 'frontblocks' ) ) . ";
+
+				function markDirty() {
+					if (saveStatus) {
+						saveStatus.textContent = unsavedText;
+					}
+				}
+
+				if (form && saveStatus) {
+					form.addEventListener('change', markDirty);
+					form.addEventListener('input', markDirty);
+
+					form.addEventListener('reset', function () {
+						setTimeout(function () {
+							form.querySelectorAll('input[type=\"checkbox\"]').forEach(function (checkbox) {
+								checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+							});
+							saveStatus.textContent = savedText;
+						}, 0);
+					});
+				}
+			});
+			"
+		);
+
 		// Enqueue script for custom post types if PRO is active and license is valid.
 		if ( frbl_is_pro_active() && $this->is_license_valid ) {
 			wp_enqueue_script(
@@ -1195,28 +1313,84 @@ class Settings {
 		if ( ! current_user_can( 'edit_theme_options' ) ) {
 			return;
 		}
-		?>
-		<div class="frbl-settings-wrapper tw:min-h-screen tw:bg-gray-50 tw:py-8">
-			<div class="tw:max-w-5xl tw:mx-auto tw:px-4 tw:sm:px-6 tw:lg:px-8">
-				<!-- Header Section -->
-				<div class="tw:mb-8 frbl-animate-slide-in">
-					<div class="tw:flex tw:items-center tw:justify-between">
-						<div>
-							<h1 class="tw:text-3xl tw:font-bold tw:text-gray-900 tw:mb-2">
-								<?php echo esc_html__( 'FrontBlocks Settings', 'frontblocks' ); ?>
-							</h1>
-							<p class="tw:text-gray-600">
-								<?php echo esc_html__( 'Add visual enhancements to your website with FrontBlocks.', 'frontblocks' ); ?>
-							</p>
-						</div>
-						<div class="tw:flex tw:items-center tw:space-x-2">
-							<span class="tw:inline-flex tw:items-center tw:px-3 tw:py-1 tw:rounded-full tw:text-sm tw:font-medium tw:bg-primary-100 tw:text-primary-700">
-								<?php echo esc_html__( 'Version', 'frontblocks' ) . ' ' . esc_html( FRBL_VERSION ); ?>
-							</span>
-						</div>
-					</div>
-				</div>
 
+		global $wp_settings_sections;
+
+		$sections    = isset( $wp_settings_sections[ $this->page_slug ] ) ? (array) $wp_settings_sections[ $this->page_slug ] : array();
+		$has_cpt_tab = false;
+
+		foreach ( $sections as $section ) {
+			if ( 'frontblocks_section_custom_post_types' === $section['id'] ) {
+				$has_cpt_tab = true;
+				break;
+			}
+		}
+
+		list( $features_on, $features_total )       = $this->count_section_toggles( 'frontblocks_section_features' );
+		list( $maintenance_on, $maintenance_total ) = $this->count_section_toggles( 'frontblocks_section_maintenance' );
+		list( $woo_on, $woo_total )                 = $this->count_section_toggles( 'frontblocks_section_woocommerce_features' );
+		$optional_on    = $features_on + $maintenance_on;
+		$optional_total = $features_total + $maintenance_total;
+
+		$tabs = array(
+			array(
+				'id'    => 'blocks',
+				'label' => __( 'Blocks', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'pro',
+				'label' => __( 'PRO blocks', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'optional',
+				'label' => __( 'Optional features', 'frontblocks' ),
+				'on'    => $optional_on,
+				'total' => $optional_total,
+			),
+			array(
+				'id'    => 'woocommerce',
+				'label' => __( 'WooCommerce', 'frontblocks' ),
+				'on'    => $woo_on,
+				'total' => $woo_total,
+			),
+			array(
+				'id'    => 'cookies',
+				'label' => __( 'Cookies', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'cpt',
+				'label' => __( 'Post types', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'license',
+				'label' => __( 'License', 'frontblocks' ),
+			),
+		);
+		?>
+		<div class="frbl-settings-wrapper">
+			<div class="frbl-admin-header">
+				<div class="frbl-admin-header-top">
+					<div class="frbl-admin-title-group">
+						<h1><?php esc_html_e( 'FrontBlocks', 'frontblocks' ); ?></h1>
+						<span class="frbl-admin-subtitle"><?php esc_html_e( 'Settings', 'frontblocks' ); ?></span>
+					</div>
+					<span class="frbl-version-chip">v<?php echo esc_html( FRBL_VERSION ); ?></span>
+					<div class="frbl-header-spacer"></div>
+					<?php $this->render_license_badge(); ?>
+				</div>
+				<div class="frbl-tabs" role="tablist">
+					<?php foreach ( $tabs as $tab ) : ?>
+						<button type="button" class="frbl-tab-btn" data-tab-target="<?php echo esc_attr( $tab['id'] ); ?>" role="tab" aria-selected="false">
+							<span><?php echo esc_html( $tab['label'] ); ?></span>
+							<?php if ( isset( $tab['total'] ) ) : ?>
+								<span class="frbl-tab-count"><?php echo esc_html( $tab['on'] . '/' . $tab['total'] ); ?></span>
+							<?php endif; ?>
+						</button>
+					<?php endforeach; ?>
+				</div>
+			</div>
+
+			<div class="frbl-admin-body">
 				<?php
 				// Show success message after settings are saved.
 				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -1335,56 +1509,333 @@ class Settings {
 				?>
 
 				<!-- Settings Form -->
-				<form method="post" action="options.php" class="tw:space-y-6">
+				<form method="post" action="options.php" id="frbl-settings-form">
 					<?php settings_fields( 'frontblocks_settings' ); ?>
 
-					<?php
-					// Get all sections for this page.
-					global $wp_settings_sections, $wp_settings_fields;
+					<div class="frbl-tab-panel" data-tab-panel="blocks">
+						<?php $this->render_blocks_tab(); ?>
+					</div>
 
-					if ( ! isset( $wp_settings_sections[ $this->page_slug ] ) ) {
-						return;
-					}
+					<div class="frbl-tab-panel" data-tab-panel="pro" hidden>
+						<?php $this->render_pro_blocks_tab(); ?>
+					</div>
 
-					foreach ( (array) $wp_settings_sections[ $this->page_slug ] as $section ) {
-						$this->render_settings_section( $section );
-					}
-					?>
+					<div class="frbl-tab-panel" data-tab-panel="optional" hidden>
+						<div class="frbl-tab-panel-head">
+							<div>
+								<h2><?php esc_html_e( 'Optional features', 'frontblocks' ); ?></h2>
+								<p><?php esc_html_e( 'Site-wide behaviours that are not blocks — progress bars, buttons, typography, maintenance mode.', 'frontblocks' ); ?></p>
+							</div>
+							<?php if ( $optional_total > 0 ) : ?>
+								<div class="frbl-bulk-actions">
+									<button type="button" class="frbl-btn-outline" data-bulk-action="enable"><?php esc_html_e( 'Enable all', 'frontblocks' ); ?></button>
+									<button type="button" class="frbl-btn-ghost" data-bulk-action="disable"><?php esc_html_e( 'Disable all', 'frontblocks' ); ?></button>
+								</div>
+							<?php endif; ?>
+						</div>
+						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_features' ); ?>
+						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_maintenance' ); ?>
+					</div>
+
+					<div class="frbl-tab-panel" data-tab-panel="woocommerce" hidden>
+						<div class="frbl-tab-panel-head">
+							<div>
+								<h2><?php esc_html_e( 'WooCommerce', 'frontblocks' ); ?></h2>
+								<p><?php esc_html_e( 'Additions and removals applied to product, cart and checkout pages.', 'frontblocks' ); ?></p>
+							</div>
+							<?php if ( $woo_total > 0 ) : ?>
+								<div class="frbl-bulk-actions">
+									<button type="button" class="frbl-btn-outline" data-bulk-action="enable"><?php esc_html_e( 'Enable all', 'frontblocks' ); ?></button>
+									<button type="button" class="frbl-btn-ghost" data-bulk-action="disable"><?php esc_html_e( 'Disable all', 'frontblocks' ); ?></button>
+								</div>
+							<?php endif; ?>
+						</div>
+						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_woocommerce_features' ); ?>
+					</div>
+
+					<div class="frbl-tab-panel" data-tab-panel="cookies" hidden>
+						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_cookie_notice' ); ?>
+					</div>
+
+					<?php if ( $has_cpt_tab ) : ?>
+						<div class="frbl-tab-panel" data-tab-panel="cpt" hidden>
+							<?php $this->render_section_if_exists( $sections, 'frontblocks_section_custom_post_types' ); ?>
+						</div>
+					<?php endif; ?>
 
 					<!-- Submit Button -->
-					<div class="frbl-settings-save-bar tw:flex tw:items-center tw:justify-between">
-						<div class="tw:text-sm tw:text-gray-500">
-							<?php echo esc_html__( 'Changes will be applied immediately after saving.', 'frontblocks' ); ?>
-						</div>
-						<button type="submit" class="tw:inline-flex tw:items-center tw:px-4 tw:py-3 tw:border tw:border-transparent tw:text-base tw:font-medium tw:rounded-lg tw:shadow-sm tw:text-white tw:bg-primary-500 tw:hover:bg-primary-600 tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-offset-2 tw:focus:ring-primary-500 tw:transition-colors tw:duration-200">
-							<svg class="tw:w-5 tw:h-5 tw:mr-2 tw:-ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<div class="frbl-settings-save-bar">
+						<span class="frbl-save-status" data-save-status><?php esc_html_e( 'All changes saved.', 'frontblocks' ); ?></span>
+						<div class="frbl-save-bar-spacer"></div>
+						<button type="reset" class="frbl-btn-ghost" data-discard-btn><?php esc_html_e( 'Discard', 'frontblocks' ); ?></button>
+						<button type="submit" class="frbl-btn-primary">
+							<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
 							</svg>
-							<?php echo esc_html__( 'Save Settings', 'frontblocks' ); ?>
+							<?php echo esc_html__( 'Save settings', 'frontblocks' ); ?>
 						</button>
 					</div>
 				</form>
 
-				<?php
-				// Render license section separately (outside main form) if PRO is active.
-				if ( frbl_is_pro_active() ) {
-					$this->render_license_section();
-				}
-				?>
+				<?php if ( ! $has_cpt_tab ) : ?>
+					<div class="frbl-tab-panel" data-tab-panel="cpt" hidden>
+						<?php
+						$this->render_pro_upsell_card(
+							__( 'Custom Post Types builder', 'frontblocks' ),
+							__( 'Create and manage post types with advanced configuration options, directly from the admin panel.', 'frontblocks' ),
+							'settings-cpt-tab'
+						);
+						?>
+					</div>
+				<?php endif; ?>
 
-				<!-- Footer Info -->
-				<div class="tw:mt-8 tw:text-center tw:text-sm tw:text-gray-500">
+				<div class="frbl-tab-panel" data-tab-panel="license" id="frontblocks_section_license" hidden>
 					<?php
-					printf(
-						/* translators: %s: Close·marketing link */
-						esc_html__( 'Made with ❤️ by %s', 'frontblocks' ),
-						'<a href="https://close.technology/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings" target="_blank" rel="noopener noreferrer" class="tw:text-primary-500 tw:hover:text-primary-600 tw:font-medium">Close·Technology</a>'
-					);
+					// Render license section (outside the settings form: it posts to its own option group).
+					if ( frbl_is_pro_active() ) {
+						$this->render_license_section();
+					} else {
+						$this->render_pro_upsell_card(
+							__( 'PRO license', 'frontblocks' ),
+							__( 'Install FrontBlocks PRO to manage your license key, automatic updates and priority support from here.', 'frontblocks' ),
+							'settings-license-tab'
+						);
+					}
 					?>
 				</div>
 
 				<?php $this->render_debug_section(); ?>
+
+				<!-- Footer Info -->
+				<div class="frbl-admin-footer">
+					<?php
+					printf(
+						/* translators: %s: Close·marketing link */
+						esc_html__( 'Made with ❤️ by %s', 'frontblocks' ),
+						'<a href="https://close.technology/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings" target="_blank" rel="noopener noreferrer">Close·Technology</a>'
+					);
+					?>
+				</div>
 			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Find a registered settings section by id and render it, if present.
+	 *
+	 * @param array  $sections   All registered sections for this page (from $wp_settings_sections).
+	 * @param string $section_id Section id to look for.
+	 * @return void
+	 */
+	private function render_section_if_exists( array $sections, $section_id ) {
+		foreach ( $sections as $section ) {
+			if ( $section['id'] === $section_id ) {
+				$this->render_settings_section( $section );
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Count how many toggle fields of a section are currently enabled.
+	 *
+	 * @param string $section_id Section id.
+	 * @return array{0:int,1:int} [enabled count, total count].
+	 */
+	private function count_section_toggles( $section_id ) {
+		global $wp_settings_fields;
+
+		if ( empty( $wp_settings_fields[ $this->page_slug ][ $section_id ] ) ) {
+			return array( 0, 0 );
+		}
+
+		$options = get_option( 'frontblocks_settings', array() );
+		$total   = 0;
+		$on      = 0;
+
+		foreach ( $wp_settings_fields[ $this->page_slug ][ $section_id ] as $field ) {
+			++$total;
+			if ( ! empty( $options[ $field['id'] ] ) ) {
+				++$on;
+			}
+		}
+
+		return array( $on, $total );
+	}
+
+	/**
+	 * Render the license status badge shown in the sticky header.
+	 *
+	 * @return void
+	 */
+	private function render_license_badge() {
+		if ( ! frbl_is_pro_active() ) {
+			?>
+			<a
+				href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-header-cta"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="frbl-license-badge frbl-license-badge--none"
+			>
+				<?php esc_html_e( 'Get FrontBlocks PRO', 'frontblocks' ); ?>
+			</a>
+			<?php
+			return;
+		}
+
+		if ( $this->is_license_valid ) {
+			?>
+			<span class="frbl-license-badge frbl-license-badge--active">
+				<span class="frbl-license-dot"></span>
+				<?php esc_html_e( 'PRO license active', 'frontblocks' ); ?>
+			</span>
+			<button type="button" class="frbl-license-manage" data-tab-target="license"><?php esc_html_e( 'Manage', 'frontblocks' ); ?></button>
+			<?php
+			return;
+		}
+		?>
+		<span class="frbl-license-badge frbl-license-badge--inactive">
+			<?php esc_html_e( 'License not active', 'frontblocks' ); ?>
+		</span>
+		<button type="button" class="frbl-license-manage" data-tab-target="license"><?php esc_html_e( 'Activate', 'frontblocks' ); ?></button>
+		<?php
+	}
+
+	/**
+	 * Render the "Blocks" tab: core blocks always available in the block editor.
+	 *
+	 * @return void
+	 */
+	private function render_blocks_tab() {
+		$active_blocks = apply_filters(
+			'frbl_active_blocks',
+			array(
+				array(
+					'icon'  => 'animations',
+					'title' => __( 'Animations', 'frontblocks' ),
+					'desc'  => __( 'Add animations to any block using Animate.css', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'carousel',
+					'title' => __( 'Carousel/Slider', 'frontblocks' ),
+					'desc'  => __( 'Transform any Grid block into a carousel or slider', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'gallery',
+					'title' => __( 'Native Gallery', 'frontblocks' ),
+					'desc'  => __( 'Enhanced gallery block with carousel and masonry options', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'sticky',
+					'title' => __( 'Sticky Columns', 'frontblocks' ),
+					'desc'  => __( 'Make Grid blocks sticky when scrolling', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'insert_post',
+					'title' => __( 'Insert Post Block', 'frontblocks' ),
+					'desc'  => __( 'Display content from other posts, pages or custom post types', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'counter',
+					'title' => __( 'Counter Block', 'frontblocks' ),
+					'desc'  => __( 'Display animated counters with start and end values', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'reading_time',
+					'title' => __( 'Reading Time Block', 'frontblocks' ),
+					'desc'  => __( 'Show estimated reading time for posts', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'stacked_images',
+					'title' => __( 'Stacked Images Block', 'frontblocks' ),
+					'desc'  => __( 'Display images with animated stacking effect from different directions', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'product_categories',
+					'title' => __( 'Product Categories Block', 'frontblocks' ),
+					'desc'  => __( 'Display WooCommerce product categories', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'headline_marquee',
+					'title' => __( 'Headline Marquee', 'frontblocks' ),
+					'desc'  => __( 'Infinite scrolling marquee effect for headline/text blocks with customizable speed', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'svg_upload',
+					'title' => __( 'SVG Uploads', 'frontblocks' ),
+					'desc'  => __( 'Upload SVG files to the media library. Files are automatically sanitized to prevent security risks.', 'frontblocks' ),
+				),
+			)
+		);
+		?>
+		<div class="frbl-tab-panel-head">
+			<div>
+				<h2><?php esc_html_e( 'Blocks & features', 'frontblocks' ); ?></h2>
+				<p><?php esc_html_e( 'Core blocks available in the block editor. Always active.', 'frontblocks' ); ?></p>
+			</div>
+		</div>
+		<div class="frbl-features-grid">
+			<?php foreach ( $active_blocks as $block ) : ?>
+				<?php UI::show_info_card( $block['icon'], $block['title'], $block['desc'] ); ?>
+			<?php endforeach; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render the "PRO blocks" tab.
+	 *
+	 * @return void
+	 */
+	private function render_pro_blocks_tab() {
+		$pro_blocks = apply_filters( 'frbl_pro_blocks', $this->get_default_pro_blocks() );
+		?>
+		<div class="frbl-tab-panel-head">
+			<div>
+				<h2><?php esc_html_e( 'PRO blocks', 'frontblocks' ); ?></h2>
+				<p><?php esc_html_e( 'Included with your active license. Each one adds a block or an editor capability.', 'frontblocks' ); ?></p>
+			</div>
+		</div>
+		<div class="frbl-features-grid">
+			<?php foreach ( $pro_blocks as $block ) : ?>
+				<?php UI::show_pro_info_card( $block['icon'], $block['title'], $block['desc'] ); ?>
+			<?php endforeach; ?>
+		</div>
+		<?php if ( ! frbl_is_pro_active() ) : ?>
+			<div class="frbl-tab-cta">
+				<a
+					href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-pro-tab"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="frbl-btn-primary"
+				>
+					<?php esc_html_e( 'Get FrontBlocks PRO', 'frontblocks' ); ?> →
+				</a>
+			</div>
+		<?php endif; ?>
+		<?php
+	}
+
+	/**
+	 * Render a generic PRO upsell card, used by tabs whose feature is entirely
+	 * absent (not just unlicensed) when FrontBlocks PRO isn't installed.
+	 *
+	 * @param string $title        Card title.
+	 * @param string $desc         Card description.
+	 * @param string $utm_campaign utm_campaign value for the outbound link.
+	 * @return void
+	 */
+	private function render_pro_upsell_card( $title, $desc, $utm_campaign ) {
+		$pro_url = 'https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=' . rawurlencode( $utm_campaign );
+		?>
+		<div class="frbl-upsell-card">
+			<span class="frbl-pro-chip">PRO</span>
+			<h2><?php echo esc_html( $title ); ?></h2>
+			<p><?php echo esc_html( $desc ); ?></p>
+			<a href="<?php echo esc_url( $pro_url ); ?>" target="_blank" rel="noopener noreferrer" class="frbl-btn-primary">
+				<?php esc_html_e( 'Get FrontBlocks PRO', 'frontblocks' ); ?> →
+			</a>
 		</div>
 		<?php
 	}
@@ -1688,23 +2139,33 @@ class Settings {
 			</div>
 			<?php
 		} else {
-			// Render regular sections with feature grid.
+			// Render regular sections with feature grid. The "Optional features" and
+			// "WooCommerce" tabs already print their own <h2>/description in the tab
+			// head, so skip the duplicate title for those two — the callback (which
+			// may render a PRO upsell notice) still runs.
+			$suppress_title = in_array( $section['id'], array( 'frontblocks_section_features', 'frontblocks_section_woocommerce_features' ), true );
 			?>
 			<div class="frbl-section-wrapper">
-				<!-- Section Header -->
-				<div class="frbl-section-header">
-					<h2 class="tw:text-2xl tw:font-bold tw:text-gray-900 tw:mb-0">
-						<?php echo esc_html( $section['title'] ); ?>
-					</h2>
-					<?php
-					if ( $section['callback'] ) {
-						echo '<div class="tw:text-sm tw:text-gray-600">';
-						call_user_func( $section['callback'], $section );
-						echo '</div>';
-					}
-					?>
-				</div>
-				
+				<?php if ( ! $suppress_title ) : ?>
+					<!-- Section Header -->
+					<div class="frbl-section-header">
+						<h2 class="tw:text-2xl tw:font-bold tw:text-gray-900 tw:mb-0">
+							<?php echo esc_html( $section['title'] ); ?>
+						</h2>
+						<?php
+						if ( $section['callback'] ) {
+							echo '<div class="tw:text-sm tw:text-gray-600">';
+							call_user_func( $section['callback'], $section );
+							echo '</div>';
+						}
+						?>
+					</div>
+				<?php elseif ( $section['callback'] ) : ?>
+					<div class="tw:text-sm tw:text-gray-600 tw:mb-4">
+						<?php call_user_func( $section['callback'], $section ); ?>
+					</div>
+				<?php endif; ?>
+
 				<!-- Features Grid -->
 				<div class="frbl-features-grid">
 					<?php
@@ -3151,7 +3612,7 @@ class Settings {
 		global $frblp_license;
 
 		?>
-		<div class="tw:mt-6" id="frontblocks_section_license">
+		<div class="tw:mt-6">
 			<?php
 			// Check if license instance exists.
 			if ( ! $frblp_license ) {
