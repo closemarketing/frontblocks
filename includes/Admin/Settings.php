@@ -897,8 +897,8 @@ class Settings {
 
 				// 'Unsaved changes' indicator on the sticky save bar.
 				var saveStatus = document.querySelector('[data-save-status]');
-				var savedText    = " . wp_json_encode( __( 'All changes saved.', 'frontblocks' ) ) . ";
-				var unsavedText  = " . wp_json_encode( __( 'Unsaved changes — applied on the front end immediately after saving.', 'frontblocks' ) ) . ";
+				var savedText    = " . wp_json_encode( __( 'All changes saved.', 'frontblocks' ) ) . ';
+				var unsavedText  = ' . wp_json_encode( __( 'Unsaved changes — applied on the front end immediately after saving.', 'frontblocks' ) ) . "
 
 				function markDirty() {
 					if (saveStatus) {
@@ -1329,6 +1329,7 @@ class Settings {
 		list( $features_on, $features_total )       = $this->count_section_toggles( 'frontblocks_section_features' );
 		list( $maintenance_on, $maintenance_total ) = $this->count_section_toggles( 'frontblocks_section_maintenance' );
 		list( $woo_on, $woo_total )                 = $this->count_section_toggles( 'frontblocks_section_woocommerce_features' );
+
 		$optional_on    = $features_on + $maintenance_on;
 		$optional_total = $features_total + $maintenance_total;
 
