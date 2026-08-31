@@ -898,7 +898,7 @@ class Settings {
 				// 'Unsaved changes' indicator on the sticky save bar.
 				var saveStatus = document.querySelector('[data-save-status]');
 				var savedText    = " . wp_json_encode( __( 'All changes saved.', 'frontblocks' ) ) . ';
-				var unsavedText  = ' . wp_json_encode( __( 'Unsaved changes — applied on the front end immediately after saving.', 'frontblocks' ) ) . "
+				var unsavedText  = ' . wp_json_encode( __( 'Unsaved changes — applied on the front end immediately after saving.', 'frontblocks' ) ) . ";
 
 				function markDirty() {
 					if (saveStatus) {
@@ -1326,12 +1326,8 @@ class Settings {
 			}
 		}
 
-		list( $features_on, $features_total )       = $this->count_section_toggles( 'frontblocks_section_features' );
-		list( $maintenance_on, $maintenance_total ) = $this->count_section_toggles( 'frontblocks_section_maintenance' );
-		list( $woo_on, $woo_total )                 = $this->count_section_toggles( 'frontblocks_section_woocommerce_features' );
-
-		$optional_on    = $features_on + $maintenance_on;
-		$optional_total = $features_total + $maintenance_total;
+		list( $features_on, $features_total ) = $this->count_section_toggles( 'frontblocks_section_features' );
+		list( $woo_on, $woo_total )           = $this->count_section_toggles( 'frontblocks_section_woocommerce_features' );
 
 		$tabs = array(
 			array(
@@ -1345,8 +1341,12 @@ class Settings {
 			array(
 				'id'    => 'optional',
 				'label' => __( 'Optional features', 'frontblocks' ),
-				'on'    => $optional_on,
-				'total' => $optional_total,
+				'on'    => $features_on,
+				'total' => $features_total,
+			),
+			array(
+				'id'    => 'maintenance',
+				'label' => __( 'Maintenance', 'frontblocks' ),
 			),
 			array(
 				'id'    => 'woocommerce',
@@ -1525,9 +1525,9 @@ class Settings {
 						<div class="frbl-tab-panel-head">
 							<div>
 								<h2><?php esc_html_e( 'Optional features', 'frontblocks' ); ?></h2>
-								<p><?php esc_html_e( 'Site-wide behaviours that are not blocks — progress bars, buttons, typography, maintenance mode.', 'frontblocks' ); ?></p>
+								<p><?php esc_html_e( 'Site-wide behaviours that are not blocks — progress bars, buttons and typography.', 'frontblocks' ); ?></p>
 							</div>
-							<?php if ( $optional_total > 0 ) : ?>
+							<?php if ( $features_total > 0 ) : ?>
 								<div class="frbl-bulk-actions">
 									<button type="button" class="frbl-btn-outline" data-bulk-action="enable"><?php esc_html_e( 'Enable all', 'frontblocks' ); ?></button>
 									<button type="button" class="frbl-btn-ghost" data-bulk-action="disable"><?php esc_html_e( 'Disable all', 'frontblocks' ); ?></button>
@@ -1535,6 +1535,9 @@ class Settings {
 							<?php endif; ?>
 						</div>
 						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_features' ); ?>
+					</div>
+
+					<div class="frbl-tab-panel" data-tab-panel="maintenance" hidden>
 						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_maintenance' ); ?>
 					</div>
 

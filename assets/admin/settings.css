@@ -546,8 +546,6 @@
 }
 .frbl-settings-wrapper {
   margin-left: -20px;
-  margin-top: -10px;
-  padding-top: 40px;
 }
 .frbl-settings-wrapper * {
   box-sizing: border-box;
@@ -1117,7 +1115,7 @@
 }
 .frbl-cookie-notice-preview {
   position: absolute !important;
-  z-index: 1;
+  z-index: 1 !important;
   max-width: calc(100% - 24px);
 }
 .frbl-cookie-notice-preview.frbl-cookie-notice--bar {

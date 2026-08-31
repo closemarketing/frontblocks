@@ -12,8 +12,6 @@
 /* Custom WordPress Admin overrides */
 .frbl-settings-wrapper {
 	margin-left: -20px;
-	margin-top: -10px;
-	padding-top: 40px;
 }
 
 .frbl-settings-wrapper * {
@@ -742,7 +740,7 @@
 
 .frbl-cookie-notice-preview {
 	position: absolute !important;
-	z-index: 1;
+	z-index: 1 !important;
 	max-width: calc(100% - 24px);
 }
 
