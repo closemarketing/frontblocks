@@ -35,7 +35,83 @@ class Animations {
 		add_action( 'init', array( $this, 'register_scripts' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ), 5 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'register_animation_attributes' ), 15 );
+		add_filter( 'register_block_type_args', array( $this, 'register_native_block_attributes' ), 10, 2 );
 		add_filter( 'render_block', array( $this, 'add_animation_classes_to_blocks' ), 10, 2 );
+	}
+
+	/**
+	 * Register the same frbl* attributes server-side so the REST block-renderer
+	 * schema (used by ServerSideRender in the editor) matches what the
+	 * blocks.registerBlockType JS filter injects client-side. Without this,
+	 * any block whose PHP-registered schema doesn't declare these attributes
+	 * gets rejected by wp/v2/block-renderer with rest_additional_properties_forbidden.
+	 *
+	 * @param array  $args       Block type args.
+	 * @param string $block_type Block type name.
+	 * @return array
+	 */
+	public function register_native_block_attributes( $args, $block_type ) {
+		if ( $block_type && 0 === strpos( $block_type, 'gravityforms/' ) ) {
+			return $args;
+		}
+
+		if ( ! isset( $args['attributes'] ) || ! is_array( $args['attributes'] ) ) {
+			$args['attributes'] = array();
+		}
+
+		$args['attributes'] = array_merge( $args['attributes'], $this->get_animation_attributes() );
+
+		return $args;
+	}
+
+	/**
+	 * Get the animation attribute schema.
+	 *
+	 * @return array
+	 */
+	private function get_animation_attributes() {
+		return array(
+			'frblAnimation'              => array(
+				'type'    => 'string',
+				'default' => '',
+			),
+			'frblAnimationDelay'         => array(
+				'type'    => 'number',
+				'default' => 0,
+			),
+			'frblAnimationDuration'      => array(
+				'type'    => 'number',
+				'default' => 1,
+			),
+			'frblAnimationRepeat'        => array(
+				'type'    => 'boolean',
+				'default' => false,
+			),
+			'frblAnimationInfinite'      => array(
+				'type'    => 'boolean',
+				'default' => false,
+			),
+			'frblDisableAnimationMobile' => array(
+				'type'    => 'boolean',
+				'default' => false,
+			),
+			'frblGlassEffect'            => array(
+				'type'    => 'boolean',
+				'default' => false,
+			),
+			'frblGlassBlur'              => array(
+				'type'    => 'number',
+				'default' => 10,
+			),
+			'frblHoverBgScale'           => array(
+				'type'    => 'boolean',
+				'default' => false,
+			),
+			'frblHoverBgScaleAmount'     => array(
+				'type'    => 'number',
+				'default' => 1.1,
+			),
+		);
 	}
 
 	/**

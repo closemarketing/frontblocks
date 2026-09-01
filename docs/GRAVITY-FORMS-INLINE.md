@@ -103,7 +103,7 @@ Works in all modern browsers:
 
 - **Requires**: Gravity Forms plugin (active)
 - **Works with**: GeneratePress, GenerateBlocks
-- **WordPress**: 5.0+
+- **WordPress**: 5.5+
 - **PHP**: 7.0+
 
 ## Troubleshooting
@@ -184,4 +184,3 @@ For issues or questions:
 ## Changelog
 
 See the main plugin changelog in `readme.txt` for version history.
-

@@ -84,7 +84,7 @@ Each pattern file includes:
 
 All patterns require:
 - ✅ FrontBlocks plugin installed and activated
-- ✅ WordPress 5.0 or higher
+- ✅ WordPress 5.5 or higher
 - ⚡ GeneratePress theme (recommended but not required)
 
 Specific pattern requirements are listed in each pattern file.

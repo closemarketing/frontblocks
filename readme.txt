@@ -2,7 +2,7 @@
 Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit2sumit, alexcm13
 Tags: carrusel, slider, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
-Requires at least: 5.0
+Requires at least: 5.5
 Tested up to: 7.1
 Stable tag: 1.5.2
 Version: 1.5.2
