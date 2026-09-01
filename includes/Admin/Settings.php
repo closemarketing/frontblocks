@@ -1253,7 +1253,7 @@ class Settings {
 			__( 'Enable Full Page Scroll', 'frontblocks' ),
 			array( $this, 'field_enable_fullpage_scroll' ),
 			$this->page_slug,
-			'frontblocks_section_woocommerce_features'
+			'frontblocks_section_features'
 		);
 
 		add_settings_field(
@@ -1261,7 +1261,15 @@ class Settings {
 			__( 'Enable Language Banner', 'frontblocks' ),
 			array( $this, 'field_enable_language_banner' ),
 			$this->page_slug,
-			'frontblocks_section_woocommerce_features'
+			'frontblocks_section_features'
+		);
+
+		// Popups section.
+		add_settings_section(
+			'frontblocks_section_popups',
+			__( 'Popups', 'frontblocks' ),
+			array( $this, 'section_popups_callback' ),
+			$this->page_slug
 		);
 
 		add_settings_field(
@@ -1269,7 +1277,7 @@ class Settings {
 			__( 'Enable Popups', 'frontblocks' ),
 			array( $this, 'field_enable_popups' ),
 			$this->page_slug,
-			'frontblocks_section_woocommerce_features'
+			'frontblocks_section_popups'
 		);
 
 		add_settings_field(
@@ -1328,6 +1336,7 @@ class Settings {
 
 		list( $features_on, $features_total ) = $this->count_section_toggles( 'frontblocks_section_features' );
 		list( $woo_on, $woo_total )           = $this->count_section_toggles( 'frontblocks_section_woocommerce_features' );
+		list( $popups_on, $popups_total )     = $this->count_section_toggles( 'frontblocks_section_popups' );
 
 		$tabs = array(
 			array(
@@ -1353,6 +1362,12 @@ class Settings {
 				'label' => __( 'WooCommerce', 'frontblocks' ),
 				'on'    => $woo_on,
 				'total' => $woo_total,
+			),
+			array(
+				'id'    => 'popups',
+				'label' => __( 'Popups', 'frontblocks' ),
+				'on'    => $popups_on,
+				'total' => $popups_total,
 			),
 			array(
 				'id'    => 'cookies',
@@ -1557,6 +1572,22 @@ class Settings {
 						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_woocommerce_features' ); ?>
 					</div>
 
+					<div class="frbl-tab-panel" data-tab-panel="popups" hidden>
+						<div class="frbl-tab-panel-head">
+							<div>
+								<h2><?php esc_html_e( 'Popups', 'frontblocks' ); ?></h2>
+								<p><?php esc_html_e( 'Create popup content with the block editor and choose when and where it appears.', 'frontblocks' ); ?></p>
+							</div>
+							<?php if ( $popups_total > 0 ) : ?>
+								<div class="frbl-bulk-actions">
+									<button type="button" class="frbl-btn-outline" data-bulk-action="enable"><?php esc_html_e( 'Enable all', 'frontblocks' ); ?></button>
+									<button type="button" class="frbl-btn-ghost" data-bulk-action="disable"><?php esc_html_e( 'Disable all', 'frontblocks' ); ?></button>
+								</div>
+							<?php endif; ?>
+						</div>
+						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_popups' ); ?>
+					</div>
+
 					<div class="frbl-tab-panel" data-tab-panel="cookies" hidden>
 						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_cookie_notice' ); ?>
 					</div>
@@ -1694,7 +1725,6 @@ class Settings {
 				<span class="frbl-license-dot"></span>
 				<?php esc_html_e( 'PRO license active', 'frontblocks' ); ?>
 			</span>
-			<button type="button" class="frbl-license-manage" data-tab-target="license"><?php esc_html_e( 'Manage', 'frontblocks' ); ?></button>
 			<?php
 			return;
 		}
@@ -1996,6 +2026,19 @@ class Settings {
 	}
 
 	/**
+	 * Popups section callback.
+	 *
+	 * @return void
+	 */
+	private function section_popups_callback() {
+		?>
+		<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
+			<?php echo esc_html__( 'Create popup content with the block editor and configure when and where it appears.', 'frontblocks' ); ?>
+		</p>
+		<?php
+	}
+
+	/**
 	 * Maintenance mode section callback.
 	 *
 	 * @return void
@@ -2144,10 +2187,10 @@ class Settings {
 			<?php
 		} else {
 			// Render regular sections with feature grid. The "Optional features" and
-			// "WooCommerce" tabs already print their own <h2>/description in the tab
-			// head, so skip the duplicate title for those two — the callback (which
+			// "WooCommerce" and "Popups" tabs already print their own <h2>/description
+			// in the tab head, so skip the duplicate title for those sections — the callback (which
 			// may render a PRO upsell notice) still runs.
-			$suppress_title = in_array( $section['id'], array( 'frontblocks_section_features', 'frontblocks_section_woocommerce_features' ), true );
+			$suppress_title = in_array( $section['id'], array( 'frontblocks_section_features', 'frontblocks_section_woocommerce_features', 'frontblocks_section_popups' ), true );
 			?>
 			<div class="frbl-section-wrapper">
 				<?php if ( ! $suppress_title ) : ?>
