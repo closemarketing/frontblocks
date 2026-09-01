@@ -59,53 +59,59 @@ class Animations {
 			$args['attributes'] = array();
 		}
 
-		$args['attributes'] = array_merge(
-			$args['attributes'],
-			array(
-				'frblAnimation'              => array(
-					'type'    => 'string',
-					'default' => '',
-				),
-				'frblAnimationDelay'         => array(
-					'type'    => 'number',
-					'default' => 0,
-				),
-				'frblAnimationDuration'      => array(
-					'type'    => 'number',
-					'default' => 1,
-				),
-				'frblAnimationRepeat'        => array(
-					'type'    => 'boolean',
-					'default' => false,
-				),
-				'frblAnimationInfinite'      => array(
-					'type'    => 'boolean',
-					'default' => false,
-				),
-				'frblDisableAnimationMobile' => array(
-					'type'    => 'boolean',
-					'default' => false,
-				),
-				'frblGlassEffect'            => array(
-					'type'    => 'boolean',
-					'default' => false,
-				),
-				'frblGlassBlur'              => array(
-					'type'    => 'number',
-					'default' => 10,
-				),
-				'frblHoverBgScale'           => array(
-					'type'    => 'boolean',
-					'default' => false,
-				),
-				'frblHoverBgScaleAmount'     => array(
-					'type'    => 'number',
-					'default' => 1.1,
-				),
-			)
-		);
+		$args['attributes'] = array_merge( $args['attributes'], $this->get_animation_attributes() );
 
 		return $args;
+	}
+
+	/**
+	 * Get the animation attribute schema.
+	 *
+	 * @return array
+	 */
+	private function get_animation_attributes() {
+		return array(
+			'frblAnimation'              => array(
+				'type'    => 'string',
+				'default' => '',
+			),
+			'frblAnimationDelay'         => array(
+				'type'    => 'number',
+				'default' => 0,
+			),
+			'frblAnimationDuration'      => array(
+				'type'    => 'number',
+				'default' => 1,
+			),
+			'frblAnimationRepeat'        => array(
+				'type'    => 'boolean',
+				'default' => false,
+			),
+			'frblAnimationInfinite'      => array(
+				'type'    => 'boolean',
+				'default' => false,
+			),
+			'frblDisableAnimationMobile' => array(
+				'type'    => 'boolean',
+				'default' => false,
+			),
+			'frblGlassEffect'            => array(
+				'type'    => 'boolean',
+				'default' => false,
+			),
+			'frblGlassBlur'              => array(
+				'type'    => 'number',
+				'default' => 10,
+			),
+			'frblHoverBgScale'           => array(
+				'type'    => 'boolean',
+				'default' => false,
+			),
+			'frblHoverBgScaleAmount'     => array(
+				'type'    => 'number',
+				'default' => 1.1,
+			),
+		);
 	}
 
 	/**
