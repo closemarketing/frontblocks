@@ -80,6 +80,13 @@ A snippet that doesn't match any supported pattern is rejected (an admin
 notice points to [close.technology/contacto](https://close.technology/contacto)
 for adding support for it) rather than silently doing nothing.
 
+Companion plugins can extend this field without adding provider-specific code
+to FrontBlocks: register their types with
+`frbl_cookie_notice_tracking_types`, detect their snippets with
+`frbl_cookie_notice_detect_tracking_snippet`, and handle their injection with
+`window.frblCookieNoticeInjectIntegration`. Unhandled records are queued until
+that browser callback is available.
+
 ## Compatibility with other analytics/ads plugins (Google Consent Mode)
 
 The GTM/GA4 fields above only gate what *this module* loads. They have no
@@ -186,6 +193,11 @@ forking it — used by FrontBlocks PRO's Advanced Cookie Management to add a
   accept/reject binary regardless of category — it's FrontBlocks PRO's
   Advanced Cookie Management that reads this to decide which category gate
   an integration needs when the visitor granted only some categories.
+- `frbl_cookie_notice_has_tracking_consent( bool $has_tracking_consent )`
+  — filter, lets an add-on with category-based consent make the read-only
+  configuration endpoint available after at least one tracking category is
+  accepted. The add-on must pass its allowed categories to
+  `window.frblCookieNoticeInject()`.
 
 ## Out of scope
 

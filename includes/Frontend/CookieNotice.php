@@ -637,8 +637,12 @@ class CookieNotice {
 				}
 			}
 
-			window.frblCookieNoticeInject = window.frblCookieNoticeInject || function ( gtmId, ga4Id, trackingIntegrations ) {
-				if ( gtmId ) {
+			window.frblCookieNoticeInject = window.frblCookieNoticeInject || function ( gtmId, ga4Id, trackingIntegrations, allowedCategories ) {
+				var allowsCategory = function ( category ) {
+					return ! allowedCategories || !! allowedCategories[ category ];
+				};
+
+				if ( gtmId && allowsCategory( 'analytics' ) ) {
 					window.dataLayer = window.dataLayer || [];
 					window.dataLayer.push( { 'gtm.start': new Date().getTime(), event: 'gtm.js' } );
 
@@ -648,7 +652,7 @@ class CookieNotice {
 					document.head.appendChild( gtmScript );
 				}
 
-				if ( ga4Id ) {
+				if ( ga4Id && allowsCategory( 'analytics' ) ) {
 					var ga4Script = document.createElement( 'script' );
 					ga4Script.async = true;
 					ga4Script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent( ga4Id );
@@ -669,8 +673,9 @@ class CookieNotice {
 				trackingIntegrations.forEach( function ( integration ) {
 					var trackingType = integration && integration.type ? integration.type : '';
 					var trackingId = integration && integration.id ? integration.id : '';
+					var trackingCategory = integration && integration.category ? integration.category : 'marketing';
 
-					if ( ! trackingId ) {
+					if ( ! trackingId || ! allowsCategory( trackingCategory ) ) {
 						return;
 					}
 
@@ -715,6 +720,11 @@ class CookieNotice {
 					openaiScript.src = 'https://bzrcdn.openai.com/sdk/oaiq.min.js';
 					document.head.appendChild( openaiScript );
 					window.oaiq( 'init', { pixelId: trackingId, debug: true } );
+				} else if ( typeof window.frblCookieNoticeInjectIntegration === 'function' ) {
+					window.frblCookieNoticeInjectIntegration( integration );
+				} else {
+					window.frblCookieNoticePendingIntegrations = window.frblCookieNoticePendingIntegrations || [];
+					window.frblCookieNoticePendingIntegrations.push( integration );
 					}
 				} );
 			};
@@ -899,12 +909,31 @@ class CookieNotice {
 			'trackingIntegrations' => array(),
 		);
 
-		if ( $this->is_enabled() && 'accepted' === $this->get_consent() ) {
+		$has_tracking_consent = 'accepted' === $this->get_consent();
+
+		/**
+		 * Filters whether the current visitor has granted consent for tracking.
+		 *
+		 * Add-ons with per-category consent can allow this endpoint when at least
+		 * one tracking category is accepted. They must pass the allowed categories
+		 * to frblCookieNoticeInject() so only matching integrations are loaded.
+		 *
+		 * @param bool $has_tracking_consent Whether binary consent is accepted.
+		 */
+		$has_tracking_consent = (bool) apply_filters( 'frbl_cookie_notice_has_tracking_consent', $has_tracking_consent );
+
+		if ( $this->is_enabled() && $has_tracking_consent ) {
 			$options                          = get_option( 'frontblocks_settings', array() );
 			$site_kit_tags                    = $this->get_google_site_kit_managed_tags();
 			$response['gtmId']                = $site_kit_tags['gtm'] ? '' : $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
 			$response['ga4Id']                = $site_kit_tags['ga4'] ? '' : $this->sanitize_ga4_id( $options['cookie_notice_ga4_id'] ?? '' );
-			$response['trackingIntegrations'] = self::get_tracking_integrations( $options );
+			$response['trackingIntegrations'] = array_map(
+				function ( $integration ) {
+					$integration['category'] = self::get_integration_default_category( $integration['type'] );
+					return $integration;
+				},
+				self::get_tracking_integrations( $options )
+			);
 		}
 
 		wp_send_json_success( $response );
@@ -1075,7 +1104,21 @@ class CookieNotice {
 	 * @return string One of TRACKING_TYPES, or '' if unrecognized.
 	 */
 	private function sanitize_tracking_type( $value ) {
-		return in_array( $value, self::TRACKING_TYPES, true ) ? $value : '';
+		return in_array( $value, self::get_tracking_types(), true ) ? $value : '';
+	}
+
+	/**
+	 * Return the tracking integration types supported by FrontBlocks and add-ons.
+	 *
+	 * @return string[] Tracking integration type slugs.
+	 */
+	public static function get_tracking_types() {
+		/**
+		 * Filters the tracking integration types accepted by Cookie Notice.
+		 *
+		 * @param string[] $types Built-in tracking integration type slugs.
+		 */
+		return array_values( array_unique( apply_filters( 'frbl_cookie_notice_tracking_types', self::TRACKING_TYPES ) ) );
 	}
 
 	/**
@@ -1146,6 +1189,23 @@ class CookieNotice {
 			);
 		}
 
+		/**
+		 * Filters a pasted tracking snippet that FrontBlocks does not detect.
+		 *
+		 * Add-ons can return a type/ID pair after registering their type through
+		 * frbl_cookie_notice_tracking_types.
+		 *
+		 * @param array|null $detected Detected type/ID pair, or null.
+		 * @param string     $raw      Pasted tracking snippet.
+		 */
+		$detected = apply_filters( 'frbl_cookie_notice_detect_tracking_snippet', null, $raw );
+		if ( is_array( $detected ) && isset( $detected['type'], $detected['id'] ) && in_array( $detected['type'], self::get_tracking_types(), true ) ) {
+			return array(
+				'type' => $detected['type'],
+				'id'   => sanitize_text_field( $detected['id'] ),
+			);
+		}
+
 		return null;
 	}
 
@@ -1188,7 +1248,7 @@ class CookieNotice {
 
 			$type = $integration['type'] ?? '';
 			$id   = sanitize_text_field( $integration['id'] ?? '' );
-			if ( in_array( $type, self::TRACKING_TYPES, true ) && '' !== $id ) {
+			if ( in_array( $type, self::get_tracking_types(), true ) && '' !== $id ) {
 				$integrations[ $type ] = array(
 					'type' => $type,
 					'id'   => $id,

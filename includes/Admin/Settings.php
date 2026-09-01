@@ -3063,7 +3063,7 @@ class Settings {
 								<?php foreach ( $tracking_integrations as $integration ) : ?>
 									<li class="tw:flex tw:items-center tw:justify-between tw:gap-4 tw:p-3 tw:bg-gray-50 tw:border tw:border-gray-200 tw:rounded-lg">
 										<span class="tw:text-sm tw:text-gray-700">
-											<strong><?php echo esc_html( $tracking_labels[ $integration['type'] ] ?? $integration['type'] ); ?></strong>
+											<strong><?php echo esc_html( apply_filters( 'frbl_cookie_notice_tracking_type_label', $tracking_labels[ $integration['type'] ] ?? $integration['type'], $integration['type'] ) ); ?></strong>
 											<span class="tw:font-mono tw:text-xs">(<?php echo esc_html( $integration['id'] ); ?>)</span>
 										</span>
 										<label class="tw:text-sm tw:text-red-700 tw:whitespace-nowrap">
@@ -3084,7 +3084,7 @@ class Settings {
 							id="cookie_notice_tracking_integration_code"
 							name="frontblocks_settings[cookie_notice_tracking_integration_code]"
 							value=""
-							placeholder="<?php echo esc_attr__( 'Paste a Clientify, Brevo, or ChatGPT Ads tracking code or Pixel ID…', 'frontblocks' ); ?>"
+							placeholder="<?php echo esc_attr__( 'Paste a supported tracking code or ID…', 'frontblocks' ); ?>"
 							class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:font-mono tw:text-xs tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
 						/>
 						<p class="tw:text-xs tw:text-gray-500 tw:mt-2 tw:mb-0">

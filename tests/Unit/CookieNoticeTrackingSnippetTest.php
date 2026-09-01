@@ -122,6 +122,30 @@ HTML;
 	}
 
 	/**
+	 * Add-ons can register their own detector and type without adding a
+	 * provider-specific pattern to the free plugin.
+	 */
+	public function test_add_on_can_register_a_tracking_detector() {
+		$types_callback = function ( $types ) {
+			$types[] = 'example_add_on';
+			return $types;
+		};
+		$detector_callback = function ( $detected, $raw ) {
+			return 'example-id' === $raw ? array( 'type' => 'example_add_on', 'id' => 'ExampleId123' ) : $detected;
+		};
+		add_filter( 'frbl_cookie_notice_tracking_types', $types_callback );
+		add_filter( 'frbl_cookie_notice_detect_tracking_snippet', $detector_callback, 10, 2 );
+
+		$this->assertSame(
+			array( 'type' => 'example_add_on', 'id' => 'ExampleId123' ),
+			CookieNotice::detect_tracking_snippet( 'example-id' )
+		);
+
+		remove_filter( 'frbl_cookie_notice_tracking_types', $types_callback );
+		remove_filter( 'frbl_cookie_notice_detect_tracking_snippet', $detector_callback, 10 );
+	}
+
+	/**
 	 * An empty/blank field is "no snippet configured", not an invalid one.
 	 */
 	public function test_blank_snippet_returns_null() {

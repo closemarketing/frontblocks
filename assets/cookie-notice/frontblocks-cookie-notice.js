@@ -30,8 +30,12 @@
 	}
 
 	function defineInjectHelper() {
-		window.frblCookieNoticeInject = window.frblCookieNoticeInject || function (gtmId, ga4Id, trackingIntegrations) {
-			if (gtmId) {
+		window.frblCookieNoticeInject = window.frblCookieNoticeInject || function (gtmId, ga4Id, trackingIntegrations, allowedCategories) {
+			var allowsCategory = function (category) {
+				return !allowedCategories || !!allowedCategories[category];
+			};
+
+			if (gtmId && allowsCategory('analytics')) {
 				window.dataLayer = window.dataLayer || [];
 				window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
 
@@ -41,7 +45,7 @@
 				document.head.appendChild(gtmScript);
 			}
 
-			if (ga4Id) {
+			if (ga4Id && allowsCategory('analytics')) {
 				var ga4Script = document.createElement('script');
 				ga4Script.async = true;
 				ga4Script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(ga4Id);
@@ -62,8 +66,9 @@
 			trackingIntegrations.forEach(function (integration) {
 				var trackingType = integration && integration.type ? integration.type : '';
 				var trackingId = integration && integration.id ? integration.id : '';
+				var trackingCategory = integration && integration.category ? integration.category : 'marketing';
 
-				if (!trackingId) {
+				if (!trackingId || !allowsCategory(trackingCategory)) {
 					return;
 				}
 
@@ -108,6 +113,11 @@
 				openaiScript.src = 'https://bzrcdn.openai.com/sdk/oaiq.min.js';
 				document.head.appendChild(openaiScript);
 				window.oaiq('init', { pixelId: trackingId, debug: true });
+			} else if (typeof window.frblCookieNoticeInjectIntegration === 'function') {
+				window.frblCookieNoticeInjectIntegration(integration);
+			} else {
+				window.frblCookieNoticePendingIntegrations = window.frblCookieNoticePendingIntegrations || [];
+				window.frblCookieNoticePendingIntegrations.push(integration);
 			}
 			});
 		};
