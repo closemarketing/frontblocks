@@ -111,6 +111,7 @@ HTML;
 	 */
 	public function test_does_not_mistake_a_hyphenated_tracking_code_for_a_chatgpt_ads_pixel_id() {
 		$this->assertNull( CookieNotice::detect_tracking_snippet( 'CF-00000-00000-TEST' ) );
+		$this->assertNull( CookieNotice::detect_tracking_snippet( 'testclientkey1234567890' ) );
 	}
 
 	/**
@@ -168,6 +169,23 @@ HTML;
 		);
 
 		$this->assertSame( array( array( 'type' => 'brevo', 'id' => 'latest-key' ) ), $integrations );
+	}
+
+	/**
+	 * Settings saves preserve integrations from an inactive companion plugin.
+	 */
+	public function test_tracking_integrations_can_preserve_unknown_add_on_records() {
+		$this->assertSame(
+			array( array( 'type' => 'inactive_add_on', 'id' => 'saved-id' ) ),
+			CookieNotice::get_tracking_integrations(
+				array(
+					'cookie_notice_tracking_integrations' => array(
+						array( 'type' => 'inactive_add_on', 'id' => 'saved-id' ),
+					),
+				),
+				true
+			)
+		);
 	}
 
 	/**

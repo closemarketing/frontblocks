@@ -99,19 +99,18 @@
 				window.Brevo = window.Brevo || [];
 				window.Brevo.push(['init', { client_key: trackingId }]);
 			} else if (trackingType === 'openai_chatgpt_ads') {
-				if (window.oaiq) {
-					return;
+				if (!window.oaiq) {
+					window.oaiq = function () {
+						window.oaiq.q.push(arguments);
+					};
+					window.oaiq.q = [];
+
+					var openaiScript = document.createElement('script');
+					openaiScript.async = true;
+					openaiScript.src = 'https://bzrcdn.openai.com/sdk/oaiq.min.js';
+					document.head.appendChild(openaiScript);
 				}
 
-				window.oaiq = function () {
-					window.oaiq.q.push(arguments);
-				};
-				window.oaiq.q = [];
-
-				var openaiScript = document.createElement('script');
-				openaiScript.async = true;
-				openaiScript.src = 'https://bzrcdn.openai.com/sdk/oaiq.min.js';
-				document.head.appendChild(openaiScript);
 				window.oaiq('init', { pixelId: trackingId, debug: true });
 			} else if (typeof window.frblCookieNoticeInjectIntegration === 'function') {
 				window.frblCookieNoticeInjectIntegration(integration);
@@ -137,7 +136,7 @@
 			})
 			.then(function (response) {
 				if (response && response.success && response.data && window.frblCookieNoticeInject) {
-					window.frblCookieNoticeInject(response.data.gtmId, response.data.ga4Id, response.data.trackingIntegrations);
+					window.frblCookieNoticeInject(response.data.gtmId, response.data.ga4Id, response.data.trackingIntegrations, response.data.allowedCategories);
 				}
 			})
 			.catch(function () {

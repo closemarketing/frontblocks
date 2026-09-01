@@ -198,6 +198,10 @@ forking it — used by FrontBlocks PRO's Advanced Cookie Management to add a
   configuration endpoint available after at least one tracking category is
   accepted. The add-on must pass its allowed categories to
   `window.frblCookieNoticeInject()`.
+- `frbl_cookie_notice_allowed_tracking_categories()` — filter, lets that
+  add-on return its allowed category map for the configuration response. The
+  map is passed to both automatic injection paths so a partial choice cannot
+  load integrations from a withheld category.
 
 ## Out of scope
 

@@ -706,19 +706,18 @@ class CookieNotice {
 					window.Brevo = window.Brevo || [];
 					window.Brevo.push( [ 'init', { client_key: trackingId } ] );
 				} else if ( 'openai_chatgpt_ads' === trackingType ) {
-					if ( window.oaiq ) {
-						return;
+					if ( ! window.oaiq ) {
+						window.oaiq = function () {
+							window.oaiq.q.push( arguments );
+						};
+						window.oaiq.q = [];
+
+						var openaiScript = document.createElement( 'script' );
+						openaiScript.async = true;
+						openaiScript.src = 'https://bzrcdn.openai.com/sdk/oaiq.min.js';
+						document.head.appendChild( openaiScript );
 					}
 
-					window.oaiq = function () {
-						window.oaiq.q.push( arguments );
-					};
-					window.oaiq.q = [];
-
-					var openaiScript = document.createElement( 'script' );
-					openaiScript.async = true;
-					openaiScript.src = 'https://bzrcdn.openai.com/sdk/oaiq.min.js';
-					document.head.appendChild( openaiScript );
 					window.oaiq( 'init', { pixelId: trackingId, debug: true } );
 				} else if ( typeof window.frblCookieNoticeInjectIntegration === 'function' ) {
 					window.frblCookieNoticeInjectIntegration( integration );
@@ -748,7 +747,7 @@ class CookieNotice {
 					.then( function ( response ) { return response.json(); } )
 					.then( function ( response ) {
 						if ( response && response.success && response.data ) {
-							window.frblCookieNoticeInject( response.data.gtmId, response.data.ga4Id, response.data.trackingIntegrations );
+							window.frblCookieNoticeInject( response.data.gtmId, response.data.ga4Id, response.data.trackingIntegrations, response.data.allowedCategories );
 						}
 					} )
 					.catch( function () {} );
@@ -907,6 +906,7 @@ class CookieNotice {
 			'gtmId'                => '',
 			'ga4Id'                => '',
 			'trackingIntegrations' => array(),
+			'allowedCategories'    => null,
 		);
 
 		$has_tracking_consent = 'accepted' === $this->get_consent();
@@ -920,7 +920,8 @@ class CookieNotice {
 		 *
 		 * @param bool $has_tracking_consent Whether binary consent is accepted.
 		 */
-		$has_tracking_consent = (bool) apply_filters( 'frbl_cookie_notice_has_tracking_consent', $has_tracking_consent );
+		$has_tracking_consent          = (bool) apply_filters( 'frbl_cookie_notice_has_tracking_consent', $has_tracking_consent );
+		$response['allowedCategories'] = apply_filters( 'frbl_cookie_notice_allowed_tracking_categories', null );
 
 		if ( $this->is_enabled() && $has_tracking_consent ) {
 			$options                          = get_option( 'frontblocks_settings', array() );
@@ -1182,7 +1183,7 @@ class CookieNotice {
 			);
 		}
 
-		if ( preg_match( '/^[A-Za-z0-9]{16,}$/', trim( $raw ) ) ) {
+		if ( preg_match( '/^[A-Za-z0-9]{22}$/', trim( $raw ) ) ) {
 			return array(
 				'type' => 'openai_chatgpt_ads',
 				'id'   => trim( $raw ),
@@ -1217,9 +1218,10 @@ class CookieNotice {
 	 * settings save.
 	 *
 	 * @param array $options FrontBlocks settings.
-	 * @return array<int, array{type: string, id: string}> Supported integration records.
+	 * @param bool  $include_unknown Whether to preserve records registered by an inactive add-on.
+	 * @return array<int, array{type: string, id: string}> Integration records.
 	 */
-	public static function get_tracking_integrations( $options ) {
+	public static function get_tracking_integrations( $options, $include_unknown = false ) {
 		if ( ! is_array( $options ) ) {
 			return array();
 		}
@@ -1246,9 +1248,9 @@ class CookieNotice {
 				continue;
 			}
 
-			$type = $integration['type'] ?? '';
+			$type = sanitize_key( $integration['type'] ?? '' );
 			$id   = sanitize_text_field( $integration['id'] ?? '' );
-			if ( in_array( $type, self::get_tracking_types(), true ) && '' !== $id ) {
+			if ( ( in_array( $type, self::get_tracking_types(), true ) || $include_unknown ) && '' !== $type && '' !== $id ) {
 				$integrations[ $type ] = array(
 					'type' => $type,
 					'id'   => $id,
