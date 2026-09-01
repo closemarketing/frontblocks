@@ -31,7 +31,7 @@ Enable it from **Appearance → FrontBlocks → Cookie Notice**.
 | Cookie expiration (days) | How long the visitor's decision is remembered. |
 | Google Tag Manager ID | `GTM-XXXXXXX`. Left empty, GTM is never loaded. |
 | GA4 Measurement ID | `G-XXXXXXXXXX`. Left empty, GA4 is never loaded. |
-| Additional tracking snippet (Clientify / Brevo) | Paste the full `<script>` snippet Clientify or Brevo gave you — the admin doesn't pick which tool it is. On save, the snippet is auto-detected against the supported patterns (Clientify Analytics Plus, classic Clientify Analytics, or Brevo) and only the id/code it needs is stored; the field then shows a "Detected: ..." confirmation and re-displays a clean, re-paste-able canonical snippet. An unrecognized snippet is rejected with an admin notice pointing to [close.technology/contacto](https://close.technology/contacto). |
+| Additional tracking snippet (Clientify / Brevo / ChatGPT Ads) | Paste the full `<script>` snippet from Clientify, Brevo, or ChatGPT Ads. For ChatGPT Ads, you can also paste the Pixel ID by itself. On save, the integration is auto-detected and only the ID/code it needs is stored; the raw script is discarded. An unrecognized snippet is rejected with an admin notice pointing to [close.technology/contacto](https://close.technology/contacto). |
 
 ## How consent gating works
 
@@ -63,19 +63,20 @@ Enable it from **Appearance → FrontBlocks → Cookie Notice**.
   module renders and would go stale on any page a cache keeps around longer than
   a nonce's lifetime, breaking tracking until the cache refreshes.
 
-## Clientify and Brevo detection
+## Additional tracking integrations
 
 Unlike the GTM/GA4 fields (a single plain ID typed in by hand), Clientify and
-Brevo hand out a full `<script>` snippet to paste — and Clientify alone has two
-differently-shaped snippets depending on which of their products the client is
-on (their current Analytics Plus pixel, or the classic Analytics tracker.js +
+Brevo hand out a full `<script>` snippet to paste. ChatGPT Ads accepts either
+its full `oaiq` snippet or a Pixel ID on its own. Clientify alone has two
+differently-shaped snippets depending on which of its products the client is
+on (its current Analytics Plus pixel, or the classic Analytics tracker.js +
 `ana(...)` calls). The settings screen provides an add-only tracking-code
 field and a list of saved integrations. Whatever is pasted is matched against
-the three known patterns in `CookieNotice::detect_tracking_snippet()`: only the
-provider type and the one required id/code are stored; the raw pasted markup is
+the supported patterns in `CookieNotice::detect_tracking_snippet()`: only the
+provider type and the one required ID/code are stored; the raw pasted markup is
 always discarded. Entries can be removed individually from that list.
 
-A snippet that doesn't match any of the three patterns is rejected (an admin
+A snippet that doesn't match any supported pattern is rejected (an admin
 notice points to [close.technology/contacto](https://close.technology/contacto)
 for adding support for it) rather than silently doing nothing.
 

@@ -55,7 +55,7 @@ class CookieNotice {
 	 *
 	 * @var string[]
 	 */
-	const TRACKING_TYPES = array( 'clientify_analytics_plus', 'clientify_analytics_classic', 'brevo' );
+	const TRACKING_TYPES = array( 'clientify_analytics_plus', 'clientify_analytics_classic', 'brevo', 'openai_chatgpt_ads' );
 
 	/**
 	 * Constructor.
@@ -700,6 +700,21 @@ class CookieNotice {
 
 					window.Brevo = window.Brevo || [];
 					window.Brevo.push( [ 'init', { client_key: trackingId } ] );
+				} else if ( 'openai_chatgpt_ads' === trackingType ) {
+					if ( window.oaiq ) {
+						return;
+					}
+
+					window.oaiq = function () {
+						window.oaiq.q.push( arguments );
+					};
+					window.oaiq.q = [];
+
+					var openaiScript = document.createElement( 'script' );
+					openaiScript.async = true;
+					openaiScript.src = 'https://bzrcdn.openai.com/sdk/oaiq.min.js';
+					document.head.appendChild( openaiScript );
+					window.oaiq( 'init', { pixelId: trackingId, debug: true } );
 					}
 				} );
 			};
@@ -1115,6 +1130,22 @@ class CookieNotice {
 			);
 		}
 
+		if ( false !== strpos( $raw, 'bzrcdn.openai.com/sdk/oaiq.min.js' )
+			&& preg_match( '#pixelId\s*:\s*[\'\"]([A-Za-z0-9_-]+)[\'\"]#', $raw, $matches )
+		) {
+			return array(
+				'type' => 'openai_chatgpt_ads',
+				'id'   => $matches[1],
+			);
+		}
+
+		if ( preg_match( '/^[A-Za-z0-9]{16,}$/', trim( $raw ) ) ) {
+			return array(
+				'type' => 'openai_chatgpt_ads',
+				'id'   => trim( $raw ),
+			);
+		}
+
 		return null;
 	}
 
@@ -1184,6 +1215,7 @@ class CookieNotice {
 			'clientify_analytics_plus'    => 'marketing',
 			'clientify_analytics_classic' => 'marketing',
 			'brevo'                       => 'marketing',
+			'openai_chatgpt_ads'          => 'marketing',
 		);
 
 		$category = $categories[ $type ] ?? 'marketing';

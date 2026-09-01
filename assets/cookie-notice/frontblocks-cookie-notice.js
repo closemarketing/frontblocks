@@ -93,7 +93,22 @@
 
 				window.Brevo = window.Brevo || [];
 				window.Brevo.push(['init', { client_key: trackingId }]);
+			} else if (trackingType === 'openai_chatgpt_ads') {
+				if (window.oaiq) {
+					return;
 				}
+
+				window.oaiq = function () {
+					window.oaiq.q.push(arguments);
+				};
+				window.oaiq.q = [];
+
+				var openaiScript = document.createElement('script');
+				openaiScript.async = true;
+				openaiScript.src = 'https://bzrcdn.openai.com/sdk/oaiq.min.js';
+				document.head.appendChild(openaiScript);
+				window.oaiq('init', { pixelId: trackingId, debug: true });
+			}
 			});
 		};
 	}

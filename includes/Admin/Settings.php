@@ -3052,6 +3052,7 @@ class Settings {
 							'clientify_analytics_plus'    => __( 'Clientify Analytics Plus', 'frontblocks' ),
 							'clientify_analytics_classic' => __( 'Clientify Analytics (classic)', 'frontblocks' ),
 							'brevo'                       => __( 'Brevo', 'frontblocks' ),
+							'openai_chatgpt_ads'          => __( 'ChatGPT Ads', 'frontblocks' ),
 						);
 						?>
 						<p class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
@@ -3083,7 +3084,7 @@ class Settings {
 							id="cookie_notice_tracking_integration_code"
 							name="frontblocks_settings[cookie_notice_tracking_integration_code]"
 							value=""
-							placeholder="<?php echo esc_attr__( 'Paste a Clientify or Brevo tracking code…', 'frontblocks' ); ?>"
+							placeholder="<?php echo esc_attr__( 'Paste a Clientify, Brevo, or ChatGPT Ads tracking code or Pixel ID…', 'frontblocks' ); ?>"
 							class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:font-mono tw:text-xs tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
 						/>
 						<p class="tw:text-xs tw:text-gray-500 tw:mt-2 tw:mb-0">
