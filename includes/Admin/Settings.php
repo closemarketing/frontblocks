@@ -1374,6 +1374,10 @@ class Settings {
 				'label' => __( 'Cookies', 'frontblocks' ),
 			),
 			array(
+				'id'    => 'google-signin',
+				'label' => __( 'Google Sign-In', 'frontblocks' ),
+			),
+			array(
 				'id'    => 'cpt',
 				'label' => __( 'Post types', 'frontblocks' ),
 			),
@@ -1611,6 +1615,14 @@ class Settings {
 						</button>
 					</div>
 				</form>
+
+				<div class="frbl-tab-panel" data-tab-panel="google-signin" hidden>
+					<?php
+					// Rendered outside the main settings form: Google Sign-In manages
+					// its own form, nonce, and save handling (see GoogleSignIn\Settings).
+					$this->render_section_if_exists( $sections, 'frontblocks_section_google_signin' );
+					?>
+				</div>
 
 				<?php if ( ! $has_cpt_tab ) : ?>
 					<div class="frbl-tab-panel" data-tab-panel="cpt" hidden>
