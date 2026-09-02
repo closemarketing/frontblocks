@@ -6,9 +6,12 @@ const vm = require('node:vm');
 
 const scriptPath = path.resolve(__dirname, '../../assets/cookie-notice/frontblocks-cookie-notice.js');
 const cookieNoticeScript = fs.readFileSync(scriptPath, 'utf8');
+const cookieNoticePhpPath = path.resolve(__dirname, '../../includes/Frontend/CookieNotice.php');
+const cookieNoticePhp = fs.readFileSync(cookieNoticePhpPath, 'utf8');
 
 function createEnvironment(existingOaiq) {
 	const scripts = [];
+	let fetchCalls = 0;
 	const listeners = {};
 	const acceptListeners = {};
 	const banner = {
@@ -60,6 +63,7 @@ function createEnvironment(existingOaiq) {
 		document,
 		encodeURIComponent,
 		fetch() {
+			fetchCalls += 1;
 			return Promise.resolve({
 				json() {
 					return Promise.resolve({
@@ -85,13 +89,15 @@ function createEnvironment(existingOaiq) {
 	vm.runInNewContext(cookieNoticeScript, context);
 	listeners.DOMContentLoaded();
 
-	return { acceptListeners, scripts, window };
+	return { acceptListeners, fetchCalls: () => fetchCalls, scripts, window };
 }
 
 test('does not load ChatGPT Ads before consent and loads it after acceptance', async () => {
 	const environment = createEnvironment();
 
+	await new Promise((resolve) => setImmediate(resolve));
 	assert.equal(environment.scripts.length, 0);
+	assert.equal(environment.fetchCalls(), 0);
 	environment.acceptListeners.click();
 	await new Promise((resolve) => setImmediate(resolve));
 	await new Promise((resolve) => setImmediate(resolve));
@@ -101,6 +107,37 @@ test('does not load ChatGPT Ads before consent and loads it after acceptance', a
 	assert.equal(environment.window.oaiq.q[0][0], 'init');
 	assert.equal(environment.window.oaiq.q[0][1].pixelId, 'TestChatGPTPixelId1234');
 	assert.equal(environment.window.oaiq.q[0][1].debug, true);
+});
+
+test('the inline bootstrap initializes ChatGPT Ads when oaiq already exists', () => {
+	const helperMatch = cookieNoticePhp.match(/window\.frblCookieNoticeInject = window\.frblCookieNoticeInject \|\| function \( gtmId, ga4Id, trackingIntegrations, allowedCategories \) \{([\s\S]*?)\n\t\t\t\};\n\n\t\t\t\/\/ An add-on/);
+	assert.ok(helperMatch);
+
+	const calls = [];
+	const scripts = [];
+	const window = {
+		oaiq() {
+			calls.push(Array.from(arguments));
+		}
+	};
+	const document = {
+		head: { appendChild(script) { scripts.push(script); } },
+		createElement() { return {}; },
+		getElementsByTagName() { return []; }
+	};
+	vm.runInNewContext(helperMatch[0].replace(/\n\t\t\t\/\/ An add-on[\s\S]*/, ''), {
+		Array,
+		Date,
+		document,
+		encodeURIComponent,
+		window
+	});
+
+	window.frblCookieNoticeInject('', '', [ { type: 'openai_chatgpt_ads', id: 'TestChatGPTPixelId1234' } ]);
+	assert.equal(scripts.length, 0);
+	assert.equal(calls.length, 1);
+	assert.equal(calls[0][0], 'init');
+	assert.equal(calls[0][1].pixelId, 'TestChatGPTPixelId1234');
 });
 
 test('initializes ChatGPT Ads when oaiq already exists', () => {
