@@ -143,3 +143,16 @@ Every frontend feature follows the same pattern:
 - Do not use global functions without the required prefix.
 - Do not commit compiled JS/CSS without also committing the source files.
 - Do not write code, comments, or documentation in any language other than English.
+
+## Release
+
+Actions for making a release:
+- Update readme Stable Tag, and Version.
+- Update Plugin Header and constant.
+- Build the assets.
+- Create release in GitHub.
+
+## Test Enforcement
+
+- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
+- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test` with a specific filename or filter.
