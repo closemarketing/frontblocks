@@ -1382,6 +1382,18 @@ class Settings {
 				'label' => __( 'License', 'frontblocks' ),
 			),
 		);
+
+		/**
+		 * Filters the settings tabs displayed in the FrontBlocks admin screen.
+		 *
+		 * Companion plugins can add a tab by appending an array with an `id` and
+		 * `label` key, then render its matching panel on
+		 * `frontblocks_settings_tab_panels`.
+		 *
+		 * @since 1.5.3
+		 * @param array $tabs Settings tabs.
+		 */
+		$tabs = apply_filters( 'frontblocks_settings_tabs', $tabs );
 		?>
 		<div class="frbl-settings-wrapper">
 			<div class="frbl-admin-header">
@@ -1611,6 +1623,8 @@ class Settings {
 						</button>
 					</div>
 				</form>
+
+				<?php do_action( 'frontblocks_settings_tab_panels' ); ?>
 
 				<?php if ( ! $has_cpt_tab ) : ?>
 					<div class="frbl-tab-panel" data-tab-panel="cpt" hidden>
