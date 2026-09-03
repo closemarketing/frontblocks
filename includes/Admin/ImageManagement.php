@@ -333,7 +333,8 @@ class ImageManagement {
 		$value['enable_image_management'] = ! empty( $posted['enable_image_management'] );
 
 		$allowed_targets              = array( 'none', 'webp', 'avif', 'both' );
-		$requested_target             = in_array( $posted['image_format_target'] ?? 'none', $allowed_targets, true ) ? $posted['image_format_target'] : 'none';
+		$posted_target                = $posted['image_format_target'] ?? 'none';
+		$requested_target             = in_array( $posted_target, $allowed_targets, true ) ? $posted_target : 'none';
 		$value['image_format_target'] = $this->downgrade_target_to_supported_formats( $requested_target );
 
 		$value['image_max_upload_dimension_enabled'] = ! empty( $posted['image_max_upload_dimension_enabled'] );
