@@ -27,6 +27,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - **Cookie Notice** - Configurable cookie consent banner (bar/box/popup) that gates Google Tag Manager, GA4, and supported tracking integrations behind consent, with Google Consent Mode v2 support for compatibility with Google Site Kit and other analytics plugins
 - **Review Notice** - Dismissible admin notice inviting site owners to leave a WordPress.org review, shown 14 days after activation
 - **Redundant Plugins Notice** - Persistent admin notice detecting third-party plugins made unnecessary by an active FrontBlocks feature (e.g. SVG upload plugins, GDPR cookie consent plugins), extensible via the `frontblocks_redundant_plugins` filter
+- **Google Sign-In** - "Sign in / Sign up with Google" button for wp-login.php, WooCommerce My Account and Checkout, plus a shortcode and block, with server-side ID token verification
 
 ### PRO Features (FrontBlocks PRO)
 - **Custom Post Types Builder** - Create and manage custom post types with advanced configuration options:
@@ -67,6 +68,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - [Cookie Notice](./docs/COOKIE-NOTICE.md) - Consent banner and consent-gated tracking integrations
 - [Review Notice](./docs/REVIEW-NOTICE.md) - Dismissible WordPress.org review prompt
 - [Redundant Plugins Notice](./docs/REDUNDANT-PLUGINS.md) - Detects plugins made unnecessary by FrontBlocks features and how to register new pairings
+- [Google Sign-In](./docs/GOOGLE-SIGNIN.md) - "Sign in / Sign up with Google" for wp-login.php and WooCommerce
 
 ## Release
 Actions for making a release:

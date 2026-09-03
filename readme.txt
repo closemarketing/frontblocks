@@ -144,6 +144,9 @@ Upload SVG files directly to the WordPress media library. Only administrators ca
 **Login Block:**
 Add a native Gutenberg login form block to any page or post. Insert the block from the Gutenberg inserter under the FrontBlocks category. Features a toggle to switch between login form and registration form views, with fully customizable labels and styles. Ideal for membership sites or pages requiring a clean, integrated login experience without a shortcode.
 
+**Google Sign-In:**
+Let visitors sign in or register with their Google account instead of, or alongside, a WordPress username and password. Add your Google Client ID and Client Secret in the FrontBlocks settings page to enable a "Sign in with Google" / "Sign up with Google" button on the wp-admin login screen, the WooCommerce My Account login and registration forms, and the WooCommerce Checkout page for guests — plus a `[frontblocks_google_login]` / `[frontblocks_google_register]` shortcode and a Google Login block for use anywhere. Uses Google Identity Services in the browser and verifies the resulting ID token server-side (signature, issuer, audience and expiry) before matching or creating a WordPress account — no third-party PHP library required.
+
 **Post Meta (Native) — FrontBlocks PRO:**
 Display custom field values from post meta inside native WordPress blocks directly in the editor. Select any registered meta key and output its value inline within heading, paragraph, or other text blocks — no shortcodes or custom PHP required. Useful for displaying dynamic data such as prices, dates, or any custom field stored in post meta. Available in [FrontBlocks PRO](https://close.technology/en/wordpress-plugins/frontblocks-pro/?utm_source=WordPressORGReadme&utm_medium=link&utm_campaign=frontblocks).
 
@@ -220,6 +223,9 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 2. Go to Settings > FrontBlocks > Features and enable the features you want to use.
 
 == Changelog ==
+
+= 1.6.0 =
+*   Added: Google Sign-In — "Sign in with Google" / "Sign up with Google" for the wp-admin login screen, WooCommerce My Account (login and registration) and Checkout, plus a shortcode and a Google Login block. Verifies the Google ID token server-side; no third-party PHP library required.
 
 = 1.5.2 =
 *   Added: Cookie Notice background color and corner rounding (none/slightly/very rounded) settings, and a floating full-width bar layout (no longer flush against the viewport edge).
