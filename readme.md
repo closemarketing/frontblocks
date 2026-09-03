@@ -69,6 +69,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - [Review Notice](./docs/REVIEW-NOTICE.md) - Dismissible WordPress.org review prompt
 - [Redundant Plugins Notice](./docs/REDUNDANT-PLUGINS.md) - Detects plugins made unnecessary by FrontBlocks features and how to register new pairings
 - [Google Sign-In](./docs/GOOGLE-SIGNIN.md) - "Sign in / Sign up with Google" for wp-login.php and WooCommerce
+- [Extending Settings Tabs](./docs/SETTINGS-TAB-EXTENSIONS.md) - Add a companion-plugin tab and matching panel to FrontBlocks settings
 
 ## Release
 Actions for making a release:
