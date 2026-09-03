@@ -169,7 +169,7 @@ class ReadingTimeTest extends TestCase {
 		$post_id = self::factory()->post->create(
 			array( 'post_content' => '<!-- wp:frontblocks/reading-time /-->' )
 		);
-		go_to( get_permalink( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
 
 		$this->reading_time->enqueue_style();
 
@@ -178,7 +178,7 @@ class ReadingTimeTest extends TestCase {
 
 	public function test_enqueue_style_is_not_loaded_on_the_frontend_without_the_block() {
 		$post_id = self::factory()->post->create( array( 'post_content' => 'No block here.' ) );
-		go_to( get_permalink( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
 
 		$this->reading_time->enqueue_style();
 
