@@ -74,6 +74,38 @@ class ImageManagement {
 	}
 
 	/**
+	 * Never persist a target the server can't actually produce — the select
+	 * shown to the user already hides unsupported options, but the saved
+	 * option is re-checked here too, in case support changed since the page
+	 * was loaded (e.g. a value saved on a different host, or a PHP extension
+	 * that was removed after the settings screen was last opened).
+	 *
+	 * @param string $target Requested target: 'none', 'webp', 'avif', or 'both'.
+	 * @return string A target the current server can produce, or 'none'.
+	 */
+	private function downgrade_target_to_supported_formats( $target ) {
+		$webp_supported = wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) );
+		$avif_supported = wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) );
+
+		if ( 'both' === $target ) {
+			if ( $webp_supported && $avif_supported ) {
+				return 'both';
+			}
+			$target = $avif_supported ? 'avif' : ( $webp_supported ? 'webp' : 'none' );
+		}
+
+		if ( 'webp' === $target && ! $webp_supported ) {
+			$target = 'none';
+		}
+
+		if ( 'avif' === $target && ! $avif_supported ) {
+			$target = 'none';
+		}
+
+		return $target;
+	}
+
+	/**
 	 * Registered size names (core + additional), used by both the field
 	 * render and sanitization.
 	 *
@@ -189,20 +221,30 @@ class ImageManagement {
 				<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200 tw:mb-4">
 					<div class="tw:grid tw:grid-cols-2 tw:gap-4">
 						<div>
+							<?php
+							$webp_supported = wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) );
+							$avif_supported = wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) );
+							?>
 							<label for="image_format_target" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2"><?php echo esc_html__( 'Modern format', 'frontblocks' ); ?></label>
 							<select id="image_format_target" name="frontblocks_settings[image_format_target]" class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base">
 								<option value="none" <?php selected( $format_target, 'none' ); ?>><?php echo esc_html__( 'Off', 'frontblocks' ); ?></option>
-								<option value="webp" <?php selected( $format_target, 'webp' ); ?>><?php echo esc_html__( 'WebP', 'frontblocks' ); ?></option>
-								<option value="avif" <?php selected( $format_target, 'avif' ); ?>><?php echo esc_html__( 'AVIF', 'frontblocks' ); ?></option>
-								<option value="both" <?php selected( $format_target, 'both' ); ?>><?php echo esc_html__( 'WebP and AVIF', 'frontblocks' ); ?></option>
+								<?php if ( $webp_supported ) : ?>
+									<option value="webp" <?php selected( $format_target, 'webp' ); ?>><?php echo esc_html__( 'WebP', 'frontblocks' ); ?></option>
+								<?php endif; ?>
+								<?php if ( $avif_supported ) : ?>
+									<option value="avif" <?php selected( $format_target, 'avif' ); ?>><?php echo esc_html__( 'AVIF', 'frontblocks' ); ?></option>
+								<?php endif; ?>
+								<?php if ( $webp_supported && $avif_supported ) : ?>
+									<option value="both" <?php selected( $format_target, 'both' ); ?>><?php echo esc_html__( 'WebP and AVIF', 'frontblocks' ); ?></option>
+								<?php endif; ?>
 							</select>
-							<?php if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) || ! wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) ) ) : ?>
+							<?php if ( ! $webp_supported || ! $avif_supported ) : ?>
 								<p class="tw:text-xs tw:text-amber-600 tw:mt-2">
 									<?php
-									echo wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) )
-										? esc_html__( 'This server does not support generating WebP images.', 'frontblocks' )
-										: ( wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) )
-											? esc_html__( 'This server does not support generating AVIF images.', 'frontblocks' )
+									echo $avif_supported
+										? esc_html__( 'This server does not support generating WebP images, so that option is hidden.', 'frontblocks' )
+										: ( $webp_supported
+											? esc_html__( 'This server does not support generating AVIF images, so that option is hidden.', 'frontblocks' )
 											: esc_html__( 'This server does not support generating WebP or AVIF images. Ask your host to enable the Imagick or GD PHP extension with modern-format support.', 'frontblocks' ) );
 									?>
 								</p>
@@ -264,7 +306,8 @@ class ImageManagement {
 		$value['enable_image_management'] = ! empty( $posted['enable_image_management'] );
 
 		$allowed_targets              = array( 'none', 'webp', 'avif', 'both' );
-		$value['image_format_target'] = in_array( $posted['image_format_target'] ?? 'none', $allowed_targets, true ) ? $posted['image_format_target'] : 'none';
+		$requested_target             = in_array( $posted['image_format_target'] ?? 'none', $allowed_targets, true ) ? $posted['image_format_target'] : 'none';
+		$value['image_format_target'] = $this->downgrade_target_to_supported_formats( $requested_target );
 
 		$quality                       = absint( $posted['image_format_quality'] ?? 82 );
 		$value['image_format_quality'] = $quality > 0 ? min( $quality, 100 ) : 82;
