@@ -153,6 +153,20 @@ class Settings {
 	private $option_cookie_notice_color = 'cookie_notice_color';
 
 	/**
+	 * Option key for the cookie notice panel background color.
+	 *
+	 * @var string
+	 */
+	private $option_cookie_notice_bg_color = 'cookie_notice_bg_color';
+
+	/**
+	 * Option key for the cookie notice panel corner rounding.
+	 *
+	 * @var string
+	 */
+	private $option_cookie_notice_radius = 'cookie_notice_radius';
+
+	/**
 	 * Option key for the cookie notice expiration (in days).
 	 *
 	 * @var string
@@ -172,6 +186,13 @@ class Settings {
 	 * @var string
 	 */
 	private $option_cookie_notice_ga4_id = 'cookie_notice_ga4_id';
+
+	/**
+	 * Option key for the additional tracking integrations.
+	 *
+	 * @var string
+	 */
+	private $option_cookie_notice_tracking_integrations = 'cookie_notice_tracking_integrations';
 
 	/**
 	 * Option key for popups feature.
@@ -739,6 +760,7 @@ class Settings {
 
 				const layoutSelect = document.getElementById('cookie_notice_layout');
 				const positionSelect = document.getElementById('cookie_notice_position');
+				const radiusSelect = document.getElementById('cookie_notice_radius');
 				const positionWrapper = document.getElementById('cookie-notice-position-wrapper');
 				const preview = document.getElementById('frbl-cookie-notice-preview');
 
@@ -761,6 +783,11 @@ class Settings {
 					if (layout === 'box') {
 						preview.className += ' frbl-cookie-notice--' + (position === 'bottom-left' ? 'left' : 'right');
 					}
+
+					if (radiusSelect) {
+						var radii = { none: '0', small: '12px', large: '24px' };
+						preview.style.setProperty('--frbl-cookie-radius', radii[radiusSelect.value] || radii.small);
+					}
 				}
 
 				if (layoutSelect) {
@@ -769,6 +796,133 @@ class Settings {
 
 				if (positionSelect) {
 					positionSelect.addEventListener('change', updatePreviewLayout);
+				}
+
+				if (radiusSelect) {
+					radiusSelect.addEventListener('change', updatePreviewLayout);
+				}
+			});
+			"
+		);
+
+		// Isolated inline script for the tabbed admin shell: tab switching, bulk
+		// enable/disable, discard, and "unsaved changes" tracking on the save bar.
+		wp_add_inline_script(
+			'jquery',
+			"
+				document.addEventListener('DOMContentLoaded', function() {
+					var tabButtons = document.querySelectorAll('[data-tab-target]');
+					var tabPanels  = document.querySelectorAll('[data-tab-panel]');
+					var saveBar    = document.querySelector('.frbl-settings-save-bar');
+
+				function activateTab(tabId) {
+					var found = false;
+
+					tabPanels.forEach(function (panel) {
+						var match = panel.getAttribute('data-tab-panel') === tabId;
+						panel.hidden = ! match;
+						found = found || match;
+					});
+
+					if (saveBar) {
+						saveBar.hidden = found && 'google-signin' === tabId;
+					}
+
+					if (! found) {
+						return;
+					}
+
+					tabButtons.forEach(function (btn) {
+						if (! btn.classList.contains('frbl-tab-btn')) {
+							return;
+						}
+						var active = btn.getAttribute('data-tab-target') === tabId;
+						btn.classList.toggle('is-active', active);
+						btn.setAttribute('aria-selected', active ? 'true' : 'false');
+					});
+				}
+
+				tabButtons.forEach(function (btn) {
+					btn.addEventListener('click', function () {
+						activateTab(btn.getAttribute('data-tab-target'));
+					});
+				});
+
+				// Legacy inline links pointing at '#frontblocks_section_license'
+				// (upsell notices) should open the License tab instead of jumping
+				// to a hidden anchor.
+				document.addEventListener('click', function (event) {
+					var link = event.target.closest('a[href=\"#frontblocks_section_license\"]');
+					if (link) {
+						event.preventDefault();
+						activateTab('license');
+					}
+				});
+
+				var initialTab = 'blocks';
+				var hash = window.location.hash.replace('#', '');
+				if (hash === 'frontblocks_section_license') {
+					hash = 'license';
+				}
+				if (hash && document.querySelector('[data-tab-panel=\"' + hash + '\"]')) {
+					initialTab = hash;
+				}
+				activateTab(initialTab);
+
+				// Keep the active tab across a save (WordPress redirects back to
+				// the referring URL after options.php processes the form).
+				var form = document.getElementById('frbl-settings-form');
+				var referer = form ? form.querySelector('input[name=\"_wp_http_referer\"]') : null;
+
+				if (form && referer) {
+					form.addEventListener('submit', function () {
+						var active = document.querySelector('.frbl-tab-btn.is-active');
+						var tabId  = active ? active.getAttribute('data-tab-target') : initialTab;
+						var url    = referer.value.split('#')[0];
+						referer.value = url + '#' + tabId;
+					});
+				}
+
+				// Bulk enable/disable within the active tab.
+				document.querySelectorAll('[data-bulk-action]').forEach(function (btn) {
+					btn.addEventListener('click', function () {
+						var panel = btn.closest('[data-tab-panel]');
+						if (! panel) {
+							return;
+						}
+						var enable = btn.getAttribute('data-bulk-action') === 'enable';
+						panel.querySelectorAll('input[type=\"checkbox\"]:not(:disabled)').forEach(function (checkbox) {
+							if (checkbox.checked !== enable) {
+								checkbox.checked = enable;
+								checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+							}
+						});
+					});
+				});
+
+				// 'Unsaved changes' indicator on the sticky save bar.
+				var saveStatus = document.querySelector('[data-save-status]');
+				var savedText    = " . wp_json_encode( __( 'All changes saved.', 'frontblocks' ) ) . ';
+				var unsavedText  = ' . wp_json_encode( __( 'Unsaved changes — applied on the front end immediately after saving.', 'frontblocks' ) ) . ";
+
+				function markDirty() {
+					if (saveStatus) {
+						saveStatus.textContent = unsavedText;
+					}
+				}
+
+				if (form && saveStatus) {
+					form.addEventListener('change', markDirty);
+					form.addEventListener('input', markDirty);
+
+					form.addEventListener('reset', function () {
+						setTimeout(function () {
+							form.querySelectorAll('input[type=\"checkbox\"]').forEach(function (checkbox) {
+								checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+							});
+							saveStatus.textContent = savedText;
+						}, 0);
+					});
 				}
 			});
 			"
@@ -1104,7 +1258,7 @@ class Settings {
 			__( 'Enable Full Page Scroll', 'frontblocks' ),
 			array( $this, 'field_enable_fullpage_scroll' ),
 			$this->page_slug,
-			'frontblocks_section_woocommerce_features'
+			'frontblocks_section_features'
 		);
 
 		add_settings_field(
@@ -1112,7 +1266,15 @@ class Settings {
 			__( 'Enable Language Banner', 'frontblocks' ),
 			array( $this, 'field_enable_language_banner' ),
 			$this->page_slug,
-			'frontblocks_section_woocommerce_features'
+			'frontblocks_section_features'
+		);
+
+		// Popups section.
+		add_settings_section(
+			'frontblocks_section_popups',
+			__( 'Popups', 'frontblocks' ),
+			array( $this, 'section_popups_callback' ),
+			$this->page_slug
 		);
 
 		add_settings_field(
@@ -1120,7 +1282,7 @@ class Settings {
 			__( 'Enable Popups', 'frontblocks' ),
 			array( $this, 'field_enable_popups' ),
 			$this->page_slug,
-			'frontblocks_section_woocommerce_features'
+			'frontblocks_section_popups'
 		);
 
 		add_settings_field(
@@ -1164,28 +1326,108 @@ class Settings {
 		if ( ! current_user_can( 'edit_theme_options' ) ) {
 			return;
 		}
-		?>
-		<div class="frbl-settings-wrapper tw:min-h-screen tw:bg-gray-50 tw:py-8">
-			<div class="tw:max-w-5xl tw:mx-auto tw:px-4 tw:sm:px-6 tw:lg:px-8">
-				<!-- Header Section -->
-				<div class="tw:mb-8 frbl-animate-slide-in">
-					<div class="tw:flex tw:items-center tw:justify-between">
-						<div>
-							<h1 class="tw:text-3xl tw:font-bold tw:text-gray-900 tw:mb-2">
-								<?php echo esc_html__( 'FrontBlocks Settings', 'frontblocks' ); ?>
-							</h1>
-							<p class="tw:text-gray-600">
-								<?php echo esc_html__( 'Add visual enhancements to your website with FrontBlocks.', 'frontblocks' ); ?>
-							</p>
-						</div>
-						<div class="tw:flex tw:items-center tw:space-x-2">
-							<span class="tw:inline-flex tw:items-center tw:px-3 tw:py-1 tw:rounded-full tw:text-sm tw:font-medium tw:bg-primary-100 tw:text-primary-700">
-								<?php echo esc_html__( 'Version', 'frontblocks' ) . ' ' . esc_html( FRBL_VERSION ); ?>
-							</span>
-						</div>
-					</div>
-				</div>
 
+		global $wp_settings_sections;
+
+		$sections    = isset( $wp_settings_sections[ $this->page_slug ] ) ? (array) $wp_settings_sections[ $this->page_slug ] : array();
+		$has_cpt_tab = false;
+
+		foreach ( $sections as $section ) {
+			if ( 'frontblocks_section_custom_post_types' === $section['id'] ) {
+				$has_cpt_tab = true;
+				break;
+			}
+		}
+
+		list( $features_on, $features_total ) = $this->count_section_toggles( 'frontblocks_section_features' );
+		list( $woo_on, $woo_total )           = $this->count_section_toggles( 'frontblocks_section_woocommerce_features' );
+		list( $popups_on, $popups_total )     = $this->count_section_toggles( 'frontblocks_section_popups' );
+
+		$tabs = array(
+			array(
+				'id'    => 'blocks',
+				'label' => __( 'Blocks', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'pro',
+				'label' => __( 'PRO blocks', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'optional',
+				'label' => __( 'Optional features', 'frontblocks' ),
+				'on'    => $features_on,
+				'total' => $features_total,
+			),
+			array(
+				'id'    => 'maintenance',
+				'label' => __( 'Maintenance', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'woocommerce',
+				'label' => __( 'WooCommerce', 'frontblocks' ),
+				'on'    => $woo_on,
+				'total' => $woo_total,
+			),
+			array(
+				'id'    => 'popups',
+				'label' => __( 'Popups', 'frontblocks' ),
+				'on'    => $popups_on,
+				'total' => $popups_total,
+			),
+			array(
+				'id'    => 'cookies',
+				'label' => __( 'Cookies', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'google-signin',
+				'label' => __( 'Google Sign-In', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'cpt',
+				'label' => __( 'Post types', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'license',
+				'label' => __( 'License', 'frontblocks' ),
+			),
+		);
+
+		/**
+		 * Filters the settings tabs displayed in the FrontBlocks admin screen.
+		 *
+		 * Companion plugins can add a tab by appending an array with an `id` and
+		 * `label` key, then render its matching panel on
+		 * `frontblocks_settings_tab_panels`.
+		 *
+		 * @since 1.5.3
+		 * @param array $tabs Settings tabs.
+		 */
+		$tabs = apply_filters( 'frontblocks_settings_tabs', $tabs );
+		?>
+		<div class="frbl-settings-wrapper">
+			<div class="frbl-admin-header">
+				<div class="frbl-admin-header-top">
+					<div class="frbl-admin-title-group">
+						<h1><?php esc_html_e( 'FrontBlocks', 'frontblocks' ); ?></h1>
+						<span class="frbl-admin-subtitle"><?php esc_html_e( 'Settings', 'frontblocks' ); ?></span>
+					</div>
+					<span class="frbl-version-chip">v<?php echo esc_html( FRBL_VERSION ); ?></span>
+					<div class="frbl-header-spacer"></div>
+					<?php $this->render_license_badge(); ?>
+				</div>
+				<div class="frbl-tabs" role="tablist">
+					<?php foreach ( $tabs as $tab ) : ?>
+						<button type="button" class="frbl-tab-btn" data-tab-target="<?php echo esc_attr( $tab['id'] ); ?>" role="tab" aria-selected="false">
+							<span><?php echo esc_html( $tab['label'] ); ?></span>
+							<?php if ( isset( $tab['total'] ) ) : ?>
+								<span class="frbl-tab-count"><?php echo esc_html( $tab['on'] . '/' . $tab['total'] ); ?></span>
+							<?php endif; ?>
+						</button>
+					<?php endforeach; ?>
+				</div>
+			</div>
+
+			<div class="frbl-admin-body">
 				<?php
 				// Show success message after settings are saved.
 				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -1299,59 +1541,365 @@ class Settings {
 					</div>
 					<?php
 				endif;
+
+				$this->render_cookie_notice_cache_notice();
 				?>
 
 				<!-- Settings Form -->
-				<form method="post" action="options.php" class="tw:space-y-6">
+				<form method="post" action="options.php" id="frbl-settings-form">
 					<?php settings_fields( 'frontblocks_settings' ); ?>
 
-					<?php
-					// Get all sections for this page.
-					global $wp_settings_sections, $wp_settings_fields;
+					<div class="frbl-tab-panel" data-tab-panel="blocks">
+						<?php $this->render_blocks_tab(); ?>
+					</div>
 
-					if ( ! isset( $wp_settings_sections[ $this->page_slug ] ) ) {
-						return;
-					}
+					<div class="frbl-tab-panel" data-tab-panel="pro" hidden>
+						<?php $this->render_pro_blocks_tab(); ?>
+					</div>
 
-					foreach ( (array) $wp_settings_sections[ $this->page_slug ] as $section ) {
-						$this->render_settings_section( $section );
-					}
-					?>
+					<div class="frbl-tab-panel" data-tab-panel="optional" hidden>
+						<div class="frbl-tab-panel-head">
+							<div>
+								<h2><?php esc_html_e( 'Optional features', 'frontblocks' ); ?></h2>
+								<p><?php esc_html_e( 'Site-wide behaviours that are not blocks — progress bars, buttons and typography.', 'frontblocks' ); ?></p>
+							</div>
+							<?php if ( $features_total > 0 ) : ?>
+								<div class="frbl-bulk-actions">
+									<button type="button" class="frbl-btn-outline" data-bulk-action="enable"><?php esc_html_e( 'Enable all', 'frontblocks' ); ?></button>
+									<button type="button" class="frbl-btn-ghost" data-bulk-action="disable"><?php esc_html_e( 'Disable all', 'frontblocks' ); ?></button>
+								</div>
+							<?php endif; ?>
+						</div>
+						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_features' ); ?>
+					</div>
+
+					<div class="frbl-tab-panel" data-tab-panel="maintenance" hidden>
+						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_maintenance' ); ?>
+					</div>
+
+					<div class="frbl-tab-panel" data-tab-panel="woocommerce" hidden>
+						<div class="frbl-tab-panel-head">
+							<div>
+								<h2><?php esc_html_e( 'WooCommerce', 'frontblocks' ); ?></h2>
+								<p><?php esc_html_e( 'Additions and removals applied to product, cart and checkout pages.', 'frontblocks' ); ?></p>
+							</div>
+							<?php if ( $woo_total > 0 ) : ?>
+								<div class="frbl-bulk-actions">
+									<button type="button" class="frbl-btn-outline" data-bulk-action="enable"><?php esc_html_e( 'Enable all', 'frontblocks' ); ?></button>
+									<button type="button" class="frbl-btn-ghost" data-bulk-action="disable"><?php esc_html_e( 'Disable all', 'frontblocks' ); ?></button>
+								</div>
+							<?php endif; ?>
+						</div>
+						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_woocommerce_features' ); ?>
+					</div>
+
+					<div class="frbl-tab-panel" data-tab-panel="popups" hidden>
+						<div class="frbl-tab-panel-head">
+							<div>
+								<h2><?php esc_html_e( 'Popups', 'frontblocks' ); ?></h2>
+								<p><?php esc_html_e( 'Create popup content with the block editor and choose when and where it appears.', 'frontblocks' ); ?></p>
+							</div>
+							<?php if ( $popups_total > 0 ) : ?>
+								<div class="frbl-bulk-actions">
+									<button type="button" class="frbl-btn-outline" data-bulk-action="enable"><?php esc_html_e( 'Enable all', 'frontblocks' ); ?></button>
+									<button type="button" class="frbl-btn-ghost" data-bulk-action="disable"><?php esc_html_e( 'Disable all', 'frontblocks' ); ?></button>
+								</div>
+							<?php endif; ?>
+						</div>
+						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_popups' ); ?>
+					</div>
+
+					<div class="frbl-tab-panel" data-tab-panel="cookies" hidden>
+						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_cookie_notice' ); ?>
+					</div>
+
+					<?php if ( $has_cpt_tab ) : ?>
+						<div class="frbl-tab-panel" data-tab-panel="cpt" hidden>
+							<?php $this->render_section_if_exists( $sections, 'frontblocks_section_custom_post_types' ); ?>
+						</div>
+					<?php endif; ?>
 
 					<!-- Submit Button -->
-					<div class="frbl-settings-save-bar tw:flex tw:items-center tw:justify-between">
-						<div class="tw:text-sm tw:text-gray-500">
-							<?php echo esc_html__( 'Changes will be applied immediately after saving.', 'frontblocks' ); ?>
-						</div>
-						<button type="submit" class="tw:inline-flex tw:items-center tw:px-4 tw:py-3 tw:border tw:border-transparent tw:text-base tw:font-medium tw:rounded-lg tw:shadow-sm tw:text-white tw:bg-primary-500 tw:hover:bg-primary-600 tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-offset-2 tw:focus:ring-primary-500 tw:transition-colors tw:duration-200">
-							<svg class="tw:w-5 tw:h-5 tw:mr-2 tw:-ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<div class="frbl-settings-save-bar">
+						<span class="frbl-save-status" data-save-status><?php esc_html_e( 'All changes saved.', 'frontblocks' ); ?></span>
+						<div class="frbl-save-bar-spacer"></div>
+						<button type="reset" class="frbl-btn-ghost" data-discard-btn><?php esc_html_e( 'Discard', 'frontblocks' ); ?></button>
+						<button type="submit" class="frbl-btn-primary">
+							<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
 							</svg>
-							<?php echo esc_html__( 'Save Settings', 'frontblocks' ); ?>
+							<?php echo esc_html__( 'Save settings', 'frontblocks' ); ?>
 						</button>
 					</div>
 				</form>
 
-				<?php
-				// Render license section separately (outside main form) if PRO is active.
-				if ( frbl_is_pro_active() ) {
-					$this->render_license_section();
-				}
-				?>
-
-				<!-- Footer Info -->
-				<div class="tw:mt-8 tw:text-center tw:text-sm tw:text-gray-500">
+				<div class="frbl-tab-panel" data-tab-panel="google-signin" hidden>
 					<?php
-					printf(
-						/* translators: %s: Close·marketing link */
-						esc_html__( 'Made with ❤️ by %s', 'frontblocks' ),
-						'<a href="https://close.technology/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings" target="_blank" rel="noopener noreferrer" class="tw:text-primary-500 tw:hover:text-primary-600 tw:font-medium">Close·Technology</a>'
-					);
+					// Rendered outside the main settings form: Google Sign-In manages
+					// its own form, nonce, and save handling (see GoogleSignIn\Settings).
+					$this->render_section_if_exists( $sections, 'frontblocks_section_google_signin' );
+					?>
+				</div>
+				<?php do_action( 'frontblocks_settings_tab_panels' ); ?>
+
+				<?php if ( ! $has_cpt_tab ) : ?>
+					<div class="frbl-tab-panel" data-tab-panel="cpt" hidden>
+						<?php
+						$this->render_pro_upsell_card(
+							__( 'Custom Post Types builder', 'frontblocks' ),
+							__( 'Create and manage post types with advanced configuration options, directly from the admin panel.', 'frontblocks' ),
+							'settings-cpt-tab'
+						);
+						?>
+					</div>
+				<?php endif; ?>
+
+				<div class="frbl-tab-panel" data-tab-panel="license" id="frontblocks_section_license" hidden>
+					<?php
+					// Render license section (outside the settings form: it posts to its own option group).
+					if ( frbl_is_pro_active() ) {
+						$this->render_license_section();
+					} else {
+						$this->render_pro_upsell_card(
+							__( 'PRO license', 'frontblocks' ),
+							__( 'Install FrontBlocks PRO to manage your license key, automatic updates and priority support from here.', 'frontblocks' ),
+							'settings-license-tab'
+						);
+					}
 					?>
 				</div>
 
 				<?php $this->render_debug_section(); ?>
+
+				<!-- Footer Info -->
+				<div class="frbl-admin-footer">
+					<?php
+					printf(
+						/* translators: %s: Close·marketing link */
+						esc_html__( 'Made with ❤️ by %s', 'frontblocks' ),
+						'<a href="https://close.technology/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings" target="_blank" rel="noopener noreferrer">Close·Technology</a>'
+					);
+					?>
+				</div>
 			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Find a registered settings section by id and render it, if present.
+	 *
+	 * @param array  $sections   All registered sections for this page (from $wp_settings_sections).
+	 * @param string $section_id Section id to look for.
+	 * @return void
+	 */
+	private function render_section_if_exists( array $sections, $section_id ) {
+		foreach ( $sections as $section ) {
+			if ( $section['id'] === $section_id ) {
+				$this->render_settings_section( $section );
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Count how many toggle fields of a section are currently enabled.
+	 *
+	 * @param string $section_id Section id.
+	 * @return array{0:int,1:int} [enabled count, total count].
+	 */
+	private function count_section_toggles( $section_id ) {
+		global $wp_settings_fields;
+
+		if ( empty( $wp_settings_fields[ $this->page_slug ][ $section_id ] ) ) {
+			return array( 0, 0 );
+		}
+
+		$options = get_option( 'frontblocks_settings', array() );
+		$total   = 0;
+		$on      = 0;
+
+		foreach ( $wp_settings_fields[ $this->page_slug ][ $section_id ] as $field ) {
+			++$total;
+			if ( ! empty( $options[ $field['id'] ] ) ) {
+				++$on;
+			}
+		}
+
+		return array( $on, $total );
+	}
+
+	/**
+	 * Render the license status badge shown in the sticky header.
+	 *
+	 * @return void
+	 */
+	private function render_license_badge() {
+		if ( ! frbl_is_pro_active() ) {
+			?>
+			<a
+				href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-header-cta"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="frbl-license-badge frbl-license-badge--none"
+			>
+				<?php esc_html_e( 'Get FrontBlocks PRO', 'frontblocks' ); ?>
+			</a>
+			<?php
+			return;
+		}
+
+		if ( $this->is_license_valid ) {
+			?>
+			<span class="frbl-license-badge frbl-license-badge--active">
+				<span class="frbl-license-dot"></span>
+				<?php esc_html_e( 'PRO license active', 'frontblocks' ); ?>
+			</span>
+			<?php
+			return;
+		}
+		?>
+		<span class="frbl-license-badge frbl-license-badge--inactive">
+			<?php esc_html_e( 'License not active', 'frontblocks' ); ?>
+		</span>
+		<button type="button" class="frbl-license-manage" data-tab-target="license"><?php esc_html_e( 'Activate', 'frontblocks' ); ?></button>
+		<?php
+	}
+
+	/**
+	 * Render the "Blocks" tab: core blocks always available in the block editor.
+	 *
+	 * @return void
+	 */
+	private function render_blocks_tab() {
+		$active_blocks = apply_filters(
+			'frbl_active_blocks',
+			array(
+				array(
+					'icon'  => 'animations',
+					'title' => __( 'Animations', 'frontblocks' ),
+					'desc'  => __( 'Add animations to any block using Animate.css', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'carousel',
+					'title' => __( 'Carousel/Slider', 'frontblocks' ),
+					'desc'  => __( 'Transform any Grid block into a carousel or slider', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'gallery',
+					'title' => __( 'Native Gallery', 'frontblocks' ),
+					'desc'  => __( 'Enhanced gallery block with carousel and masonry options', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'sticky',
+					'title' => __( 'Sticky Columns', 'frontblocks' ),
+					'desc'  => __( 'Make Grid blocks sticky when scrolling', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'insert_post',
+					'title' => __( 'Insert Post Block', 'frontblocks' ),
+					'desc'  => __( 'Display content from other posts, pages or custom post types', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'counter',
+					'title' => __( 'Counter Block', 'frontblocks' ),
+					'desc'  => __( 'Display animated counters with start and end values', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'reading_time',
+					'title' => __( 'Reading Time Block', 'frontblocks' ),
+					'desc'  => __( 'Show estimated reading time for posts', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'stacked_images',
+					'title' => __( 'Stacked Images Block', 'frontblocks' ),
+					'desc'  => __( 'Display images with animated stacking effect from different directions', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'product_categories',
+					'title' => __( 'Product Categories Block', 'frontblocks' ),
+					'desc'  => __( 'Display WooCommerce product categories', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'headline_marquee',
+					'title' => __( 'Headline Marquee', 'frontblocks' ),
+					'desc'  => __( 'Infinite scrolling marquee effect for headline/text blocks with customizable speed', 'frontblocks' ),
+				),
+				array(
+					'icon'  => 'svg_upload',
+					'title' => __( 'SVG Uploads', 'frontblocks' ),
+					'desc'  => __( 'Upload SVG files to the media library. Files are automatically sanitized to prevent security risks.', 'frontblocks' ),
+				),
+			)
+		);
+		?>
+		<div class="frbl-tab-panel-head">
+			<div>
+				<h2><?php esc_html_e( 'Blocks & features', 'frontblocks' ); ?></h2>
+				<p><?php esc_html_e( 'Core blocks available in the block editor. Always active.', 'frontblocks' ); ?></p>
+			</div>
+		</div>
+		<div class="frbl-features-grid">
+			<?php foreach ( $active_blocks as $block ) : ?>
+				<?php UI::show_info_card( $block['icon'], $block['title'], $block['desc'] ); ?>
+			<?php endforeach; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render the "PRO blocks" tab.
+	 *
+	 * @return void
+	 */
+	private function render_pro_blocks_tab() {
+		$pro_blocks = apply_filters( 'frbl_pro_blocks', $this->get_default_pro_blocks() );
+		?>
+		<div class="frbl-tab-panel-head">
+			<div>
+				<h2><?php esc_html_e( 'PRO blocks', 'frontblocks' ); ?></h2>
+				<p><?php esc_html_e( 'Included with your active license. Each one adds a block or an editor capability.', 'frontblocks' ); ?></p>
+			</div>
+		</div>
+		<div class="frbl-features-grid">
+			<?php foreach ( $pro_blocks as $block ) : ?>
+				<?php UI::show_pro_info_card( $block['icon'], $block['title'], $block['desc'] ); ?>
+			<?php endforeach; ?>
+		</div>
+		<?php if ( ! frbl_is_pro_active() ) : ?>
+			<div class="frbl-tab-cta">
+				<a
+					href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-pro-tab"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="frbl-btn-primary"
+				>
+					<?php esc_html_e( 'Get FrontBlocks PRO', 'frontblocks' ); ?> →
+				</a>
+			</div>
+		<?php endif; ?>
+		<?php
+	}
+
+	/**
+	 * Render a generic PRO upsell card, used by tabs whose feature is entirely
+	 * absent (not just unlicensed) when FrontBlocks PRO isn't installed.
+	 *
+	 * @param string $title        Card title.
+	 * @param string $desc         Card description.
+	 * @param string $utm_campaign utm_campaign value for the outbound link.
+	 * @return void
+	 */
+	private function render_pro_upsell_card( $title, $desc, $utm_campaign ) {
+		$pro_url = 'https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=' . rawurlencode( $utm_campaign );
+		?>
+		<div class="frbl-upsell-card">
+			<span class="frbl-pro-chip">PRO</span>
+			<h2><?php echo esc_html( $title ); ?></h2>
+			<p><?php echo esc_html( $desc ); ?></p>
+			<a href="<?php echo esc_url( $pro_url ); ?>" target="_blank" rel="noopener noreferrer" class="frbl-btn-primary">
+				<?php esc_html_e( 'Get FrontBlocks PRO', 'frontblocks' ); ?> →
+			</a>
 		</div>
 		<?php
 	}
@@ -1508,6 +2056,19 @@ class Settings {
 	}
 
 	/**
+	 * Popups section callback.
+	 *
+	 * @return void
+	 */
+	private function section_popups_callback() {
+		?>
+		<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
+			<?php echo esc_html__( 'Create popup content with the block editor and configure when and where it appears.', 'frontblocks' ); ?>
+		</p>
+		<?php
+	}
+
+	/**
 	 * Maintenance mode section callback.
 	 *
 	 * @return void
@@ -1531,6 +2092,46 @@ class Settings {
 			<?php echo esc_html__( 'Show a cookie consent banner and only load Google Tag Manager / GA4 after a visitor accepts.', 'frontblocks' ); ?>
 		</p>
 		<?php
+		$this->render_advanced_cookies_upsell();
+	}
+
+	/**
+	 * Show what FrontBlocks PRO's Advanced Cookie Management adds on top of
+	 * this banner. The feature's own settings (and the fields to configure
+	 * it) live entirely in the PRO plugin — this is only a plain message,
+	 * shown when PRO isn't active/licensed yet.
+	 *
+	 * @return void
+	 */
+	private function render_advanced_cookies_upsell() {
+		if ( frbl_is_pro_active() && $this->is_license_valid ) {
+			// Already unlocked: the PRO plugin renders its own settings section
+			// right below this one.
+			return;
+		}
+
+		if ( ! frbl_is_pro_active() ) {
+			echo '<div class="tw:bg-blue-50 tw:border-l-4 tw:border-blue-400 tw:p-4 tw:mb-4">';
+			echo '<p class="tw:text-sm tw:text-blue-700 tw:font-medium tw:mb-1">' . esc_html__( 'Want per-category consent?', 'frontblocks' ) . '</p>';
+			echo '<p class="tw:text-sm tw:text-blue-700">';
+			printf(
+				/* translators: %s: FrontBlocks PRO link */
+				esc_html__( '%s adds a "Customize" option so visitors can accept Analytics and Marketing cookies separately, with native Google Ads, Meta Pixel and Microsoft Clarity integrations that only load once accepted.', 'frontblocks' ),
+				'<a href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-cookie-notice" target="_blank" rel="noopener noreferrer" class="tw:font-medium tw:underline">FrontBlocks PRO</a>'
+			);
+			echo '</p>';
+			echo '</div>';
+		} else {
+			echo '<div class="tw:bg-yellow-50 tw:border-l-4 tw:border-yellow-400 tw:p-4 tw:mb-4">';
+			echo '<p class="tw:text-sm tw:text-yellow-700">';
+			printf(
+				/* translators: %s: License section link */
+				esc_html__( 'Advanced Cookie Management (per-category consent, Google Ads / Meta Pixel / Microsoft Clarity) is included with FrontBlocks PRO. Activate your license in the %s section below to unlock it.', 'frontblocks' ),
+				'<a href="#frontblocks_section_license" class="tw:font-medium tw:underline">' . esc_html__( 'License', 'frontblocks' ) . '</a>'
+			);
+			echo '</p>';
+			echo '</div>';
+		}
 	}
 
 	/**
@@ -1615,23 +2216,33 @@ class Settings {
 			</div>
 			<?php
 		} else {
-			// Render regular sections with feature grid.
+			// Render regular sections with feature grid. The "Optional features" and
+			// "WooCommerce" and "Popups" tabs already print their own <h2>/description
+			// in the tab head, so skip the duplicate title for those sections — the callback (which
+			// may render a PRO upsell notice) still runs.
+			$suppress_title = in_array( $section['id'], array( 'frontblocks_section_features', 'frontblocks_section_woocommerce_features', 'frontblocks_section_popups' ), true );
 			?>
 			<div class="frbl-section-wrapper">
-				<!-- Section Header -->
-				<div class="frbl-section-header">
-					<h2 class="tw:text-2xl tw:font-bold tw:text-gray-900 tw:mb-0">
-						<?php echo esc_html( $section['title'] ); ?>
-					</h2>
-					<?php
-					if ( $section['callback'] ) {
-						echo '<div class="tw:text-sm tw:text-gray-600">';
-						call_user_func( $section['callback'], $section );
-						echo '</div>';
-					}
-					?>
-				</div>
-				
+				<?php if ( ! $suppress_title ) : ?>
+					<!-- Section Header -->
+					<div class="frbl-section-header">
+						<h2 class="tw:text-2xl tw:font-bold tw:text-gray-900 tw:mb-0">
+							<?php echo esc_html( $section['title'] ); ?>
+						</h2>
+						<?php
+						if ( $section['callback'] ) {
+							echo '<div class="tw:text-sm tw:text-gray-600">';
+							call_user_func( $section['callback'], $section );
+							echo '</div>';
+						}
+						?>
+					</div>
+				<?php elseif ( $section['callback'] ) : ?>
+					<div class="tw:text-sm tw:text-gray-600 tw:mb-4">
+						<?php call_user_func( $section['callback'], $section ); ?>
+					</div>
+				<?php endif; ?>
+
 				<!-- Features Grid -->
 				<div class="frbl-features-grid">
 					<?php
@@ -2119,22 +2730,26 @@ class Settings {
 	 * @return void
 	 */
 	public function field_enable_cookie_notice() {
-		$options        = get_option( 'frontblocks_settings', array() );
-		$enabled        = (bool) ( $options[ $this->option_enable_cookie_notice ] ?? false );
-		$message        = (string) ( $options[ $this->option_cookie_notice_message ] ?? '' );
-		$accept_label   = (string) ( $options[ $this->option_cookie_notice_accept_label ] ?? '' );
-		$reject_label   = (string) ( $options[ $this->option_cookie_notice_reject_label ] ?? '' );
-		$policy_page_id = (int) ( $options[ $this->option_cookie_notice_policy_page_id ] ?? 0 );
-		$layout         = (string) ( $options[ $this->option_cookie_notice_layout ] ?? 'bar' );
-		$position       = (string) ( $options[ $this->option_cookie_notice_position ] ?? 'bottom-right' );
-		$color          = (string) ( $options[ $this->option_cookie_notice_color ] ?? '#687df9' );
-		$expiration     = (int) ( $options[ $this->option_cookie_notice_expiration_days ] ?? 365 );
-		$gtm_id         = (string) ( $options[ $this->option_cookie_notice_gtm_id ] ?? '' );
-		$ga4_id         = (string) ( $options[ $this->option_cookie_notice_ga4_id ] ?? '' );
-		$accepted_count = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_ACCEPTED, 0 );
-		$rejected_count = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_REJECTED, 0 );
-		$total_count    = $accepted_count + $rejected_count;
-		$acceptance_pct = $total_count > 0 ? round( ( $accepted_count / $total_count ) * 100, 1 ) : 0;
+		$options               = get_option( 'frontblocks_settings', array() );
+		$enabled               = (bool) ( $options[ $this->option_enable_cookie_notice ] ?? false );
+		$message               = (string) ( $options[ $this->option_cookie_notice_message ] ?? '' );
+		$accept_label          = (string) ( $options[ $this->option_cookie_notice_accept_label ] ?? '' );
+		$reject_label          = (string) ( $options[ $this->option_cookie_notice_reject_label ] ?? '' );
+		$policy_page_id        = (int) ( $options[ $this->option_cookie_notice_policy_page_id ] ?? 0 );
+		$layout                = (string) ( $options[ $this->option_cookie_notice_layout ] ?? 'bar' );
+		$position              = (string) ( $options[ $this->option_cookie_notice_position ] ?? 'bottom-right' );
+		$color                 = (string) ( $options[ $this->option_cookie_notice_color ] ?? '#687df9' );
+		$bg_color              = (string) ( $options[ $this->option_cookie_notice_bg_color ] ?? '#ffffff' );
+		$radius                = (string) ( $options[ $this->option_cookie_notice_radius ] ?? 'small' );
+		$expiration            = (int) ( $options[ $this->option_cookie_notice_expiration_days ] ?? 365 );
+		$gtm_id                = (string) ( $options[ $this->option_cookie_notice_gtm_id ] ?? '' );
+		$ga4_id                = (string) ( $options[ $this->option_cookie_notice_ga4_id ] ?? '' );
+		$tracking_integrations = \FrontBlocks\Frontend\CookieNotice::get_tracking_integrations( $options );
+		$site_kit_tags         = $this->get_google_site_kit_managed_tags();
+		$accepted_count        = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_ACCEPTED, 0 );
+		$rejected_count        = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_REJECTED, 0 );
+		$total_count           = $accepted_count + $rejected_count;
+		$acceptance_pct        = $total_count > 0 ? round( ( $accepted_count / $total_count ) * 100, 1 ) : 0;
 		?>
 		<div class="frbl-cookie-notice-wrapper">
 			<div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
@@ -2317,6 +2932,35 @@ class Settings {
 						</div>
 					</div>
 
+					<div class="tw:grid tw:grid-cols-2 tw:gap-4 tw:mt-4">
+						<div>
+							<label for="<?php echo esc_attr( $this->option_cookie_notice_bg_color ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+								<?php echo esc_html__( 'Background color', 'frontblocks' ); ?>
+							</label>
+							<input
+								type="color"
+								id="<?php echo esc_attr( $this->option_cookie_notice_bg_color ); ?>"
+								name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_bg_color ); ?>]"
+								value="<?php echo esc_attr( $bg_color ); ?>"
+								class="tw:h-10 tw:w-full tw:border tw:border-gray-300 tw:rounded-lg"
+							/>
+						</div>
+						<div>
+							<label for="<?php echo esc_attr( $this->option_cookie_notice_radius ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+								<?php echo esc_html__( 'Corner rounding', 'frontblocks' ); ?>
+							</label>
+							<select
+								id="<?php echo esc_attr( $this->option_cookie_notice_radius ); ?>"
+								name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_radius ); ?>]"
+								class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
+							>
+								<option value="none" <?php selected( $radius, 'none' ); ?>><?php echo esc_html__( 'None', 'frontblocks' ); ?></option>
+								<option value="small" <?php selected( $radius, 'small' ); ?>><?php echo esc_html__( 'Slightly rounded', 'frontblocks' ); ?></option>
+								<option value="large" <?php selected( $radius, 'large' ); ?>><?php echo esc_html__( 'Very rounded', 'frontblocks' ); ?></option>
+							</select>
+						</div>
+					</div>
+
 					<div class="tw:mt-4">
 						<p class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
 							<?php echo esc_html__( 'Preview', 'frontblocks' ); ?>
@@ -2324,12 +2968,14 @@ class Settings {
 						<?php
 						$preview_accent_text = \FrontBlocks\Frontend\CookieNotice::get_readable_text_color( $color );
 						$preview_accent_link = \FrontBlocks\Frontend\CookieNotice::get_readable_on_white_color( $color );
+						$preview_panel_text  = \FrontBlocks\Frontend\CookieNotice::get_readable_text_color( $bg_color );
+						$preview_radius      = \FrontBlocks\Frontend\CookieNotice::get_radius_value( $radius );
 						?>
 						<div id="frbl-cookie-notice-preview-stage" class="frbl-cookie-notice-preview-stage">
 							<div
 								id="frbl-cookie-notice-preview"
 								class="frbl-cookie-notice frbl-cookie-notice-preview frbl-cookie-notice--<?php echo esc_attr( $layout ); ?><?php echo 'box' === $layout ? ' frbl-cookie-notice--' . ( 'bottom-left' === $position ? 'left' : 'right' ) : ''; ?>"
-								style="--frbl-cookie-accent: <?php echo esc_attr( $color ); ?>; --frbl-cookie-accent-contrast: <?php echo esc_attr( $preview_accent_text ); ?>; --frbl-cookie-accent-on-light: <?php echo esc_attr( $preview_accent_link ); ?>;"
+								style="--frbl-cookie-accent: <?php echo esc_attr( $color ); ?>; --frbl-cookie-accent-contrast: <?php echo esc_attr( $preview_accent_text ); ?>; --frbl-cookie-accent-on-light: <?php echo esc_attr( $preview_accent_link ); ?>; --frbl-cookie-bg: <?php echo esc_attr( $bg_color ); ?>; --frbl-cookie-text: <?php echo esc_attr( $preview_panel_text ); ?>; --frbl-cookie-radius: <?php echo esc_attr( $preview_radius ); ?>;"
 							>
 								<div class="frbl-cookie-notice__panel">
 									<span id="frbl-cookie-notice-preview-icon" class="frbl-cookie-notice__icon">
@@ -2366,39 +3012,235 @@ class Settings {
 				</div>
 
 				<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200">
-					<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
-						<?php echo esc_html__( 'Scripts are only requested after a visitor accepts — never before.', 'frontblocks' ); ?>
-					</p>
-					<div class="tw:grid tw:grid-cols-2 tw:gap-4">
-						<div>
-							<label for="<?php echo esc_attr( $this->option_cookie_notice_gtm_id ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
-								<?php echo esc_html__( 'Google Tag Manager ID', 'frontblocks' ); ?>
-							</label>
-							<input
-								type="text"
-								id="<?php echo esc_attr( $this->option_cookie_notice_gtm_id ); ?>"
-								name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_gtm_id ); ?>]"
-								value="<?php echo esc_attr( $gtm_id ); ?>"
-								placeholder="GTM-XXXXXXX"
-								class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
-							/>
+					<?php if ( $site_kit_tags['gtm'] || $site_kit_tags['ga4'] ) : ?>
+						<p class="tw:text-sm tw:text-gray-600 tw:m-0">
+							<?php echo esc_html__( 'Google Site Kit manages the configured Google tag. FrontBlocks applies Consent Mode to it, so no duplicate ID is needed here.', 'frontblocks' ); ?>
+						</p>
+					<?php endif; ?>
+
+					<?php if ( ! $site_kit_tags['gtm'] || ! $site_kit_tags['ga4'] ) : ?>
+						<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
+							<?php echo esc_html__( 'Scripts are only requested after a visitor accepts — never before.', 'frontblocks' ); ?>
+						</p>
+						<div class="tw:grid tw:grid-cols-1 tw:gap-4<?php echo ! $site_kit_tags['gtm'] && ! $site_kit_tags['ga4'] ? ' tw:grid-cols-2' : ''; ?>">
+							<?php if ( ! $site_kit_tags['gtm'] ) : ?>
+							<div>
+								<label for="<?php echo esc_attr( $this->option_cookie_notice_gtm_id ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+									<?php echo esc_html__( 'Google Tag Manager ID', 'frontblocks' ); ?>
+								</label>
+								<input
+									type="text"
+									id="<?php echo esc_attr( $this->option_cookie_notice_gtm_id ); ?>"
+									name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_gtm_id ); ?>]"
+									value="<?php echo esc_attr( $gtm_id ); ?>"
+									placeholder="GTM-XXXXXXX"
+									class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
+								/>
+							</div>
+							<?php endif; ?>
+							<?php if ( ! $site_kit_tags['ga4'] ) : ?>
+							<div>
+								<label for="<?php echo esc_attr( $this->option_cookie_notice_ga4_id ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+									<?php echo esc_html__( 'GA4 Measurement ID', 'frontblocks' ); ?>
+								</label>
+								<input
+									type="text"
+									id="<?php echo esc_attr( $this->option_cookie_notice_ga4_id ); ?>"
+									name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_ga4_id ); ?>]"
+									value="<?php echo esc_attr( $ga4_id ); ?>"
+									placeholder="G-XXXXXXXXXX"
+									class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
+								/>
+							</div>
+							<?php endif; ?>
 						</div>
-						<div>
-							<label for="<?php echo esc_attr( $this->option_cookie_notice_ga4_id ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
-								<?php echo esc_html__( 'GA4 Measurement ID', 'frontblocks' ); ?>
-							</label>
-							<input
-								type="text"
-								id="<?php echo esc_attr( $this->option_cookie_notice_ga4_id ); ?>"
-								name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_ga4_id ); ?>]"
-								value="<?php echo esc_attr( $ga4_id ); ?>"
-								placeholder="G-XXXXXXXXXX"
-								class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
-							/>
+
+						<?php if ( $enabled && $this->is_gtm4wp_container_loading( $gtm_id ) ) : ?>
+						<div class="tw:mt-4 tw:p-4 tw:bg-amber-50 tw:border tw:border-amber-200 tw:rounded-lg" role="alert">
+							<p class="tw:text-sm tw:font-medium tw:text-amber-900 tw:mt-0 tw:mb-2">
+								<?php echo esc_html__( 'Google Tag Manager may load twice.', 'frontblocks' ); ?>
+							</p>
+							<p class="tw:text-sm tw:text-amber-800 tw:m-0">
+								<?php
+								printf(
+									wp_kses(
+										/* translators: %s: Google Tag Manager for WordPress settings page URL. */
+										__( 'The same container is enabled in Google Tag Manager for WordPress. Disable its container-code injection in <a href="%s">its settings</a> so FrontBlocks can load it only after consent. Its data layer can remain enabled.', 'frontblocks' ),
+										array( 'a' => array( 'href' => array() ) )
+									),
+									esc_url( admin_url( 'options-general.php?page=gtm4wp-settings' ) )
+								);
+								?>
+							</p>
 						</div>
+						<?php endif; ?>
+					<?php endif; ?>
+
+					<div class="tw:mt-4">
+						<?php
+						$tracking_labels = array(
+							'clientify_analytics_plus'    => __( 'Clientify Analytics Plus', 'frontblocks' ),
+							'clientify_analytics_classic' => __( 'Clientify Analytics (classic)', 'frontblocks' ),
+							'brevo'                       => __( 'Brevo', 'frontblocks' ),
+							'openai_chatgpt_ads'          => __( 'ChatGPT Ads', 'frontblocks' ),
+						);
+						?>
+						<p class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+							<?php echo esc_html__( 'Added tracking integrations', 'frontblocks' ); ?>
+						</p>
+						<?php if ( $tracking_integrations ) : ?>
+							<ul class="tw:space-y-2 tw:mb-4">
+								<?php foreach ( $tracking_integrations as $integration ) : ?>
+									<li class="tw:flex tw:items-center tw:justify-between tw:gap-4 tw:p-3 tw:bg-gray-50 tw:border tw:border-gray-200 tw:rounded-lg">
+										<span class="tw:text-sm tw:text-gray-700">
+											<strong><?php echo esc_html( apply_filters( 'frbl_cookie_notice_tracking_type_label', $tracking_labels[ $integration['type'] ] ?? $integration['type'], $integration['type'] ) ); ?></strong>
+											<span class="tw:font-mono tw:text-xs">(<?php echo esc_html( $integration['id'] ); ?>)</span>
+										</span>
+										<label class="tw:text-sm tw:text-red-700 tw:whitespace-nowrap">
+											<input type="checkbox" name="frontblocks_settings[cookie_notice_tracking_remove][]" value="<?php echo esc_attr( $integration['type'] ); ?>" />
+											<?php echo esc_html__( 'Remove', 'frontblocks' ); ?>
+										</label>
+									</li>
+								<?php endforeach; ?>
+							</ul>
+						<?php else : ?>
+							<p class="tw:text-sm tw:text-gray-500 tw:mb-4"><?php echo esc_html__( 'No additional tracking integrations have been added.', 'frontblocks' ); ?></p>
+						<?php endif; ?>
+						<label for="cookie_notice_tracking_integration_code" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+							<?php echo esc_html__( 'Add a tracking integration', 'frontblocks' ); ?>
+						</label>
+						<input
+							type="text"
+							id="cookie_notice_tracking_integration_code"
+							name="frontblocks_settings[cookie_notice_tracking_integration_code]"
+							value=""
+							placeholder="<?php echo esc_attr__( 'Paste a supported tracking code or ID…', 'frontblocks' ); ?>"
+							class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:font-mono tw:text-xs tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
+						/>
+						<p class="tw:text-xs tw:text-gray-500 tw:mt-2 tw:mb-0">
+							<?php
+							printf(
+								wp_kses(
+									/* translators: %s: contact page URL. */
+									__( 'For security reasons, only a supported integration ID is extracted and saved; the pasted code is discarded. Need another tool supported? <a href="%s" target="_blank" rel="noopener noreferrer">Contact us</a>.', 'frontblocks' ),
+									array(
+										'a' => array(
+											'href'   => array(),
+											'target' => array(),
+											'rel'    => array(),
+										),
+									)
+								),
+								esc_url( 'https://close.technology/contacto' )
+							);
+							?>
+						</p>
 					</div>
 				</div>
 			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Check whether GTM4WP is set to load the same container as Cookie Notice.
+	 *
+	 * @param string $frontblocks_gtm_id FrontBlocks GTM container ID.
+	 * @return bool
+	 */
+	private function is_gtm4wp_container_loading( $frontblocks_gtm_id ) {
+		if ( '' === $frontblocks_gtm_id || ( ! defined( 'GTM4WP_OPTIONS' ) && ! function_exists( 'gtm4wp_the_gtm_tag' ) ) ) {
+			return false;
+		}
+
+		$gtm4wp_options = get_option( 'gtm4wp-options', array() );
+		if ( ! is_array( $gtm4wp_options ) ) {
+			return false;
+		}
+
+		$placement_off = defined( 'GTM4WP_PLACEMENT_OFF' ) ? (int) GTM4WP_PLACEMENT_OFF : 3;
+		$placement     = isset( $gtm4wp_options['gtm-code-placement'] ) ? (int) $gtm4wp_options['gtm-code-placement'] : 0;
+
+		if ( $placement_off === $placement ) {
+			return false;
+		}
+
+		$container_ids = array_filter(
+			array_map(
+				'trim',
+				explode( ',', (string) ( $gtm4wp_options['gtm-code'] ?? '' ) )
+			)
+		);
+
+		if ( isset( $gtm4wp_options['gtm-containers'] ) && is_array( $gtm4wp_options['gtm-containers'] ) ) {
+			foreach ( $gtm4wp_options['gtm-containers'] as $container ) {
+				if ( is_array( $container ) && ! empty( $container['id'] ) ) {
+					$container_ids[] = (string) $container['id'];
+				}
+			}
+		}
+
+		$container_ids = array_map( 'strtoupper', $container_ids );
+
+		return in_array( strtoupper( $frontblocks_gtm_id ), $container_ids, true );
+	}
+
+	/**
+	 * Get the Google tags that Site Kit is configured to place.
+	 *
+	 * @return array{gtm: bool, ga4: bool}
+	 */
+	private function get_google_site_kit_managed_tags() {
+		$tags = array(
+			'gtm' => false,
+			'ga4' => false,
+		);
+
+		if ( ! defined( 'GOOGLESITEKIT_VERSION' ) && ! class_exists( '\\Google\\Site_Kit\\Plugin' ) ) {
+			return $tags;
+		}
+
+		$tag_manager_settings = get_option( 'googlesitekit_tagmanager_settings', array() );
+		if ( is_array( $tag_manager_settings ) && ! empty( $tag_manager_settings['containerID'] ) && ( ! isset( $tag_manager_settings['useSnippet'] ) || $tag_manager_settings['useSnippet'] ) ) {
+			$tags['gtm'] = true;
+		}
+
+		$analytics_settings = get_option( 'googlesitekit_analytics-4_settings', array() );
+		if ( is_array( $analytics_settings ) && ! empty( $analytics_settings['measurementID'] ) && ( ! isset( $analytics_settings['useSnippet'] ) || $analytics_settings['useSnippet'] ) ) {
+			$tags['ga4'] = true;
+		}
+
+		return $tags;
+	}
+
+	/**
+	 * Render a one-time cache notice after Cookie Notice settings are saved.
+	 *
+	 * @return void
+	 */
+	private function render_cookie_notice_cache_notice() {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return;
+		}
+
+		$notice = get_transient( 'frbl_cookie_notice_cache_notice_' . $user_id );
+		if ( ! $notice ) {
+			return;
+		}
+
+		delete_transient( 'frbl_cookie_notice_cache_notice_' . $user_id );
+		?>
+		<div style="background-color: #eff6ff; border-left: 4px solid #60a5fa; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
+			<p class="tw:text-sm tw:font-medium" style="color: #1d4ed8; margin: 0;">
+				<?php
+				if ( 'wp-rocket' === $notice ) {
+					esc_html_e( 'Cookie Notice settings were updated and the WP Rocket cache was cleared.', 'frontblocks' );
+				} else {
+					esc_html_e( 'Cookie Notice settings were updated. If you use a full-page cache, purge it now so visitors receive the new configuration.', 'frontblocks' );
+				}
+				?>
+			</p>
 		</div>
 		<?php
 	}
@@ -2848,7 +3690,7 @@ class Settings {
 		global $frblp_license;
 
 		?>
-		<div class="tw:mt-6" id="frontblocks_section_license">
+		<div class="tw:mt-6">
 			<?php
 			// Check if license instance exists.
 			if ( ! $frblp_license ) {
@@ -3148,6 +3990,11 @@ class Settings {
 			} elseif ( $this->option_cookie_notice_color === $key ) {
 				$hex_color         = sanitize_hex_color( $val );
 				$sanitized[ $key ] = $hex_color ? $hex_color : '#687df9';
+			} elseif ( $this->option_cookie_notice_bg_color === $key ) {
+				$hex_color         = sanitize_hex_color( $val );
+				$sanitized[ $key ] = $hex_color ? $hex_color : '#ffffff';
+			} elseif ( $this->option_cookie_notice_radius === $key ) {
+				$sanitized[ $key ] = in_array( $val, array( 'none', 'small', 'large' ), true ) ? $val : 'small';
 			} elseif ( $this->option_cookie_notice_expiration_days === $key ) {
 				$days              = absint( $val );
 				$sanitized[ $key ] = $days > 0 ? min( $days, 730 ) : 365;
@@ -3158,6 +4005,53 @@ class Settings {
 				$ga4_id            = strtoupper( sanitize_text_field( $val ) );
 				$sanitized[ $key ] = preg_match( '/^G-[A-Z0-9]+$/', $ga4_id ) ? $ga4_id : '';
 			}
+		}
+
+		if ( array_key_exists( 'cookie_notice_tracking_integration_code', $value ) || array_key_exists( 'cookie_notice_tracking_remove', $value ) ) {
+			$tracking_integrations = \FrontBlocks\Frontend\CookieNotice::get_tracking_integrations( $current_options, true );
+			$remove_types          = isset( $value['cookie_notice_tracking_remove'] ) && is_array( $value['cookie_notice_tracking_remove'] ) ? array_map( 'sanitize_key', $value['cookie_notice_tracking_remove'] ) : array();
+			$tracking_integrations = array_values(
+				array_filter(
+					$tracking_integrations,
+					static function ( $integration ) use ( $remove_types ) {
+						return ! in_array( $integration['type'], $remove_types, true );
+					}
+				)
+			);
+
+			$raw_code = (string) ( $value['cookie_notice_tracking_integration_code'] ?? '' );
+			$detected = \FrontBlocks\Frontend\CookieNotice::detect_tracking_snippet( $raw_code );
+
+			if ( null === $detected && '' !== trim( $raw_code ) ) {
+				add_settings_error(
+					'frontblocks_settings',
+					'frbl_cookie_notice_tracking_unrecognized',
+					sprintf(
+						/* translators: %s: contact page URL. */
+						esc_html__( 'The tracking code was not recognized and was not saved. Need support for this tool? Contact us at %s.', 'frontblocks' ),
+						'close.technology/contacto'
+					),
+					'error'
+				);
+			}
+
+			if ( $detected ) {
+				$tracking_integrations   = array_values(
+					array_filter(
+						$tracking_integrations,
+						static function ( $integration ) use ( $detected ) {
+							return $integration['type'] !== $detected['type'];
+						}
+					)
+				);
+				$tracking_integrations[] = array(
+					'type' => $detected['type'],
+					'id'   => sanitize_text_field( $detected['id'] ),
+				);
+			}
+
+			$sanitized[ $this->option_cookie_notice_tracking_integrations ] = $tracking_integrations;
+			unset( $sanitized['cookie_notice_tracking_type'], $sanitized['cookie_notice_tracking_id'] );
 		}
 
 		// Ensure mutual exclusion: if both description options are enabled, keep only the last one changed.

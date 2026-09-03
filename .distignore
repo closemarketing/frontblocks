@@ -16,9 +16,12 @@ node_modules/
 package.json
 package-lock.json
 .npmrc
+postcss.config.js
+tailwind.config.js
 
 # WordPress
 .wordpress-org
+.wordpress-playground
 
 # Testing
 .travis.yml
@@ -32,10 +35,17 @@ phpstan.neon.dist
 tests/
 bin/
 .wp-env.json
+.phplint.yml
 
 # AI
 AGENTS.md
+README.md
+REVIEW.md
 CLAUDE.md
 .claude/
 .cursor/
 docs/
+
+# Lang
+*.pot
+*.po

@@ -9,6 +9,9 @@
 	--frbl-cookie-accent: #687df9;
 	--frbl-cookie-accent-contrast: #ffffff;
 	--frbl-cookie-accent-on-light: #687df9;
+	--frbl-cookie-bg: #ffffff;
+	--frbl-cookie-text: #1f2937;
+	--frbl-cookie-radius: 12px;
 
 	position: fixed;
 	z-index: 999999;
@@ -28,16 +31,49 @@
 	pointer-events: none;
 }
 
+/*
+ * Initial, pre-decision state: printed by the server this way so a visitor
+ * who already accepted/rejected never sees the banner flash into view before
+ * frontblocks-cookie-notice.js hides it — the invisible state is the default,
+ * not something applied after the fact. It doubles as the "from" state of the
+ * entrance animation for a visitor who still needs to decide: the script
+ * removes this class once it determines that, letting the transition above
+ * animate it in. A `<noscript>` rule further down resets it to visible for
+ * browsers that never run the script at all.
+ */
+.frbl-cookie-notice--init {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.frbl-cookie-notice--bar.frbl-cookie-notice--init {
+	transform: translateY(100%);
+}
+
+.frbl-cookie-notice--box.frbl-cookie-notice--init {
+	transform: translateX(100%);
+}
+
+.frbl-cookie-notice--box.frbl-cookie-notice--left.frbl-cookie-notice--init {
+	transform: translateX(-100%);
+}
+
+.frbl-cookie-notice--popup.frbl-cookie-notice--init {
+	transform: scale(0.96);
+}
+
 .frbl-cookie-notice__panel {
-	background-color: #ffffff;
-	color: #1f2937;
-	box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+	background-color: var(--frbl-cookie-bg);
+	color: var(--frbl-cookie-text);
+	border-radius: var(--frbl-cookie-radius);
+	overflow: hidden;
+	box-shadow: none;
 }
 
 .frbl-cookie-notice__message {
 	margin: 0;
 	font-size: 14px;
-	color: #1f2937;
+	color: var(--frbl-cookie-text);
 }
 
 .frbl-cookie-notice__link {
@@ -48,6 +84,7 @@
 
 .frbl-cookie-notice__actions {
 	display: flex;
+	flex-wrap: wrap;
 	gap: 12px;
 	flex-shrink: 0;
 }
@@ -86,15 +123,23 @@
 .frbl-cookie-notice__button--reject {
 	background-color: transparent;
 	border: 1px solid #9ca3af;
-	color: #1f2937;
+	color: var(--frbl-cookie-text);
 }
 
-/* Bar layout: full-width bottom bar. */
+/* Bar layout: floating bottom bar, spanning most of the viewport width. */
 .frbl-cookie-notice--bar {
-	inset: auto 0 0 0;
-	width: 100%;
-	max-height: 100vh;
+	left: 20px;
+	right: 20px;
+	bottom: 20px;
+	max-height: calc(100vh - 40px);
 	overflow-y: auto;
+}
+
+/* GeneratePress sets the content width in PHP, so match its centered page
+   container when FrontBlocks receives that value from the active theme. */
+.frbl-cookie-notice--bar.frbl-cookie-notice--generatepress {
+	left: max(20px, calc((100vw - var(--frbl-cookie-content-width)) / 2));
+	right: max(20px, calc((100vw - var(--frbl-cookie-content-width)) / 2));
 }
 
 .frbl-cookie-notice--bar .frbl-cookie-notice__panel {
@@ -128,7 +173,6 @@
 }
 
 .frbl-cookie-notice--box .frbl-cookie-notice__panel {
-	border-radius: 12px;
 	padding: 20px;
 	display: flex;
 	flex-direction: column;
@@ -152,11 +196,10 @@
 	justify-content: center;
 	padding: 20px;
 	overflow-y: auto;
-	background-color: rgba(15, 23, 42, 0.55);
+	background-color: transparent;
 }
 
 .frbl-cookie-notice--popup .frbl-cookie-notice__panel {
-	border-radius: 16px;
 	padding: 40px 32px 32px;
 	max-width: 420px;
 	width: 100%;
@@ -167,7 +210,7 @@
 	align-items: center;
 	text-align: center;
 	gap: 16px;
-	box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
+	box-shadow: none;
 }
 
 .frbl-cookie-notice__icon {
@@ -223,7 +266,8 @@ body.frbl-cookie-notice-lock-scroll {
 		max-height: calc(100vh - 24px);
 	}
 
-	.frbl-cookie-notice--box {
+	.frbl-cookie-notice--box,
+	.frbl-cookie-notice--bar {
 		left: 12px;
 		right: 12px;
 		bottom: 12px;

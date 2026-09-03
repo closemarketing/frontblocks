@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "frontblocks/google-login",
+	"title": "Google Login",
+	"category": "widgets",
+	"icon": "unlock",
+	"description": "Display a \"Sign in with Google\" or \"Sign up with Google\" button anywhere.",
+	"keywords": [ "google", "login", "register", "sign in", "oauth" ],
+	"textdomain": "frontblocks",
+	"attributes": {
+		"mode": {
+			"type": "string",
+			"default": "login",
+			"enum": [ "login", "register" ]
+		},
+		"redirect": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": [ "left", "center", "right" ]
+	},
+	"editorScript": "frontblocks-google-login-block-editor"
+}
