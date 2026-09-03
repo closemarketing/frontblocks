@@ -83,11 +83,67 @@ HTML;
 	}
 
 	/**
+	 * ChatGPT Ads can be configured from the vendor-provided oaiq snippet.
+	 */
+	public function test_detects_chatgpt_ads_snippet() {
+		$snippet = <<<'HTML'
+<script>!function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");oaiq("init",{pixelId:"TestChatGPTPixelId1234",debug:true});</script>
+HTML;
+
+		$detected = CookieNotice::detect_tracking_snippet( $snippet );
+
+		$this->assertSame( 'openai_chatgpt_ads', $detected['type'] );
+		$this->assertSame( 'TestChatGPTPixelId1234', $detected['id'] );
+	}
+
+	/**
+	 * ChatGPT Ads can also be configured by pasting only its Pixel ID.
+	 */
+	public function test_detects_chatgpt_ads_pixel_id() {
+		$detected = CookieNotice::detect_tracking_snippet( 'TestChatGPTPixelId1234' );
+
+		$this->assertSame( 'openai_chatgpt_ads', $detected['type'] );
+		$this->assertSame( 'TestChatGPTPixelId1234', $detected['id'] );
+	}
+
+	/**
+	 * A generic provider code must not be treated as a ChatGPT Ads Pixel ID.
+	 */
+	public function test_does_not_mistake_a_hyphenated_tracking_code_for_a_chatgpt_ads_pixel_id() {
+		$this->assertNull( CookieNotice::detect_tracking_snippet( 'CF-00000-00000-TEST' ) );
+		$this->assertNull( CookieNotice::detect_tracking_snippet( 'testclientkey1234567890' ) );
+	}
+
+	/**
 	 * A snippet from an unsupported tool (or plain garbage) must not be
 	 * mistaken for one of the three supported patterns.
 	 */
 	public function test_unrecognized_snippet_returns_null() {
 		$this->assertNull( CookieNotice::detect_tracking_snippet( '<script src="https://example.com/some-other-tracker.js"></script>' ) );
+	}
+
+	/**
+	 * Add-ons can register their own detector and type without adding a
+	 * provider-specific pattern to the free plugin.
+	 */
+	public function test_add_on_can_register_a_tracking_detector() {
+		$types_callback = function ( $types ) {
+			$types[] = 'example_add_on';
+			return $types;
+		};
+		$detector_callback = function ( $detected, $raw ) {
+			return 'example-id' === $raw ? array( 'type' => 'example_add_on', 'id' => 'ExampleId123' ) : $detected;
+		};
+		add_filter( 'frbl_cookie_notice_tracking_types', $types_callback );
+		add_filter( 'frbl_cookie_notice_detect_tracking_snippet', $detector_callback, 10, 2 );
+
+		$this->assertSame(
+			array( 'type' => 'example_add_on', 'id' => 'ExampleId123' ),
+			CookieNotice::detect_tracking_snippet( 'example-id' )
+		);
+
+		remove_filter( 'frbl_cookie_notice_tracking_types', $types_callback );
+		remove_filter( 'frbl_cookie_notice_detect_tracking_snippet', $detector_callback, 10 );
 	}
 
 	/**
@@ -113,6 +169,23 @@ HTML;
 		);
 
 		$this->assertSame( array( array( 'type' => 'brevo', 'id' => 'latest-key' ) ), $integrations );
+	}
+
+	/**
+	 * Settings saves preserve integrations from an inactive companion plugin.
+	 */
+	public function test_tracking_integrations_can_preserve_unknown_add_on_records() {
+		$this->assertSame(
+			array( array( 'type' => 'inactive_add_on', 'id' => 'saved-id' ) ),
+			CookieNotice::get_tracking_integrations(
+				array(
+					'cookie_notice_tracking_integrations' => array(
+						array( 'type' => 'inactive_add_on', 'id' => 'saved-id' ),
+					),
+				),
+				true
+			)
+		);
 	}
 
 	/**
@@ -142,6 +215,7 @@ HTML;
 		$this->assertSame( 'marketing', CookieNotice::get_integration_default_category( 'clientify_analytics_plus' ) );
 		$this->assertSame( 'marketing', CookieNotice::get_integration_default_category( 'clientify_analytics_classic' ) );
 		$this->assertSame( 'marketing', CookieNotice::get_integration_default_category( 'brevo' ) );
+		$this->assertSame( 'marketing', CookieNotice::get_integration_default_category( 'openai_chatgpt_ads' ) );
 	}
 
 	/**
