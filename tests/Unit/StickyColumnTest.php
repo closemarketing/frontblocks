@@ -19,11 +19,25 @@ class StickyColumnTest extends TestCase {
 		parent::set_up();
 		$this->sticky_column = new StickyColumn();
 		$this->sticky_column->register_scripts();
+		$this->sticky_column->register_custom_attributes();
 	}
 
 	public function tear_down() {
 		wp_dequeue_style( 'frontblocks-sticky-column' );
 		wp_dequeue_script( 'frontblocks-sticky-column-custom' );
+		remove_filter(
+			'generateblocks_blocks_registered_block',
+			array( $this->sticky_column, 'register_sticky_attributes_for_grid_block' ),
+			9
+		);
+		remove_filter(
+			'register_block_type_args',
+			array( $this->sticky_column, 'register_sticky_attributes_for_columns_block' )
+		);
+		remove_action(
+			'enqueue_block_editor_assets',
+			array( $this->sticky_column, 'add_inline_script_for_attributes' )
+		);
 		parent::tear_down();
 	}
 
