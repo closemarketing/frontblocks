@@ -127,7 +127,7 @@ class StackedImagesTest extends TestCase {
 		$post_id = self::factory()->post->create(
 			array( 'post_content' => '<!-- wp:frontblocks/stacked-images /-->' )
 		);
-		go_to( get_permalink( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
 
 		$this->stacked_images->enqueue_frontend_scripts();
 
@@ -137,7 +137,7 @@ class StackedImagesTest extends TestCase {
 
 	public function test_enqueue_frontend_scripts_are_not_loaded_without_the_block() {
 		$post_id = self::factory()->post->create( array( 'post_content' => 'No block here.' ) );
-		go_to( get_permalink( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
 
 		$this->stacked_images->enqueue_frontend_scripts();
 
