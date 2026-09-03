@@ -53,6 +53,7 @@
     "build:before-after": "babel assets/before-after/frontblocks-before-after-option.jsx --out-file assets/before-after/frontblocks-before-after.js",
     "build:user-text": "babel assets/user-text/frontblocks-user-text-option.jsx --out-file assets/user-text/frontblocks-user-text.js",
     "build:columns-same-height": "babel assets/columns-same-height/frontblocks-columns-same-height-option.jsx --out-file assets/columns-same-height/frontblocks-columns-same-height-option.js",
+    "test:cookie-notice": "node --test tests/js/cookie-notice-injection.test.js",
     "build:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css",
     "watch:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css --watch",
     "build:download-button": "babel assets/download-button/frontblocks-download-button-option.jsx --out-file assets/download-button/frontblocks-download-button-option.js",

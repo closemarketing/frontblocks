@@ -12,6 +12,10 @@ on:
       - 'bin/install-wp-tests.sh'
       - 'composer.json'
       - 'composer.lock'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'assets/cookie-notice/**'
+      - 'tests/js/**'
   pull_request:
     branches:
       - trunk
@@ -24,6 +28,10 @@ on:
       - 'bin/install-wp-tests.sh'
       - 'composer.json'
       - 'composer.lock'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'assets/cookie-notice/**'
+      - 'tests/js/**'
     types:
       - opened
       - reopened
@@ -34,6 +42,25 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/trunk' }}
 
 jobs:
+  javascript:
+    name: Run JavaScript tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Run JavaScript tests
+        run: npm run test:cookie-notice
+
   phpunit:
     name: Run tests
     runs-on: ubuntu-latest
