@@ -16,6 +16,8 @@
 		const configInput    = document.getElementById( 'frbl-image-sizes-config' );
 		const tableContainer = document.getElementById( 'frbl-image-sizes-table' );
 		const configScript   = document.getElementById( 'frbl-image-management-config' );
+		const maxDimensionToggle = document.getElementById( 'image_max_upload_dimension_enabled' );
+		const maxDimensionField  = document.getElementById( 'image-max-upload-dimension-field' );
 		const qualityInputs  = [
 			{ input: document.getElementById( 'image_format_quality_webp' ), value: document.getElementById( 'frbl-image-quality-webp-value' ) },
 			{ input: document.getElementById( 'image_format_quality_avif' ), value: document.getElementById( 'frbl-image-quality-avif-value' ) },
@@ -41,6 +43,12 @@
 		enableCheckbox.addEventListener( 'change', function () {
 			fieldsWrapper.style.display = enableCheckbox.checked ? '' : 'none';
 		} );
+
+		if ( maxDimensionToggle && maxDimensionField ) {
+			maxDimensionToggle.addEventListener( 'change', function () {
+				maxDimensionField.style.display = maxDimensionToggle.checked ? '' : 'none';
+			} );
+		}
 
 		qualityInputs.forEach( function ( pair ) {
 			if ( pair.input && pair.value ) {

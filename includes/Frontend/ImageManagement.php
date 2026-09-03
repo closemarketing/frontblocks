@@ -61,6 +61,7 @@ class ImageManagement {
 		add_filter( 'intermediate_image_sizes_advanced', array( $this, 'filter_intermediate_sizes_advanced' ) );
 		add_filter( 'intermediate_image_sizes', array( $this, 'filter_intermediate_sizes' ) );
 		add_filter( 'image_size_names_choose', array( $this, 'filter_image_size_names_choose' ) );
+		add_filter( 'big_image_size_threshold', array( $this, 'filter_big_image_size_threshold' ) );
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'maybe_generate_modern_formats' ), 10, 2 );
 		add_action( 'delete_attachment', array( $this, 'delete_variant_files' ) );
 
@@ -119,6 +120,34 @@ class ImageManagement {
 			}
 			add_image_size( $size['name'], (int) ( $size['width'] ?? 0 ), (int) ( $size['height'] ?? 0 ), (bool) ( $size['crop'] ?? false ) );
 		}
+	}
+
+	/**
+	 * Override how large an uploaded original can be before WordPress
+	 * downscales the stored file, so oversized source images don't bloat
+	 * storage or slow down thumbnail generation. Defaults to 2048px,
+	 * overriding core's own default of 2560px; can be set to a different
+	 * value, or disabled entirely (returning false leaves full-size
+	 * originals untouched, same as WordPress core's own behavior when this
+	 * filter isn't hooked at all).
+	 *
+	 * @param int $threshold Core's default threshold in pixels.
+	 * @return int|false
+	 */
+	public function filter_big_image_size_threshold( $threshold ) {
+		if ( ! $this->is_enabled() ) {
+			return $threshold;
+		}
+
+		$options = $this->get_options();
+
+		if ( empty( $options['image_max_upload_dimension_enabled'] ) && isset( $options['image_max_upload_dimension_enabled'] ) ) {
+			return false;
+		}
+
+		$max = absint( $options['image_max_upload_dimension'] ?? 2048 );
+
+		return $max > 0 ? $max : $threshold;
 	}
 
 	/**

@@ -172,8 +172,10 @@ class ImageManagement {
 		$disabled      = (array) ( $options['image_sizes_disabled'] ?? array() );
 		$overrides     = (array) ( $options['image_sizes_overrides'] ?? array() );
 		$custom        = (array) ( $options['image_sizes_custom'] ?? array() );
-		$format_target  = (string) ( $options['image_format_target'] ?? 'none' );
-		$quality_by_fmt = FrontendImageManagement::get_quality_settings( $options );
+		$format_target                = (string) ( $options['image_format_target'] ?? 'none' );
+		$quality_by_fmt               = FrontendImageManagement::get_quality_settings( $options );
+		$max_upload_dimension_enabled = (bool) ( $options['image_max_upload_dimension_enabled'] ?? true );
+		$max_upload_dimension         = (int) ( $options['image_max_upload_dimension'] ?? 2048 );
 
 		$sizes_info = $this->get_registered_sizes_info();
 		$usage      = FrontendImageManagement::estimate_disk_usage_by_size( wp_list_pluck( $sizes_info, 'name' ) );
@@ -216,6 +218,28 @@ class ImageManagement {
 				<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200 tw:mb-4">
 					<p class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2"><?php echo esc_html__( 'Registered image sizes', 'frontblocks' ); ?></p>
 					<div id="frbl-image-sizes-table"></div>
+				</div>
+
+				<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200 tw:mb-4">
+					<div class="tw:flex tw:items-center tw:justify-between">
+						<div>
+							<label for="image_max_upload_dimension_enabled" class="tw:text-sm tw:font-medium tw:text-gray-700"><?php echo esc_html__( 'Limit max upload dimension', 'frontblocks' ); ?></label>
+							<p class="tw:text-xs tw:text-gray-500 tw:mt-1"><?php echo esc_html__( 'On upload, downscale the stored original if it exceeds this size, so oversized source images don\'t bloat storage or slow down thumbnail generation. Off: keep full-size originals untouched.', 'frontblocks' ); ?></p>
+						</div>
+						<label class="frbl-toggle">
+							<input type="checkbox"
+								id="image_max_upload_dimension_enabled"
+								name="frontblocks_settings[image_max_upload_dimension_enabled]"
+								value="1"
+								<?php checked( true, $max_upload_dimension_enabled ); ?>
+							/>
+							<span></span>
+						</label>
+					</div>
+					<div class="tw:mt-3" style="<?php echo $max_upload_dimension_enabled ? '' : 'display: none;'; ?>" id="image-max-upload-dimension-field">
+						<label for="image_max_upload_dimension" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2"><?php echo esc_html__( 'Max width/height (pixels)', 'frontblocks' ); ?></label>
+						<input type="number" id="image_max_upload_dimension" name="frontblocks_settings[image_max_upload_dimension]" min="300" max="10000" step="1" value="<?php echo esc_attr( $max_upload_dimension ); ?>" class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base" />
+					</div>
 				</div>
 
 				<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200 tw:mb-4">
@@ -311,6 +335,11 @@ class ImageManagement {
 		$allowed_targets              = array( 'none', 'webp', 'avif', 'both' );
 		$requested_target             = in_array( $posted['image_format_target'] ?? 'none', $allowed_targets, true ) ? $posted['image_format_target'] : 'none';
 		$value['image_format_target'] = $this->downgrade_target_to_supported_formats( $requested_target );
+
+		$value['image_max_upload_dimension_enabled'] = ! empty( $posted['image_max_upload_dimension_enabled'] );
+
+		$max_dimension                          = absint( $posted['image_max_upload_dimension'] ?? 2048 );
+		$value['image_max_upload_dimension']    = $max_dimension >= 300 ? min( $max_dimension, 10000 ) : 2048;
 
 		$webp_quality                       = absint( $posted['image_format_quality_webp'] ?? 82 );
 		$value['image_format_quality_webp'] = $webp_quality > 0 ? min( $webp_quality, 100 ) : 82;
