@@ -160,7 +160,7 @@ class FaqSchemaTest extends TestCase {
 
 	public function test_build_how_to_produces_expected_schema_shape() {
 		$post_id = self::factory()->post->create( array( 'post_title' => 'How to test FrontBlocks' ) );
-		go_to( get_permalink( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
 
 		$method = new ReflectionMethod( FaqSchema::class, 'build_how_to' );
 		$method->setAccessible( true );
