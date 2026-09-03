@@ -55,7 +55,7 @@ class ReadingProgressTest extends TestCase {
 	public function test_render_bar_outputs_progressbar_markup_when_enabled_on_a_singular_post() {
 		update_option( 'frontblocks_settings', array( 'enable_reading_progress' => true ) );
 		$post_id = self::factory()->post->create();
-		go_to( get_permalink( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
 
 		$this->assertTrue( is_singular( 'post' ), 'Precondition: the test must be viewing a singular post.' );
 
@@ -71,7 +71,7 @@ class ReadingProgressTest extends TestCase {
 	public function test_render_bar_outputs_nothing_when_the_feature_is_disabled() {
 		update_option( 'frontblocks_settings', array( 'enable_reading_progress' => false ) );
 		$post_id = self::factory()->post->create();
-		go_to( get_permalink( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
 
 		ob_start();
 		$this->reading_progress->render_reading_progress_bar();
@@ -83,7 +83,7 @@ class ReadingProgressTest extends TestCase {
 	public function test_render_bar_outputs_nothing_on_a_non_post_singular_view() {
 		update_option( 'frontblocks_settings', array( 'enable_reading_progress' => true ) );
 		$page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
-		go_to( get_permalink( $page_id ) );
+		$this->go_to( get_permalink( $page_id ) );
 
 		ob_start();
 		$this->reading_progress->render_reading_progress_bar();
@@ -95,7 +95,7 @@ class ReadingProgressTest extends TestCase {
 	public function test_enqueue_frontend_assets_registers_assets_when_enabled_on_a_post() {
 		update_option( 'frontblocks_settings', array( 'enable_reading_progress' => true ) );
 		$post_id = self::factory()->post->create();
-		go_to( get_permalink( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
 
 		$this->reading_progress->enqueue_frontend_assets();
 
@@ -106,7 +106,7 @@ class ReadingProgressTest extends TestCase {
 	public function test_enqueue_frontend_assets_does_nothing_when_disabled() {
 		update_option( 'frontblocks_settings', array( 'enable_reading_progress' => false ) );
 		$post_id = self::factory()->post->create();
-		go_to( get_permalink( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
 
 		$this->reading_progress->enqueue_frontend_assets();
 
@@ -117,7 +117,7 @@ class ReadingProgressTest extends TestCase {
 	public function test_enqueue_frontend_assets_does_nothing_on_a_non_post_view() {
 		update_option( 'frontblocks_settings', array( 'enable_reading_progress' => true ) );
 		$page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
-		go_to( get_permalink( $page_id ) );
+		$this->go_to( get_permalink( $page_id ) );
 
 		$this->reading_progress->enqueue_frontend_assets();
 
