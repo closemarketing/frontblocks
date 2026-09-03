@@ -31,6 +31,8 @@ class SettingsTest extends TestCase {
 	public function tear_down() {
 		unset( $_POST['_wpnonce'] );
 		delete_option( 'frontblocks_settings' );
+		remove_all_filters( 'frontblocks_settings_tabs' );
+		remove_all_actions( 'frontblocks_settings_tab_panels' );
 		parent::tear_down();
 	}
 
@@ -205,6 +207,45 @@ class SettingsTest extends TestCase {
 		}
 
 		$this->assertTrue( $found, 'Expected a "frontblocks-settings" entry under the Appearance menu.' );
+	}
+
+	public function test_settings_tab_extensions_render_matching_tabs_and_panels() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		add_filter( 'frontblocks_settings_tabs', array( $this, 'add_test_settings_tab' ) );
+		add_action( 'frontblocks_settings_tab_panels', array( $this, 'render_test_settings_tab_panel' ) );
+
+		ob_start();
+		$this->settings->render_page();
+		$rendered = ob_get_clean();
+
+		$this->assertStringContainsString( 'data-tab-target="test-extension"', $rendered );
+		$this->assertStringContainsString( 'data-tab-panel="test-extension"', $rendered );
+		$this->assertStringContainsString( 'Test extension panel', $rendered );
+	}
+
+	/**
+	 * Add a tab used by test_settings_tab_extensions_render_matching_tabs_and_panels().
+	 *
+	 * @param array $tabs Registered settings tabs.
+	 * @return array
+	 */
+	public function add_test_settings_tab( $tabs ) {
+		$tabs[] = array(
+			'id'    => 'test-extension',
+			'label' => 'Test extension',
+		);
+
+		return $tabs;
+	}
+
+	/**
+	 * Render the panel used by test_settings_tab_extensions_render_matching_tabs_and_panels().
+	 *
+	 * @return void
+	 */
+	public function render_test_settings_tab_panel() {
+		echo '<div class="frbl-tab-panel" data-tab-panel="test-extension" hidden>Test extension panel</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	public function test_enqueue_admin_styles_does_nothing_outside_the_settings_page_hook() {
