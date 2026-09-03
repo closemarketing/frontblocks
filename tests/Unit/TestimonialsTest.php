@@ -22,7 +22,7 @@ class TestimonialsTest extends TestCase {
 		$testimonials = new Testimonials();
 
 		$this->assertFalse( has_action( 'init', array( $testimonials, 'register_cpt_testimonials' ) ) );
-		$this->assertFalse( has_shortcode( 'frontblocks_testimonials_carousel' ) );
+		$this->assertFalse( shortcode_exists( 'frontblocks_testimonials_carousel' ) );
 	}
 
 	public function test_constructor_registers_hooks_when_feature_enabled() {
@@ -34,7 +34,7 @@ class TestimonialsTest extends TestCase {
 		$this->assertNotFalse( has_action( 'add_meta_boxes', array( $testimonials, 'add_metabox_stars' ) ) );
 		$this->assertNotFalse( has_action( 'save_post', array( $testimonials, 'save_metabox_stars' ) ) );
 		$this->assertNotFalse( has_action( 'wp_enqueue_scripts', array( $testimonials, 'enqueue_scripts' ) ) );
-		$this->assertTrue( has_shortcode( 'frontblocks_testimonials_carousel' ) );
+		$this->assertTrue( shortcode_exists( 'frontblocks_testimonials_carousel' ) );
 
 		remove_shortcode( 'frontblocks_testimonials_carousel' );
 	}
