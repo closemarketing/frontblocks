@@ -133,6 +133,7 @@ Every frontend feature follows the same pattern:
 3. Add assets in the matching `assets/` subdirectory.
 4. Update `readme.md` with the new feature.
 5. Add documentation to `/docs/` and link it from `readme.md`.
+6. If the new feature replaces functionality commonly provided by a third-party plugin, register that plugin via the `frontblocks_redundant_plugins` filter so the Redundant Plugins Notice can flag it — see `docs/REDUNDANT-PLUGINS.md`.
 
 ## What NOT to Do
 
@@ -142,3 +143,16 @@ Every frontend feature follows the same pattern:
 - Do not use global functions without the required prefix.
 - Do not commit compiled JS/CSS without also committing the source files.
 - Do not write code, comments, or documentation in any language other than English.
+
+## Release
+
+Actions for making a release:
+- Update readme Stable Tag, and Version.
+- Update Plugin Header and constant.
+- Build the assets.
+- Create release in GitHub.
+
+## Test Enforcement
+
+- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
+- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test` with a specific filename or filter.

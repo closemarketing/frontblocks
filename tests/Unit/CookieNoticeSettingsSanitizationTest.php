@@ -95,6 +95,103 @@ class CookieNoticeSettingsSanitizationTest extends TestCase {
 		$this->assertSame( '#687df9', $sanitized['cookie_notice_color'] );
 	}
 
+	public function test_valid_hex_background_color_is_preserved() {
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_bg_color' => '#111827' ) );
+		$this->assertSame( '#111827', $sanitized['cookie_notice_bg_color'] );
+	}
+
+	public function test_invalid_hex_background_color_falls_back_to_default() {
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_bg_color' => 'not-a-hex-color' ) );
+		$this->assertSame( '#ffffff', $sanitized['cookie_notice_bg_color'] );
+	}
+
+	public function test_radius_only_accepts_known_values() {
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_radius' => 'none' ) );
+		$this->assertSame( 'none', $sanitized['cookie_notice_radius'] );
+
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_radius' => 'large' ) );
+		$this->assertSame( 'large', $sanitized['cookie_notice_radius'] );
+	}
+
+	public function test_radius_falls_back_to_small_for_unknown_values() {
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_radius' => 'extra-bevel' ) );
+		$this->assertSame( 'small', $sanitized['cookie_notice_radius'] );
+	}
+
+	public function test_recognized_tracking_code_is_added_as_a_safe_integration_record() {
+		$snippet   = '<script defer src="https://analyticsplusdev.clientify.net/analytics_plus/pixel/TestPixel1"></script>';
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_integration_code' => $snippet ) );
+
+		$this->assertSame(
+			array(
+				array(
+					'type' => 'clientify_analytics_plus',
+					'id'   => 'TestPixel1',
+				),
+			),
+			$sanitized['cookie_notice_tracking_integrations']
+		);
+		$this->assertArrayNotHasKey( 'cookie_notice_tracking_integration_code', $sanitized );
+	}
+
+	public function test_unrecognized_tracking_code_is_rejected_and_reports_an_error() {
+		$before_count = $this->count_tracking_notice_errors();
+
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_integration_code' => '<script src="https://example.com/unsupported.js"></script>' ) );
+
+		$this->assertSame( array(), $sanitized['cookie_notice_tracking_integrations'] );
+		$this->assertSame( $before_count + 1, $this->count_tracking_notice_errors(), 'Expected exactly one new admin notice for the unrecognized tracking snippet.' );
+	}
+
+	public function test_blank_tracking_code_leaves_the_integration_list_empty_without_an_error() {
+		$before_count = $this->count_tracking_notice_errors();
+
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_integration_code' => '' ) );
+
+		$this->assertSame( array(), $sanitized['cookie_notice_tracking_integrations'] );
+		$this->assertSame( $before_count, $this->count_tracking_notice_errors(), 'A blank snippet must not add an admin notice.' );
+	}
+
+	public function test_tracking_integration_can_be_removed() {
+		update_option(
+			'frontblocks_settings',
+			array(
+				'cookie_notice_tracking_integrations' => array(
+					array( 'type' => 'brevo', 'id' => 'brevo-key' ),
+				),
+			)
+		);
+
+		$sanitized = $this->settings->sanitize_settings(
+			array(
+				'cookie_notice_tracking_integration_code' => '',
+				'cookie_notice_tracking_remove'           => array( 'brevo' ),
+			)
+		);
+
+		$this->assertSame( array(), $sanitized['cookie_notice_tracking_integrations'] );
+	}
+
+	/**
+	 * Count how many "unrecognized tracking snippet" admin notices are
+	 * currently queued, so tests can assert a delta instead of an absolute
+	 * count — WordPress's settings-errors list is a process-wide global that
+	 * earlier tests (in this file or elsewhere) may have already added to.
+	 *
+	 * @return int
+	 */
+	private function count_tracking_notice_errors() {
+		$count = 0;
+
+		foreach ( get_settings_errors( 'frontblocks_settings' ) as $error ) {
+			if ( 'frbl_cookie_notice_tracking_unrecognized' === $error['code'] ) {
+				++$count;
+			}
+		}
+
+		return $count;
+	}
+
 	public function test_expiration_days_is_capped_at_730() {
 		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_expiration_days' => '99999' ) );
 		$this->assertSame( 730, $sanitized['cookie_notice_expiration_days'] );

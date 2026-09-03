@@ -24,8 +24,11 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - Headline Marquee - Infinite scrolling marquee effect for headline/text blocks with customizable speed (Fast, Medium, Slow)
 - Modern Settings Page with Card-based Layout
 - Custom SVG Animations
-- **Cookie Notice** - Configurable cookie consent banner (bar/box/popup) that gates Google Tag Manager and GA4 behind consent, with Google Consent Mode v2 support for compatibility with Google Site Kit and other analytics plugins
+- **Cookie Notice** - Configurable cookie consent banner (bar/box/popup) that gates Google Tag Manager, GA4, and supported tracking integrations behind consent, with Google Consent Mode v2 support for compatibility with Google Site Kit and other analytics plugins
 - **Image Management** - Enable/disable/override registered image sizes, define custom sizes, bulk-regenerate thumbnails, and automatically serve WebP/AVIF variants on the frontend
+- **Review Notice** - Dismissible admin notice inviting site owners to leave a WordPress.org review, shown 14 days after activation
+- **Redundant Plugins Notice** - Persistent admin notice detecting third-party plugins made unnecessary by an active FrontBlocks feature (e.g. SVG upload plugins, GDPR cookie consent plugins), extensible via the `frontblocks_redundant_plugins` filter
+- **Google Sign-In** - "Sign in / Sign up with Google" button for wp-login.php, WooCommerce My Account and Checkout, plus a shortcode and block, with server-side ID token verification
 
 ### PRO Features (FrontBlocks PRO)
 - **Custom Post Types Builder** - Create and manage custom post types with advanced configuration options:
@@ -63,8 +66,12 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - [Full Page Implementation](./docs/FULLPAGE-IMPLEMENTATION-SUMMARY.md) - Technical implementation details
 - [Changelog Full Page](./docs/CHANGELOG-FULLPAGE.md) - Full Page feature changelog
 - [Carousel Pattern](./docs/CAROUSEL-PATTERN.md) - Hero carousel pattern with native WordPress blocks
-- [Cookie Notice](./docs/COOKIE-NOTICE.md) - Consent banner and consent-gated Google Tag Manager / GA4 loading
+- [Cookie Notice](./docs/COOKIE-NOTICE.md) - Consent banner and consent-gated tracking integrations
 - [Image Management](./docs/IMAGE-MANAGEMENT.md) - Image size control and automatic WebP/AVIF delivery
+- [Review Notice](./docs/REVIEW-NOTICE.md) - Dismissible WordPress.org review prompt
+- [Redundant Plugins Notice](./docs/REDUNDANT-PLUGINS.md) - Detects plugins made unnecessary by FrontBlocks features and how to register new pairings
+- [Google Sign-In](./docs/GOOGLE-SIGNIN.md) - "Sign in / Sign up with Google" for wp-login.php and WooCommerce
+- [Extending Settings Tabs](./docs/SETTINGS-TAB-EXTENSIONS.md) - Add a companion-plugin tab and matching panel to FrontBlocks settings
 
 ## Release
 Actions for making a release:

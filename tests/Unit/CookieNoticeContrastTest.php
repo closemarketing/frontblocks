@@ -76,4 +76,22 @@ class CookieNoticeContrastTest extends TestCase {
 			CookieNotice::get_readable_text_color( '#fff' )
 		);
 	}
+
+	/**
+	 * Each corner-rounding preset must map to its own distinct CSS length.
+	 */
+	public function test_radius_presets_resolve_to_their_own_css_value() {
+		$this->assertSame( '0px', CookieNotice::get_radius_value( 'none' ) );
+		$this->assertSame( '12px', CookieNotice::get_radius_value( 'small' ) );
+		$this->assertSame( '24px', CookieNotice::get_radius_value( 'large' ) );
+	}
+
+	/**
+	 * An unknown preset (e.g. stale data from before an option was renamed)
+	 * must degrade to the 'small' default rather than emitting an invalid or
+	 * empty CSS value.
+	 */
+	public function test_unknown_radius_preset_falls_back_to_small() {
+		$this->assertSame( CookieNotice::get_radius_value( 'small' ), CookieNotice::get_radius_value( 'not-a-real-preset' ) );
+	}
 }

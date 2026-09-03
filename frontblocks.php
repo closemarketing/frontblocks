@@ -3,7 +3,7 @@
  * Plugin Name: FrontBlocks for Gutenberg/GeneratePress
  * Plugin URI:  https://wordpress.org/plugins/frontblocks/
  * Description: Blocks and helpers that extends Gutenberg and GeneratePress blocks.
- * Version:     1.5.0
+ * Version:     1.5.3-beta.1
  * Author:      Closemarketing
  * Author URI:  https://close.marketing
  * Text Domain: frontblocks
@@ -26,7 +26,7 @@
 
 defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
-define( 'FRBL_VERSION', '1.5.0' );
+define( 'FRBL_VERSION', '1.5.3-beta.1' );
 define( 'FRBL_PLUGIN', __FILE__ );
 define( 'FRBL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'FRBL_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
@@ -71,6 +71,22 @@ function frbl_set_activation_redirect() {
 	add_option( 'frbl_activation_redirect', true );
 }
 register_activation_hook( __FILE__, 'frbl_set_activation_redirect' );
+
+/**
+ * Record the activation date used by the review notice (see
+ * FrontBlocks\Admin\ReviewNotice). Done here, via register_activation_hook(),
+ * rather than from that class's own constructor: that class is only
+ * instantiated on 'plugins_loaded', which — for a plugin's own first
+ * activation — has already fired (or won't fire again) by the time
+ * WordPress includes this file and runs the activation hooks, so an
+ * 'activated_plugin' listener registered there would never catch it.
+ */
+function frbl_set_activation_date() {
+	if ( ! get_option( 'frbl_activation_date' ) ) {
+		update_option( 'frbl_activation_date', time(), false );
+	}
+}
+register_activation_hook( __FILE__, 'frbl_set_activation_date' );
 
 /**
  * Check if FrontBlocks PRO is active.

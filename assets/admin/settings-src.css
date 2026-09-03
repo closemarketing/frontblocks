@@ -12,8 +12,6 @@
 /* Custom WordPress Admin overrides */
 .frbl-settings-wrapper {
 	margin-left: -20px;
-	margin-top: -10px;
-	padding-top: 40px;
 }
 
 .frbl-settings-wrapper * {
@@ -730,40 +728,19 @@
 	font-size: 1.125rem;
 }
 
-/* Sticky save bar — keeps the Save Settings button reachable without scrolling to the bottom of a long form. */
-.frbl-settings-save-bar {
-	position: sticky;
-	bottom: 1.5rem;
-	z-index: 20;
-	padding: 1.5rem;
-	background: rgba(255, 255, 255, 0.92);
-	backdrop-filter: blur(4px);
-	border: 1px solid #e5e7eb;
-	border-radius: 0.5rem;
-	box-shadow: 0 4px 12px -6px rgba(15, 23, 42, 0.12);
-}
+/* Save bar layout/position rules live further down (fixed to the viewport). */
 
 /* Cookie notice live preview: renders the real frontend banner markup/styles
    confined to a small "stage" instead of position: fixed over the whole screen. */
 .frbl-cookie-notice-preview-stage {
 	position: relative;
 	height: 360px;
-	background-color: #f1f5f9;
-	background-image:
-		linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
-		linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
-		linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
-		linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
-	background-size: 16px 16px;
-	background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
-	border-radius: 0.5rem;
-	border: 1px solid #e5e7eb;
-	overflow: hidden;
+	background: transparent;
 }
 
 .frbl-cookie-notice-preview {
 	position: absolute !important;
-	z-index: 1;
+	z-index: 1 !important;
 	max-width: calc(100% - 24px);
 }
 
@@ -799,9 +776,365 @@
 	.frbl-settings-wrapper .tw\:flex.tw\:items-center.tw\:justify-between {
 		@apply tw:flex-col tw:items-start tw:space-y-4;
 	}
+}
 
-	.frbl-settings-save-bar {
-		@apply tw:flex-col tw:items-start tw:space-y-4;
+/* =============================================
+   Tabbed admin shell
+   ============================================= */
+
+.frbl-settings-wrapper {
+	background: #f0f0f1;
+	min-height: 100vh;
+	padding-bottom: 88px;
+}
+
+.frbl-admin-header {
+	position: sticky;
+	top: 32px;
+	z-index: 20;
+	background: #fff;
+	border-bottom: 1px solid #dcdcde;
+}
+
+@media (max-width: 782px) {
+	.frbl-admin-header {
+		top: 46px;
 	}
 }
 
+.frbl-admin-header-top {
+	max-width: 1240px;
+	margin: 0 auto;
+	padding: 14px 24px 0 24px;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	flex-wrap: wrap;
+}
+
+.frbl-admin-title-group {
+	display: flex;
+	align-items: baseline;
+	gap: 10px;
+}
+
+.frbl-admin-title-group h1 {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	color: #1d2327;
+}
+
+.frbl-admin-subtitle {
+	color: #646970;
+	font-size: 12px;
+}
+
+.frbl-version-chip {
+	font-size: 11px;
+	color: #646970;
+	border: 1px solid #dcdcde;
+	border-radius: 3px;
+	padding: 1px 6px;
+	white-space: nowrap;
+}
+
+.frbl-header-spacer {
+	flex: 1;
+}
+
+.frbl-license-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	border-radius: 4px;
+	padding: 5px 10px;
+	font-size: 12px;
+	font-weight: 600;
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.frbl-license-badge--active {
+	background: #edfaef;
+	border: 1px solid #b8e6bf;
+	color: #1d2327;
+}
+
+.frbl-license-dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: #00a32a;
+	display: block;
+}
+
+.frbl-license-badge--inactive {
+	background: #fcf9e8;
+	border: 1px solid #f0e2a2;
+	color: #856404;
+}
+
+.frbl-license-badge--none {
+	background: #fcf0f1;
+	border: 1px solid #f3cfd1;
+	color: #b32d2e;
+}
+
+.frbl-license-badge--none:hover {
+	background: #f3cfd1;
+	color: #b32d2e;
+	text-decoration: none;
+}
+
+.frbl-license-manage {
+	background: none;
+	border: none;
+	color: #2271b1;
+	font-size: 12px;
+	font-weight: 500;
+	cursor: pointer;
+	padding: 0;
+	white-space: nowrap;
+}
+
+.frbl-license-manage:hover {
+	color: #135e96;
+	text-decoration: underline;
+}
+
+.frbl-tabs {
+	max-width: 1240px;
+	margin: 0 auto;
+	padding: 0 24px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-top: 14px;
+	padding-bottom: 0;
+}
+
+.frbl-tab-btn {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	border: none;
+	border-bottom: 2px solid transparent;
+	background: transparent;
+	color: #50575e;
+	font-weight: 500;
+	font-size: 13px;
+	padding: 9px 14px 8px 14px;
+	border-radius: 4px 4px 0 0;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.frbl-tab-btn:hover {
+	background: #f6f7f7;
+}
+
+.frbl-tab-btn.is-active {
+	border-bottom-color: #2271b1;
+	background: #f0f6fc;
+	color: #0a4b78;
+	font-weight: 600;
+}
+
+.frbl-tab-count {
+	font-size: 11px;
+	font-variant-numeric: tabular-nums;
+	color: #787c82;
+	background: #f0f0f1;
+	border-radius: 8px;
+	padding: 1px 6px;
+}
+
+.frbl-tab-btn.is-active .frbl-tab-count {
+	color: #0a4b78;
+	background: #dbeafe;
+}
+
+.frbl-admin-body {
+	max-width: 1240px;
+	margin: 0 auto;
+	padding: 24px;
+}
+
+.frbl-tab-panel[hidden] {
+	display: none;
+}
+
+.frbl-tab-panel-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 24px;
+	margin-bottom: 18px;
+	flex-wrap: wrap;
+}
+
+.frbl-tab-panel-head h2 {
+	margin: 0 0 4px 0;
+	font-size: 17px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.frbl-tab-panel-head p {
+	margin: 0;
+	color: #646970;
+	max-width: 620px;
+}
+
+.frbl-bulk-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+.frbl-btn-outline,
+.frbl-btn-ghost,
+.frbl-btn-primary {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	border-radius: 3px;
+	padding: 6px 12px;
+	font-size: 12px;
+	font-weight: 500;
+	cursor: pointer;
+	text-decoration: none;
+	line-height: 1.4;
+}
+
+.frbl-btn-outline {
+	background: #fff;
+	border: 1px solid #2271b1;
+	color: #2271b1;
+}
+
+.frbl-btn-outline:hover {
+	background: #f0f6fc;
+	color: #2271b1;
+}
+
+.frbl-btn-ghost {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	color: #50575e;
+}
+
+.frbl-btn-ghost:hover {
+	background: #f6f7f7;
+	color: #50575e;
+}
+
+.frbl-btn-primary {
+	background: #2271b1;
+	border: 1px solid #2271b1;
+	color: #fff;
+	padding: 7px 16px;
+	font-size: 13px;
+}
+
+.frbl-btn-primary:hover {
+	background: #135e96;
+	border-color: #135e96;
+	color: #fff;
+}
+
+.frbl-tab-cta {
+	margin-top: 24px;
+	text-align: center;
+}
+
+.frbl-upsell-card {
+	background: linear-gradient(135deg, #ffffff 0%, #fef3f2 100%);
+	border: 1px solid #fee2e2;
+	border-radius: 8px;
+	padding: 28px;
+	max-width: 520px;
+}
+
+.frbl-pro-chip {
+	display: inline-block;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	color: #fff;
+	background: linear-gradient(135deg, #ec4899 0%, #f97316 100%);
+	border-radius: 3px;
+	padding: 2px 7px;
+	margin-bottom: 10px;
+}
+
+.frbl-upsell-card h2 {
+	margin: 0 0 8px 0;
+	font-size: 18px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.frbl-upsell-card p {
+	margin: 0 0 18px 0;
+	color: #646970;
+	line-height: 1.5;
+}
+
+/* Fixed to the viewport (not the .frbl-admin-body column), so its inner
+   padding recreates the same 1240px content column by hand. */
+.frbl-settings-save-bar {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 30;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	background: #fff;
+	border-top: 1px solid #dcdcde;
+	box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+	border-radius: 0;
+	max-width: 100%;
+	padding: 12px max(24px, calc((100% - 1240px) / 2));
+}
+
+.frbl-save-status {
+	color: #646970;
+	font-size: 13px;
+}
+
+.frbl-save-bar-spacer {
+	flex: 1;
+}
+
+.frbl-admin-footer {
+	margin-top: 32px;
+	text-align: center;
+	font-size: 13px;
+	color: #646970;
+}
+
+.frbl-admin-footer a {
+	color: #2271b1;
+	font-weight: 500;
+}
+
+@media (max-width: 640px) {
+	.frbl-admin-header-top {
+		align-items: flex-start;
+	}
+
+	.frbl-settings-save-bar {
+		flex-wrap: wrap;
+	}
+
+	.frbl-save-bar-spacer {
+		flex-basis: 100%;
+		height: 0;
+	}
+}

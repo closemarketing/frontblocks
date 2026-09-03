@@ -90,6 +90,36 @@ class CookieNoticePolicyPageTest extends TestCase {
 	}
 
 	/**
+	 * The banner must render already invisible/off-screen by default — the
+	 * 'frbl-cookie-notice--init' class is what a returning, already-decided
+	 * visitor never sees removed, avoiding the flash frontblocks-cookie-notice.js
+	 * used to cause by hiding a banner that started out visible.
+	 */
+	public function test_banner_renders_with_the_init_class_by_default() {
+		$other_page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		$this->go_to( get_permalink( $other_page_id ) );
+
+		$html = $this->render_banner_html();
+
+		$this->assertMatchesRegularExpression( '/class="[^"]*\bfrbl-cookie-notice--init\b[^"]*"/', $html );
+	}
+
+	/**
+	 * A no-JS visitor must still see the banner: the printed <noscript> style
+	 * resets '--init' back to visible, since nothing would otherwise ever
+	 * remove that class for them.
+	 */
+	public function test_banner_includes_a_noscript_fallback_for_the_init_state() {
+		$other_page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		$this->go_to( get_permalink( $other_page_id ) );
+
+		$html = $this->render_banner_html();
+
+		$this->assertStringContainsString( '<noscript>', $html );
+		$this->assertStringContainsString( 'frbl-cookie-notice--init', $html );
+	}
+
+	/**
 	 * The "Learn more" link in the banner message must resolve the saved
 	 * page ID to its actual current permalink, not embed a stale/raw URL.
 	 */

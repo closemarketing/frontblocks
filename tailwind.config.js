@@ -2,6 +2,7 @@
 module.exports = {
 	content: [
 		'./includes/Admin/**/*.php',
+		'./includes/GoogleSignIn/**/*.php',
 		'./assets/admin/**/*.{js,jsx}',
 	],
 	theme: {
@@ -27,4 +28,3 @@ module.exports = {
 	prefix: 'tw',
 	important: '.frbl-settings-wrapper',
 };
-

@@ -30,8 +30,12 @@
 	}
 
 	function defineInjectHelper() {
-		window.frblCookieNoticeInject = window.frblCookieNoticeInject || function (gtmId, ga4Id) {
-			if (gtmId) {
+		window.frblCookieNoticeInject = window.frblCookieNoticeInject || function (gtmId, ga4Id, trackingIntegrations, allowedCategories) {
+			var allowsCategory = function (category) {
+				return !allowedCategories || !!allowedCategories[category];
+			};
+
+			if (gtmId && allowsCategory('analytics')) {
 				window.dataLayer = window.dataLayer || [];
 				window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
 
@@ -41,7 +45,7 @@
 				document.head.appendChild(gtmScript);
 			}
 
-			if (ga4Id) {
+			if (ga4Id && allowsCategory('analytics')) {
 				var ga4Script = document.createElement('script');
 				ga4Script.async = true;
 				ga4Script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(ga4Id);
@@ -54,6 +58,67 @@
 				window.gtag('js', new Date());
 				window.gtag('config', ga4Id);
 			}
+
+			if (!Array.isArray(trackingIntegrations)) {
+				trackingIntegrations = [];
+			}
+
+			trackingIntegrations.forEach(function (integration) {
+				var trackingType = integration && integration.type ? integration.type : '';
+				var trackingId = integration && integration.id ? integration.id : '';
+				var trackingCategory = integration && integration.category ? integration.category : 'marketing';
+
+				if (!trackingId || !allowsCategory(trackingCategory)) {
+					return;
+				}
+
+			if (trackingType === 'clientify_analytics_plus') {
+				var clientifyPixel = document.createElement('script');
+				clientifyPixel.defer = true;
+				clientifyPixel.src = 'https://analyticsplusdev.clientify.net/analytics_plus/pixel/' + encodeURIComponent(trackingId);
+				document.head.appendChild(clientifyPixel);
+			} else if (trackingType === 'clientify_analytics_classic') {
+				(function (d, w, u, o) {
+					w[o] = w[o] || function () {
+						(w[o].q = w[o].q || []).push(arguments);
+					};
+					var a = d.createElement('script'),
+						m = d.getElementsByTagName('script')[0];
+					a.async = 1; a.src = u;
+					m.parentNode.insertBefore(a, m);
+				})(document, window, 'https://analytics.clientify.net/tracker.js', 'ana');
+				window.ana('setTrackerUrl', 'https://analytics.clientify.net');
+				window.ana('setTrackingCode', trackingId);
+				window.ana('trackPageview');
+			} else if (trackingType === 'brevo') {
+				var brevoScript = document.createElement('script');
+				brevoScript.async = true;
+				brevoScript.src = 'https://cdn.brevo.com/js/sdk-loader.js';
+				document.head.appendChild(brevoScript);
+
+				window.Brevo = window.Brevo || [];
+				window.Brevo.push(['init', { client_key: trackingId }]);
+			} else if (trackingType === 'openai_chatgpt_ads') {
+				if (!window.oaiq) {
+					window.oaiq = function () {
+						window.oaiq.q.push(arguments);
+					};
+					window.oaiq.q = [];
+
+					var openaiScript = document.createElement('script');
+					openaiScript.async = true;
+					openaiScript.src = 'https://bzrcdn.openai.com/sdk/oaiq.min.js';
+					document.head.appendChild(openaiScript);
+				}
+
+				window.oaiq('init', { pixelId: trackingId, debug: true });
+			} else if (typeof window.frblCookieNoticeInjectIntegration === 'function') {
+				window.frblCookieNoticeInjectIntegration(integration);
+			} else {
+				window.frblCookieNoticePendingIntegrations = window.frblCookieNoticePendingIntegrations || [];
+				window.frblCookieNoticePendingIntegrations.push(integration);
+			}
+			});
 		};
 	}
 
@@ -71,7 +136,7 @@
 			})
 			.then(function (response) {
 				if (response && response.success && response.data && window.frblCookieNoticeInject) {
-					window.frblCookieNoticeInject(response.data.gtmId, response.data.ga4Id);
+					window.frblCookieNoticeInject(response.data.gtmId, response.data.ga4Id, response.data.trackingIntegrations, response.data.allowedCategories);
 				}
 			})
 			.catch(function () {
@@ -99,7 +164,9 @@
 
 		defineInjectHelper();
 
-		if (readCookie(frblCookieNotice.cookieName) === 'accepted') {
+		var isStale = typeof window.frblCookieNoticeIsConsentStale === 'function' && window.frblCookieNoticeIsConsentStale();
+
+		if (readCookie(frblCookieNotice.cookieName) === 'accepted' && !isStale) {
 			fetchAndInjectScripts();
 		}
 
@@ -108,6 +175,14 @@
 
 	function hideBannerIfDecided(banner) {
 		var consent = readCookie(frblCookieNotice.cookieName);
+
+		// An add-on tracking per-category consent (analytics vs. marketing) can
+		// define this to say "the categories cookie is stale — e.g. the site
+		// admin just added a new integration — so re-prompt even though the
+		// legacy accepted/rejected cookie here still looks decided."
+		if (typeof window.frblCookieNoticeIsConsentStale === 'function' && window.frblCookieNoticeIsConsentStale()) {
+			return false;
+		}
 
 		if (banner && (consent === 'accepted' || consent === 'rejected')) {
 			banner.style.display = 'none';
@@ -140,15 +215,7 @@
 		var isPopup = banner.classList.contains('frbl-cookie-notice--popup');
 		var previouslyFocused = document.activeElement;
 
-		if (isPopup) {
-			document.body.classList.add('frbl-cookie-notice-lock-scroll');
-
-			if (acceptBtn) {
-				acceptBtn.focus({ preventScroll: true });
-			}
-
-			document.addEventListener('keydown', trapFocus);
-		}
+		revealBanner();
 
 		if (acceptBtn) {
 			acceptBtn.addEventListener('click', function () {
@@ -160,6 +227,51 @@
 			rejectBtn.addEventListener('click', function () {
 				handleDecision('rejected');
 			});
+		}
+
+		var customizeBtn = banner.querySelector('[data-frbl-cookie-action="customize"]');
+
+		if (customizeBtn) {
+			// Deliberately not routed through handleDecision(): clicking it isn't a
+			// decision by itself, just a request to see more detail. An add-on
+			// listens for this to open its own categories dialog.
+			customizeBtn.addEventListener('click', function () {
+				var event;
+
+				try {
+					event = new CustomEvent('frblCookieNoticeCustomize');
+				} catch (e) {
+					event = document.createEvent('CustomEvent');
+					event.initCustomEvent('frblCookieNoticeCustomize', true, true, null);
+				}
+
+				document.dispatchEvent(event);
+			});
+		}
+
+		/**
+		 * Reveal the banner: removes the '--init' class printed by PHP so the
+		 * CSS transition animates it in (slide up for the bar, slide in from
+		 * its anchored edge for the box, scale/fade in for the popup). The
+		 * popup gets a short extra delay first, per its layout's own request,
+		 * so it doesn't feel jarring the instant the page loads.
+		 */
+		function revealBanner() {
+			var delay = isPopup ? 150 : 20;
+
+			window.setTimeout(function () {
+				banner.classList.remove('frbl-cookie-notice--init');
+
+				if (isPopup) {
+					document.body.classList.add('frbl-cookie-notice-lock-scroll');
+
+					if (acceptBtn) {
+						acceptBtn.focus({ preventScroll: true });
+					}
+
+					document.addEventListener('keydown', trapFocus);
+				}
+			}, delay);
 		}
 
 		function trapFocus(event) {
