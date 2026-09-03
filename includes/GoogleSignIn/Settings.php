@@ -137,7 +137,7 @@ class Settings {
 	 * @return string
 	 */
 	private function settings_url() {
-		return admin_url( 'themes.php?page=' . self::PAGE_SLUG );
+		return admin_url( 'themes.php?page=' . self::PAGE_SLUG . '#google-signin' );
 	}
 
 	/**

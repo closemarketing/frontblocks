@@ -133,7 +133,7 @@ class TokenVerifier {
 
 		$keys = get_transient( self::JWKS_TRANSIENT );
 
-		if ( ! is_array( $keys ) || ! self::find_key( $keys, $kid ) ) {
+		if ( ! is_array( $keys ) ) {
 			$keys = self::fetch_jwks();
 			if ( is_array( $keys ) ) {
 				set_transient( self::JWKS_TRANSIENT, $keys, HOUR_IN_SECONDS );

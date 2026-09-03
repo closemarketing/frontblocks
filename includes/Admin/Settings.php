@@ -810,9 +810,10 @@ class Settings {
 		wp_add_inline_script(
 			'jquery',
 			"
-			document.addEventListener('DOMContentLoaded', function() {
-				var tabButtons = document.querySelectorAll('[data-tab-target]');
-				var tabPanels  = document.querySelectorAll('[data-tab-panel]');
+				document.addEventListener('DOMContentLoaded', function() {
+					var tabButtons = document.querySelectorAll('[data-tab-target]');
+					var tabPanels  = document.querySelectorAll('[data-tab-panel]');
+					var saveBar    = document.querySelector('.frbl-settings-save-bar');
 
 				function activateTab(tabId) {
 					var found = false;
@@ -822,6 +823,10 @@ class Settings {
 						panel.hidden = ! match;
 						found = found || match;
 					});
+
+					if (saveBar) {
+						saveBar.hidden = found && 'google-signin' === tabId;
+					}
 
 					if (! found) {
 						return;

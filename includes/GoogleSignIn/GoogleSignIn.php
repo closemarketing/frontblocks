@@ -66,7 +66,6 @@ class GoogleSignIn {
 		if ( is_admin() ) {
 			new Settings();
 		}
-
 		$this->options = Settings::get_options();
 
 		// The shortcodes and block are always available; they render nothing
@@ -74,6 +73,7 @@ class GoogleSignIn {
 		add_shortcode( 'frontblocks_google_login', array( $this, 'shortcode_login' ) );
 		add_shortcode( 'frontblocks_google_register', array( $this, 'shortcode_register' ) );
 		add_action( 'init', array( $this, 'register_block' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_assets' ) );
 
 		// Feature is fully optional/off by default until Client ID and Secret are configured.
 		if ( ! Settings::is_configured() ) {
@@ -99,8 +99,6 @@ class GoogleSignIn {
 			if ( ! empty( $this->options['enable_checkout'] ) ) {
 				add_action( 'woocommerce_before_checkout_form', array( $this, 'render_checkout_button' ), 5 );
 			}
-
-			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_assets' ) );
 		}
 	}
 
@@ -122,10 +120,6 @@ class GoogleSignIn {
 						'required' => true,
 						'type'     => 'string',
 					),
-					'nonce'       => array(
-						'required' => true,
-						'type'     => 'string',
-					),
 					'redirect_to' => array(
 						'required' => false,
 						'type'     => 'string',
@@ -143,12 +137,6 @@ class GoogleSignIn {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function handle_signin( \WP_REST_Request $request ) {
-		$nonce = sanitize_text_field( (string) $request->get_param( 'nonce' ) );
-
-		if ( ! wp_verify_nonce( $nonce, self::NONCE_ACTION ) ) {
-			return new \WP_Error( 'frbl_gsi_invalid_nonce', __( 'Security check failed. Please refresh the page and try again.', 'frontblocks' ), array( 'status' => 403 ) );
-		}
-
 		$redirect_to = $this->safe_redirect( (string) $request->get_param( 'redirect_to' ) );
 
 		if ( is_user_logged_in() ) {
@@ -275,7 +263,7 @@ class GoogleSignIn {
 		$allowed = (bool) get_option( 'users_can_register' );
 
 		if ( ! $allowed && class_exists( 'WooCommerce' ) ) {
-			$allowed = 'yes' === get_option( 'woocommerce_enable_myaccount_registration' );
+			$allowed = 'yes' === get_option( 'woocommerce_enable_myaccount_registration' ) || 'yes' === get_option( 'woocommerce_enable_signup_from_checkout' );
 		}
 
 		/**
@@ -368,7 +356,6 @@ class GoogleSignIn {
 			array(
 				'clientId'   => $this->options['client_id'],
 				'apiUrl'     => rest_url( 'frontblocks/v1/google-signin' ),
-				'nonce'      => wp_create_nonce( self::NONCE_ACTION ),
 				'redirectTo' => $redirect_to,
 				'i18n'       => array(
 					'error' => __( 'Could not sign in with Google. Please try again or use the form below.', 'frontblocks' ),
@@ -446,6 +433,11 @@ class GoogleSignIn {
 
 		if ( function_exists( 'is_checkout' ) && is_checkout() && ! empty( $this->options['enable_checkout'] ) ) {
 			return true;
+		}
+
+		global $post;
+		if ( $post instanceof \WP_Post ) {
+			return has_block( 'frontblocks/google-login', $post ) || has_shortcode( $post->post_content, 'frontblocks_google_login' ) || has_shortcode( $post->post_content, 'frontblocks_google_register' );
 		}
 
 		return false;
@@ -606,9 +598,36 @@ class GoogleSignIn {
 			true
 		);
 
+		if ( version_compare( get_bloginfo( 'version' ), '5.5', '>=' ) ) {
+			register_block_type( FRBL_PLUGIN_PATH . 'includes/GoogleSignIn/block', array( 'render_callback' => array( $this, 'render_block' ) ) );
+			return;
+		}
+
 		register_block_type(
-			FRBL_PLUGIN_PATH . 'includes/GoogleSignIn/block',
-			array( 'render_callback' => array( $this, 'render_block' ) )
+			'frontblocks/google-login',
+			array(
+				'editor_script'   => 'frontblocks-google-login-block-editor',
+				'render_callback' => array( $this, 'render_block' ),
+				'attributes'      => $this->get_block_attributes(),
+			)
+		);
+	}
+
+	/**
+	 * Return Google Login block attributes for pre-metadata WordPress versions.
+	 *
+	 * @return array
+	 */
+	private function get_block_attributes() {
+		return array(
+			'mode'     => array(
+				'type'    => 'string',
+				'default' => 'login',
+			),
+			'redirect' => array(
+				'type'    => 'string',
+				'default' => '',
+			),
 		);
 	}
 
@@ -622,6 +641,13 @@ class GoogleSignIn {
 		$mode     = ( isset( $attributes['mode'] ) && 'register' === $attributes['mode'] ) ? 'register' : 'login';
 		$redirect = isset( $attributes['redirect'] ) ? (string) $attributes['redirect'] : '';
 
-		return $this->render_button_html( $mode, $redirect );
+		$content = $this->render_button_html( $mode, $redirect );
+		if ( function_exists( 'get_block_wrapper_attributes' ) ) {
+			return sprintf( '<div %1$s>%2$s</div>', get_block_wrapper_attributes(), $content );
+		}
+
+		$align = isset( $attributes['align'] ) ? sanitize_key( $attributes['align'] ) : '';
+
+		return sprintf( '<div class="%1$s">%2$s</div>', $align ? 'align' . esc_attr( $align ) : '', $content );
 	}
 }

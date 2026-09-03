@@ -10,6 +10,8 @@
 
 namespace FrontBlocks\Admin;
 
+use FrontBlocks\GoogleSignIn\Settings as GoogleSignInSettings;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -87,7 +89,8 @@ class RedundantPlugins {
 	 * @return array
 	 */
 	private static function get_default_entries() {
-		$settings = get_option( 'frontblocks_settings', array() );
+		$settings               = get_option( 'frontblocks_settings', array() );
+		$google_signin_settings = GoogleSignInSettings::get_options();
 
 		return array(
 			'svg-upload'    => array(
@@ -111,7 +114,7 @@ class RedundantPlugins {
 			),
 			'login-google'  => array(
 				'feature' => __( 'Google Login', 'frontblocks' ),
-				'enabled' => (bool) ( $settings['enable_login_google'] ?? false ),
+				'enabled' => GoogleSignInSettings::is_configured() && ( ! empty( $google_signin_settings['enable_wp_login'] ) || ! empty( $google_signin_settings['enable_myaccount_login'] ) || ! empty( $google_signin_settings['enable_myaccount_register'] ) || ! empty( $google_signin_settings['enable_checkout'] ) ),
 				'plugins' => array(
 					'login-with-google/login-with-google.php' => 'Login with Google',
 					'login-with/login-with.php' => 'Login with',

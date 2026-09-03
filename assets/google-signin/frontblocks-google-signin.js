@@ -98,10 +98,9 @@
 		fetch( config.apiUrl, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify( {
-				credential: response.credential,
-				nonce: config.nonce,
-				redirect_to: getRedirectOverride() || config.redirectTo || '',
+		body: JSON.stringify( {
+			credential: response.credential,
+			redirect_to: getRedirectOverride() || config.redirectTo || '',
 			} ),
 		} )
 			.then( function ( res ) {
