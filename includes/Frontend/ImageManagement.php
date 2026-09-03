@@ -67,26 +67,7 @@ class ImageManagement {
 		if ( ! is_admin() ) {
 			add_filter( 'wp_content_img_tag', array( $this, 'filter_content_img_tag' ), 10, 3 );
 			add_filter( 'post_thumbnail_html', array( $this, 'filter_post_thumbnail_html' ), 10, 3 );
-			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_picture_styles' ) );
 		}
-	}
-
-	/**
-	 * Enqueue the small stylesheet used by the optional <picture> wrapper markup.
-	 *
-	 * @return void
-	 */
-	public function enqueue_picture_styles() {
-		if ( ! $this->is_enabled() || ! $this->uses_picture_element() ) {
-			return;
-		}
-
-		wp_enqueue_style(
-			'frontblocks-image-picture',
-			FRBL_PLUGIN_URL . 'assets/image-management/frontblocks-image-picture.css',
-			array(),
-			FRBL_VERSION
-		);
 	}
 
 	/**
@@ -106,19 +87,6 @@ class ImageManagement {
 	public function is_enabled() {
 		$options = $this->get_options();
 		return (bool) ( $options['enable_image_management'] ?? false );
-	}
-
-	/**
-	 * Whether the frontend should wrap images in a <picture> element with
-	 * one <source> per generated format, instead of rewriting the <img>
-	 * src/srcset in place. Direct rewriting is the default: modern-format
-	 * browser support is high enough that the extra markup usually isn't
-	 * needed, and it keeps output closer to what themes already produce.
-	 *
-	 * @return bool
-	 */
-	private function uses_picture_element() {
-		return (bool) ( $this->get_options()['image_format_use_picture'] ?? false );
 	}
 
 	/**
@@ -466,13 +434,12 @@ class ImageManagement {
 	}
 
 	/**
-	 * Serve generated modern-format variants for a content/featured image,
-	 * either by rewriting its src/srcset in place (default — lighter markup,
-	 * relies on the browser only requesting a format it supports via the
-	 * srcset it's given) or, when the "picture" setting is enabled, by
-	 * wrapping the original <img> in a <picture> element with one <source>
-	 * per format, which additionally protects against a browser silently
-	 * getting no image at all if a variant file goes missing.
+	 * Serve generated modern-format variants for a content/featured image by
+	 * rewriting its src/srcset in place. WebP is used unconditionally when a
+	 * variant exists — browser support is effectively universal. AVIF is
+	 * only used when the visitor's `Accept` request header confirms support
+	 * for it; otherwise delivery falls back to WebP, or to the original
+	 * format if no WebP variant exists either.
 	 *
 	 * @param string $filtered_image Full <img ...> tag markup.
 	 * @param string $context        Filter context (unused).
@@ -500,25 +467,53 @@ class ImageManagement {
 			return $filtered_image;
 		}
 
-		// AVIF first when both are available: it's the smaller format, and
-		// this module only ever generates a format the server actually
-		// supports producing.
-		$mime = null;
-		foreach ( array( 'image/avif', 'image/webp' ) as $candidate ) {
-			if ( ! empty( $variants[ $size_key ][ $candidate ]['file'] ) ) {
-				$mime = $candidate;
-				break;
-			}
-		}
+		$mime = $this->best_mime_for_request( $variants[ $size_key ] );
 		if ( null === $mime ) {
 			return $filtered_image;
 		}
 
 		$base_url = trailingslashit( dirname( $src_match[1] ) );
 
-		return $this->uses_picture_element()
-			? $this->wrap_in_picture( $filtered_image, $variants, $metadata, $base_url )
-			: $this->rewrite_src_in_place( $filtered_image, $variants, $metadata, $base_url, $mime );
+		return $this->rewrite_src_in_place( $filtered_image, $variants, $metadata, $base_url, $mime );
+	}
+
+	/**
+	 * Pick the best available modern format for the current request: AVIF
+	 * only when the visitor's `Accept` header confirms support for it,
+	 * WebP otherwise (near-universal support, so no negotiation needed),
+	 * or null if the size has no variant in either format.
+	 *
+	 * @param array $size_variants Map of MIME type => file data for one size.
+	 * @return string|null
+	 */
+	private function best_mime_for_request( $size_variants ) {
+		if ( ! empty( $size_variants['image/avif']['file'] ) && $this->accepts( 'image/avif' ) ) {
+			return 'image/avif';
+		}
+
+		if ( ! empty( $size_variants['image/webp']['file'] ) ) {
+			return 'image/webp';
+		}
+
+		return null;
+	}
+
+	/**
+	 * Whether the current request's `Accept` header explicitly lists the
+	 * given MIME type as acceptable. Deliberately doesn't treat a generic
+	 * image or wildcard range as a match: those are common on requests that
+	 * don't actually confirm AVIF decode support (plain img fetches from
+	 * older browsers, non-browser clients, etc.), and this is the one format
+	 * worth being conservative about — unlike WebP, which is rewritten
+	 * unconditionally.
+	 *
+	 * @param string $mime MIME type to check for, e.g. 'image/avif'.
+	 * @return bool
+	 */
+	private function accepts( $mime ) {
+		$accept = isset( $_SERVER['HTTP_ACCEPT'] ) ? (string) $_SERVER['HTTP_ACCEPT'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- read-only substring check, never output or used in a query.
+
+		return false !== strpos( $accept, $mime );
 	}
 
 	/**
@@ -598,50 +593,6 @@ class ImageManagement {
 		}
 
 		return $base_url . $variants[ $size_key ][ $mime ]['file'];
-	}
-
-	/**
-	 * Wrap the original <img> tag in a <picture> element with one <source>
-	 * per generated format, keeping the <img> itself as the last child so
-	 * browsers without modern-format support fall back to it automatically.
-	 *
-	 * @param string $image_tag Full <img ...> tag markup.
-	 * @param array  $variants  Full variants map for the attachment.
-	 * @param array  $metadata  Attachment metadata, used to resolve the matched size.
-	 * @param string $base_url  Directory URL the variant files live in.
-	 * @return string
-	 */
-	private function wrap_in_picture( $image_tag, $variants, $metadata, $base_url ) {
-		if ( ! preg_match( '/src=["\']([^"\']+)["\']/', $image_tag, $src_match ) ) {
-			return $image_tag;
-		}
-
-		$size_key = $this->match_variant_size( $src_match[1], $metadata );
-		if ( null === $size_key || empty( $variants[ $size_key ] ) ) {
-			return $image_tag;
-		}
-
-		$sources = '';
-
-		foreach ( array( 'image/avif', 'image/webp' ) as $mime ) {
-			if ( empty( $variants[ $size_key ][ $mime ]['file'] ) ) {
-				continue;
-			}
-			$sources .= sprintf(
-				'<source type="%1$s" srcset="%2$s" />',
-				esc_attr( $mime ),
-				esc_url( $base_url . $variants[ $size_key ][ $mime ]['file'] )
-			);
-		}
-
-		if ( '' === $sources ) {
-			return $image_tag;
-		}
-
-		// The <img> tag itself is already WP-escaped markup; only the
-		// <source> URLs added above are freshly built, and those go
-		// through esc_url()/esc_attr() above.
-		return '<picture class="frbl-picture">' . $sources . $image_tag . '</picture>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**

@@ -23,7 +23,6 @@ Enable it from **Appearance → FrontBlocks → Image Management**.
 | Add custom size | Defines an additional named size, generated alongside the existing ones. Each custom size also has a Label and a "Show in picker" checkbox — when checked, the size becomes selectable (under its label) from the image size dropdown shown when inserting or editing an image, the same dropdown that lists `Thumbnail`/`Medium`/`Large`/`Full Size`. |
 | Modern format | `Off`, `WebP`, `AVIF`, or `WebP and AVIF`. A warning is shown if the current server's PHP image library (GD/Imagick) doesn't support a chosen format. |
 | Quality | Compression quality (1–100) used when generating WebP/AVIF variants. |
-| Use a `<picture>` element for delivery | Off by default: the `<img>` tag itself is switched to point at the modern-format file, which keeps the markup unchanged and relies on the format already being one the server (and by extension, in practice, the visiting browser) supports. On: the original file is kept as an explicit `<picture>`-element fallback alongside each modern-format `<source>`, at the cost of extra markup — useful if you want a guaranteed fallback even when a variant file is missing or corrupted. |
 | Regenerate thumbnails | Bulk-regenerates intermediate sizes for existing media library items, using the currently saved size settings. Processed in small batches with a progress bar. |
 | Convert to modern formats | Bulk-generates WebP/AVIF variants for existing media library items, using the currently saved format settings. Processed in small batches with a progress bar. |
 | Delete files for disabled sizes | Bulk-deletes the on-disk files (and any generated WebP/AVIF variants) for sizes currently marked disabled, across existing media library items — this is what actually reclaims the disk space the sizes table estimates. Disabling a size on its own only stops future generation. |
@@ -53,15 +52,14 @@ configuration, not the form's current unsaved state.
   size are recorded per size, per MIME type, in the attachment's metadata
   (`frbl_image_variants`).
 - **Frontend delivery** rewrites `<img>` tags in post content
-  (`wp_content_img_tag`) and featured images (`post_thumbnail_html`). By
-  default it rewrites the `src`/`srcset` in place to point at the generated
-  variant (AVIF preferred over WebP when both exist) — no extra markup. With
-  "Use a `<picture>` element for delivery" enabled, it instead wraps the
-  original `<img>` in a `<picture>` element with one `<source>` per generated
-  format, keeping the original as the last child so a browser — or a request
-  for a size/format with no generated variant — falls back to it
-  automatically. No server-side Accept-header sniffing or server
-  configuration is required either way.
+  (`wp_content_img_tag`) and featured images (`post_thumbnail_html`) by
+  rewriting their `src`/`srcset` in place to point at the generated variant —
+  no extra markup, no `<picture>` element. WebP is used unconditionally
+  whenever a variant exists (support across browsers is effectively
+  universal). AVIF is only used when the visitor's request `Accept` header
+  explicitly lists `image/avif`; otherwise delivery falls back to WebP, or to
+  the original file if no WebP variant exists either. A size/format with no
+  generated variant is left untouched.
 - **Cleanup** happens automatically in two cases: generated variants are
   re-created from scratch (old files removed first) whenever an attachment's
   metadata is regenerated or converted, so switching formats never leaves

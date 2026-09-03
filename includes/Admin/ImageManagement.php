@@ -142,7 +142,6 @@ class ImageManagement {
 		$custom        = (array) ( $options['image_sizes_custom'] ?? array() );
 		$format_target = (string) ( $options['image_format_target'] ?? 'none' );
 		$quality       = (int) ( $options['image_format_quality'] ?? 82 );
-		$use_picture   = (bool) ( $options['image_format_use_picture'] ?? false );
 
 		$sizes_info = $this->get_registered_sizes_info();
 		$usage      = FrontendImageManagement::estimate_disk_usage_by_size( wp_list_pluck( $sizes_info, 'name' ) );
@@ -214,21 +213,6 @@ class ImageManagement {
 							<input type="range" id="image_format_quality" name="frontblocks_settings[image_format_quality]" min="1" max="100" value="<?php echo esc_attr( $quality ); ?>" class="tw:block tw:w-full" />
 						</div>
 					</div>
-					<div class="tw:flex tw:items-center tw:justify-between tw:mt-4">
-						<div>
-							<label for="image_format_use_picture" class="tw:text-sm tw:font-medium tw:text-gray-700"><?php echo esc_html__( 'Use a <picture> element for delivery', 'frontblocks' ); ?></label>
-							<p class="tw:text-xs tw:text-gray-500 tw:mt-1"><?php echo esc_html__( 'Off (default): the image tag itself is switched to the modern format — lighter markup. On: the original image is kept as an explicit fallback inside a <picture> element, at the cost of extra markup.', 'frontblocks' ); ?></p>
-						</div>
-						<label class="frbl-toggle">
-							<input type="checkbox"
-								id="image_format_use_picture"
-								name="frontblocks_settings[image_format_use_picture]"
-								value="1"
-								<?php checked( true, $use_picture ); ?>
-							/>
-							<span></span>
-						</label>
-					</div>
 				</div>
 
 				<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200">
@@ -284,8 +268,6 @@ class ImageManagement {
 
 		$quality                       = absint( $posted['image_format_quality'] ?? 82 );
 		$value['image_format_quality'] = $quality > 0 ? min( $quality, 100 ) : 82;
-
-		$value['image_format_use_picture'] = ! empty( $posted['image_format_use_picture'] );
 
 		$config = array();
 		if ( ! empty( $posted['image_sizes_config'] ) ) {
