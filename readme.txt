@@ -224,7 +224,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Changelog ==
 
-= 1.6.0 =
+= 1.5.3 =
 *   Added: Google Sign-In — "Sign in with Google" / "Sign up with Google" for the wp-admin login screen, WooCommerce My Account (login and registration) and Checkout, plus a shortcode and a Google Login block. Verifies the Google ID token server-side; no third-party PHP library required.
 
 = 1.5.2 =

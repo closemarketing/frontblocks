@@ -2,7 +2,7 @@
 
 **Plugin:** FrontBlocks for Gutenberg/GeneratePress
 **Feature:** "Sign in / Sign up with Google" for wp-login.php and WooCommerce
-**Since:** 1.6.0
+**Since:** 1.5.3
 
 ---
 
