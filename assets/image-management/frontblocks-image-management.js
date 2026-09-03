@@ -16,8 +16,10 @@
 		const configInput    = document.getElementById( 'frbl-image-sizes-config' );
 		const tableContainer = document.getElementById( 'frbl-image-sizes-table' );
 		const configScript   = document.getElementById( 'frbl-image-management-config' );
-		const qualityInput   = document.getElementById( 'image_format_quality' );
-		const qualityValue   = document.getElementById( 'frbl-image-quality-value' );
+		const qualityInputs  = [
+			{ input: document.getElementById( 'image_format_quality_webp' ), value: document.getElementById( 'frbl-image-quality-webp-value' ) },
+			{ input: document.getElementById( 'image_format_quality_avif' ), value: document.getElementById( 'frbl-image-quality-avif-value' ) },
+		];
 
 		if ( ! enableCheckbox || ! fieldsWrapper || ! configInput || ! tableContainer || ! configScript ) {
 			return;
@@ -40,11 +42,13 @@
 			fieldsWrapper.style.display = enableCheckbox.checked ? '' : 'none';
 		} );
 
-		if ( qualityInput && qualityValue ) {
-			qualityInput.addEventListener( 'input', function () {
-				qualityValue.textContent = qualityInput.value;
-			} );
-		}
+		qualityInputs.forEach( function ( pair ) {
+			if ( pair.input && pair.value ) {
+				pair.input.addEventListener( 'input', function () {
+					pair.value.textContent = pair.input.value;
+				} );
+			}
+		} );
 
 		function escapeHtml( value ) {
 			return String( value )

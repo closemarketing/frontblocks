@@ -172,8 +172,8 @@ class ImageManagement {
 		$disabled      = (array) ( $options['image_sizes_disabled'] ?? array() );
 		$overrides     = (array) ( $options['image_sizes_overrides'] ?? array() );
 		$custom        = (array) ( $options['image_sizes_custom'] ?? array() );
-		$format_target = (string) ( $options['image_format_target'] ?? 'none' );
-		$quality       = (int) ( $options['image_format_quality'] ?? 82 );
+		$format_target  = (string) ( $options['image_format_target'] ?? 'none' );
+		$quality_by_fmt = FrontendImageManagement::get_quality_settings( $options );
 
 		$sizes_info = $this->get_registered_sizes_info();
 		$usage      = FrontendImageManagement::estimate_disk_usage_by_size( wp_list_pluck( $sizes_info, 'name' ) );
@@ -251,8 +251,11 @@ class ImageManagement {
 							<?php endif; ?>
 						</div>
 						<div>
-							<label for="image_format_quality" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2"><?php echo esc_html__( 'Quality', 'frontblocks' ); ?> (<span id="frbl-image-quality-value"><?php echo esc_html( $quality ); ?></span>)</label>
-							<input type="range" id="image_format_quality" name="frontblocks_settings[image_format_quality]" min="1" max="100" value="<?php echo esc_attr( $quality ); ?>" class="tw:block tw:w-full" />
+							<label for="image_format_quality_webp" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2"><?php echo esc_html__( 'WebP quality', 'frontblocks' ); ?> (<span id="frbl-image-quality-webp-value"><?php echo esc_html( $quality_by_fmt['webp'] ); ?></span>)</label>
+							<input type="range" id="image_format_quality_webp" name="frontblocks_settings[image_format_quality_webp]" min="1" max="100" value="<?php echo esc_attr( $quality_by_fmt['webp'] ); ?>" class="tw:block tw:w-full tw:mb-4" />
+							<label for="image_format_quality_avif" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2"><?php echo esc_html__( 'AVIF quality', 'frontblocks' ); ?> (<span id="frbl-image-quality-avif-value"><?php echo esc_html( $quality_by_fmt['avif'] ); ?></span>)</label>
+							<input type="range" id="image_format_quality_avif" name="frontblocks_settings[image_format_quality_avif]" min="1" max="100" value="<?php echo esc_attr( $quality_by_fmt['avif'] ); ?>" class="tw:block tw:w-full" />
+							<p class="tw:text-xs tw:text-gray-500 tw:mt-1"><?php echo esc_html__( 'AVIF defaults lower than WebP: the same numeric quality produces a noticeably smaller AVIF file at a visually comparable result.', 'frontblocks' ); ?></p>
 						</div>
 					</div>
 				</div>
@@ -309,8 +312,11 @@ class ImageManagement {
 		$requested_target             = in_array( $posted['image_format_target'] ?? 'none', $allowed_targets, true ) ? $posted['image_format_target'] : 'none';
 		$value['image_format_target'] = $this->downgrade_target_to_supported_formats( $requested_target );
 
-		$quality                       = absint( $posted['image_format_quality'] ?? 82 );
-		$value['image_format_quality'] = $quality > 0 ? min( $quality, 100 ) : 82;
+		$webp_quality                       = absint( $posted['image_format_quality_webp'] ?? 82 );
+		$value['image_format_quality_webp'] = $webp_quality > 0 ? min( $webp_quality, 100 ) : 82;
+
+		$avif_quality                       = absint( $posted['image_format_quality_avif'] ?? 60 );
+		$value['image_format_quality_avif'] = $avif_quality > 0 ? min( $avif_quality, 100 ) : 60;
 
 		$config = array();
 		if ( ! empty( $posted['image_sizes_config'] ) ) {

@@ -202,7 +202,21 @@ class ImageManagement {
 			return $metadata;
 		}
 
-		return self::generate_variants_for_metadata( $attachment_id, $metadata, $target, (int) ( $options['image_format_quality'] ?? 82 ) );
+		return self::generate_variants_for_metadata( $attachment_id, $metadata, $target, self::get_quality_settings( $options ) );
+	}
+
+	/**
+	 * Per-format quality settings, each falling back to its own default when
+	 * unset.
+	 *
+	 * @param array $options Plugin settings array.
+	 * @return array Map of format key ('webp'/'avif') => quality (1-100).
+	 */
+	public static function get_quality_settings( $options ) {
+		return array(
+			'webp' => (int) ( $options['image_format_quality_webp'] ?? 82 ),
+			'avif' => (int) ( $options['image_format_quality_avif'] ?? 60 ),
+		);
 	}
 
 	/**
@@ -216,7 +230,8 @@ class ImageManagement {
 	 * @param int    $attachment_id Attachment ID.
 	 * @param array  $metadata      Attachment metadata.
 	 * @param string $target        'webp', 'avif', or 'both'.
-	 * @param int    $quality       Compression quality (1-100).
+	 * @param array  $quality       Map of format key ('webp'/'avif') => quality (1-100),
+	 *                              as returned by get_quality_settings().
 	 * @return array Updated metadata.
 	 */
 	public static function generate_variants_for_metadata( $attachment_id, $metadata, $target, $quality ) {
@@ -257,7 +272,8 @@ class ImageManagement {
 	 *
 	 * @param string   $source_path Absolute path to the source image.
 	 * @param string[] $formats     'webp' and/or 'avif'.
-	 * @param int      $quality     Compression quality (1-100).
+	 * @param array    $quality     Map of format key => quality (1-100), as
+	 *                              returned by get_quality_settings().
 	 * @return array Map of MIME type => array( 'file' => basename, 'filesize' => bytes ).
 	 */
 	private static function generate_variant_files( $source_path, $formats, $quality ) {
@@ -275,7 +291,7 @@ class ImageManagement {
 				continue;
 			}
 
-			$editor->set_quality( $quality );
+			$editor->set_quality( $quality[ $format ] ?? 82 );
 
 			$target_path = preg_replace( '/\.[^.]+$/', '.' . $format, $source_path );
 			$saved       = $editor->save( $target_path, $mime );
@@ -313,7 +329,7 @@ class ImageManagement {
 			return false;
 		}
 
-		self::generate_variants_for_metadata( $attachment_id, $metadata, $target, (int) ( $options['image_format_quality'] ?? 82 ) );
+		self::generate_variants_for_metadata( $attachment_id, $metadata, $target, self::get_quality_settings( $options ) );
 
 		return true;
 	}
