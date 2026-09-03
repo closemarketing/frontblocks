@@ -109,6 +109,15 @@ class RedundantPlugins {
 				),
 				'doc_url' => admin_url( 'themes.php?page=frontblocks-settings' ),
 			),
+			'login-google' => array(
+				'feature' => __( 'Google Login', 'frontblocks' ),
+				'enabled' => (bool) ( $settings['enable_login_google'] ?? false ),
+				'plugins' => array(
+					'login-with-google/login-with-google.php' => 'Login with Google',
+					'login-with/login-with.php' => 'Login with',
+				),
+				'doc_url' => admin_url( 'themes.php?page=frontblocks-settings' ),
+			),
 		);
 	}
 
