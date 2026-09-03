@@ -201,11 +201,12 @@ class Testimonials {
 			);
 
 			$query_testimonios = new \WP_Query( $args );
-			ob_start();
 
 			if ( ! $query_testimonios->have_posts() ) {
 				return '';
 			}
+
+			ob_start();
 			?>
 			<div class="frontblocks-carousel frontblocks-testimonials-carousel" data-type="carousel" data-view="4" data-res-view="1" data-buttons="bullets" data-autoplay="6000">
 				<?php
