@@ -810,9 +810,10 @@ class Settings {
 		wp_add_inline_script(
 			'jquery',
 			"
-			document.addEventListener('DOMContentLoaded', function() {
-				var tabButtons = document.querySelectorAll('[data-tab-target]');
-				var tabPanels  = document.querySelectorAll('[data-tab-panel]');
+				document.addEventListener('DOMContentLoaded', function() {
+					var tabButtons = document.querySelectorAll('[data-tab-target]');
+					var tabPanels  = document.querySelectorAll('[data-tab-panel]');
+					var saveBar    = document.querySelector('.frbl-settings-save-bar');
 
 				function activateTab(tabId) {
 					var found = false;
@@ -822,6 +823,10 @@ class Settings {
 						panel.hidden = ! match;
 						found = found || match;
 					});
+
+					if (saveBar) {
+						saveBar.hidden = found && 'google-signin' === tabId;
+					}
 
 					if (! found) {
 						return;
@@ -1374,6 +1379,10 @@ class Settings {
 				'label' => __( 'Cookies', 'frontblocks' ),
 			),
 			array(
+				'id'    => 'google-signin',
+				'label' => __( 'Google Sign-In', 'frontblocks' ),
+			),
+			array(
 				'id'    => 'cpt',
 				'label' => __( 'Post types', 'frontblocks' ),
 			),
@@ -1624,6 +1633,13 @@ class Settings {
 					</div>
 				</form>
 
+				<div class="frbl-tab-panel" data-tab-panel="google-signin" hidden>
+					<?php
+					// Rendered outside the main settings form: Google Sign-In manages
+					// its own form, nonce, and save handling (see GoogleSignIn\Settings).
+					$this->render_section_if_exists( $sections, 'frontblocks_section_google_signin' );
+					?>
+				</div>
 				<?php do_action( 'frontblocks_settings_tab_panels' ); ?>
 
 				<?php if ( ! $has_cpt_tab ) : ?>

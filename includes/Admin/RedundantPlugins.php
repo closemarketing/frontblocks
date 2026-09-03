@@ -10,6 +10,8 @@
 
 namespace FrontBlocks\Admin;
 
+use FrontBlocks\GoogleSignIn\Settings as GoogleSignInSettings;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -87,7 +89,8 @@ class RedundantPlugins {
 	 * @return array
 	 */
 	private static function get_default_entries() {
-		$settings = get_option( 'frontblocks_settings', array() );
+		$settings               = get_option( 'frontblocks_settings', array() );
+		$google_signin_settings = GoogleSignInSettings::get_options();
 
 		return array(
 			'svg-upload'    => array(
@@ -106,6 +109,15 @@ class RedundantPlugins {
 				'plugins' => array(
 					'gdpr-cookie-compliance/moove-gdpr.php' => 'GDPR Cookie Compliance',
 					'cookie-law-info/cookie-law-info.php' => 'CookieYes',
+				),
+				'doc_url' => admin_url( 'themes.php?page=frontblocks-settings' ),
+			),
+			'login-google'  => array(
+				'feature' => __( 'Google Login', 'frontblocks' ),
+				'enabled' => GoogleSignInSettings::is_configured() && ( ! empty( $google_signin_settings['enable_wp_login'] ) || ! empty( $google_signin_settings['enable_myaccount_login'] ) || ! empty( $google_signin_settings['enable_myaccount_register'] ) || ! empty( $google_signin_settings['enable_checkout'] ) ),
+				'plugins' => array(
+					'login-with-google/login-with-google.php' => 'Login with Google',
+					'login-with/login-with.php' => 'Login with',
 				),
 				'doc_url' => admin_url( 'themes.php?page=frontblocks-settings' ),
 			),

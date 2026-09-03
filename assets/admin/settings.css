@@ -21,6 +21,9 @@
     --tw-color-yellow-200: oklch(94.5% 0.129 101.54);
     --tw-color-yellow-400: oklch(85.2% 0.199 91.936);
     --tw-color-yellow-700: oklch(55.4% 0.135 66.442);
+    --tw-color-green-50: oklch(98.2% 0.018 155.826);
+    --tw-color-green-200: oklch(92.5% 0.084 155.995);
+    --tw-color-green-700: oklch(52.7% 0.154 150.069);
     --tw-color-blue-50: oklch(97% 0.014 254.604);
     --tw-color-blue-400: oklch(70.7% 0.165 254.624);
     --tw-color-blue-700: oklch(48.8% 0.243 264.376);
@@ -242,6 +245,9 @@
   .frbl-settings-wrapper .tw\:mb-2 {
     margin-bottom: calc(var(--tw-spacing) * 2);
   }
+  .frbl-settings-wrapper .tw\:mb-3 {
+    margin-bottom: calc(var(--tw-spacing) * 3);
+  }
   .frbl-settings-wrapper .tw\:mb-4 {
     margin-bottom: calc(var(--tw-spacing) * 4);
   }
@@ -299,16 +305,30 @@
   .frbl-settings-wrapper .tw\:justify-between {
     justify-content: space-between;
   }
+  .frbl-settings-wrapper .tw\:justify-end {
+    justify-content: flex-end;
+  }
   .frbl-settings-wrapper .tw\:gap-2 {
     gap: calc(var(--tw-spacing) * 2);
   }
+  .frbl-settings-wrapper .tw\:gap-3 {
+    gap: calc(var(--tw-spacing) * 3);
+  }
   .frbl-settings-wrapper .tw\:gap-4 {
     gap: calc(var(--tw-spacing) * 4);
+  }
+  .frbl-settings-wrapper .tw\:gap-6 {
+    gap: calc(var(--tw-spacing) * 6);
   }
   :where(.frbl-settings-wrapper .tw\:space-y-2 > :not(:last-child)) {
     --tw-space-y-reverse: 0;
     margin-block-start: calc(calc(var(--tw-spacing) * 2) * var(--tw-space-y-reverse));
     margin-block-end: calc(calc(var(--tw-spacing) * 2) * calc(1 - var(--tw-space-y-reverse)));
+  }
+  :where(.frbl-settings-wrapper .tw\:space-y-6 > :not(:last-child)) {
+    --tw-space-y-reverse: 0;
+    margin-block-start: calc(calc(var(--tw-spacing) * 6) * var(--tw-space-y-reverse));
+    margin-block-end: calc(calc(var(--tw-spacing) * 6) * calc(1 - var(--tw-space-y-reverse)));
   }
   .frbl-settings-wrapper .tw\:overflow-auto {
     overflow: auto;
@@ -346,6 +366,9 @@
   .frbl-settings-wrapper .tw\:border-gray-300 {
     border-color: var(--tw-color-gray-300);
   }
+  .frbl-settings-wrapper .tw\:border-green-200 {
+    border-color: var(--tw-color-green-200);
+  }
   .frbl-settings-wrapper .tw\:border-red-200 {
     border-color: var(--tw-color-red-200);
   }
@@ -366,6 +389,9 @@
   }
   .frbl-settings-wrapper .tw\:bg-gray-50 {
     background-color: var(--tw-color-gray-50);
+  }
+  .frbl-settings-wrapper .tw\:bg-green-50 {
+    background-color: var(--tw-color-green-50);
   }
   .frbl-settings-wrapper .tw\:bg-primary-500 {
     background-color: #687df9;
@@ -490,6 +516,9 @@
   .frbl-settings-wrapper .tw\:text-gray-900 {
     color: var(--tw-color-gray-900);
   }
+  .frbl-settings-wrapper .tw\:text-green-700 {
+    color: var(--tw-color-green-700);
+  }
   .frbl-settings-wrapper .tw\:text-red-600 {
     color: var(--tw-color-red-600);
   }
@@ -542,6 +571,16 @@
   .frbl-settings-wrapper .tw\:focus\:outline-none:focus {
     --tw-outline-style: none;
     outline-style: none;
+  }
+  @media (width >= 40rem) {
+    .frbl-settings-wrapper .tw\:sm\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (width >= 48rem) {
+    .frbl-settings-wrapper .tw\:md\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 }
 .frbl-settings-wrapper {
