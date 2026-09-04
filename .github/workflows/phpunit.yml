@@ -62,6 +62,7 @@ jobs:
         run: |
           npm run test:cookie-notice
           npm run test:accessibility-utils
+          npm run test:carousel-accessibility
 
   phpunit:
     name: Run tests
