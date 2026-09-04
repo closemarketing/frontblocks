@@ -46,6 +46,7 @@ window.addEventListener('load', function (event) {
             const carouselbuttonsPosition = item.getAttribute('data-buttons-position') ? item.getAttribute('data-buttons-position') : 'side';
             const carouselArrowLeftUrl = item.getAttribute('data-arrow-left-url') || '';
             const carouselArrowRightUrl = item.getAttribute('data-arrow-right-url') || '';
+            const carouselPauseOnHover = item.getAttribute('data-pause-on-hover') !== 'false';
 
 
             // Add classes
@@ -136,6 +137,7 @@ window.addEventListener('load', function (event) {
                 perView: carouselView,
                 startAt: 0,
                 autoplay: carouselAutoplay > 0 ? carouselAutoplay : false,
+                hoverpause: carouselPauseOnHover,
                 gap: isNaN(carouselGap) ? 20 : carouselGap,
                 rewind: carouselRewind,
                 breakpoints: {
@@ -167,6 +169,14 @@ window.addEventListener('load', function (event) {
             }
 
             glideFrontBlocks.mount();
+
+            // Glide's hoverpause only reacts to mouse hover; also pause on
+            // keyboard/assistive-tech focus so autoplay can be stopped
+            // without a mouse (WCAG 2.2.2).
+            if (carouselAutoplay > 0 && carouselPauseOnHover) {
+                wrapperParent.addEventListener('focusin', () => glideFrontBlocks.pause());
+                wrapperParent.addEventListener('focusout', () => glideFrontBlocks.play());
+            }
         });
     }
 });
