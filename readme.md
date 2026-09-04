@@ -28,6 +28,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - **Review Notice** - Dismissible admin notice inviting site owners to leave a WordPress.org review, shown 14 days after activation
 - **Redundant Plugins Notice** - Persistent admin notice detecting third-party plugins made unnecessary by an active FrontBlocks feature (e.g. SVG upload plugins, GDPR cookie consent plugins), extensible via the `frontblocks_redundant_plugins` filter
 - **Google Sign-In** - "Sign in / Sign up with Google" button for wp-login.php, WooCommerce My Account and Checkout, plus a shortcode and block, with server-side ID token verification
+- **Table of Contents** - Accessible navigation block generated from the headings in the post, with collapsible and sticky options
 
 ### PRO Features (FrontBlocks PRO)
 - **Custom Post Types Builder** - Create and manage custom post types with advanced configuration options:
@@ -70,6 +71,7 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - [Redundant Plugins Notice](./docs/REDUNDANT-PLUGINS.md) - Detects plugins made unnecessary by FrontBlocks features and how to register new pairings
 - [Google Sign-In](./docs/GOOGLE-SIGNIN.md) - "Sign in / Sign up with Google" for wp-login.php and WooCommerce
 - [Extending Settings Tabs](./docs/SETTINGS-TAB-EXTENSIONS.md) - Add a companion-plugin tab and matching panel to FrontBlocks settings
+- [Table of Contents](./docs/TABLE-OF-CONTENTS.md) - Accessible, headings-based navigation block
 
 ## Release
 Actions for making a release:
