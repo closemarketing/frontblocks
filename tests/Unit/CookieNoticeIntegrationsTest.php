@@ -129,4 +129,99 @@ class CookieNoticeIntegrationsTest extends TestCase {
 
 		$this->assertFalse( $method->invoke( $settings, 'GTM-ABC123' ) );
 	}
+
+	/**
+	 * Verify that legacy dedicated GTM/GA4 ids are moved into the shared
+	 * tracking-integrations list, and the legacy keys are cleared.
+	 *
+	 * @return void
+	 */
+	public function test_migration_moves_legacy_gtm_and_ga4_ids_into_the_shared_list() {
+		update_option(
+			'frontblocks_settings',
+			array(
+				'cookie_notice_gtm_id' => 'GTM-LEGACY1',
+				'cookie_notice_ga4_id' => 'G-LEGACY123',
+			)
+		);
+
+		( new Settings() )->migrate_legacy_gtm_ga4_tracking_ids();
+
+		$options = get_option( 'frontblocks_settings' );
+
+		$this->assertArrayNotHasKey( 'cookie_notice_gtm_id', $options );
+		$this->assertArrayNotHasKey( 'cookie_notice_ga4_id', $options );
+		$this->assertSame(
+			array(
+				array( 'type' => 'gtm', 'id' => 'GTM-LEGACY1' ),
+				array( 'type' => 'ga4', 'id' => 'G-LEGACY123' ),
+			),
+			$options['cookie_notice_tracking_integrations']
+		);
+	}
+
+	/**
+	 * A site with no legacy values must not gain an empty integrations key
+	 * out of nowhere, since the migration is meant to be a no-op there.
+	 *
+	 * @return void
+	 */
+	public function test_migration_is_a_no_op_when_no_legacy_value_is_present() {
+		update_option( 'frontblocks_settings', array( 'enable_cookie_notice' => true ) );
+
+		( new Settings() )->migrate_legacy_gtm_ga4_tracking_ids();
+
+		$options = get_option( 'frontblocks_settings' );
+
+		$this->assertArrayNotHasKey( 'cookie_notice_tracking_integrations', $options );
+	}
+
+	/**
+	 * If the admin already added an equivalent entry to the generic list
+	 * before the migration runs, the legacy value must not override it.
+	 *
+	 * @return void
+	 */
+	public function test_migration_does_not_override_an_existing_gtm_entry() {
+		update_option(
+			'frontblocks_settings',
+			array(
+				'cookie_notice_gtm_id'                => 'GTM-LEGACY1',
+				'cookie_notice_tracking_integrations' => array(
+					array( 'type' => 'gtm', 'id' => 'GTM-CURRENT' ),
+				),
+			)
+		);
+
+		( new Settings() )->migrate_legacy_gtm_ga4_tracking_ids();
+
+		$options = get_option( 'frontblocks_settings' );
+
+		$this->assertArrayNotHasKey( 'cookie_notice_gtm_id', $options );
+		$this->assertSame(
+			array( array( 'type' => 'gtm', 'id' => 'GTM-CURRENT' ) ),
+			$options['cookie_notice_tracking_integrations']
+		);
+	}
+
+	/**
+	 * Running the migration a second time (e.g. on a later admin_init) must
+	 * not error or duplicate anything now that the legacy keys are gone.
+	 *
+	 * @return void
+	 */
+	public function test_migration_only_runs_once() {
+		update_option( 'frontblocks_settings', array( 'cookie_notice_gtm_id' => 'GTM-LEGACY1' ) );
+
+		$settings = new Settings();
+		$settings->migrate_legacy_gtm_ga4_tracking_ids();
+		$settings->migrate_legacy_gtm_ga4_tracking_ids();
+
+		$options = get_option( 'frontblocks_settings' );
+
+		$this->assertSame(
+			array( array( 'type' => 'gtm', 'id' => 'GTM-LEGACY1' ) ),
+			$options['cookie_notice_tracking_integrations']
+		);
+	}
 }

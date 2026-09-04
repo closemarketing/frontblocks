@@ -50,12 +50,14 @@ class CookieNotice {
 	const NONCE_ACTION = 'frbl_cookie_notice_nonce';
 
 	/**
-	 * Additional tracking tools detectable from a pasted snippet (see
-	 * detect_tracking_snippet()), beyond the dedicated GTM/GA4 ID fields.
+	 * Tracking tools detectable from a pasted snippet or plain ID (see
+	 * detect_tracking_snippet()) and storable as {type, id} records in the
+	 * shared cookie_notice_tracking_integrations list. 'gtm' and 'ga4' are
+	 * FrontBlocks' own native types; the rest are additional tools.
 	 *
 	 * @var string[]
 	 */
-	const TRACKING_TYPES = array( 'clientify_analytics_plus', 'clientify_analytics_classic', 'brevo', 'openai_chatgpt_ads' );
+	const TRACKING_TYPES = array( 'gtm', 'ga4', 'clientify_analytics_plus', 'clientify_analytics_classic', 'brevo', 'openai_chatgpt_ads' );
 
 	/**
 	 * Constructor.
@@ -172,8 +174,6 @@ class CookieNotice {
 			'cookie_notice_bg_color'              => '#ffffff',
 			'cookie_notice_radius'                => 'small',
 			'cookie_notice_expiration_days'       => 365,
-			'cookie_notice_gtm_id'                => '',
-			'cookie_notice_ga4_id'                => '',
 			'cookie_notice_tracking_integrations' => array(),
 		);
 
@@ -924,16 +924,35 @@ class CookieNotice {
 		$response['allowedCategories'] = apply_filters( 'frbl_cookie_notice_allowed_tracking_categories', null );
 
 		if ( $this->is_enabled() && $has_tracking_consent ) {
-			$options                          = get_option( 'frontblocks_settings', array() );
-			$site_kit_tags                    = $this->get_google_site_kit_managed_tags();
-			$response['gtmId']                = $site_kit_tags['gtm'] ? '' : $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
-			$response['ga4Id']                = $site_kit_tags['ga4'] ? '' : $this->sanitize_ga4_id( $options['cookie_notice_ga4_id'] ?? '' );
+			$options       = get_option( 'frontblocks_settings', array() );
+			$site_kit_tags = $this->get_google_site_kit_managed_tags();
+			$integrations  = self::get_tracking_integrations( $options );
+			$other_types   = array();
+			$gtm_id        = '';
+			$ga4_id        = '';
+
+			foreach ( $integrations as $integration ) {
+				if ( 'gtm' === $integration['type'] ) {
+					$gtm_id = $integration['id'];
+				} elseif ( 'ga4' === $integration['type'] ) {
+					$ga4_id = $integration['id'];
+				} else {
+					$other_types[] = $integration;
+				}
+			}
+
+			// GTM/GA4 are surfaced through their own dedicated response keys
+			// (consumed directly by the inline bootstrap script and the
+			// registered frontblocks-cookie-notice.js fallback), not through
+			// the generic trackingIntegrations dispatch used by add-ons.
+			$response['gtmId']                = $site_kit_tags['gtm'] ? '' : $this->sanitize_gtm_id( $gtm_id );
+			$response['ga4Id']                = $site_kit_tags['ga4'] ? '' : $this->sanitize_ga4_id( $ga4_id );
 			$response['trackingIntegrations'] = array_map(
 				function ( $integration ) {
 					$integration['category'] = self::get_integration_default_category( $integration['type'] );
 					return $integration;
 				},
-				self::get_tracking_integrations( $options )
+				$other_types
 			);
 		}
 
@@ -1143,6 +1162,34 @@ class CookieNotice {
 
 		if ( '' === trim( $raw ) ) {
 			return null;
+		}
+
+		// A bare container ID, or Google Tag Manager's own install snippet —
+		// which passes the container ID as the IIFE's last literal argument,
+		// not embedded in the gtm.js URL itself.
+		if ( preg_match( '/^GTM-[A-Za-z0-9]+$/i', trim( $raw ) ) ) {
+			return array(
+				'type' => 'gtm',
+				'id'   => strtoupper( trim( $raw ) ),
+			);
+		}
+
+		if ( false !== strpos( $raw, 'googletagmanager.com/gtm.js' ) && preg_match( '/[\'"](GTM-[A-Za-z0-9]+)[\'"]/i', $raw, $matches ) ) {
+			return array(
+				'type' => 'gtm',
+				'id'   => strtoupper( $matches[1] ),
+			);
+		}
+
+		// A bare measurement ID, or gtag.js's own install snippet — which does
+		// embed the measurement ID directly in its src URL.
+		if ( preg_match( '/^G-[A-Za-z0-9]+$/i', trim( $raw ) )
+			|| preg_match( '#googletagmanager\.com/gtag/js\?id=(G-[A-Za-z0-9]+)#i', $raw, $matches )
+		) {
+			return array(
+				'type' => 'ga4',
+				'id'   => strtoupper( isset( $matches[1] ) ? $matches[1] : trim( $raw ) ),
+			);
 		}
 
 		if ( preg_match( '#analyticsplusdev\.clientify\.net/analytics_plus/pixel/([A-Za-z0-9_-]+)#', $raw, $matches ) ) {
