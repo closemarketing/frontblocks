@@ -11,6 +11,68 @@ use Yoast\WPTestUtils\WPIntegration\TestCase;
 class CookieNoticeTrackingSnippetTest extends TestCase {
 
 	/**
+	 * GTM's container ID can be pasted on its own, without any surrounding
+	 * snippet — this is how the generic tracking field is documented to work
+	 * for the two native Google types.
+	 */
+	public function test_detects_bare_gtm_container_id() {
+		$detected = CookieNotice::detect_tracking_snippet( 'gtm-abc1234' );
+
+		$this->assertSame( 'gtm', $detected['type'] );
+		$this->assertSame( 'GTM-ABC1234', $detected['id'] );
+	}
+
+	/**
+	 * A full GTM loader snippet (e.g. copied from Google Tag Manager's own
+	 * install instructions) also carries the container ID in its src URL.
+	 */
+	public function test_detects_gtm_container_id_from_a_full_snippet() {
+		$snippet = <<<'HTML'
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-ABC1234');</script>
+HTML;
+
+		$detected = CookieNotice::detect_tracking_snippet( $snippet );
+
+		$this->assertSame( 'gtm', $detected['type'] );
+		$this->assertSame( 'GTM-ABC1234', $detected['id'] );
+	}
+
+	/**
+	 * GA4's measurement ID can also be pasted on its own.
+	 */
+	public function test_detects_bare_ga4_measurement_id() {
+		$detected = CookieNotice::detect_tracking_snippet( 'g-abc1234567' );
+
+		$this->assertSame( 'ga4', $detected['type'] );
+		$this->assertSame( 'G-ABC1234567', $detected['id'] );
+	}
+
+	/**
+	 * A full gtag.js loader snippet also carries the measurement ID in its
+	 * src URL.
+	 */
+	public function test_detects_ga4_measurement_id_from_a_full_snippet() {
+		$snippet = <<<'HTML'
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ABC1234567"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-ABC1234567');
+</script>
+HTML;
+
+		$detected = CookieNotice::detect_tracking_snippet( $snippet );
+
+		$this->assertSame( 'ga4', $detected['type'] );
+		$this->assertSame( 'G-ABC1234567', $detected['id'] );
+	}
+
+	/**
 	 * The Clientify Analytics Plus snippet is just a single pixel <script>
 	 * tag — the id is the last path segment of its src URL.
 	 */
@@ -201,6 +263,40 @@ HTML;
 					'cookie_notice_tracking_id'   => 'legacy-key',
 				)
 			)
+		);
+	}
+
+	/**
+	 * 'gtm' and 'ga4' are FrontBlocks' own native types, registered by default
+	 * alongside the additional tools detectable from a pasted snippet.
+	 */
+	public function test_gtm_and_ga4_are_registered_tracking_types() {
+		$types = CookieNotice::get_tracking_types();
+
+		$this->assertContains( 'gtm', $types );
+		$this->assertContains( 'ga4', $types );
+	}
+
+	/**
+	 * A stored 'gtm'/'ga4' record round-trips through get_tracking_integrations()
+	 * the same way any other supported type does.
+	 */
+	public function test_gtm_and_ga4_records_are_normalized_like_other_integrations() {
+		$integrations = CookieNotice::get_tracking_integrations(
+			array(
+				'cookie_notice_tracking_integrations' => array(
+					array( 'type' => 'gtm', 'id' => 'GTM-ABC1234' ),
+					array( 'type' => 'ga4', 'id' => 'G-ABC1234567' ),
+				),
+			)
+		);
+
+		$this->assertSame(
+			array(
+				array( 'type' => 'gtm', 'id' => 'GTM-ABC1234' ),
+				array( 'type' => 'ga4', 'id' => 'G-ABC1234567' ),
+			),
+			$integrations
 		);
 	}
 

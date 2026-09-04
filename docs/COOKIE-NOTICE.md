@@ -29,9 +29,7 @@ Enable it from **Appearance → FrontBlocks → Cookie Notice**.
 | Background color | The notice panel's background. A contrasting text color is computed automatically for the message and Reject button, the same way the accent color's own contrast is handled. |
 | Corner rounding | `None`, `Slightly rounded`, or `Very rounded` — applies to the notice panel across all three layouts. |
 | Cookie expiration (days) | How long the visitor's decision is remembered. |
-| Google Tag Manager ID | `GTM-XXXXXXX`. Left empty, GTM is never loaded. |
-| GA4 Measurement ID | `G-XXXXXXXXXX`. Left empty, GA4 is never loaded. |
-| Additional tracking snippet (Clientify / Brevo / ChatGPT Ads) | Paste the full `<script>` snippet from Clientify, Brevo, or ChatGPT Ads. For ChatGPT Ads, you can also paste the Pixel ID by itself. On save, the integration is auto-detected and only the ID/code it needs is stored; the raw script is discarded. An unrecognized snippet is rejected with an admin notice pointing to [close.technology/contacto](https://close.technology/contacto). |
+| Add a tracking ID or code integration | A single add-only field for every supported tool, including Google Tag Manager and GA4: paste a bare `GTM-XXXXXXX` / `G-XXXXXXXXXX` id, GTM/gtag's own install snippet, or the full `<script>` snippet from Clientify, Brevo, or ChatGPT Ads (which also accepts a standalone Pixel ID). On save, the integration is auto-detected and only the ID/code it needs is stored; the raw pasted snippet is discarded. An unrecognized snippet is rejected with an admin notice pointing to [close.technology/contacto](https://close.technology/contacto). If empty, GTM/GA4 are never loaded. |
 
 ## How consent gating works
 
@@ -65,31 +63,42 @@ Enable it from **Appearance → FrontBlocks → Cookie Notice**.
 
 ## Additional tracking integrations
 
-Unlike the GTM/GA4 fields (a single plain ID typed in by hand), Clientify and
-Brevo hand out a full `<script>` snippet to paste. ChatGPT Ads accepts either
-its full `oaiq` snippet or a Pixel ID on its own. Clientify alone has two
-differently-shaped snippets depending on which of its products the client is
-on (its current Analytics Plus pixel, or the classic Analytics tracker.js +
-`ana(...)` calls). The settings screen provides an add-only tracking-code
-field and a list of saved integrations. Whatever is pasted is matched against
-the supported patterns in `CookieNotice::detect_tracking_snippet()`: only the
-provider type and the one required ID/code are stored; the raw pasted markup is
-always discarded. Entries can be removed individually from that list.
+GTM and GA4 accept a bare ID (`GTM-XXXXXXX` / `G-XXXXXXXXXX`) or their own
+official install snippet. Clientify and Brevo hand out a full `<script>`
+snippet to paste. ChatGPT Ads accepts either its full `oaiq` snippet or a
+Pixel ID on its own. Clientify alone has two differently-shaped snippets
+depending on which of its products the client is on (its current Analytics
+Plus pixel, or the classic Analytics tracker.js + `ana(...)` calls). The
+settings screen provides a single add-only "Add a tracking ID or code
+integration" field and a list of saved integrations, covering every
+supported tool including GTM/GA4. Whatever is pasted is matched against the
+supported patterns in `CookieNotice::detect_tracking_snippet()`: only the
+provider type (`gtm`, `ga4`, or one of the other supported types) and the one
+required ID/code are stored, as a `{type, id}` record; the raw pasted markup
+is always discarded. Entries can be removed individually from that list.
 
 A snippet that doesn't match any supported pattern is rejected (an admin
 notice points to [close.technology/contacto](https://close.technology/contacto)
 for adding support for it) rather than silently doing nothing.
+
+Sites upgrading from an older version that used the separate "Google Tag
+Manager ID" / "GA4 Measurement ID" fields have their existing values migrated
+automatically, once, into `gtm` / `ga4` records in this same list — no
+re-entry needed. See `Settings::migrate_legacy_gtm_ga4_tracking_ids()`.
 
 Companion plugins can extend this field without adding provider-specific code
 to FrontBlocks: register their types with
 `frbl_cookie_notice_tracking_types`, detect their snippets with
 `frbl_cookie_notice_detect_tracking_snippet`, and handle their injection with
 `window.frblCookieNoticeInjectIntegration`. Unhandled records are queued until
-that browser callback is available.
+that browser callback is available. `gtm` and `ga4` records are the exception:
+they're dispatched through their own dedicated response keys (consumed
+directly by the built-in GTM/gtag loading code) rather than through that
+generic callback.
 
 ## Compatibility with other analytics/ads plugins (Google Consent Mode)
 
-The GTM/GA4 fields above only gate what *this module* loads. They have no
+GTM/GA4 loading (see above) only gates what *this module* loads. It has no
 effect on tracking scripts injected by other plugins — most notably
 [Google Site Kit](https://wordpress.org/plugins/google-site-kit/), which
 enqueues its own `gtag.js` independently and would otherwise start collecting
@@ -115,10 +124,10 @@ anything hooked at the normal `wp_head` priority (`10`) or later.
 
 No extra plugin (e.g. WP Consent API) or Site Kit configuration is required —
 this is plain Consent Mode, read directly off `window.dataLayer`. When Site Kit
-is configured to place a tag, FrontBlocks hides the matching manual GTM or GA4
-field and does not load its previously saved ID, preventing duplicate Google
-tags. Site Kit can remain active without affecting FrontBlocks when the matching
-module is unconfigured or its snippet placement is disabled.
+is configured to place a tag, FrontBlocks hides the matching `gtm`/`ga4` entry
+from the tracking-integrations list and does not load its saved ID, preventing
+duplicate Google tags. Site Kit can remain active without affecting FrontBlocks
+when the matching module is unconfigured or its snippet placement is disabled.
 
 ## GTM4WP and cache compatibility
 
