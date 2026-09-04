@@ -59,7 +59,10 @@ jobs:
         run: npm ci
 
       - name: Run JavaScript tests
-        run: npm run test:cookie-notice
+        run: |
+          npm run test:cookie-notice
+          npm run test:accessibility-utils
+          npm run test:carousel-accessibility
 
   phpunit:
     name: Run tests

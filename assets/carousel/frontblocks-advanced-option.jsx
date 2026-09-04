@@ -2,7 +2,7 @@
 const { addFilter } = wp.hooks;
 const { Fragment, useEffect, useRef } = wp.element;
 const { InspectorControls, PanelColorSettings, MediaUpload } = wp.blockEditor;
-const { SelectControl, TextControl, PanelBody, ToggleControl, Button } = wp.components;
+const { SelectControl, TextControl, PanelBody, ToggleControl, Button, Notice } = wp.components;
 const { __ } = wp.i18n;
 
 /**
@@ -103,7 +103,19 @@ function addCustomCarouselPanel( BlockEdit ) {
 			frblArrowLeftUrl    = '',
 			frblArrowRightUrl   = '',
 			frblDisableOnDesktop = false,
+			frblPauseOnHover    = true,
 		} = props.attributes;
+
+		const a11y = window.FrontBlocksA11y;
+		const autoplayPauseCheck = a11y
+			? a11y.checkAutoplayPauseControl( frblAutoplay, frblPauseOnHover )
+			: { applicable: false, warn: false };
+		const autoplayTimingCheck = a11y
+			? a11y.checkAutoplayTiming( frblAutoplay )
+			: { applicable: false, warn: false };
+		const buttonContrastCheck = a11y
+			? a11y.checkControlContrast( frblButtonColor, frblButtonBgColor )
+			: { applicable: false, warn: false };
 
 		// ── Editor carousel preview ──────────────────────────────────────────
 		const stateRef = useRef( null );
@@ -392,6 +404,24 @@ function addCustomCarouselPanel( BlockEdit ) {
 									value={ frblAutoplay }
 									onChange={ ( value ) => props.setAttributes( { frblAutoplay: value } ) }
 								/>
+								{ autoplayTimingCheck.warn && (
+									<Notice status="warning" isDismissible={ false }>
+										{ __( 'This autoplay interval may be too short for users to read a slide before it advances. WCAG recommends at least 5 seconds.', 'frontblocks' ) }
+									</Notice>
+								) }
+								{ autoplayPauseCheck.applicable && (
+									<ToggleControl
+										label={ __( 'Pause on hover/focus', 'frontblocks' ) }
+										checked={ frblPauseOnHover }
+										onChange={ ( value ) => props.setAttributes( { frblPauseOnHover: value } ) }
+										help={ __( 'Lets visitors stop the auto-advancing slides by hovering or tabbing into them, as required by WCAG 2.2.2.', 'frontblocks' ) }
+									/>
+								) }
+								{ autoplayPauseCheck.warn && (
+									<Notice status="warning" isDismissible={ false }>
+										{ __( 'Autoplay is enabled without a way to pause it. Enable "Pause on hover/focus" above so keyboard and screen reader users can stop the motion.', 'frontblocks' ) }
+									</Notice>
+								) }
 								<TextControl
 									label={ __( 'Gap (px)', 'frontblocks' ) }
 									value={ frblGap }
@@ -492,6 +522,11 @@ function addCustomCarouselPanel( BlockEdit ) {
 										},
 									] }
 								/>
+								{ buttonContrastCheck.warn && (
+									<Notice status="warning" isDismissible={ false }>
+										{ __( 'The button color and background color don’t have enough contrast (WCAG requires at least 3:1 for controls). Choose colors that stand out from each other more.', 'frontblocks' ) }
+									</Notice>
+								) }
 								<ToggleControl
 									label={ __( 'Disable on Desktop', 'frontblocks' ) }
 									checked={ frblDisableOnDesktop }

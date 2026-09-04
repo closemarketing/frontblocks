@@ -193,6 +193,14 @@ class Plugin_Main {
 	 * @return void
 	 */
 	public function register_scripts() {
+		wp_register_script(
+			'frontblocks-a11y-utils',
+			FRBL_PLUGIN_URL . 'assets/accessibility/frontblocks-a11y-utils.js',
+			array(),
+			FRBL_VERSION,
+			true
+		);
+
 		wp_register_style(
 			'frontblocks-carousel',
 			FRBL_PLUGIN_URL . 'assets/carousel/frontblocks-carousel.css',

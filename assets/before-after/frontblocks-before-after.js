@@ -16,7 +16,8 @@ var _wp$components = wp.components,
   Button = _wp$components.Button,
   Placeholder = _wp$components.Placeholder,
   TextControl = _wp$components.TextControl,
-  ToggleControl = _wp$components.ToggleControl;
+  ToggleControl = _wp$components.ToggleControl,
+  Notice = _wp$components.Notice;
 var __ = wp.i18n.__;
 
 /**
@@ -35,6 +36,13 @@ function BeforeAfterEdit(props) {
     blockHeight = attributes.blockHeight,
     fixedHeight = attributes.fixedHeight;
   var blockProps = useBlockProps();
+  var a11y = window.FrontBlocksA11y;
+  var beforeLabelCheck = a11y ? a11y.checkImageLabel(beforeImageUrl, beforeLabel) : {
+    warn: false
+  };
+  var afterLabelCheck = a11y ? a11y.checkImageLabel(afterImageUrl, afterLabel) : {
+    warn: false
+  };
   var hasImages = beforeImageUrl && afterImageUrl;
   var containerRef = useRef(null);
 
@@ -138,7 +146,10 @@ function BeforeAfterEdit(props) {
     style: {
       marginTop: '12px'
     }
-  })), /*#__PURE__*/React.createElement(PanelBody, {
+  }), beforeLabelCheck.warn && /*#__PURE__*/React.createElement(Notice, {
+    status: "warning",
+    isDismissible: false
+  }, __('The before image has no label. Without it, screen reader users have no way to know what this image shows — add a short label.', 'frontblocks'))), /*#__PURE__*/React.createElement(PanelBody, {
     title: __('After Image', 'frontblocks'),
     initialOpen: true
   }, /*#__PURE__*/React.createElement(MediaUploadCheck, null, /*#__PURE__*/React.createElement(MediaUpload, {
@@ -192,7 +203,10 @@ function BeforeAfterEdit(props) {
     style: {
       marginTop: '12px'
     }
-  })), /*#__PURE__*/React.createElement(PanelBody, {
+  }), afterLabelCheck.warn && /*#__PURE__*/React.createElement(Notice, {
+    status: "warning",
+    isDismissible: false
+  }, __('The after image has no label. Without it, screen reader users have no way to know what this image shows — add a short label.', 'frontblocks'))), /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Slider Settings', 'frontblocks'),
     initialOpen: false
   }, /*#__PURE__*/React.createElement(RangeControl, {

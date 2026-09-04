@@ -102,7 +102,15 @@
   line-height: 1;
 }
 
+/* A visible focus indicator (WCAG 2.4.7) — :focus-visible keeps it from
+ * showing on a mouse click while still showing for keyboard/AT users;
+ * browsers without :focus-visible support fall back to the plain :focus. */
 .frontblocks .glide__arrow:focus {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+.frontblocks .glide__arrow:focus:not(:focus-visible) {
   outline: none;
 }
 
@@ -131,18 +139,34 @@
   padding: 0;
 }
 
+/* The visible dot stays 10px, but the clickable/tappable button box is
+ * enlarged to the WCAG 2.5.8 minimum target size (24x24 CSS px) via a
+ * centered pseudo-element, so the hit target doesn't look oversized. */
 .frontblocks .glide__bullet {
-  box-sizing: content-box;
-  width: 10px;
-  height: 10px;
+  box-sizing: border-box;
+  position: relative;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border-radius: 50%;
   border: none;
-  background-color: var(--frbl-bullet-bg, rgba(0, 0, 0, 0.25));
+  background-color: transparent;
   cursor: pointer;
-  transition: background-color 300ms ease-in-out, transform 300ms ease-in-out;
-  margin: 0 2px;
+  margin: 0;
   flex-shrink: 0;
+}
+
+.frontblocks .glide__bullet::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--frbl-bullet-bg, rgba(0, 0, 0, 0.25));
+  transform: translate(-50%, -50%);
+  transition: background-color 300ms ease-in-out, transform 300ms ease-in-out;
 }
 
 .frontblocks .glide__bullet:focus {
@@ -150,14 +174,48 @@
   outline-offset: 2px;
 }
 
-.frontblocks .glide__bullet:hover {
+.frontblocks .glide__bullet:hover::after {
   background-color: var(--frbl-bullet-color, rgba(0, 0, 0, 0.8));
-  transform: scale(1.2);
+  transform: translate(-50%, -50%) scale(1.2);
 }
 
-.frontblocks .glide__bullet--active {
+.frontblocks .glide__bullet--active::after {
   background-color: var(--frbl-bullet-color, rgba(0, 0, 0, 0.8));
-  transform: scale(1.2);
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* Accessible pause/resume control (WCAG 2.2.2). Always at least 24x24
+ * CSS px (WCAG 2.5.8), with a visible focus indicator (WCAG 2.4.7). */
+.frontblocks .glide__pause {
+  position: absolute;
+  z-index: 2;
+  top: 0.75em;
+  right: 0.75em;
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.45);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.frontblocks .glide__pause:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.frontblocks .glide__pause:focus {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+.frontblocks .glide__pause:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .frontblocks.glide--swipeable {

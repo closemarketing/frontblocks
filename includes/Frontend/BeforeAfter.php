@@ -70,10 +70,12 @@ class BeforeAfter {
 			FRBL_VERSION
 		);
 
+		wp_enqueue_script( 'frontblocks-a11y-utils' );
+
 		wp_enqueue_script(
 			'frontblocks-before-after-option',
 			FRBL_PLUGIN_URL . 'assets/before-after/frontblocks-before-after.js',
-			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-block-editor', 'wp-i18n' ),
+			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-block-editor', 'wp-i18n', 'frontblocks-a11y-utils' ),
 			FRBL_VERSION,
 			true
 		);

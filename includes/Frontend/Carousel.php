@@ -89,10 +89,12 @@ class Carousel {
 	 * @return void
 	 */
 	public function enqueue_block_editor_assets() {
+		wp_enqueue_script( 'frontblocks-a11y-utils' );
+
 		wp_enqueue_script(
 			'frontblocks-advanced-option',
 			FRBL_PLUGIN_URL . 'assets/carousel/frontblocks-advanced-option.js',
-			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-edit-post' ),
+			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-edit-post', 'frontblocks-a11y-utils' ),
 			FRBL_VERSION,
 			true
 		);
@@ -128,6 +130,7 @@ class Carousel {
 		$arrow_left_url     = isset( $attrs['frblArrowLeftUrl'] ) ? esc_url_raw( $attrs['frblArrowLeftUrl'] ) : '';
 		$arrow_right_url    = isset( $attrs['frblArrowRightUrl'] ) ? esc_url_raw( $attrs['frblArrowRightUrl'] ) : '';
 		$disable_on_desktop = isset( $attrs['frblDisableOnDesktop'] ) ? (bool) $attrs['frblDisableOnDesktop'] : false;
+		$pause_on_hover     = isset( $attrs['frblPauseOnHover'] ) ? (bool) $attrs['frblPauseOnHover'] : true;
 
 		// Add data attributes to the wrapper div if carousel is enabled.
 		if ( 'carousel' === $custom_option || 'slider' === $custom_option ) {
@@ -154,6 +157,7 @@ class Carousel {
 					( $arrow_left_url ? ' data-arrow-left-url="' . esc_url( $arrow_left_url ) . '"' : '' ) .
 					( $arrow_right_url ? ' data-arrow-right-url="' . esc_url( $arrow_right_url ) . '"' : '' ) .
 					' data-disable-on-desktop="' . esc_attr( $disable_on_desktop ? 'true' : 'false' ) . '"' .
+					' data-pause-on-hover="' . esc_attr( $pause_on_hover ? 'true' : 'false' ) . '"' .
 					$attributes .
 					'>',
 				$block_content,
@@ -200,6 +204,7 @@ class Carousel {
 		$arrow_left_url     = isset( $attrs['frblArrowLeftUrl'] ) ? esc_url_raw( $attrs['frblArrowLeftUrl'] ) : '';
 		$arrow_right_url    = isset( $attrs['frblArrowRightUrl'] ) ? esc_url_raw( $attrs['frblArrowRightUrl'] ) : '';
 		$disable_on_desktop = isset( $attrs['frblDisableOnDesktop'] ) ? (bool) $attrs['frblDisableOnDesktop'] : false;
+		$pause_on_hover     = isset( $attrs['frblPauseOnHover'] ) ? (bool) $attrs['frblPauseOnHover'] : true;
 
 		// Add data attributes to the wrapper div if carousel is enabled.
 		if ( 'carousel' === $custom_option || 'slider' === $custom_option ) {
@@ -226,6 +231,7 @@ class Carousel {
 					( $arrow_left_url ? ' data-arrow-left-url="' . esc_url( $arrow_left_url ) . '"' : '' ) .
 					( $arrow_right_url ? ' data-arrow-right-url="' . esc_url( $arrow_right_url ) . '"' : '' ) .
 					' data-disable-on-desktop="' . esc_attr( $disable_on_desktop ? 'true' : 'false' ) . '"' .
+					' data-pause-on-hover="' . esc_attr( $pause_on_hover ? 'true' : 'false' ) . '"' .
 					$attributes .
 					'>',
 				$block_content,
@@ -272,6 +278,7 @@ class Carousel {
 		$arrow_left_url     = isset( $attrs['frblArrowLeftUrl'] ) ? esc_url_raw( $attrs['frblArrowLeftUrl'] ) : '';
 		$arrow_right_url    = isset( $attrs['frblArrowRightUrl'] ) ? esc_url_raw( $attrs['frblArrowRightUrl'] ) : '';
 		$disable_on_desktop = isset( $attrs['frblDisableOnDesktop'] ) ? (bool) $attrs['frblDisableOnDesktop'] : false;
+		$pause_on_hover     = isset( $attrs['frblPauseOnHover'] ) ? (bool) $attrs['frblPauseOnHover'] : true;
 
 		// Add data attributes to the wrapper div if carousel is enabled.
 		if ( 'carousel' === $custom_option || 'slider' === $custom_option ) {
@@ -298,6 +305,7 @@ class Carousel {
 					( $arrow_left_url ? ' data-arrow-left-url="' . esc_url( $arrow_left_url ) . '"' : '' ) .
 					( $arrow_right_url ? ' data-arrow-right-url="' . esc_url( $arrow_right_url ) . '"' : '' ) .
 					' data-disable-on-desktop="' . esc_attr( $disable_on_desktop ? 'true' : 'false' ) . '"' .
+					' data-pause-on-hover="' . esc_attr( $pause_on_hover ? 'true' : 'false' ) . '"' .
 					$attributes .
 					'>',
 				$block_content,
@@ -339,6 +347,7 @@ class Carousel {
 		$arrow_left_url     = isset( $attrs['frblArrowLeftUrl'] ) ? esc_url_raw( $attrs['frblArrowLeftUrl'] ) : '';
 		$arrow_right_url    = isset( $attrs['frblArrowRightUrl'] ) ? esc_url_raw( $attrs['frblArrowRightUrl'] ) : '';
 		$disable_on_desktop = isset( $attrs['frblDisableOnDesktop'] ) ? (bool) $attrs['frblDisableOnDesktop'] : false;
+		$pause_on_hover     = isset( $attrs['frblPauseOnHover'] ) ? (bool) $attrs['frblPauseOnHover'] : true;
 
 		$extra = '';
 		if ( 'slider' === $custom_option ) {
@@ -362,6 +371,7 @@ class Carousel {
 				( $arrow_left_url ? ' data-arrow-left-url="' . esc_url( $arrow_left_url ) . '"' : '' ) .
 				( $arrow_right_url ? ' data-arrow-right-url="' . esc_url( $arrow_right_url ) . '"' : '' ) .
 				' data-disable-on-desktop="' . esc_attr( $disable_on_desktop ? 'true' : 'false' ) . '"' .
+				' data-pause-on-hover="' . esc_attr( $pause_on_hover ? 'true' : 'false' ) . '"' .
 				$extra .
 				'>',
 			$block_content,
@@ -469,6 +479,10 @@ class Carousel {
 			'type'    => 'boolean',
 			'default' => false,
 		);
+		$block_args['attributes']['frblPauseOnHover']     = array(
+			'type'    => 'boolean',
+			'default' => true,
+		);
 
 		return $block_args;
 	}
@@ -548,6 +562,10 @@ class Carousel {
 		$args['attributes']['frblDisableOnDesktop'] = array(
 			'type'    => 'boolean',
 			'default' => false,
+		);
+		$args['attributes']['frblPauseOnHover']     = array(
+			'type'    => 'boolean',
+			'default' => true,
 		);
 
 		return $args;
@@ -631,6 +649,10 @@ class Carousel {
 					frblDisableOnDesktop: {
 						type: 'boolean',
 						default: false
+					},
+					frblPauseOnHover: {
+						type: 'boolean',
+						default: true
 					}
 				};
 

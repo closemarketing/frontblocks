@@ -18,7 +18,8 @@ var _wp$components = wp.components,
   TextControl = _wp$components.TextControl,
   PanelBody = _wp$components.PanelBody,
   ToggleControl = _wp$components.ToggleControl,
-  Button = _wp$components.Button;
+  Button = _wp$components.Button,
+  Notice = _wp$components.Notice;
 var __ = wp.i18n.__;
 
 /**
@@ -130,7 +131,22 @@ function addCustomCarouselPanel(BlockEdit) {
       _props$attributes$frb10 = _props$attributes.frblArrowRightUrl,
       frblArrowRightUrl = _props$attributes$frb10 === void 0 ? '' : _props$attributes$frb10,
       _props$attributes$frb11 = _props$attributes.frblDisableOnDesktop,
-      frblDisableOnDesktop = _props$attributes$frb11 === void 0 ? false : _props$attributes$frb11;
+      frblDisableOnDesktop = _props$attributes$frb11 === void 0 ? false : _props$attributes$frb11,
+      _props$attributes$frb12 = _props$attributes.frblPauseOnHover,
+      frblPauseOnHover = _props$attributes$frb12 === void 0 ? true : _props$attributes$frb12;
+    var a11y = window.FrontBlocksA11y;
+    var autoplayPauseCheck = a11y ? a11y.checkAutoplayPauseControl(frblAutoplay, frblPauseOnHover) : {
+      applicable: false,
+      warn: false
+    };
+    var autoplayTimingCheck = a11y ? a11y.checkAutoplayTiming(frblAutoplay) : {
+      applicable: false,
+      warn: false
+    };
+    var buttonContrastCheck = a11y ? a11y.checkControlContrast(frblButtonColor, frblButtonBgColor) : {
+      applicable: false,
+      warn: false
+    };
 
     // ── Editor carousel preview ──────────────────────────────────────────
     var stateRef = useRef(null);
@@ -439,7 +455,22 @@ function addCustomCarouselPanel(BlockEdit) {
           frblAutoplay: value
         });
       }
-    }), /*#__PURE__*/React.createElement(TextControl, {
+    }), autoplayTimingCheck.warn && /*#__PURE__*/React.createElement(Notice, {
+      status: "warning",
+      isDismissible: false
+    }, __('This autoplay interval may be too short for users to read a slide before it advances. WCAG recommends at least 5 seconds.', 'frontblocks')), autoplayPauseCheck.applicable && /*#__PURE__*/React.createElement(ToggleControl, {
+      label: __('Pause on hover/focus', 'frontblocks'),
+      checked: frblPauseOnHover,
+      onChange: function onChange(value) {
+        return props.setAttributes({
+          frblPauseOnHover: value
+        });
+      },
+      help: __('Lets visitors stop the auto-advancing slides by hovering or tabbing into them, as required by WCAG 2.2.2.', 'frontblocks')
+    }), autoplayPauseCheck.warn && /*#__PURE__*/React.createElement(Notice, {
+      status: "warning",
+      isDismissible: false
+    }, __('Autoplay is enabled without a way to pause it. Enable "Pause on hover/focus" above so keyboard and screen reader users can stop the motion.', 'frontblocks')), /*#__PURE__*/React.createElement(TextControl, {
       label: __('Gap (px)', 'frontblocks'),
       value: frblGap,
       onChange: function onChange(value) {
@@ -617,7 +648,10 @@ function addCustomCarouselPanel(BlockEdit) {
         },
         label: __('Color background button', 'frontblocks')
       }]
-    }), /*#__PURE__*/React.createElement(ToggleControl, {
+    }), buttonContrastCheck.warn && /*#__PURE__*/React.createElement(Notice, {
+      status: "warning",
+      isDismissible: false
+    }, __('The button color and background color don’t have enough contrast (WCAG requires at least 3:1 for controls). Choose colors that stand out from each other more.', 'frontblocks')), /*#__PURE__*/React.createElement(ToggleControl, {
       label: __('Disable on Desktop', 'frontblocks'),
       checked: frblDisableOnDesktop,
       onChange: function onChange(value) {
