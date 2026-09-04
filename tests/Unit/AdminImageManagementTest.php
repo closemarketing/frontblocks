@@ -768,7 +768,7 @@ class AdminImageManagementTest extends TestCase {
 		$_POST['nonce']    = 'not-a-valid-nonce';
 		$_REQUEST['nonce'] = 'not-a-valid-nonce';
 
-		foreach ( array( 'ajax_list_attachment_ids', 'ajax_bulk_regenerate', 'ajax_bulk_convert', 'ajax_bulk_cleanup_disabled_sizes' ) as $method ) {
+		foreach ( array( 'ajax_list_attachment_ids', 'ajax_start_bulk_job', 'ajax_bulk_job_status' ) as $method ) {
 			try {
 				$this->admin->{$method}();
 				$this->fail( "Expected {$method}() to call wp_die() when the nonce is invalid." );
@@ -782,7 +782,7 @@ class AdminImageManagementTest extends TestCase {
 		$subscriber_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 		$this->set_up_valid_ajax_context( $subscriber_id );
 
-		foreach ( array( 'ajax_list_attachment_ids', 'ajax_bulk_regenerate', 'ajax_bulk_convert', 'ajax_bulk_cleanup_disabled_sizes' ) as $method ) {
+		foreach ( array( 'ajax_list_attachment_ids', 'ajax_start_bulk_job', 'ajax_bulk_job_status' ) as $method ) {
 			$result = $this->run_ajax_expecting_die( array( $this->admin, $method ) );
 			$this->assertFalse( $result['body']['success'], "{$method}() must report failure for a user without edit_theme_options." );
 		}
@@ -824,10 +824,111 @@ class AdminImageManagementTest extends TestCase {
 		$this->assertNotContains( $non_image_id, $ids );
 	}
 
-	public function test_ajax_bulk_regenerate_reports_false_for_a_missing_file() {
+	public function test_ajax_start_bulk_job_rejects_an_invalid_job_type() {
 		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		$this->set_up_valid_ajax_context( $admin_id );
 
+		$_POST['job_type'] = 'not-a-real-job-type';
+
+		$result = $this->run_ajax_expecting_die( array( $this->admin, 'ajax_start_bulk_job' ) );
+
+		$this->assertFalse( $result['body']['success'] );
+	}
+
+	public function test_ajax_start_bulk_job_schedules_one_action_per_image_attachment() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->set_up_valid_ajax_context( $admin_id );
+
+		$image_id_1   = $this->create_real_image_attachment();
+		$image_id_2   = $this->create_real_image_attachment();
+		$non_image_id = self::factory()->attachment->create_object(
+			array(
+				'file'           => 'frbl-job-test.pdf',
+				'post_mime_type' => 'application/pdf',
+				'post_type'      => 'attachment',
+			)
+		);
+		$this->created_attachment_ids[] = $non_image_id;
+
+		$_POST['job_type'] = 'regenerate';
+
+		$result = $this->run_ajax_expecting_die( array( $this->admin, 'ajax_start_bulk_job' ) );
+
+		$this->assertTrue( $result['body']['success'] );
+		$job_id = $result['body']['data']['job_id'];
+		$this->assertNotEmpty( $job_id );
+		$this->assertGreaterThanOrEqual( 2, $result['body']['data']['total'], 'Total must count at least the two image attachments created for this test.' );
+
+		$scheduled = as_get_scheduled_actions(
+			array(
+				'group'  => ImageManagement::JOB_GROUP,
+				'status' => \ActionScheduler_Store::STATUS_PENDING,
+			)
+		);
+		$scheduled_attachment_ids = array_map(
+			function ( $action ) {
+				$args = $action->get_args();
+				return $args[1];
+			},
+			$scheduled
+		);
+		$this->assertContains( $image_id_1, $scheduled_attachment_ids );
+		$this->assertContains( $image_id_2, $scheduled_attachment_ids );
+		$this->assertNotContains( $non_image_id, $scheduled_attachment_ids, 'A non-image attachment must never be scheduled.' );
+
+		$progress = get_option( 'frbl_image_job_' . $job_id );
+		$this->assertSame( $result['body']['data']['total'], $progress['total'] );
+		$this->assertSame( 0, $progress['done'] );
+	}
+
+	public function test_ajax_bulk_job_status_rejects_an_unknown_job_id() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->set_up_valid_ajax_context( $admin_id );
+
+		$_POST['job_id'] = 'does-not-exist';
+
+		$result = $this->run_ajax_expecting_die( array( $this->admin, 'ajax_bulk_job_status' ) );
+
+		$this->assertFalse( $result['body']['success'] );
+	}
+
+	public function test_ajax_bulk_job_status_reports_progress() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->set_up_valid_ajax_context( $admin_id );
+
+		update_option( 'frbl_image_job_test-job', array( 'total' => 5, 'done' => 2 ) );
+		$_POST['job_id'] = 'test-job';
+
+		$result = $this->run_ajax_expecting_die( array( $this->admin, 'ajax_bulk_job_status' ) );
+
+		$this->assertTrue( $result['body']['success'] );
+		$this->assertSame( 5, $result['body']['data']['total'] );
+		$this->assertSame( 2, $result['body']['data']['done'] );
+		$this->assertNotFalse( get_option( 'frbl_image_job_test-job' ), 'An in-progress job must not be deleted yet.' );
+	}
+
+	public function test_ajax_bulk_job_status_deletes_the_progress_option_once_the_job_is_complete() {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->set_up_valid_ajax_context( $admin_id );
+
+		update_option( 'frbl_image_job_test-job', array( 'total' => 3, 'done' => 3 ) );
+		$_POST['job_id'] = 'test-job';
+
+		$result = $this->run_ajax_expecting_die( array( $this->admin, 'ajax_bulk_job_status' ) );
+
+		$this->assertTrue( $result['body']['success'] );
+		$this->assertFalse( get_option( 'frbl_image_job_test-job' ), 'A completed job must have its progress option cleaned up.' );
+	}
+
+	public function test_process_bulk_item_regenerate_generates_metadata_for_a_real_image() {
+		$attachment_id = $this->create_real_image_attachment();
+
+		$this->admin->process_bulk_item( 'regenerate', $attachment_id, 'irrelevant-job-id' );
+
+		$this->assertNotEmpty( wp_get_attachment_metadata( $attachment_id ) );
+	}
+
+	public function test_process_bulk_item_regenerate_does_nothing_for_a_missing_file() {
 		$attachment_id = self::factory()->attachment->create_object(
 			array(
 				'file'           => 'frbl-does-not-exist-on-disk.jpg',
@@ -836,86 +937,33 @@ class AdminImageManagementTest extends TestCase {
 			)
 		);
 		$this->created_attachment_ids[] = $attachment_id;
-		$_POST['ids']                   = array( $attachment_id );
 
-		$result = $this->run_ajax_expecting_die( array( $this->admin, 'ajax_bulk_regenerate' ) );
+		// Must not throw/warn even though the underlying file is missing.
+		$this->admin->process_bulk_item( 'regenerate', $attachment_id, 'irrelevant-job-id' );
 
-		$this->assertTrue( $result['body']['success'] );
-		$this->assertFalse( $result['body']['data']['results'][ $attachment_id ] );
+		$this->assertEmpty( wp_get_attachment_metadata( $attachment_id ) );
 	}
 
-	public function test_ajax_bulk_regenerate_succeeds_for_a_real_image_file() {
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		$this->set_up_valid_ajax_context( $admin_id );
-
-		$attachment_id = $this->create_real_image_attachment();
-		$_POST['ids']  = array( $attachment_id );
-
-		$result = $this->run_ajax_expecting_die( array( $this->admin, 'ajax_bulk_regenerate' ) );
-
-		$this->assertTrue( $result['body']['success'] );
-		$this->assertTrue( $result['body']['data']['results'][ $attachment_id ] );
-		$this->assertNotEmpty( wp_get_attachment_metadata( $attachment_id ) );
-	}
-
-	public function test_ajax_bulk_convert_reports_false_when_the_format_target_is_none() {
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		$this->set_up_valid_ajax_context( $admin_id );
-
-		update_option( 'frontblocks_settings', array( 'image_format_target' => 'none' ) );
-
-		$attachment_id = $this->create_real_image_attachment();
-		wp_generate_attachment_metadata( $attachment_id, get_attached_file( $attachment_id ) );
-		$_POST['ids'] = array( $attachment_id );
-
-		$result = $this->run_ajax_expecting_die( array( $this->admin, 'ajax_bulk_convert' ) );
-
-		$this->assertTrue( $result['body']['success'] );
-		$this->assertFalse( $result['body']['data']['results'][ $attachment_id ] );
-	}
-
-	public function test_ajax_bulk_convert_succeeds_when_a_supported_format_target_is_configured() {
+	public function test_process_bulk_item_convert_generates_variants_when_a_supported_format_target_is_configured() {
 		$webp_supported = wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) );
 		if ( ! $webp_supported ) {
 			$this->markTestSkipped( 'This environment does not support generating WebP images.' );
 		}
 
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		$this->set_up_valid_ajax_context( $admin_id );
-
 		update_option( 'frontblocks_settings', array( 'image_format_target' => 'webp' ) );
 
 		$attachment_id = $this->create_real_image_attachment();
 		wp_generate_attachment_metadata( $attachment_id, get_attached_file( $attachment_id ) );
-		$_POST['ids'] = array( $attachment_id );
 
-		$result = $this->run_ajax_expecting_die( array( $this->admin, 'ajax_bulk_convert' ) );
+		$this->admin->process_bulk_item( 'convert', $attachment_id, 'irrelevant-job-id' );
 
-		$this->assertTrue( $result['body']['success'] );
-		$this->assertTrue( $result['body']['data']['results'][ $attachment_id ] );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$this->assertNotEmpty( $metadata[ FrontendImageManagement::VARIANTS_META_KEY ]['full'] ?? null );
 	}
 
-	public function test_ajax_bulk_cleanup_disabled_sizes_reports_false_when_no_size_is_disabled() {
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		$this->set_up_valid_ajax_context( $admin_id );
-
-		update_option( 'frontblocks_settings', array( 'image_sizes_disabled' => array() ) );
-
+	public function test_process_bulk_item_cleanup_removes_files_for_a_disabled_size() {
 		$attachment_id = $this->create_real_image_attachment();
-		$_POST['ids']  = array( $attachment_id );
-
-		$result = $this->run_ajax_expecting_die( array( $this->admin, 'ajax_bulk_cleanup_disabled_sizes' ) );
-
-		$this->assertTrue( $result['body']['success'] );
-		$this->assertFalse( $result['body']['data']['results'][ $attachment_id ] );
-	}
-
-	public function test_ajax_bulk_cleanup_disabled_sizes_removes_files_for_a_disabled_size() {
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		$this->set_up_valid_ajax_context( $admin_id );
-
-		$attachment_id = $this->create_real_image_attachment();
-		$metadata      = wp_generate_attachment_metadata( $attachment_id, get_attached_file( $attachment_id ) );
+		$metadata       = wp_generate_attachment_metadata( $attachment_id, get_attached_file( $attachment_id ) );
 		wp_update_attachment_metadata( $attachment_id, $metadata );
 
 		if ( empty( $metadata['sizes']['thumbnail']['file'] ) ) {
@@ -924,16 +972,44 @@ class AdminImageManagementTest extends TestCase {
 
 		update_option( 'frontblocks_settings', array( 'image_sizes_disabled' => array( 'thumbnail' ) ) );
 
-		$dir           = trailingslashit( dirname( get_attached_file( $attachment_id ) ) );
+		$dir            = trailingslashit( dirname( get_attached_file( $attachment_id ) ) );
 		$thumbnail_path = $dir . $metadata['sizes']['thumbnail']['file'];
 		$this->assertFileExists( $thumbnail_path, 'Sanity check: the thumbnail file must exist before cleanup.' );
 
-		$_POST['ids'] = array( $attachment_id );
+		$this->admin->process_bulk_item( 'cleanup', $attachment_id, 'irrelevant-job-id' );
 
-		$result = $this->run_ajax_expecting_die( array( $this->admin, 'ajax_bulk_cleanup_disabled_sizes' ) );
-
-		$this->assertTrue( $result['body']['success'] );
-		$this->assertTrue( $result['body']['data']['results'][ $attachment_id ] );
 		$this->assertFileDoesNotExist( $thumbnail_path, 'The disabled size file must have been deleted.' );
+	}
+
+	public function test_process_bulk_item_increments_the_jobs_progress_option() {
+		$attachment_id = $this->create_real_image_attachment();
+		update_option( 'frbl_image_job_test-job', array( 'total' => 2, 'done' => 0 ) );
+
+		$this->admin->process_bulk_item( 'regenerate', $attachment_id, 'test-job' );
+		$progress = get_option( 'frbl_image_job_test-job' );
+		$this->assertSame( 1, $progress['done'] );
+
+		$this->admin->process_bulk_item( 'regenerate', $attachment_id, 'test-job' );
+		$progress = get_option( 'frbl_image_job_test-job' );
+		$this->assertSame( 2, $progress['done'] );
+	}
+
+	public function test_process_bulk_item_does_not_increment_progress_past_the_total() {
+		$attachment_id = $this->create_real_image_attachment();
+		update_option( 'frbl_image_job_test-job', array( 'total' => 1, 'done' => 1 ) );
+
+		$this->admin->process_bulk_item( 'regenerate', $attachment_id, 'test-job' );
+
+		$progress = get_option( 'frbl_image_job_test-job' );
+		$this->assertSame( 1, $progress['done'] );
+	}
+
+	public function test_process_bulk_item_silently_ignores_an_unknown_job_id() {
+		$attachment_id = $this->create_real_image_attachment();
+
+		// Must not throw/warn even though no progress option exists for this job id.
+		$this->admin->process_bulk_item( 'regenerate', $attachment_id, 'a-job-id-with-no-progress-option' );
+
+		$this->assertNotEmpty( wp_get_attachment_metadata( $attachment_id ) );
 	}
 }
