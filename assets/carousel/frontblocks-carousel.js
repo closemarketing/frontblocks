@@ -48,6 +48,12 @@ window.addEventListener('load', function (event) {
             const carouselArrowRightUrl = item.getAttribute('data-arrow-right-url') || '';
             const carouselPauseOnHover = item.getAttribute('data-pause-on-hover') !== 'false';
 
+            // Never auto-start motion for visitors who asked the OS/browser
+            // for reduced motion, regardless of the configured autoplay value.
+            const prefersReducedMotion = window.matchMedia
+                && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const effectiveAutoplay = prefersReducedMotion ? 0 : carouselAutoplay;
+
 
             // Add classes
             item.classList.add('glide__slides', 'glide-' + Math.floor(Math.random() * 1000));
@@ -132,12 +138,35 @@ window.addEventListener('load', function (event) {
                 arrows.innerHTML = arrowsHTML;
                 wrapperParent.appendChild(arrows);
             }
+
+            // Accessible pause/resume control. Rendered whenever autoplay is
+            // actually running, independent of the "pause on hover/focus"
+            // setting above — visitors must always have a way to stop
+            // auto-advancing content (WCAG 2.2.2), not just a convenience
+            // behavior tied to their pointer/keyboard.
+            let pauseButton = null;
+            const PAUSE_LABEL = 'Pause automatic slideshow';
+            const PLAY_LABEL = 'Play automatic slideshow';
+            const pauseIcon = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="1" y="1" width="3.5" height="10" rx="1" fill="currentColor"/><rect x="7.5" y="1" width="3.5" height="10" rx="1" fill="currentColor"/></svg>';
+            const playIcon = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 1.2v9.6a.6.6 0 0 0 .92.5l7.6-4.8a.6.6 0 0 0 0-1L2.92.7A.6.6 0 0 0 2 1.2Z" fill="currentColor"/></svg>';
+
+            if (effectiveAutoplay > 0) {
+                pauseButton = document.createElement('button');
+                pauseButton.type = 'button';
+                pauseButton.classList.add('glide__pause');
+                wrapperParent.appendChild(pauseButton);
+            }
+
             const glideFrontBlocks = new Glide(wrapperParent, {
                 type: carouselType,
                 perView: carouselView,
                 startAt: 0,
-                autoplay: carouselAutoplay > 0 ? carouselAutoplay : false,
-                hoverpause: carouselPauseOnHover,
+                autoplay: effectiveAutoplay > 0 ? effectiveAutoplay : false,
+                // Hover/focus pausing is handled manually below (see
+                // pauseReasons) so it can be coordinated with the manual
+                // pause/resume button without the two fighting over Glide's
+                // internal play/pause state.
+                hoverpause: false,
                 gap: isNaN(carouselGap) ? 20 : carouselGap,
                 rewind: carouselRewind,
                 breakpoints: {
@@ -170,12 +199,49 @@ window.addEventListener('load', function (event) {
 
             glideFrontBlocks.mount();
 
-            // Glide's hoverpause only reacts to mouse hover; also pause on
-            // keyboard/assistive-tech focus so autoplay can be stopped
-            // without a mouse (WCAG 2.2.2).
-            if (carouselAutoplay > 0 && carouselPauseOnHover) {
-                wrapperParent.addEventListener('focusin', () => glideFrontBlocks.pause());
-                wrapperParent.addEventListener('focusout', () => glideFrontBlocks.play());
+            if (effectiveAutoplay > 0) {
+                // Coordinates every reason autoplay might be paused (hover,
+                // keyboard/AT focus, and the manual pause button) so they
+                // can't fight over Glide's play/pause state — autoplay only
+                // resumes once none of them apply any more.
+                const pauseReasons = new Set();
+
+                const updatePauseButton = () => {
+                    if (!pauseButton) return;
+                    const paused = pauseReasons.has('manual');
+                    pauseButton.setAttribute('aria-pressed', String(paused));
+                    pauseButton.setAttribute('aria-label', paused ? PLAY_LABEL : PAUSE_LABEL);
+                    pauseButton.innerHTML = paused ? playIcon : pauseIcon;
+                };
+
+                const applyPauseState = () => {
+                    if (pauseReasons.size > 0) {
+                        glideFrontBlocks.pause();
+                    } else {
+                        glideFrontBlocks.play();
+                    }
+                    updatePauseButton();
+                };
+
+                if (carouselPauseOnHover) {
+                    wrapperParent.addEventListener('mouseenter', () => { pauseReasons.add('hover'); applyPauseState(); });
+                    wrapperParent.addEventListener('mouseleave', () => { pauseReasons.delete('hover'); applyPauseState(); });
+                    wrapperParent.addEventListener('focusin', () => { pauseReasons.add('focus'); applyPauseState(); });
+                    wrapperParent.addEventListener('focusout', () => { pauseReasons.delete('focus'); applyPauseState(); });
+                }
+
+                if (pauseButton) {
+                    pauseButton.addEventListener('click', () => {
+                        if (pauseReasons.has('manual')) {
+                            pauseReasons.delete('manual');
+                        } else {
+                            pauseReasons.add('manual');
+                        }
+                        applyPauseState();
+                    });
+                }
+
+                updatePauseButton();
             }
         });
     }
