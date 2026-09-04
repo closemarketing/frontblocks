@@ -36,6 +36,17 @@ if ( file_exists( FRBL_PLUGIN_PATH . 'vendor/autoload.php' ) ) {
 	require_once FRBL_PLUGIN_PATH . 'vendor/autoload.php';
 }
 
+// Action Scheduler, used by Image Management for background bulk operations
+// (regenerating thumbnails, bulk format conversion). Its own bootstrap file
+// is the "standard shared-library way" to load it: it self-registers a
+// versioned instance via ActionScheduler_Versions and only initializes the
+// highest version found across every plugin that bundles it, so multiple
+// plugins (or WooCommerce) can safely load their own copy without conflict.
+// It must be required before `plugins_loaded` runs, since it hooks into it.
+if ( file_exists( FRBL_PLUGIN_PATH . 'vendor/woocommerce/action-scheduler/action-scheduler.php' ) ) {
+	require_once FRBL_PLUGIN_PATH . 'vendor/woocommerce/action-scheduler/action-scheduler.php';
+}
+
 require_once FRBL_PLUGIN_PATH . 'includes/Plugin_Main.php';
 
 add_action(
