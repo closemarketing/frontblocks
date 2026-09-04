@@ -37,10 +37,28 @@ class ImageManagement {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 
 		add_action( 'wp_ajax_frbl_list_image_attachment_ids', array( $this, 'ajax_list_attachment_ids' ) );
-		add_action( 'wp_ajax_frbl_bulk_regenerate_thumbnails', array( $this, 'ajax_bulk_regenerate' ) );
-		add_action( 'wp_ajax_frbl_bulk_convert_images', array( $this, 'ajax_bulk_convert' ) );
-		add_action( 'wp_ajax_frbl_bulk_cleanup_disabled_sizes', array( $this, 'ajax_bulk_cleanup_disabled_sizes' ) );
+		add_action( 'wp_ajax_frbl_start_image_bulk_job', array( $this, 'ajax_start_bulk_job' ) );
+		add_action( 'wp_ajax_frbl_image_bulk_job_status', array( $this, 'ajax_bulk_job_status' ) );
+		add_action( self::PROCESS_ITEM_ACTION, array( $this, 'process_bulk_item' ), 10, 3 );
 	}
+
+	/**
+	 * Action Scheduler hook used to process one attachment of a bulk job.
+	 */
+	const PROCESS_ITEM_ACTION = 'frontblocks_image_management_process_item';
+
+	/**
+	 * Action Scheduler group every Image Management bulk action is
+	 * scheduled under, so they're easy to find/inspect via Tools > Scheduled
+	 * Actions independently of any other plugin's (e.g. WooCommerce's) use
+	 * of the same shared library.
+	 */
+	const JOB_GROUP = 'frontblocks-image-management';
+
+	/**
+	 * The three supported bulk job types.
+	 */
+	const JOB_TYPES = array( 'regenerate', 'convert', 'cleanup' );
 
 	/**
 	 * Register the settings section and fields.
@@ -167,11 +185,11 @@ class ImageManagement {
 	 * @return void
 	 */
 	public function field_enable_image_management() {
-		$options       = get_option( 'frontblocks_settings', array() );
-		$enabled       = (bool) ( $options['enable_image_management'] ?? false );
-		$disabled      = (array) ( $options['image_sizes_disabled'] ?? array() );
-		$overrides     = (array) ( $options['image_sizes_overrides'] ?? array() );
-		$custom        = (array) ( $options['image_sizes_custom'] ?? array() );
+		$options                      = get_option( 'frontblocks_settings', array() );
+		$enabled                      = (bool) ( $options['enable_image_management'] ?? false );
+		$disabled                     = (array) ( $options['image_sizes_disabled'] ?? array() );
+		$overrides                    = (array) ( $options['image_sizes_overrides'] ?? array() );
+		$custom                       = (array) ( $options['image_sizes_custom'] ?? array() );
 		$format_target                = (string) ( $options['image_format_target'] ?? 'none' );
 		$quality_by_fmt               = FrontendImageManagement::get_quality_settings( $options );
 		$max_upload_dimension_enabled = (bool) ( $options['image_max_upload_dimension_enabled'] ?? true );
@@ -339,8 +357,8 @@ class ImageManagement {
 
 		$value['image_max_upload_dimension_enabled'] = ! empty( $posted['image_max_upload_dimension_enabled'] );
 
-		$max_dimension                          = absint( $posted['image_max_upload_dimension'] ?? 2048 );
-		$value['image_max_upload_dimension']    = $max_dimension >= 300 ? min( $max_dimension, 10000 ) : 2048;
+		$max_dimension                       = absint( $posted['image_max_upload_dimension'] ?? 2048 );
+		$value['image_max_upload_dimension'] = $max_dimension >= 300 ? min( $max_dimension, 10000 ) : 2048;
 
 		$webp_quality                       = absint( $posted['image_format_quality_webp'] ?? 82 );
 		$value['image_format_quality_webp'] = $webp_quality > 0 ? min( $webp_quality, 100 ) : 82;
@@ -480,83 +498,139 @@ class ImageManagement {
 	}
 
 	/**
-	 * AJAX: regenerate thumbnails for a batch of attachment IDs.
+	 * AJAX: start a bulk job (regenerate/convert/cleanup) — schedules one
+	 * Action Scheduler action per image attachment on a background queue,
+	 * so processing continues even if this browser tab is closed, and each
+	 * attachment is its own request-sized unit of work (no bulk-timeout risk
+	 * on large libraries).
 	 *
 	 * @return void
 	 */
-	public function ajax_bulk_regenerate() {
+	public function ajax_start_bulk_job() {
 		check_ajax_referer( 'frbl_image_management', 'nonce' );
 
 		if ( ! current_user_can( 'edit_theme_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'frontblocks' ) ), 403 );
 		}
 
-		require_once ABSPATH . 'wp-admin/includes/image.php';
-
-		$ids     = array_map( 'absint', (array) ( $_POST['ids'] ?? array() ) ); // phpcs:ignore WordPress.Security.NonceVerification -- verified above.
-		$results = array();
-
-		foreach ( $ids as $attachment_id ) {
-			$file = get_attached_file( $attachment_id );
-			if ( ! $file || ! file_exists( $file ) ) {
-				$results[ $attachment_id ] = false;
-				continue;
-			}
-			$metadata = wp_generate_attachment_metadata( $attachment_id, $file );
-			if ( ! is_wp_error( $metadata ) && ! empty( $metadata ) ) {
-				wp_update_attachment_metadata( $attachment_id, $metadata );
-				$results[ $attachment_id ] = true;
-			} else {
-				$results[ $attachment_id ] = false;
-			}
+		$job_type = isset( $_POST['job_type'] ) ? sanitize_key( wp_unslash( $_POST['job_type'] ) ) : '';
+		if ( ! in_array( $job_type, self::JOB_TYPES, true ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid job type.', 'frontblocks' ) ), 400 );
 		}
 
-		wp_send_json_success( array( 'results' => $results ) );
+		if ( ! function_exists( 'as_enqueue_async_action' ) ) {
+			wp_send_json_error( array( 'message' => __( 'The background job library is unavailable.', 'frontblocks' ) ), 500 );
+		}
+
+		$ids = get_posts(
+			array(
+				'post_type'      => 'attachment',
+				'post_status'    => 'inherit',
+				'post_mime_type' => 'image',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			)
+		);
+
+		$job_id = wp_generate_uuid4();
+
+		update_option(
+			$this->job_option_name( $job_id ),
+			array(
+				'total' => count( $ids ),
+				'done'  => 0,
+			),
+			false
+		);
+
+		foreach ( $ids as $attachment_id ) {
+			as_enqueue_async_action(
+				self::PROCESS_ITEM_ACTION,
+				array( $job_type, (int) $attachment_id, $job_id ),
+				self::JOB_GROUP
+			);
+		}
+
+		wp_send_json_success(
+			array(
+				'job_id' => $job_id,
+				'total'  => count( $ids ),
+			)
+		);
 	}
 
 	/**
-	 * AJAX: generate modern-format variants for a batch of attachment IDs.
+	 * AJAX: report a bulk job's progress so far.
 	 *
 	 * @return void
 	 */
-	public function ajax_bulk_convert() {
+	public function ajax_bulk_job_status() {
 		check_ajax_referer( 'frbl_image_management', 'nonce' );
 
 		if ( ! current_user_can( 'edit_theme_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'frontblocks' ) ), 403 );
 		}
 
-		$ids     = array_map( 'absint', (array) ( $_POST['ids'] ?? array() ) ); // phpcs:ignore WordPress.Security.NonceVerification -- verified above.
-		$results = array();
+		$job_id      = isset( $_POST['job_id'] ) ? sanitize_key( wp_unslash( $_POST['job_id'] ) ) : '';
+		$option_name = $this->job_option_name( $job_id );
+		$progress    = get_option( $option_name, false );
 
-		foreach ( $ids as $attachment_id ) {
-			$results[ $attachment_id ] = FrontendImageManagement::convert_attachment( $attachment_id );
+		if ( false === $progress || ! isset( $progress['total'], $progress['done'] ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unknown job.', 'frontblocks' ) ), 404 );
 		}
 
-		wp_send_json_success( array( 'results' => $results ) );
+		if ( $progress['done'] >= $progress['total'] ) {
+			delete_option( $option_name );
+		}
+
+		wp_send_json_success( $progress );
 	}
 
 	/**
-	 * AJAX: delete on-disk files for currently disabled sizes, for a batch
-	 * of attachment IDs, to actually reclaim the disk space the sizes
-	 * table's estimate is showing.
+	 * Action Scheduler callback: process one attachment for a bulk job.
 	 *
+	 * @param string $job_type      One of self::JOB_TYPES.
+	 * @param int    $attachment_id Attachment post ID.
+	 * @param string $job_id        Job id, to update its progress counter.
 	 * @return void
 	 */
-	public function ajax_bulk_cleanup_disabled_sizes() {
-		check_ajax_referer( 'frbl_image_management', 'nonce' );
+	public function process_bulk_item( $job_type, $attachment_id, $job_id ) {
+		switch ( $job_type ) {
+			case 'regenerate':
+				require_once ABSPATH . 'wp-admin/includes/image.php';
+				$file = get_attached_file( $attachment_id );
+				if ( $file && file_exists( $file ) ) {
+					$metadata = wp_generate_attachment_metadata( $attachment_id, $file );
+					if ( ! is_wp_error( $metadata ) && ! empty( $metadata ) ) {
+						wp_update_attachment_metadata( $attachment_id, $metadata );
+					}
+				}
+				break;
 
-		if ( ! current_user_can( 'edit_theme_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'frontblocks' ) ), 403 );
+			case 'convert':
+				FrontendImageManagement::convert_attachment( $attachment_id );
+				break;
+
+			case 'cleanup':
+				FrontendImageManagement::cleanup_disabled_size_files( $attachment_id );
+				break;
 		}
 
-		$ids     = array_map( 'absint', (array) ( $_POST['ids'] ?? array() ) ); // phpcs:ignore WordPress.Security.NonceVerification -- verified above.
-		$results = array();
-
-		foreach ( $ids as $attachment_id ) {
-			$results[ $attachment_id ] = FrontendImageManagement::cleanup_disabled_size_files( $attachment_id );
+		$option_name = $this->job_option_name( $job_id );
+		$progress    = get_option( $option_name, false );
+		if ( false !== $progress && isset( $progress['total'], $progress['done'] ) ) {
+			$progress['done'] = min( $progress['total'], $progress['done'] + 1 );
+			update_option( $option_name, $progress, false );
 		}
+	}
 
-		wp_send_json_success( array( 'results' => $results ) );
+	/**
+	 * Build the option name storing one bulk job's progress.
+	 *
+	 * @param string $job_id Job id.
+	 * @return string
+	 */
+	private function job_option_name( $job_id ) {
+		return 'frbl_image_job_' . $job_id;
 	}
 }
