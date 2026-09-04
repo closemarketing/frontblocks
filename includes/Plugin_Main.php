@@ -169,6 +169,9 @@ class Plugin_Main {
 		// Before After comparison block.
 		new Frontend\BeforeAfter();
 
+		// Table of Contents block.
+		new Frontend\TableOfContents();
+
 		// SVG Upload module (allows SVG files in the media library).
 		new Frontend\SvgUpload();
 
