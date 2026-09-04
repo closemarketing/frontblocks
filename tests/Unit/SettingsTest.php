@@ -217,6 +217,7 @@ class SettingsTest extends TestCase {
 
 		add_filter( 'frontblocks_settings_tabs', array( $this, 'add_test_settings_tab' ) );
 		add_action( 'frontblocks_settings_tab_panels', array( $this, 'render_test_settings_tab_panel' ) );
+		$this->settings->register_settings();
 
 		ob_start();
 		$this->settings->render_page();
@@ -225,6 +226,15 @@ class SettingsTest extends TestCase {
 		$this->assertStringContainsString( 'data-tab-target="test-extension"', $rendered );
 		$this->assertStringContainsString( 'data-tab-panel="test-extension"', $rendered );
 		$this->assertStringContainsString( 'Test extension panel', $rendered );
+		$this->assertStringNotContainsString( 'data-tab-target="popups"', $rendered );
+		$this->assertStringContainsString( 'name="frontblocks_settings[enable_popups]"', $rendered );
+		$this->assertStringContainsString( '>Social Login<', $rendered );
+		$this->assertStringNotContainsString( '>Google Sign-In<', $rendered );
+		$this->assertLessThan(
+			strpos( $rendered, 'name="frontblocks_settings[enable_testimonials]"' ),
+			strpos( $rendered, 'name="frontblocks_settings[enable_popups]"' ),
+			'PRO optional features should be displayed before free optional features.'
+		);
 	}
 
 	/**
