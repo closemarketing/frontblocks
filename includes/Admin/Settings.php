@@ -174,14 +174,20 @@ class Settings {
 	private $option_cookie_notice_expiration_days = 'cookie_notice_expiration_days';
 
 	/**
-	 * Option key for the Google Tag Manager container ID.
+	 * Legacy option key that used to store the Google Tag Manager container ID
+	 * as a dedicated field. Superseded by 'gtm' records in the shared
+	 * cookie_notice_tracking_integrations list; kept only so
+	 * migrate_legacy_gtm_ga4_tracking_ids() can read and clear old values.
 	 *
 	 * @var string
 	 */
 	private $option_cookie_notice_gtm_id = 'cookie_notice_gtm_id';
 
 	/**
-	 * Option key for the GA4 Measurement ID.
+	 * Legacy option key that used to store the GA4 Measurement ID as a
+	 * dedicated field. Superseded by 'ga4' records in the shared
+	 * cookie_notice_tracking_integrations list; kept only so
+	 * migrate_legacy_gtm_ga4_tracking_ids() can read and clear old values.
 	 *
 	 * @var string
 	 */
@@ -364,6 +370,7 @@ class Settings {
 
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		add_action( 'admin_init', array( $this, 'migrate_legacy_gtm_ga4_tracking_ids' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
 		add_action( 'admin_head', array( $this, 'add_menu_icon_styles' ) );
 	}
@@ -2742,8 +2749,6 @@ class Settings {
 		$bg_color              = (string) ( $options[ $this->option_cookie_notice_bg_color ] ?? '#ffffff' );
 		$radius                = (string) ( $options[ $this->option_cookie_notice_radius ] ?? 'small' );
 		$expiration            = (int) ( $options[ $this->option_cookie_notice_expiration_days ] ?? 365 );
-		$gtm_id                = (string) ( $options[ $this->option_cookie_notice_gtm_id ] ?? '' );
-		$ga4_id                = (string) ( $options[ $this->option_cookie_notice_ga4_id ] ?? '' );
 		$tracking_integrations = \FrontBlocks\Frontend\CookieNotice::get_tracking_integrations( $options );
 		$site_kit_tags         = $this->get_google_site_kit_managed_tags();
 		$accepted_count        = (int) get_option( \FrontBlocks\Frontend\CookieNotice::STATS_OPTION_ACCEPTED, 0 );
@@ -3012,73 +3017,69 @@ class Settings {
 				</div>
 
 				<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200">
+					<?php
+					// Site Kit-managed types are hidden from the list and never
+					// re-added: the "Google tag is managed by Site Kit" notice
+					// below is the only UI shown for them.
+					$site_kit_managed_types = array_keys(
+						array_filter(
+							array(
+								'gtm' => $site_kit_tags['gtm'],
+								'ga4' => $site_kit_tags['ga4'],
+							)
+						)
+					);
+					$visible_integrations   = array_values(
+						array_filter(
+							$tracking_integrations,
+							static function ( $integration ) use ( $site_kit_managed_types ) {
+								return ! in_array( $integration['type'], $site_kit_managed_types, true );
+							}
+						)
+					);
+					$gtm_integration        = null;
+					foreach ( $tracking_integrations as $integration ) {
+						if ( 'gtm' === $integration['type'] ) {
+							$gtm_integration = $integration['id'];
+							break;
+						}
+					}
+					?>
 					<?php if ( $site_kit_tags['gtm'] || $site_kit_tags['ga4'] ) : ?>
-						<p class="tw:text-sm tw:text-gray-600 tw:m-0">
+						<p class="tw:text-sm tw:text-gray-600 tw:m-0 tw:mb-4">
 							<?php echo esc_html__( 'Google Site Kit manages the configured Google tag. FrontBlocks applies Consent Mode to it, so no duplicate ID is needed here.', 'frontblocks' ); ?>
 						</p>
 					<?php endif; ?>
 
-					<?php if ( ! $site_kit_tags['gtm'] || ! $site_kit_tags['ga4'] ) : ?>
-						<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
-							<?php echo esc_html__( 'Scripts are only requested after a visitor accepts — never before.', 'frontblocks' ); ?>
-						</p>
-						<div class="tw:grid tw:grid-cols-1 tw:gap-4<?php echo ! $site_kit_tags['gtm'] && ! $site_kit_tags['ga4'] ? ' tw:grid-cols-2' : ''; ?>">
-							<?php if ( ! $site_kit_tags['gtm'] ) : ?>
-							<div>
-								<label for="<?php echo esc_attr( $this->option_cookie_notice_gtm_id ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
-									<?php echo esc_html__( 'Google Tag Manager ID', 'frontblocks' ); ?>
-								</label>
-								<input
-									type="text"
-									id="<?php echo esc_attr( $this->option_cookie_notice_gtm_id ); ?>"
-									name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_gtm_id ); ?>]"
-									value="<?php echo esc_attr( $gtm_id ); ?>"
-									placeholder="GTM-XXXXXXX"
-									class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
-								/>
-							</div>
-							<?php endif; ?>
-							<?php if ( ! $site_kit_tags['ga4'] ) : ?>
-							<div>
-								<label for="<?php echo esc_attr( $this->option_cookie_notice_ga4_id ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
-									<?php echo esc_html__( 'GA4 Measurement ID', 'frontblocks' ); ?>
-								</label>
-								<input
-									type="text"
-									id="<?php echo esc_attr( $this->option_cookie_notice_ga4_id ); ?>"
-									name="frontblocks_settings[<?php echo esc_attr( $this->option_cookie_notice_ga4_id ); ?>]"
-									value="<?php echo esc_attr( $ga4_id ); ?>"
-									placeholder="G-XXXXXXXXXX"
-									class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
-								/>
-							</div>
-							<?php endif; ?>
-						</div>
+					<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
+						<?php echo esc_html__( 'Scripts are only requested after a visitor accepts — never before.', 'frontblocks' ); ?>
+					</p>
 
-						<?php if ( $enabled && $this->is_gtm4wp_container_loading( $gtm_id ) ) : ?>
-						<div class="tw:mt-4 tw:p-4 tw:bg-amber-50 tw:border tw:border-amber-200 tw:rounded-lg" role="alert">
-							<p class="tw:text-sm tw:font-medium tw:text-amber-900 tw:mt-0 tw:mb-2">
-								<?php echo esc_html__( 'Google Tag Manager may load twice.', 'frontblocks' ); ?>
-							</p>
-							<p class="tw:text-sm tw:text-amber-800 tw:m-0">
-								<?php
-								printf(
-									wp_kses(
-										/* translators: %s: Google Tag Manager for WordPress settings page URL. */
-										__( 'The same container is enabled in Google Tag Manager for WordPress. Disable its container-code injection in <a href="%s">its settings</a> so FrontBlocks can load it only after consent. Its data layer can remain enabled.', 'frontblocks' ),
-										array( 'a' => array( 'href' => array() ) )
-									),
-									esc_url( admin_url( 'options-general.php?page=gtm4wp-settings' ) )
-								);
-								?>
-							</p>
-						</div>
-						<?php endif; ?>
+					<?php if ( $enabled && $this->is_gtm4wp_container_loading( (string) $gtm_integration ) ) : ?>
+					<div class="tw:mb-4 tw:p-4 tw:bg-amber-50 tw:border tw:border-amber-200 tw:rounded-lg" role="alert">
+						<p class="tw:text-sm tw:font-medium tw:text-amber-900 tw:mt-0 tw:mb-2">
+							<?php echo esc_html__( 'Google Tag Manager may load twice.', 'frontblocks' ); ?>
+						</p>
+						<p class="tw:text-sm tw:text-amber-800 tw:m-0">
+							<?php
+							printf(
+								wp_kses(
+									/* translators: %s: Google Tag Manager for WordPress settings page URL. */
+									__( 'The same container is enabled in Google Tag Manager for WordPress. Disable its container-code injection in <a href="%s">its settings</a> so FrontBlocks can load it only after consent. Its data layer can remain enabled.', 'frontblocks' ),
+									array( 'a' => array( 'href' => array() ) )
+								),
+								esc_url( admin_url( 'options-general.php?page=gtm4wp-settings' ) )
+							);
+							?>
+						</p>
+					</div>
 					<?php endif; ?>
 
-					<div class="tw:mt-4">
+					<div>
 						<?php
 						$tracking_labels = array(
+							'gtm'                         => __( 'Google Tag Manager', 'frontblocks' ),
+							'ga4'                         => __( 'GA4 (Google Analytics)', 'frontblocks' ),
 							'clientify_analytics_plus'    => __( 'Clientify Analytics Plus', 'frontblocks' ),
 							'clientify_analytics_classic' => __( 'Clientify Analytics (classic)', 'frontblocks' ),
 							'brevo'                       => __( 'Brevo', 'frontblocks' ),
@@ -3088,9 +3089,9 @@ class Settings {
 						<p class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
 							<?php echo esc_html__( 'Added tracking integrations', 'frontblocks' ); ?>
 						</p>
-						<?php if ( $tracking_integrations ) : ?>
+						<?php if ( $visible_integrations ) : ?>
 							<ul class="tw:space-y-2 tw:mb-4">
-								<?php foreach ( $tracking_integrations as $integration ) : ?>
+								<?php foreach ( $visible_integrations as $integration ) : ?>
 									<li class="tw:flex tw:items-center tw:justify-between tw:gap-4 tw:p-3 tw:bg-gray-50 tw:border tw:border-gray-200 tw:rounded-lg">
 										<span class="tw:text-sm tw:text-gray-700">
 											<strong><?php echo esc_html( apply_filters( 'frbl_cookie_notice_tracking_type_label', $tracking_labels[ $integration['type'] ] ?? $integration['type'], $integration['type'] ) ); ?></strong>
@@ -3107,14 +3108,14 @@ class Settings {
 							<p class="tw:text-sm tw:text-gray-500 tw:mb-4"><?php echo esc_html__( 'No additional tracking integrations have been added.', 'frontblocks' ); ?></p>
 						<?php endif; ?>
 						<label for="cookie_notice_tracking_integration_code" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
-							<?php echo esc_html__( 'Add a tracking integration', 'frontblocks' ); ?>
+							<?php echo esc_html__( 'Add a tracking ID or code integration', 'frontblocks' ); ?>
 						</label>
 						<input
 							type="text"
 							id="cookie_notice_tracking_integration_code"
 							name="frontblocks_settings[cookie_notice_tracking_integration_code]"
 							value=""
-							placeholder="<?php echo esc_attr__( 'Paste a supported tracking code or ID…', 'frontblocks' ); ?>"
+							placeholder="<?php echo esc_attr__( 'Paste a tracking ID (GTM-XXXXXXX, G-XXXXXXXXXX…) or code…', 'frontblocks' ); ?>"
 							class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:font-mono tw:text-xs tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
 						/>
 						<p class="tw:text-xs tw:text-gray-500 tw:mt-2 tw:mb-0">
@@ -3211,6 +3212,74 @@ class Settings {
 		}
 
 		return $tags;
+	}
+
+	/**
+	 * One-time migration: move the retired dedicated GTM/GA4 ID fields into the
+	 * shared cookie_notice_tracking_integrations list as {type, id} records,
+	 * then clear the legacy option keys.
+	 *
+	 * Guarded by the legacy values themselves being non-empty, so this is a
+	 * no-op on every run after the first: the legacy keys are unset as soon as
+	 * they are migrated, and never written to again.
+	 *
+	 * @return void
+	 */
+	public function migrate_legacy_gtm_ga4_tracking_ids() {
+		$options = get_option( 'frontblocks_settings', array() );
+		if ( ! is_array( $options ) ) {
+			return;
+		}
+
+		$legacy = array(
+			$this->option_cookie_notice_gtm_id => 'gtm',
+			$this->option_cookie_notice_ga4_id => 'ga4',
+		);
+
+		$has_legacy_value = false;
+		foreach ( $legacy as $option_key => $type ) {
+			if ( '' !== (string) ( $options[ $option_key ] ?? '' ) ) {
+				$has_legacy_value = true;
+				break;
+			}
+		}
+
+		if ( ! $has_legacy_value ) {
+			return;
+		}
+
+		$integrations = \FrontBlocks\Frontend\CookieNotice::get_tracking_integrations( $options, true );
+
+		foreach ( $legacy as $option_key => $type ) {
+			$legacy_id = sanitize_text_field( (string) ( $options[ $option_key ] ?? '' ) );
+			unset( $options[ $option_key ] );
+
+			if ( '' === $legacy_id ) {
+				continue;
+			}
+
+			// A stored 'gtm'/'ga4' record already wins over the legacy value,
+			// which the settings page would have stopped displaying once the
+			// admin added an equivalent entry to the generic list.
+			$already_present = false;
+			foreach ( $integrations as $integration ) {
+				if ( $type === $integration['type'] ) {
+					$already_present = true;
+					break;
+				}
+			}
+
+			if ( ! $already_present ) {
+				$integrations[] = array(
+					'type' => $type,
+					'id'   => $legacy_id,
+				);
+			}
+		}
+
+		$options[ $this->option_cookie_notice_tracking_integrations ] = array_values( $integrations );
+
+		update_option( 'frontblocks_settings', $options );
 	}
 
 	/**
@@ -3998,12 +4067,6 @@ class Settings {
 			} elseif ( $this->option_cookie_notice_expiration_days === $key ) {
 				$days              = absint( $val );
 				$sanitized[ $key ] = $days > 0 ? min( $days, 730 ) : 365;
-			} elseif ( $this->option_cookie_notice_gtm_id === $key ) {
-				$gtm_id            = strtoupper( sanitize_text_field( $val ) );
-				$sanitized[ $key ] = preg_match( '/^GTM-[A-Z0-9]+$/', $gtm_id ) ? $gtm_id : '';
-			} elseif ( $this->option_cookie_notice_ga4_id === $key ) {
-				$ga4_id            = strtoupper( sanitize_text_field( $val ) );
-				$sanitized[ $key ] = preg_match( '/^G-[A-Z0-9]+$/', $ga4_id ) ? $ga4_id : '';
 			}
 		}
 
@@ -4049,6 +4112,28 @@ class Settings {
 					'id'   => sanitize_text_field( $detected['id'] ),
 				);
 			}
+
+			// Defensive re-validation for the native gtm/ga4 types: guards against a
+			// malformed record ever reaching the stored array outside the normal
+			// detect_tracking_snippet() path (e.g. a hand-edited option value).
+			$tracking_integrations = array_values(
+				array_filter(
+					array_map(
+						function ( $integration ) {
+							if ( 'gtm' === $integration['type'] ) {
+								$integration['id'] = preg_match( '/^GTM-[A-Z0-9]+$/', $integration['id'] ) ? $integration['id'] : '';
+							} elseif ( 'ga4' === $integration['type'] ) {
+								$integration['id'] = preg_match( '/^G-[A-Z0-9]+$/', $integration['id'] ) ? $integration['id'] : '';
+							}
+							return $integration;
+						},
+						$tracking_integrations
+					),
+					static function ( $integration ) {
+						return '' !== $integration['id'];
+					}
+				)
+			);
 
 			$sanitized[ $this->option_cookie_notice_tracking_integrations ] = $tracking_integrations;
 			unset( $sanitized['cookie_notice_tracking_type'], $sanitized['cookie_notice_tracking_id'] );
