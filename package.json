@@ -51,13 +51,15 @@
     "build:faq-schema": "babel assets/faq-schema/frontblocks-faq-schema-option.jsx --out-file assets/faq-schema/frontblocks-faq-schema.js",
     "build:text-animation": "babel assets/text-animation/frontblocks-text-animation-option.jsx --out-file assets/text-animation/frontblocks-text-animation.js",
     "build:before-after": "babel assets/before-after/frontblocks-before-after-option.jsx --out-file assets/before-after/frontblocks-before-after.js",
+    "build:table-of-contents": "babel assets/table-of-contents/frontblocks-toc-option.jsx --out-file assets/table-of-contents/frontblocks-toc-option.js",
     "build:user-text": "babel assets/user-text/frontblocks-user-text-option.jsx --out-file assets/user-text/frontblocks-user-text.js",
     "build:columns-same-height": "babel assets/columns-same-height/frontblocks-columns-same-height-option.jsx --out-file assets/columns-same-height/frontblocks-columns-same-height-option.js",
     "test:cookie-notice": "node --test tests/js/cookie-notice-injection.test.js",
+    "test:table-of-contents": "node --test tests/js/table-of-contents-frontend.test.js",
     "build:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css",
     "watch:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css --watch",
     "build:download-button": "babel assets/download-button/frontblocks-download-button-option.jsx --out-file assets/download-button/frontblocks-download-button-option.js",
-    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:headline && npm run build:product-categories && npm run build:reading-time && npm run build:stacked-images && npm run build:edge-alignment && npm run build:shape-animations && npm run build:gf-inline && npm run build:faq-schema && npm run build:before-after && npm run build:text-animation && npm run build:user-text && npm run build:download-button && npm run build:columns-same-height && npm run build:css"
+    "build": "npm run build:carousel && npm run build:animations && npm run build:sticky && npm run build:gallery && npm run build:post && npm run build:headline && npm run build:product-categories && npm run build:reading-time && npm run build:stacked-images && npm run build:edge-alignment && npm run build:shape-animations && npm run build:gf-inline && npm run build:faq-schema && npm run build:before-after && npm run build:text-animation && npm run build:user-text && npm run build:download-button && npm run build:columns-same-height && npm run build:table-of-contents && npm run build:css"
   },
   "dependencies": {
     "react": "^19.2.8",
