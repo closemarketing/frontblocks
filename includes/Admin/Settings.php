@@ -2791,6 +2791,129 @@ class Settings {
 					</div>
 				<?php endif; ?>
 
+				<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200">
+					<?php
+					// Site Kit-managed types are hidden from the list and never
+					// re-added: the "Google tag is managed by Site Kit" notice
+					// below is the only UI shown for them.
+					$site_kit_managed_types = array_keys(
+						array_filter(
+							array(
+								'gtm' => $site_kit_tags['gtm'],
+								'ga4' => $site_kit_tags['ga4'],
+							)
+						)
+					);
+					$visible_integrations   = array_values(
+						array_filter(
+							$tracking_integrations,
+							static function ( $integration ) use ( $site_kit_managed_types ) {
+								return ! in_array( $integration['type'], $site_kit_managed_types, true );
+							}
+						)
+					);
+					$gtm_integration        = null;
+					foreach ( $tracking_integrations as $integration ) {
+						if ( 'gtm' === $integration['type'] ) {
+							$gtm_integration = $integration['id'];
+							break;
+						}
+					}
+					?>
+					<?php if ( $site_kit_tags['gtm'] || $site_kit_tags['ga4'] ) : ?>
+						<p class="tw:text-sm tw:text-gray-600 tw:m-0 tw:mb-4">
+							<?php echo esc_html__( 'Google Site Kit manages the configured Google tag. FrontBlocks applies Consent Mode to it, so no duplicate ID is needed here.', 'frontblocks' ); ?>
+						</p>
+					<?php endif; ?>
+
+					<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
+						<?php echo esc_html__( 'Scripts are only requested after a visitor accepts — never before.', 'frontblocks' ); ?>
+					</p>
+
+					<?php if ( $enabled && $this->is_gtm4wp_container_loading( (string) $gtm_integration ) ) : ?>
+					<div class="tw:mb-4 tw:p-4 tw:bg-amber-50 tw:border tw:border-amber-200 tw:rounded-lg" role="alert">
+						<p class="tw:text-sm tw:font-medium tw:text-amber-900 tw:mt-0 tw:mb-2">
+							<?php echo esc_html__( 'Google Tag Manager may load twice.', 'frontblocks' ); ?>
+						</p>
+						<p class="tw:text-sm tw:text-amber-800 tw:m-0">
+							<?php
+							printf(
+								wp_kses(
+									/* translators: %s: Google Tag Manager for WordPress settings page URL. */
+									__( 'The same container is enabled in Google Tag Manager for WordPress. Disable its container-code injection in <a href="%s">its settings</a> so FrontBlocks can load it only after consent. Its data layer can remain enabled.', 'frontblocks' ),
+									array( 'a' => array( 'href' => array() ) )
+								),
+								esc_url( admin_url( 'options-general.php?page=gtm4wp-settings' ) )
+							);
+							?>
+						</p>
+					</div>
+					<?php endif; ?>
+
+					<div>
+						<?php
+						$tracking_labels = array(
+							'gtm'                         => __( 'Google Tag Manager', 'frontblocks' ),
+							'ga4'                         => __( 'GA4 (Google Analytics)', 'frontblocks' ),
+							'clientify_analytics_plus'    => __( 'Clientify Analytics Plus', 'frontblocks' ),
+							'clientify_analytics_classic' => __( 'Clientify Analytics (classic)', 'frontblocks' ),
+							'brevo'                       => __( 'Brevo', 'frontblocks' ),
+							'openai_chatgpt_ads'          => __( 'ChatGPT Ads', 'frontblocks' ),
+						);
+						?>
+						<p class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+							<?php echo esc_html__( 'Added tracking integrations', 'frontblocks' ); ?>
+						</p>
+						<?php if ( $visible_integrations ) : ?>
+							<ul class="tw:space-y-2 tw:mb-4">
+								<?php foreach ( $visible_integrations as $integration ) : ?>
+									<li class="tw:flex tw:items-center tw:justify-between tw:gap-4 tw:p-3 tw:bg-gray-50 tw:border tw:border-gray-200 tw:rounded-lg">
+										<span class="tw:text-sm tw:text-gray-700">
+											<strong><?php echo esc_html( apply_filters( 'frbl_cookie_notice_tracking_type_label', $tracking_labels[ $integration['type'] ] ?? $integration['type'], $integration['type'] ) ); ?></strong>
+											<span class="tw:font-mono tw:text-xs">(<?php echo esc_html( $integration['id'] ); ?>)</span>
+										</span>
+										<label class="tw:text-sm tw:text-red-700 tw:whitespace-nowrap">
+											<input type="checkbox" name="frontblocks_settings[cookie_notice_tracking_remove][]" value="<?php echo esc_attr( $integration['type'] ); ?>" />
+											<?php echo esc_html__( 'Remove', 'frontblocks' ); ?>
+										</label>
+									</li>
+								<?php endforeach; ?>
+							</ul>
+						<?php else : ?>
+							<p class="tw:text-sm tw:text-gray-500 tw:mb-4"><?php echo esc_html__( 'No additional tracking integrations have been added.', 'frontblocks' ); ?></p>
+						<?php endif; ?>
+						<label for="cookie_notice_tracking_integration_code" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
+							<?php echo esc_html__( 'Add a tracking ID or code integration', 'frontblocks' ); ?>
+						</label>
+						<input
+							type="text"
+							id="cookie_notice_tracking_integration_code"
+							name="frontblocks_settings[cookie_notice_tracking_integration_code]"
+							value=""
+							placeholder="<?php echo esc_attr__( 'Paste a tracking ID (GTM-XXXXXXX, G-XXXXXXXXXX…) or code…', 'frontblocks' ); ?>"
+							class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:font-mono tw:text-xs tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
+						/>
+						<p class="tw:text-xs tw:text-gray-500 tw:mt-2 tw:mb-0">
+							<?php
+							printf(
+								wp_kses(
+									/* translators: %s: contact page URL. */
+									__( 'For security reasons, only a supported integration ID is extracted and saved; the pasted code is discarded. Need another tool supported? <a href="%s" target="_blank" rel="noopener noreferrer">Contact us</a>.', 'frontblocks' ),
+									array(
+										'a' => array(
+											'href'   => array(),
+											'target' => array(),
+											'rel'    => array(),
+										),
+									)
+								),
+								esc_url( 'https://close.technology/contacto' )
+							);
+							?>
+						</p>
+					</div>
+				</div>
+
 				<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200 tw:mb-4">
 					<label for="<?php echo esc_attr( $this->option_cookie_notice_message ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
 						<?php echo esc_html__( 'Message', 'frontblocks' ); ?>
@@ -3014,129 +3137,6 @@ class Settings {
 						value="<?php echo esc_attr( $expiration ); ?>"
 						class="tw:block tw:w-32 tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
 					/>
-				</div>
-
-				<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200">
-					<?php
-					// Site Kit-managed types are hidden from the list and never
-					// re-added: the "Google tag is managed by Site Kit" notice
-					// below is the only UI shown for them.
-					$site_kit_managed_types = array_keys(
-						array_filter(
-							array(
-								'gtm' => $site_kit_tags['gtm'],
-								'ga4' => $site_kit_tags['ga4'],
-							)
-						)
-					);
-					$visible_integrations   = array_values(
-						array_filter(
-							$tracking_integrations,
-							static function ( $integration ) use ( $site_kit_managed_types ) {
-								return ! in_array( $integration['type'], $site_kit_managed_types, true );
-							}
-						)
-					);
-					$gtm_integration        = null;
-					foreach ( $tracking_integrations as $integration ) {
-						if ( 'gtm' === $integration['type'] ) {
-							$gtm_integration = $integration['id'];
-							break;
-						}
-					}
-					?>
-					<?php if ( $site_kit_tags['gtm'] || $site_kit_tags['ga4'] ) : ?>
-						<p class="tw:text-sm tw:text-gray-600 tw:m-0 tw:mb-4">
-							<?php echo esc_html__( 'Google Site Kit manages the configured Google tag. FrontBlocks applies Consent Mode to it, so no duplicate ID is needed here.', 'frontblocks' ); ?>
-						</p>
-					<?php endif; ?>
-
-					<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
-						<?php echo esc_html__( 'Scripts are only requested after a visitor accepts — never before.', 'frontblocks' ); ?>
-					</p>
-
-					<?php if ( $enabled && $this->is_gtm4wp_container_loading( (string) $gtm_integration ) ) : ?>
-					<div class="tw:mb-4 tw:p-4 tw:bg-amber-50 tw:border tw:border-amber-200 tw:rounded-lg" role="alert">
-						<p class="tw:text-sm tw:font-medium tw:text-amber-900 tw:mt-0 tw:mb-2">
-							<?php echo esc_html__( 'Google Tag Manager may load twice.', 'frontblocks' ); ?>
-						</p>
-						<p class="tw:text-sm tw:text-amber-800 tw:m-0">
-							<?php
-							printf(
-								wp_kses(
-									/* translators: %s: Google Tag Manager for WordPress settings page URL. */
-									__( 'The same container is enabled in Google Tag Manager for WordPress. Disable its container-code injection in <a href="%s">its settings</a> so FrontBlocks can load it only after consent. Its data layer can remain enabled.', 'frontblocks' ),
-									array( 'a' => array( 'href' => array() ) )
-								),
-								esc_url( admin_url( 'options-general.php?page=gtm4wp-settings' ) )
-							);
-							?>
-						</p>
-					</div>
-					<?php endif; ?>
-
-					<div>
-						<?php
-						$tracking_labels = array(
-							'gtm'                         => __( 'Google Tag Manager', 'frontblocks' ),
-							'ga4'                         => __( 'GA4 (Google Analytics)', 'frontblocks' ),
-							'clientify_analytics_plus'    => __( 'Clientify Analytics Plus', 'frontblocks' ),
-							'clientify_analytics_classic' => __( 'Clientify Analytics (classic)', 'frontblocks' ),
-							'brevo'                       => __( 'Brevo', 'frontblocks' ),
-							'openai_chatgpt_ads'          => __( 'ChatGPT Ads', 'frontblocks' ),
-						);
-						?>
-						<p class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
-							<?php echo esc_html__( 'Added tracking integrations', 'frontblocks' ); ?>
-						</p>
-						<?php if ( $visible_integrations ) : ?>
-							<ul class="tw:space-y-2 tw:mb-4">
-								<?php foreach ( $visible_integrations as $integration ) : ?>
-									<li class="tw:flex tw:items-center tw:justify-between tw:gap-4 tw:p-3 tw:bg-gray-50 tw:border tw:border-gray-200 tw:rounded-lg">
-										<span class="tw:text-sm tw:text-gray-700">
-											<strong><?php echo esc_html( apply_filters( 'frbl_cookie_notice_tracking_type_label', $tracking_labels[ $integration['type'] ] ?? $integration['type'], $integration['type'] ) ); ?></strong>
-											<span class="tw:font-mono tw:text-xs">(<?php echo esc_html( $integration['id'] ); ?>)</span>
-										</span>
-										<label class="tw:text-sm tw:text-red-700 tw:whitespace-nowrap">
-											<input type="checkbox" name="frontblocks_settings[cookie_notice_tracking_remove][]" value="<?php echo esc_attr( $integration['type'] ); ?>" />
-											<?php echo esc_html__( 'Remove', 'frontblocks' ); ?>
-										</label>
-									</li>
-								<?php endforeach; ?>
-							</ul>
-						<?php else : ?>
-							<p class="tw:text-sm tw:text-gray-500 tw:mb-4"><?php echo esc_html__( 'No additional tracking integrations have been added.', 'frontblocks' ); ?></p>
-						<?php endif; ?>
-						<label for="cookie_notice_tracking_integration_code" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
-							<?php echo esc_html__( 'Add a tracking ID or code integration', 'frontblocks' ); ?>
-						</label>
-						<input
-							type="text"
-							id="cookie_notice_tracking_integration_code"
-							name="frontblocks_settings[cookie_notice_tracking_integration_code]"
-							value=""
-							placeholder="<?php echo esc_attr__( 'Paste a tracking ID (GTM-XXXXXXX, G-XXXXXXXXXX…) or code…', 'frontblocks' ); ?>"
-							class="tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:font-mono tw:text-xs tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-primary-500 tw:focus:border-transparent"
-						/>
-						<p class="tw:text-xs tw:text-gray-500 tw:mt-2 tw:mb-0">
-							<?php
-							printf(
-								wp_kses(
-									/* translators: %s: contact page URL. */
-									__( 'For security reasons, only a supported integration ID is extracted and saved; the pasted code is discarded. Need another tool supported? <a href="%s" target="_blank" rel="noopener noreferrer">Contact us</a>.', 'frontblocks' ),
-									array(
-										'a' => array(
-											'href'   => array(),
-											'target' => array(),
-											'rel'    => array(),
-										),
-									)
-								),
-								esc_url( 'https://close.technology/contacto' )
-							);
-							?>
-						</p>
-					</div>
 				</div>
 			</div>
 		</div>
