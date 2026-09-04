@@ -2,9 +2,9 @@
 /**
  * Tests for FrontBlocks\Admin\Settings — covering sanitize_settings() logic
  * that is NOT already exercised by CookieNoticeSettingsSanitizationTest
- * (events type, scroll-to-top, maintenance mode, GA4 id, boolean options,
- * the short-description mutual exclusion rule) plus a few other public
- * helper methods.
+ * (events type, scroll-to-top, maintenance mode, a GA4 id pasted through the
+ * generic tracking-integration field, boolean options, the short-description
+ * mutual exclusion rule) plus a few other public helper methods.
  *
  * @package FrontBlocks
  */
@@ -122,15 +122,18 @@ class SettingsTest extends TestCase {
 	}
 
 	public function test_ga4_id_is_preserved_when_valid_and_uppercased() {
-		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_ga4_id' => 'g-abc123' ) );
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_integration_code' => 'g-abc123' ) );
 
-		$this->assertSame( 'G-ABC123', $sanitized['cookie_notice_ga4_id'] );
+		$this->assertSame(
+			array( array( 'type' => 'ga4', 'id' => 'G-ABC123' ) ),
+			$sanitized['cookie_notice_tracking_integrations']
+		);
 	}
 
 	public function test_ga4_id_is_rejected_when_malformed() {
-		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_ga4_id' => 'not-a-valid-id' ) );
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_integration_code' => 'not-a-valid-id' ) );
 
-		$this->assertSame( '', $sanitized['cookie_notice_ga4_id'] );
+		$this->assertSame( array(), $sanitized['cookie_notice_tracking_integrations'] );
 	}
 
 	public function test_deactivate_short_description_and_move_content_are_mutually_exclusive() {
@@ -214,6 +217,7 @@ class SettingsTest extends TestCase {
 
 		add_filter( 'frontblocks_settings_tabs', array( $this, 'add_test_settings_tab' ) );
 		add_action( 'frontblocks_settings_tab_panels', array( $this, 'render_test_settings_tab_panel' ) );
+		$this->settings->register_settings();
 
 		ob_start();
 		$this->settings->render_page();
@@ -222,6 +226,15 @@ class SettingsTest extends TestCase {
 		$this->assertStringContainsString( 'data-tab-target="test-extension"', $rendered );
 		$this->assertStringContainsString( 'data-tab-panel="test-extension"', $rendered );
 		$this->assertStringContainsString( 'Test extension panel', $rendered );
+		$this->assertStringNotContainsString( 'data-tab-target="popups"', $rendered );
+		$this->assertStringContainsString( 'name="frontblocks_settings[enable_popups]"', $rendered );
+		$this->assertStringContainsString( '>Social Login<', $rendered );
+		$this->assertStringNotContainsString( '>Google Sign-In<', $rendered );
+		$this->assertLessThan(
+			strpos( $rendered, 'name="frontblocks_settings[enable_testimonials]"' ),
+			strpos( $rendered, 'name="frontblocks_settings[enable_popups]"' ),
+			'PRO optional features should be displayed before free optional features.'
+		);
 	}
 
 	/**
