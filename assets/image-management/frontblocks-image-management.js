@@ -3,12 +3,18 @@
  *
  * Renders the registered-sizes table from the localized config, keeps the
  * hidden JSON field in sync so it saves with the normal settings form, and
- * drives the bulk regenerate/convert actions via batched admin-ajax calls.
+ * drives the bulk regenerate/convert/cleanup actions. Actual processing
+ * happens server-side on an Action Scheduler background queue, one action
+ * per attachment — this script only starts the job and polls its progress,
+ * so the job keeps running even if this tab is closed; reopening the
+ * settings page resumes polling any job still in progress (tracked in
+ * localStorage, since a job's server-side progress option is otherwise
+ * only reachable if you know its id).
  */
 ( function () {
 	'use strict';
 
-	const BATCH_SIZE = 5;
+	const JOB_STORAGE_KEY = 'frblImageManagementActiveJob';
 
 	document.addEventListener( 'DOMContentLoaded', function () {
 		const enableCheckbox = document.getElementById( 'enable_image_management' );
@@ -211,18 +217,23 @@
 		renderTable();
 		syncConfigInput();
 
-		function runBulkAction( action, button ) {
-			const progress = document.getElementById( 'frbl-image-bulk-progress' );
-			const fill     = progress.querySelector( '.frbl-image-bulk-progress__fill' );
-			const label    = progress.querySelector( '.frbl-image-bulk-progress__label' );
+		const bulkButtons = {
+			regenerate: document.getElementById( 'frbl-bulk-regenerate' ),
+			convert:    document.getElementById( 'frbl-bulk-convert' ),
+			cleanup:    document.getElementById( 'frbl-bulk-cleanup' ),
+		};
 
-			button.disabled = true;
-			progress.style.display = '';
-			label.textContent = 'Loading media library items…';
+		function updateProgress( fill, label, done, total ) {
+			const pct = total > 0 ? Math.round( ( done / total ) * 100 ) : 100;
+			fill.style.width = pct + '%';
+			label.textContent = frblImageManagement.i18n.processing.replace( '%1$d', done ).replace( '%2$d', total );
+		}
 
+		function pollJobStatus( jobId, total, fill, label, button ) {
 			const params = new URLSearchParams();
-			params.set( 'action', 'frbl_list_image_attachment_ids' );
+			params.set( 'action', 'frbl_image_bulk_job_status' );
 			params.set( 'nonce', frblImageManagement.nonce );
+			params.set( 'job_id', jobId );
 
 			fetch( frblImageManagement.ajaxUrl, { method: 'POST', body: params } )
 				.then( function ( response ) {
@@ -230,13 +241,60 @@
 				} )
 				.then( function ( json ) {
 					if ( ! json.success ) {
-						throw new Error( 'list failed' );
+						throw new Error( 'status failed' );
 					}
-					return processBatches( action, json.data.ids, fill, label );
+
+					const done = json.data.done;
+					updateProgress( fill, label, done, total );
+
+					if ( done >= total ) {
+						label.textContent = frblImageManagement.i18n.done.replace( '%d', total );
+						button.disabled = false;
+						window.localStorage.removeItem( JOB_STORAGE_KEY );
+						return;
+					}
+
+					window.setTimeout( function () {
+						pollJobStatus( jobId, total, fill, label, button );
+					}, 1500 );
 				} )
-				.then( function ( processed ) {
-					label.textContent = frblImageManagement.i18n.done.replace( '%d', processed );
+				.catch( function () {
+					label.textContent = frblImageManagement.i18n.error;
 					button.disabled = false;
+					window.localStorage.removeItem( JOB_STORAGE_KEY );
+				} );
+		}
+
+		function runBulkAction( jobType, button ) {
+			const progress = document.getElementById( 'frbl-image-bulk-progress' );
+			const fill     = progress.querySelector( '.frbl-image-bulk-progress__fill' );
+			const label    = progress.querySelector( '.frbl-image-bulk-progress__label' );
+
+			button.disabled = true;
+			progress.style.display = '';
+			label.textContent = 'Starting…';
+
+			const params = new URLSearchParams();
+			params.set( 'action', 'frbl_start_image_bulk_job' );
+			params.set( 'nonce', frblImageManagement.nonce );
+			params.set( 'job_type', jobType );
+
+			fetch( frblImageManagement.ajaxUrl, { method: 'POST', body: params } )
+				.then( function ( response ) {
+					return response.json();
+				} )
+				.then( function ( json ) {
+					if ( ! json.success ) {
+						throw new Error( 'start failed' );
+					}
+
+					window.localStorage.setItem( JOB_STORAGE_KEY, JSON.stringify( {
+						jobId: json.data.job_id,
+						total: json.data.total,
+						jobType: jobType,
+					} ) );
+
+					pollJobStatus( json.data.job_id, json.data.total, fill, label, button );
 				} )
 				.catch( function () {
 					label.textContent = frblImageManagement.i18n.error;
@@ -244,59 +302,35 @@
 				} );
 		}
 
-		function processBatches( action, ids, fill, label ) {
-			let offset = 0;
-			const total = ids.length;
-
-			function next() {
-				if ( offset >= total ) {
-					return Promise.resolve( total );
-				}
-
-				const batch  = ids.slice( offset, offset + BATCH_SIZE );
-				const params = new URLSearchParams();
-				params.set( 'action', action );
-				params.set( 'nonce', frblImageManagement.nonce );
-				batch.forEach( function ( id ) {
-					params.append( 'ids[]', id );
+		Object.keys( bulkButtons ).forEach( function ( jobType ) {
+			const button = bulkButtons[ jobType ];
+			if ( button ) {
+				button.addEventListener( 'click', function () {
+					runBulkAction( jobType, button );
 				} );
-
-				return fetch( frblImageManagement.ajaxUrl, { method: 'POST', body: params } )
-					.then( function ( response ) {
-						return response.json();
-					} )
-					.then( function () {
-						offset += batch.length;
-						const pct = total > 0 ? Math.round( ( offset / total ) * 100 ) : 100;
-						fill.style.width = pct + '%';
-						label.textContent = frblImageManagement.i18n.processing.replace( '%1$d', offset ).replace( '%2$d', total );
-						return next();
-					} );
 			}
+		} );
 
-			return next();
-		}
-
-		const regenerateButton = document.getElementById( 'frbl-bulk-regenerate' );
-		const convertButton    = document.getElementById( 'frbl-bulk-convert' );
-		const cleanupButton    = document.getElementById( 'frbl-bulk-cleanup' );
-
-		if ( regenerateButton ) {
-			regenerateButton.addEventListener( 'click', function () {
-				runBulkAction( 'frbl_bulk_regenerate_thumbnails', regenerateButton );
-			} );
-		}
-
-		if ( convertButton ) {
-			convertButton.addEventListener( 'click', function () {
-				runBulkAction( 'frbl_bulk_convert_images', convertButton );
-			} );
-		}
-
-		if ( cleanupButton ) {
-			cleanupButton.addEventListener( 'click', function () {
-				runBulkAction( 'frbl_bulk_cleanup_disabled_sizes', cleanupButton );
-			} );
+		// Resume polling a job that was already running when this page loaded
+		// (e.g. the tab was closed and reopened, or the settings page was
+		// simply reloaded) — the job itself kept running server-side either way.
+		try {
+			const stored = window.localStorage.getItem( JOB_STORAGE_KEY );
+			if ( stored ) {
+				const job    = JSON.parse( stored );
+				const button = bulkButtons[ job.jobType ];
+				if ( button ) {
+					const progress = document.getElementById( 'frbl-image-bulk-progress' );
+					const fill     = progress.querySelector( '.frbl-image-bulk-progress__fill' );
+					const label    = progress.querySelector( '.frbl-image-bulk-progress__label' );
+					button.disabled = true;
+					progress.style.display = '';
+					pollJobStatus( job.jobId, job.total, fill, label, button );
+				}
+			}
+		} catch ( e ) {
+			// Ignore malformed/unavailable localStorage — worst case the user
+			// just doesn't see a resumed progress bar for a job still running.
 		}
 	} );
 } )();
