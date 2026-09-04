@@ -75,12 +75,6 @@ class Plugin_Main {
 			}
 			new Admin\Settings();
 
-			// Image Management admin UI (settings section + bulk actions).
-			if ( ! class_exists( 'FrontBlocks\Admin\ImageManagement' ) ) {
-				require_once FRBL_PLUGIN_PATH . 'includes/Admin/ImageManagement.php';
-			}
-			new Admin\ImageManagement();
-
 			if ( ! class_exists( 'FrontBlocks\Admin\ReviewNotice' ) ) {
 				require_once FRBL_PLUGIN_PATH . 'includes/Admin/ReviewNotice.php';
 			}
@@ -91,6 +85,18 @@ class Plugin_Main {
 			}
 			new Admin\RedundantPlugins();
 		}
+
+		// Image Management admin UI (settings section + bulk actions). Loaded
+		// unconditionally, not just when is_admin() — its bulk-job callback
+		// (process_bulk_item(), registered in the constructor) must be
+		// reachable from the contexts Action Scheduler actually runs
+		// scheduled actions in (WP-Cron, WP-CLI), none of which are
+		// is_admin(). Loading it there would leave every scheduled action
+		// permanently failing with "no callbacks are registered".
+		if ( ! class_exists( 'FrontBlocks\Admin\ImageManagement' ) ) {
+			require_once FRBL_PLUGIN_PATH . 'includes/Admin/ImageManagement.php';
+		}
+		new Admin\ImageManagement();
 
 		// Google Sign-In module (wp-admin login, WooCommerce My Account & Checkout).
 		if ( ! class_exists( 'FrontBlocks\GoogleSignIn\Settings' ) ) {
