@@ -7,7 +7,7 @@ Guidelines for AI coding agents working on this WordPress plugin.
 **FrontBlocks** is a free WordPress plugin that extends Gutenberg and GeneratePress blocks. The PRO companion lives at `wp-content/plugins/frontblocks-pro/`.
 
 - **PHP minimum:** 7.0
-- **WordPress minimum:** 5.0
+- **WordPress minimum:** 5.8 (required for the image-format-output filters used by Image Management)
 - **Namespace:** `FrontBlocks\`
 - **Prefix (constants/functions):** `FRBL_` / `frbl_` / `frontblocks_`
 - **Text domain:** `frontblocks`

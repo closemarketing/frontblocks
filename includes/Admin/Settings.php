@@ -1361,6 +1361,10 @@ class Settings {
 				'label' => __( 'Maintenance', 'frontblocks' ),
 			),
 			array(
+				'id'    => 'image-management',
+				'label' => __( 'Image Management', 'frontblocks' ),
+			),
+			array(
 				'id'    => 'woocommerce',
 				'label' => __( 'WooCommerce', 'frontblocks' ),
 				'on'    => $woo_on,
@@ -1567,6 +1571,10 @@ class Settings {
 
 					<div class="frbl-tab-panel" data-tab-panel="maintenance" hidden>
 						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_maintenance' ); ?>
+					</div>
+
+					<div class="frbl-tab-panel" data-tab-panel="image-management" hidden>
+						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_image_management' ); ?>
 					</div>
 
 					<div class="frbl-tab-panel" data-tab-panel="woocommerce" hidden>
@@ -2117,7 +2125,7 @@ class Settings {
 		$is_callback_only = ! $has_fields && $section['callback'];
 
 		// Check if this is a section that needs full width (rich fields, not a simple toggle grid).
-		$is_cpt_section = in_array( $section['id'], array( 'frontblocks_section_custom_post_types', 'frontblocks_section_maintenance', 'frontblocks_section_cookie_notice' ), true );
+		$is_cpt_section = in_array( $section['id'], array( 'frontblocks_section_custom_post_types', 'frontblocks_section_maintenance', 'frontblocks_section_cookie_notice', 'frontblocks_section_image_management' ), true );
 
 		// Show PRO CTA button before the Optional Features section.
 		if ( 'frontblocks_section_features' === $section['id'] && ! $this->is_license_valid ) {
