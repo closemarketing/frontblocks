@@ -50,17 +50,21 @@ jobs:
         run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress --ignore-platform-reqs
 
       - name: Install WP-CLI and dist-archive-command
-        env:
-          # Composer auto-detects the GitHub CLI pre-authenticated on hosted
-          # runners (via `gh auth token`) and uses it for github-oauth — on
-          # this runner that comes back malformed ("Your github oauth token
-          # for github.com contains invalid characters"). COMPOSER_AUTH='{}'
-          # short-circuits that auto-detection; dist-archive-command is a
-          # public package, so unauthenticated API access is fine here.
-          COMPOSER_AUTH: '{}'
         run: |
           curl -sSL -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
           chmod +x /usr/local/bin/wp
+
+          # Composer calls `gh auth token` directly (regardless of
+          # COMPOSER_AUTH) when the gh CLI is present, to avoid anonymous
+          # GitHub API rate limits in CI — but the token that comes back from
+          # this runner's pre-authenticated gh CLI fails Composer's own
+          # validation ("Your github oauth token for github.com contains
+          # invalid characters"). Logging gh out here removes that stored
+          # auth so Composer falls back to unauthenticated API access, which
+          # is fine for installing this public package. The final step
+          # re-authenticates gh explicitly via GH_TOKEN, unaffected by this.
+          gh auth logout --hostname github.com --yes || true
+
           # Pinned to ^3.0 (a tagged release, not dev-main): needed for
           # --filename-format, and it's compatible with the current stable
           # wp-cli.phar despite its composer.json asking for wp-cli/wp-cli ^2.13.
