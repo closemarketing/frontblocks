@@ -63,7 +63,7 @@ jobs:
           # auth so Composer falls back to unauthenticated API access, which
           # is fine for installing this public package. The final step
           # re-authenticates gh explicitly via GH_TOKEN, unaffected by this.
-          gh auth logout --hostname github.com --yes || true
+          gh auth logout --hostname github.com || true
 
           # Pinned to ^3.0 (a tagged release, not dev-main): needed for
           # --filename-format, and it's compatible with the current stable
