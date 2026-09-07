@@ -8,6 +8,11 @@ name: Attach plugin zip to GitHub Release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Existing release tag to (re)build and attach the zip to — for manually testing this workflow without publishing a new release.'
+        required: true
 
 permissions:
   contents: write
@@ -19,6 +24,8 @@ jobs:
     steps:
       - name: Checkout release tag
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.inputs.tag_name || github.event.release.tag_name }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -52,11 +59,9 @@ jobs:
           wp package install wp-cli/dist-archive-command:^3.0
 
       - name: Build release zip honouring .distignore
-        run: |
-          mkdir -p dist
-          wp dist-archive . ./dist --create-target-dir --filename-format="{name}-{version}"
+        run: wp dist-archive . ./dist --create-target-dir --filename-format="{name}-{version}"
 
       - name: Upload zip to the GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ github.event.release.tag_name }}" dist/*.zip --repo ${{ github.repository }} --clobber
+        run: gh release upload "${{ github.event.inputs.tag_name || github.event.release.tag_name }}" dist/*.zip --repo ${{ github.repository }} --clobber
