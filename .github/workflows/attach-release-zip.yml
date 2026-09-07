@@ -71,9 +71,13 @@ jobs:
           wp package install wp-cli/dist-archive-command:^3.0
 
       - name: Build release zip honouring .distignore
-        run: wp dist-archive . ./dist --create-target-dir --filename-format="{name}-{version}"
+        # Target a directory OUTSIDE the checkout (runner.temp), not ./dist:
+        # a target inside the plugin directory gets created before the
+        # source walk finishes and .distignore has no entry for it, so an
+        # empty dist/ folder previously ended up packaged inside the zip.
+        run: wp dist-archive . "${{ runner.temp }}/dist" --create-target-dir --filename-format="{name}-{version}"
 
       - name: Upload zip to the GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ github.event.inputs.tag_name || github.event.release.tag_name }}" dist/*.zip --repo ${{ github.repository }} --clobber
+        run: gh release upload "${{ github.event.inputs.tag_name || github.event.release.tag_name }}" "${{ runner.temp }}/dist"/*.zip --repo ${{ github.repository }} --clobber
