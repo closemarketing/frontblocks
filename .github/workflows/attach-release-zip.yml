@@ -46,14 +46,17 @@ jobs:
         run: |
           curl -sSL -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
           chmod +x /usr/local/bin/wp
-          # Pinned to ^2.0: unpinned resolves to dev-main, which requires
-          # wp-cli/wp-cli ^3.0 and fails against the current stable wp-cli.phar.
-          wp package install wp-cli/dist-archive-command:^2.0
+          # Pinned to ^3.0 (a tagged release, not dev-main): needed for
+          # --filename-format, and it's compatible with the current stable
+          # wp-cli.phar despite its composer.json asking for wp-cli/wp-cli ^2.13.
+          wp package install wp-cli/dist-archive-command:^3.0
 
       - name: Build release zip honouring .distignore
-        run: wp dist-archive . ./frontblocks.zip
+        run: |
+          mkdir -p dist
+          wp dist-archive . ./dist --create-target-dir --filename-format="{name}-{version}"
 
       - name: Upload zip to the GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ github.event.release.tag_name }}" frontblocks.zip --repo ${{ github.repository }} --clobber
+        run: gh release upload "${{ github.event.release.tag_name }}" dist/*.zip --repo ${{ github.repository }} --clobber
