@@ -11,6 +11,68 @@ use Yoast\WPTestUtils\WPIntegration\TestCase;
 class CookieNoticeTrackingSnippetTest extends TestCase {
 
 	/**
+	 * GTM's container ID can be pasted on its own, without any surrounding
+	 * snippet — this is how the generic tracking field is documented to work
+	 * for the two native Google types.
+	 */
+	public function test_detects_bare_gtm_container_id() {
+		$detected = CookieNotice::detect_tracking_snippet( 'gtm-abc1234' );
+
+		$this->assertSame( 'gtm', $detected['type'] );
+		$this->assertSame( 'GTM-ABC1234', $detected['id'] );
+	}
+
+	/**
+	 * A full GTM loader snippet (e.g. copied from Google Tag Manager's own
+	 * install instructions) also carries the container ID in its src URL.
+	 */
+	public function test_detects_gtm_container_id_from_a_full_snippet() {
+		$snippet = <<<'HTML'
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-ABC1234');</script>
+HTML;
+
+		$detected = CookieNotice::detect_tracking_snippet( $snippet );
+
+		$this->assertSame( 'gtm', $detected['type'] );
+		$this->assertSame( 'GTM-ABC1234', $detected['id'] );
+	}
+
+	/**
+	 * GA4's measurement ID can also be pasted on its own.
+	 */
+	public function test_detects_bare_ga4_measurement_id() {
+		$detected = CookieNotice::detect_tracking_snippet( 'g-abc1234567' );
+
+		$this->assertSame( 'ga4', $detected['type'] );
+		$this->assertSame( 'G-ABC1234567', $detected['id'] );
+	}
+
+	/**
+	 * A full gtag.js loader snippet also carries the measurement ID in its
+	 * src URL.
+	 */
+	public function test_detects_ga4_measurement_id_from_a_full_snippet() {
+		$snippet = <<<'HTML'
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ABC1234567"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-ABC1234567');
+</script>
+HTML;
+
+		$detected = CookieNotice::detect_tracking_snippet( $snippet );
+
+		$this->assertSame( 'ga4', $detected['type'] );
+		$this->assertSame( 'G-ABC1234567', $detected['id'] );
+	}
+
+	/**
 	 * The Clientify Analytics Plus snippet is just a single pixel <script>
 	 * tag — the id is the last path segment of its src URL.
 	 */
@@ -83,11 +145,67 @@ HTML;
 	}
 
 	/**
+	 * ChatGPT Ads can be configured from the vendor-provided oaiq snippet.
+	 */
+	public function test_detects_chatgpt_ads_snippet() {
+		$snippet = <<<'HTML'
+<script>!function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");oaiq("init",{pixelId:"TestChatGPTPixelId1234",debug:true});</script>
+HTML;
+
+		$detected = CookieNotice::detect_tracking_snippet( $snippet );
+
+		$this->assertSame( 'openai_chatgpt_ads', $detected['type'] );
+		$this->assertSame( 'TestChatGPTPixelId1234', $detected['id'] );
+	}
+
+	/**
+	 * ChatGPT Ads can also be configured by pasting only its Pixel ID.
+	 */
+	public function test_detects_chatgpt_ads_pixel_id() {
+		$detected = CookieNotice::detect_tracking_snippet( 'TestChatGPTPixelId1234' );
+
+		$this->assertSame( 'openai_chatgpt_ads', $detected['type'] );
+		$this->assertSame( 'TestChatGPTPixelId1234', $detected['id'] );
+	}
+
+	/**
+	 * A generic provider code must not be treated as a ChatGPT Ads Pixel ID.
+	 */
+	public function test_does_not_mistake_a_hyphenated_tracking_code_for_a_chatgpt_ads_pixel_id() {
+		$this->assertNull( CookieNotice::detect_tracking_snippet( 'CF-00000-00000-TEST' ) );
+		$this->assertNull( CookieNotice::detect_tracking_snippet( 'testclientkey1234567890' ) );
+	}
+
+	/**
 	 * A snippet from an unsupported tool (or plain garbage) must not be
 	 * mistaken for one of the three supported patterns.
 	 */
 	public function test_unrecognized_snippet_returns_null() {
 		$this->assertNull( CookieNotice::detect_tracking_snippet( '<script src="https://example.com/some-other-tracker.js"></script>' ) );
+	}
+
+	/**
+	 * Add-ons can register their own detector and type without adding a
+	 * provider-specific pattern to the free plugin.
+	 */
+	public function test_add_on_can_register_a_tracking_detector() {
+		$types_callback = function ( $types ) {
+			$types[] = 'example_add_on';
+			return $types;
+		};
+		$detector_callback = function ( $detected, $raw ) {
+			return 'example-id' === $raw ? array( 'type' => 'example_add_on', 'id' => 'ExampleId123' ) : $detected;
+		};
+		add_filter( 'frbl_cookie_notice_tracking_types', $types_callback );
+		add_filter( 'frbl_cookie_notice_detect_tracking_snippet', $detector_callback, 10, 2 );
+
+		$this->assertSame(
+			array( 'type' => 'example_add_on', 'id' => 'ExampleId123' ),
+			CookieNotice::detect_tracking_snippet( 'example-id' )
+		);
+
+		remove_filter( 'frbl_cookie_notice_tracking_types', $types_callback );
+		remove_filter( 'frbl_cookie_notice_detect_tracking_snippet', $detector_callback, 10 );
 	}
 
 	/**
@@ -116,6 +234,23 @@ HTML;
 	}
 
 	/**
+	 * Settings saves preserve integrations from an inactive companion plugin.
+	 */
+	public function test_tracking_integrations_can_preserve_unknown_add_on_records() {
+		$this->assertSame(
+			array( array( 'type' => 'inactive_add_on', 'id' => 'saved-id' ) ),
+			CookieNotice::get_tracking_integrations(
+				array(
+					'cookie_notice_tracking_integrations' => array(
+						array( 'type' => 'inactive_add_on', 'id' => 'saved-id' ),
+					),
+				),
+				true
+			)
+		);
+	}
+
+	/**
 	 * Existing sites using the former single type/id settings retain tracking
 	 * until their next settings save migrates them to the integrations list.
 	 */
@@ -132,6 +267,40 @@ HTML;
 	}
 
 	/**
+	 * 'gtm' and 'ga4' are FrontBlocks' own native types, registered by default
+	 * alongside the additional tools detectable from a pasted snippet.
+	 */
+	public function test_gtm_and_ga4_are_registered_tracking_types() {
+		$types = CookieNotice::get_tracking_types();
+
+		$this->assertContains( 'gtm', $types );
+		$this->assertContains( 'ga4', $types );
+	}
+
+	/**
+	 * A stored 'gtm'/'ga4' record round-trips through get_tracking_integrations()
+	 * the same way any other supported type does.
+	 */
+	public function test_gtm_and_ga4_records_are_normalized_like_other_integrations() {
+		$integrations = CookieNotice::get_tracking_integrations(
+			array(
+				'cookie_notice_tracking_integrations' => array(
+					array( 'type' => 'gtm', 'id' => 'GTM-ABC1234' ),
+					array( 'type' => 'ga4', 'id' => 'G-ABC1234567' ),
+				),
+			)
+		);
+
+		$this->assertSame(
+			array(
+				array( 'type' => 'gtm', 'id' => 'GTM-ABC1234' ),
+				array( 'type' => 'ga4', 'id' => 'G-ABC1234567' ),
+			),
+			$integrations
+		);
+	}
+
+	/**
 	 * GTM/GA4 default to the "analytics" category, while every Clientify/Brevo
 	 * variant defaults to "marketing" — this is what FrontBlocks PRO's
 	 * per-category consent gating keys off of.
@@ -142,6 +311,7 @@ HTML;
 		$this->assertSame( 'marketing', CookieNotice::get_integration_default_category( 'clientify_analytics_plus' ) );
 		$this->assertSame( 'marketing', CookieNotice::get_integration_default_category( 'clientify_analytics_classic' ) );
 		$this->assertSame( 'marketing', CookieNotice::get_integration_default_category( 'brevo' ) );
+		$this->assertSame( 'marketing', CookieNotice::get_integration_default_category( 'openai_chatgpt_ads' ) );
 	}
 
 	/**

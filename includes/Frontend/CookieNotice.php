@@ -50,12 +50,14 @@ class CookieNotice {
 	const NONCE_ACTION = 'frbl_cookie_notice_nonce';
 
 	/**
-	 * Additional tracking tools detectable from a pasted snippet (see
-	 * detect_tracking_snippet()), beyond the dedicated GTM/GA4 ID fields.
+	 * Tracking tools detectable from a pasted snippet or plain ID (see
+	 * detect_tracking_snippet()) and storable as {type, id} records in the
+	 * shared cookie_notice_tracking_integrations list. 'gtm' and 'ga4' are
+	 * FrontBlocks' own native types; the rest are additional tools.
 	 *
 	 * @var string[]
 	 */
-	const TRACKING_TYPES = array( 'clientify_analytics_plus', 'clientify_analytics_classic', 'brevo' );
+	const TRACKING_TYPES = array( 'gtm', 'ga4', 'clientify_analytics_plus', 'clientify_analytics_classic', 'brevo', 'openai_chatgpt_ads' );
 
 	/**
 	 * Constructor.
@@ -172,8 +174,6 @@ class CookieNotice {
 			'cookie_notice_bg_color'              => '#ffffff',
 			'cookie_notice_radius'                => 'small',
 			'cookie_notice_expiration_days'       => 365,
-			'cookie_notice_gtm_id'                => '',
-			'cookie_notice_ga4_id'                => '',
 			'cookie_notice_tracking_integrations' => array(),
 		);
 
@@ -637,8 +637,12 @@ class CookieNotice {
 				}
 			}
 
-			window.frblCookieNoticeInject = window.frblCookieNoticeInject || function ( gtmId, ga4Id, trackingIntegrations ) {
-				if ( gtmId ) {
+			window.frblCookieNoticeInject = window.frblCookieNoticeInject || function ( gtmId, ga4Id, trackingIntegrations, allowedCategories ) {
+				var allowsCategory = function ( category ) {
+					return ! allowedCategories || !! allowedCategories[ category ];
+				};
+
+				if ( gtmId && allowsCategory( 'analytics' ) ) {
 					window.dataLayer = window.dataLayer || [];
 					window.dataLayer.push( { 'gtm.start': new Date().getTime(), event: 'gtm.js' } );
 
@@ -648,7 +652,7 @@ class CookieNotice {
 					document.head.appendChild( gtmScript );
 				}
 
-				if ( ga4Id ) {
+				if ( ga4Id && allowsCategory( 'analytics' ) ) {
 					var ga4Script = document.createElement( 'script' );
 					ga4Script.async = true;
 					ga4Script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent( ga4Id );
@@ -669,8 +673,9 @@ class CookieNotice {
 				trackingIntegrations.forEach( function ( integration ) {
 					var trackingType = integration && integration.type ? integration.type : '';
 					var trackingId = integration && integration.id ? integration.id : '';
+					var trackingCategory = integration && integration.category ? integration.category : 'marketing';
 
-					if ( ! trackingId ) {
+					if ( ! trackingId || ! allowsCategory( trackingCategory ) ) {
 						return;
 					}
 
@@ -700,6 +705,25 @@ class CookieNotice {
 
 					window.Brevo = window.Brevo || [];
 					window.Brevo.push( [ 'init', { client_key: trackingId } ] );
+				} else if ( 'openai_chatgpt_ads' === trackingType ) {
+					if ( ! window.oaiq ) {
+						window.oaiq = function () {
+							window.oaiq.q.push( arguments );
+						};
+						window.oaiq.q = [];
+
+						var openaiScript = document.createElement( 'script' );
+						openaiScript.async = true;
+						openaiScript.src = 'https://bzrcdn.openai.com/sdk/oaiq.min.js';
+						document.head.appendChild( openaiScript );
+					}
+
+					window.oaiq( 'init', { pixelId: trackingId, debug: true } );
+				} else if ( typeof window.frblCookieNoticeInjectIntegration === 'function' ) {
+					window.frblCookieNoticeInjectIntegration( integration );
+				} else {
+					window.frblCookieNoticePendingIntegrations = window.frblCookieNoticePendingIntegrations || [];
+					window.frblCookieNoticePendingIntegrations.push( integration );
 					}
 				} );
 			};
@@ -723,7 +747,7 @@ class CookieNotice {
 					.then( function ( response ) { return response.json(); } )
 					.then( function ( response ) {
 						if ( response && response.success && response.data ) {
-							window.frblCookieNoticeInject( response.data.gtmId, response.data.ga4Id, response.data.trackingIntegrations );
+							window.frblCookieNoticeInject( response.data.gtmId, response.data.ga4Id, response.data.trackingIntegrations, response.data.allowedCategories );
 						}
 					} )
 					.catch( function () {} );
@@ -882,14 +906,54 @@ class CookieNotice {
 			'gtmId'                => '',
 			'ga4Id'                => '',
 			'trackingIntegrations' => array(),
+			'allowedCategories'    => null,
 		);
 
-		if ( $this->is_enabled() && 'accepted' === $this->get_consent() ) {
-			$options                          = get_option( 'frontblocks_settings', array() );
-			$site_kit_tags                    = $this->get_google_site_kit_managed_tags();
-			$response['gtmId']                = $site_kit_tags['gtm'] ? '' : $this->sanitize_gtm_id( $options['cookie_notice_gtm_id'] ?? '' );
-			$response['ga4Id']                = $site_kit_tags['ga4'] ? '' : $this->sanitize_ga4_id( $options['cookie_notice_ga4_id'] ?? '' );
-			$response['trackingIntegrations'] = self::get_tracking_integrations( $options );
+		$has_tracking_consent = 'accepted' === $this->get_consent();
+
+		/**
+		 * Filters whether the current visitor has granted consent for tracking.
+		 *
+		 * Add-ons with per-category consent can allow this endpoint when at least
+		 * one tracking category is accepted. They must pass the allowed categories
+		 * to frblCookieNoticeInject() so only matching integrations are loaded.
+		 *
+		 * @param bool $has_tracking_consent Whether binary consent is accepted.
+		 */
+		$has_tracking_consent          = (bool) apply_filters( 'frbl_cookie_notice_has_tracking_consent', $has_tracking_consent );
+		$response['allowedCategories'] = apply_filters( 'frbl_cookie_notice_allowed_tracking_categories', null );
+
+		if ( $this->is_enabled() && $has_tracking_consent ) {
+			$options       = get_option( 'frontblocks_settings', array() );
+			$site_kit_tags = $this->get_google_site_kit_managed_tags();
+			$integrations  = self::get_tracking_integrations( $options );
+			$other_types   = array();
+			$gtm_id        = '';
+			$ga4_id        = '';
+
+			foreach ( $integrations as $integration ) {
+				if ( 'gtm' === $integration['type'] ) {
+					$gtm_id = $integration['id'];
+				} elseif ( 'ga4' === $integration['type'] ) {
+					$ga4_id = $integration['id'];
+				} else {
+					$other_types[] = $integration;
+				}
+			}
+
+			// GTM/GA4 are surfaced through their own dedicated response keys
+			// (consumed directly by the inline bootstrap script and the
+			// registered frontblocks-cookie-notice.js fallback), not through
+			// the generic trackingIntegrations dispatch used by add-ons.
+			$response['gtmId']                = $site_kit_tags['gtm'] ? '' : $this->sanitize_gtm_id( $gtm_id );
+			$response['ga4Id']                = $site_kit_tags['ga4'] ? '' : $this->sanitize_ga4_id( $ga4_id );
+			$response['trackingIntegrations'] = array_map(
+				function ( $integration ) {
+					$integration['category'] = self::get_integration_default_category( $integration['type'] );
+					return $integration;
+				},
+				$other_types
+			);
 		}
 
 		wp_send_json_success( $response );
@@ -1060,7 +1124,21 @@ class CookieNotice {
 	 * @return string One of TRACKING_TYPES, or '' if unrecognized.
 	 */
 	private function sanitize_tracking_type( $value ) {
-		return in_array( $value, self::TRACKING_TYPES, true ) ? $value : '';
+		return in_array( $value, self::get_tracking_types(), true ) ? $value : '';
+	}
+
+	/**
+	 * Return the tracking integration types supported by FrontBlocks and add-ons.
+	 *
+	 * @return string[] Tracking integration type slugs.
+	 */
+	public static function get_tracking_types() {
+		/**
+		 * Filters the tracking integration types accepted by Cookie Notice.
+		 *
+		 * @param string[] $types Built-in tracking integration type slugs.
+		 */
+		return array_values( array_unique( apply_filters( 'frbl_cookie_notice_tracking_types', self::TRACKING_TYPES ) ) );
 	}
 
 	/**
@@ -1084,6 +1162,34 @@ class CookieNotice {
 
 		if ( '' === trim( $raw ) ) {
 			return null;
+		}
+
+		// A bare container ID, or Google Tag Manager's own install snippet —
+		// which passes the container ID as the IIFE's last literal argument,
+		// not embedded in the gtm.js URL itself.
+		if ( preg_match( '/^GTM-[A-Za-z0-9]+$/i', trim( $raw ) ) ) {
+			return array(
+				'type' => 'gtm',
+				'id'   => strtoupper( trim( $raw ) ),
+			);
+		}
+
+		if ( false !== strpos( $raw, 'googletagmanager.com/gtm.js' ) && preg_match( '/[\'"](GTM-[A-Za-z0-9]+)[\'"]/i', $raw, $matches ) ) {
+			return array(
+				'type' => 'gtm',
+				'id'   => strtoupper( $matches[1] ),
+			);
+		}
+
+		// A bare measurement ID, or gtag.js's own install snippet — which does
+		// embed the measurement ID directly in its src URL.
+		if ( preg_match( '/^G-[A-Za-z0-9]+$/i', trim( $raw ) )
+			|| preg_match( '#googletagmanager\.com/gtag/js\?id=(G-[A-Za-z0-9]+)#i', $raw, $matches )
+		) {
+			return array(
+				'type' => 'ga4',
+				'id'   => strtoupper( isset( $matches[1] ) ? $matches[1] : trim( $raw ) ),
+			);
 		}
 
 		if ( preg_match( '#analyticsplusdev\.clientify\.net/analytics_plus/pixel/([A-Za-z0-9_-]+)#', $raw, $matches ) ) {
@@ -1115,6 +1221,39 @@ class CookieNotice {
 			);
 		}
 
+		if ( false !== strpos( $raw, 'bzrcdn.openai.com/sdk/oaiq.min.js' )
+			&& preg_match( '#pixelId\s*:\s*[\'\"]([A-Za-z0-9_-]+)[\'\"]#', $raw, $matches )
+		) {
+			return array(
+				'type' => 'openai_chatgpt_ads',
+				'id'   => $matches[1],
+			);
+		}
+
+		if ( preg_match( '/^[A-Za-z0-9]{22}$/', trim( $raw ) ) ) {
+			return array(
+				'type' => 'openai_chatgpt_ads',
+				'id'   => trim( $raw ),
+			);
+		}
+
+		/**
+		 * Filters a pasted tracking snippet that FrontBlocks does not detect.
+		 *
+		 * Add-ons can return a type/ID pair after registering their type through
+		 * frbl_cookie_notice_tracking_types.
+		 *
+		 * @param array|null $detected Detected type/ID pair, or null.
+		 * @param string     $raw      Pasted tracking snippet.
+		 */
+		$detected = apply_filters( 'frbl_cookie_notice_detect_tracking_snippet', null, $raw );
+		if ( is_array( $detected ) && isset( $detected['type'], $detected['id'] ) && in_array( $detected['type'], self::get_tracking_types(), true ) ) {
+			return array(
+				'type' => $detected['type'],
+				'id'   => sanitize_text_field( $detected['id'] ),
+			);
+		}
+
 		return null;
 	}
 
@@ -1126,9 +1265,10 @@ class CookieNotice {
 	 * settings save.
 	 *
 	 * @param array $options FrontBlocks settings.
-	 * @return array<int, array{type: string, id: string}> Supported integration records.
+	 * @param bool  $include_unknown Whether to preserve records registered by an inactive add-on.
+	 * @return array<int, array{type: string, id: string}> Integration records.
 	 */
-	public static function get_tracking_integrations( $options ) {
+	public static function get_tracking_integrations( $options, $include_unknown = false ) {
 		if ( ! is_array( $options ) ) {
 			return array();
 		}
@@ -1155,9 +1295,9 @@ class CookieNotice {
 				continue;
 			}
 
-			$type = $integration['type'] ?? '';
+			$type = sanitize_key( $integration['type'] ?? '' );
 			$id   = sanitize_text_field( $integration['id'] ?? '' );
-			if ( in_array( $type, self::TRACKING_TYPES, true ) && '' !== $id ) {
+			if ( ( in_array( $type, self::get_tracking_types(), true ) || $include_unknown ) && '' !== $type && '' !== $id ) {
 				$integrations[ $type ] = array(
 					'type' => $type,
 					'id'   => $id,
@@ -1184,6 +1324,7 @@ class CookieNotice {
 			'clientify_analytics_plus'    => 'marketing',
 			'clientify_analytics_classic' => 'marketing',
 			'brevo'                       => 'marketing',
+			'openai_chatgpt_ads'          => 'marketing',
 		);
 
 		$category = $categories[ $type ] ?? 'marketing';

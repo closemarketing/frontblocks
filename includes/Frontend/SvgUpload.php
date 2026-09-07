@@ -39,6 +39,7 @@ class SvgUpload {
 		add_filter( 'wp_check_filetype_and_ext', array( $this, 'fix_svg_mime_check' ), 10, 3 );
 		add_filter( 'wp_handle_upload_prefilter', array( $this, 'sanitize_svg_upload' ) );
 		add_filter( 'wp_prepare_attachment_for_js', array( $this, 'fix_svg_in_media_library' ), 10, 2 );
+		add_filter( 'wp_calculate_image_srcset', array( $this, 'disable_svg_srcset' ), 10, 5 );
 	}
 
 	/**
@@ -243,5 +244,27 @@ class SvgUpload {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Disable responsive image sources for SVG attachments.
+	 *
+	 * SVGs are vector files and do not have generated raster size variants.
+	 * Returning their responsive sources can produce invalid URLs, so browsers
+	 * must use the attachment's original source URL instead.
+	 *
+	 * @param array  $sources       One or more arrays of source data to include in the 'srcset'.
+	 * @param array  $size_array    Array of width and height values in pixels.
+	 * @param string $image_src     The 'src' of the image.
+	 * @param array  $image_meta    The image metadata as returned by wp_get_attachment_metadata().
+	 * @param int    $attachment_id Image attachment ID.
+	 * @return array
+	 */
+	public function disable_svg_srcset( $sources, $size_array, $image_src, $image_meta, $attachment_id ) {
+		if ( 'image/svg+xml' !== get_post_mime_type( $attachment_id ) ) {
+			return $sources;
+		}
+
+		return array();
 	}
 }

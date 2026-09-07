@@ -202,13 +202,59 @@ class CookieNoticeSettingsSanitizationTest extends TestCase {
 		$this->assertSame( 365, $sanitized['cookie_notice_expiration_days'] );
 	}
 
-	public function test_valid_gtm_id_is_preserved_uppercased() {
-		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_gtm_id' => 'gtm-abc123' ) );
-		$this->assertSame( 'GTM-ABC123', $sanitized['cookie_notice_gtm_id'] );
+	public function test_valid_gtm_id_pasted_through_the_generic_field_is_preserved_uppercased() {
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_integration_code' => 'gtm-abc123' ) );
+
+		$this->assertSame(
+			array( array( 'type' => 'gtm', 'id' => 'GTM-ABC123' ) ),
+			$sanitized['cookie_notice_tracking_integrations']
+		);
 	}
 
 	public function test_malformed_gtm_id_is_rejected() {
-		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_gtm_id' => 'not-a-gtm-id' ) );
-		$this->assertSame( '', $sanitized['cookie_notice_gtm_id'] );
+		$before_count = $this->count_tracking_notice_errors();
+
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_integration_code' => 'not-a-gtm-id' ) );
+
+		$this->assertSame( array(), $sanitized['cookie_notice_tracking_integrations'] );
+		$this->assertSame( $before_count + 1, $this->count_tracking_notice_errors() );
+	}
+
+	public function test_gtm_snippet_replaces_a_previously_saved_gtm_entry() {
+		update_option(
+			'frontblocks_settings',
+			array(
+				'cookie_notice_tracking_integrations' => array(
+					array( 'type' => 'gtm', 'id' => 'GTM-OLD1234' ),
+				),
+			)
+		);
+
+		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_integration_code' => 'GTM-NEW5678' ) );
+
+		$this->assertSame(
+			array( array( 'type' => 'gtm', 'id' => 'GTM-NEW5678' ) ),
+			$sanitized['cookie_notice_tracking_integrations']
+		);
+	}
+
+	public function test_gtm_entry_can_be_removed_through_the_generic_list() {
+		update_option(
+			'frontblocks_settings',
+			array(
+				'cookie_notice_tracking_integrations' => array(
+					array( 'type' => 'gtm', 'id' => 'GTM-ABC123' ),
+				),
+			)
+		);
+
+		$sanitized = $this->settings->sanitize_settings(
+			array(
+				'cookie_notice_tracking_integration_code' => '',
+				'cookie_notice_tracking_remove'           => array( 'gtm' ),
+			)
+		);
+
+		$this->assertSame( array(), $sanitized['cookie_notice_tracking_integrations'] );
 	}
 }

@@ -86,6 +86,18 @@ class Plugin_Main {
 			new Admin\RedundantPlugins();
 		}
 
+		// Google Sign-In module (wp-admin login, WooCommerce My Account & Checkout).
+		if ( ! class_exists( 'FrontBlocks\GoogleSignIn\Settings' ) ) {
+			require_once FRBL_PLUGIN_PATH . 'includes/GoogleSignIn/Settings.php';
+		}
+		if ( ! class_exists( 'FrontBlocks\GoogleSignIn\TokenVerifier' ) ) {
+			require_once FRBL_PLUGIN_PATH . 'includes/GoogleSignIn/TokenVerifier.php';
+		}
+		if ( ! class_exists( 'FrontBlocks\GoogleSignIn\GoogleSignIn' ) ) {
+			require_once FRBL_PLUGIN_PATH . 'includes/GoogleSignIn/GoogleSignIn.php';
+		}
+		new GoogleSignIn\GoogleSignIn();
+
 		// Container Edge Alignment for GenerateBlocks.
 		new Frontend\ContainerEdgeAlignment();
 
