@@ -49,20 +49,23 @@ jobs:
       - name: Install production Composer dependencies
         run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress --ignore-platform-reqs
 
-      - name: Debug composer global auth (TEMPORARY)
-        run: |
-          echo "COMPOSER_HOME=$(composer config -g home 2>&1)"
-          echo "--- global auth.json (if any) ---"
-          cat "$(composer config -g home 2>/dev/null)/auth.json" 2>&1 || echo "(no global auth.json)"
-          echo "--- composer config -g --list (github-oauth only) ---"
-          composer config -g --list 2>&1 | grep -i github || echo "(none)"
-          echo "--- gh auth status ---"
-          gh auth status 2>&1 || true
-
       - name: Install WP-CLI and dist-archive-command
         run: |
           curl -sSL -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
           chmod +x /usr/local/bin/wp
+
+          # shivammathur/setup-php writes a github-oauth token into Composer's
+          # global auth.json (to avoid GitHub API rate limits during its own
+          # setup) that this Composer version's own validation rejects as
+          # malformed ("Your github oauth token for github.com contains
+          # invalid characters"). Unsetting it here falls back to
+          # unauthenticated API access, which is fine for installing this one
+          # public package.
+          composer config -g --unset github-oauth.github.com || true
+
+          # Pinned to ^3.0 (a tagged release, not dev-main): needed for
+          # --filename-format, and it's compatible with the current stable
+          # wp-cli.phar despite its composer.json asking for wp-cli/wp-cli ^2.13.
           wp package install wp-cli/dist-archive-command:^3.0
 
       - name: Build release zip honouring .distignore
