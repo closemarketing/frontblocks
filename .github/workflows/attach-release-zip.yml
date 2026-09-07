@@ -1,0 +1,59 @@
+name: Attach plugin zip to GitHub Release
+
+# Builds the production zip with `wp dist-archive` (honouring .distignore,
+# same tool used for manual releases) and attaches it as an asset to the
+# GitHub Release, so it can be installed directly from the Releases page
+# without going through WordPress.org.
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-attach:
+    name: Build zip and attach to release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build JS/CSS assets
+        run: npm run build
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+          coverage: none
+
+      - name: Install production Composer dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress --ignore-platform-reqs
+
+      - name: Install WP-CLI and dist-archive-command
+        run: |
+          curl -sSL -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          chmod +x /usr/local/bin/wp
+          # Pinned to ^2.0: unpinned resolves to dev-main, which requires
+          # wp-cli/wp-cli ^3.0 and fails against the current stable wp-cli.phar.
+          wp package install wp-cli/dist-archive-command:^2.0
+
+      - name: Build release zip honouring .distignore
+        run: wp dist-archive . ./frontblocks.zip
+
+      - name: Upload zip to the GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.event.release.tag_name }}" frontblocks.zip --repo ${{ github.repository }} --clobber
