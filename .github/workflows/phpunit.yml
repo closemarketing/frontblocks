@@ -61,6 +61,8 @@ jobs:
       - name: Run JavaScript tests
         run: |
           npm run test:cookie-notice
+          npm run test:accessibility-utils
+          npm run test:carousel-accessibility
           npm run test:text-animation
 
   phpunit:
