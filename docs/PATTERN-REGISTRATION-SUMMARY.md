@@ -224,7 +224,7 @@ frontblocks/
 ## 📝 Notas Técnicas
 
 ### Compatibilidad:
-- WordPress: 5.0+
+- WordPress: 5.5+
 - PHP: 7.4+
 - GeneratePress: Recomendado pero no requerido
 - GenerateBlocks: No requerido (usa bloques nativos)

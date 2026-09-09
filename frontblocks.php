@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: FrontBlocks for Gutenberg/GeneratePress
+ * Plugin Name: FrontBlocks Web Toolkit
  * Plugin URI:  https://wordpress.org/plugins/frontblocks/
  * Description: Blocks and helpers that extends Gutenberg and GeneratePress blocks.
  * Version:     1.5.3-beta.3
