@@ -1,4 +1,4 @@
-=== FrontBlocks for Gutenberg/GeneratePress ===
+=== FrontBlocks Web Toolkit ===
 Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit2sumit, alexcm13
 Tags: carrusel, slider, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
