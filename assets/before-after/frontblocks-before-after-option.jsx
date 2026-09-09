@@ -1,7 +1,7 @@
 const { registerBlockType } = wp.blocks;
 const { Fragment, useEffect, useRef } = wp.element;
 const { InspectorControls, MediaUpload, MediaUploadCheck, useBlockProps } = wp.blockEditor;
-const { PanelBody, RangeControl, Button, Placeholder, TextControl, ToggleControl } = wp.components;
+const { PanelBody, RangeControl, Button, Placeholder, TextControl, ToggleControl, Notice } = wp.components;
 const { __ } = wp.i18n;
 
 /**
@@ -22,6 +22,10 @@ function BeforeAfterEdit( props ) {
 	} = attributes;
 
 	const blockProps = useBlockProps();
+
+	const a11y = window.FrontBlocksA11y;
+	const beforeLabelCheck = a11y ? a11y.checkImageLabel( beforeImageUrl, beforeLabel ) : { warn: false };
+	const afterLabelCheck  = a11y ? a11y.checkImageLabel( afterImageUrl, afterLabel ) : { warn: false };
 
 	const hasImages = beforeImageUrl && afterImageUrl;
 	const containerRef = useRef( null );
@@ -133,6 +137,11 @@ function BeforeAfterEdit( props ) {
 						onChange={ ( value ) => setAttributes( { beforeLabel: value } ) }
 						style={ { marginTop: '12px' } }
 					/>
+					{ beforeLabelCheck.warn && (
+						<Notice status="warning" isDismissible={ false }>
+							{ __( 'The before image has no label. Without it, screen reader users have no way to know what this image shows — add a short label.', 'frontblocks' ) }
+						</Notice>
+					) }
 				</PanelBody>
 
 				<PanelBody title={ __( 'After Image', 'frontblocks' ) } initialOpen={ true }>
@@ -189,6 +198,11 @@ function BeforeAfterEdit( props ) {
 						onChange={ ( value ) => setAttributes( { afterLabel: value } ) }
 						style={ { marginTop: '12px' } }
 					/>
+					{ afterLabelCheck.warn && (
+						<Notice status="warning" isDismissible={ false }>
+							{ __( 'The after image has no label. Without it, screen reader users have no way to know what this image shows — add a short label.', 'frontblocks' ) }
+						</Notice>
+					) }
 				</PanelBody>
 
 				<PanelBody title={ __( 'Slider Settings', 'frontblocks' ) } initialOpen={ false }>

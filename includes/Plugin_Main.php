@@ -86,6 +86,18 @@ class Plugin_Main {
 			new Admin\RedundantPlugins();
 		}
 
+		// Image Management admin UI (settings section + bulk actions). Loaded
+		// unconditionally, not just when is_admin() — its bulk-job callback
+		// (process_bulk_item(), registered in the constructor) must be
+		// reachable from the contexts Action Scheduler actually runs
+		// scheduled actions in (WP-Cron, WP-CLI), none of which are
+		// is_admin(). Loading it there would leave every scheduled action
+		// permanently failing with "no callbacks are registered".
+		if ( ! class_exists( 'FrontBlocks\Admin\ImageManagement' ) ) {
+			require_once FRBL_PLUGIN_PATH . 'includes/Admin/ImageManagement.php';
+		}
+		new Admin\ImageManagement();
+
 		// Google Sign-In module (wp-admin login, WooCommerce My Account & Checkout).
 		if ( ! class_exists( 'FrontBlocks\GoogleSignIn\Settings' ) ) {
 			require_once FRBL_PLUGIN_PATH . 'includes/GoogleSignIn/Settings.php';
@@ -187,6 +199,9 @@ class Plugin_Main {
 		// Cookie Notice module.
 		new Frontend\CookieNotice();
 
+		// Image Management module (size control + WebP/AVIF delivery).
+		new Frontend\ImageManagement();
+
 		// User Text block is provided by FrontBlocks Pro when license is active.
 	}
 
@@ -196,6 +211,14 @@ class Plugin_Main {
 	 * @return void
 	 */
 	public function register_scripts() {
+		wp_register_script(
+			'frontblocks-a11y-utils',
+			FRBL_PLUGIN_URL . 'assets/accessibility/frontblocks-a11y-utils.js',
+			array(),
+			FRBL_VERSION,
+			true
+		);
+
 		wp_register_style(
 			'frontblocks-carousel',
 			FRBL_PLUGIN_URL . 'assets/carousel/frontblocks-carousel.css',

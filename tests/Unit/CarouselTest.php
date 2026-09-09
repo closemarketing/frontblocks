@@ -67,9 +67,30 @@ class CarouselTest extends TestCase {
 		$this->assertStringContainsString( 'data-gap="10"', $result );
 		$this->assertStringContainsString( 'data-buttons="dots"', $result );
 		$this->assertStringContainsString( 'data-buttons-color="#fff"', $result );
+		$this->assertStringContainsString( 'data-pause-on-hover="true"', $result, 'Pause on hover defaults to true when not explicitly set.' );
 		$this->assertStringNotContainsString( 'data-rewind=', $result, 'The rewind data attribute is only added for the slider option.' );
 		$this->assertTrue( wp_style_is( 'frontblocks-carousel', 'enqueued' ) );
 		$this->assertTrue( wp_script_is( 'frontblocks-carousel-custom', 'enqueued' ) );
+	}
+
+	/**
+	 * The pause-on-hover data attribute reflects the frblPauseOnHover
+	 * attribute, including when it is explicitly disabled — this is the
+	 * accessibility guardrail from issue #261 that lets autoplaying
+	 * carousels be paused via hover or keyboard focus.
+	 */
+	public function test_grid_block_reflects_pause_on_hover_attribute() {
+		$content = '<div class="gb-grid-wrapper">content</div>';
+		$block   = array(
+			'attrs' => array(
+				'frblGridOption'   => 'carousel',
+				'frblPauseOnHover' => false,
+			),
+		);
+
+		$result = $this->carousel->add_custom_attributes_to_grid_block( $content, $block );
+
+		$this->assertStringContainsString( 'data-pause-on-hover="false"', $result );
 	}
 
 	/**
@@ -203,6 +224,7 @@ class CarouselTest extends TestCase {
 		$this->assertSame( 'none', $result['attributes']['frblGridOption']['default'] );
 		$this->assertSame( 'arrows', $result['attributes']['frblButtons']['default'] );
 		$this->assertTrue( $result['attributes']['frblRewind']['default'] );
+		$this->assertTrue( $result['attributes']['frblPauseOnHover']['default'], 'Pause on hover must default to enabled.' );
 	}
 
 	public function test_register_custom_attributes_for_grid_block_ignores_unrelated_block_types() {
@@ -225,6 +247,7 @@ class CarouselTest extends TestCase {
 		$this->assertArrayHasKey( 'attributes', $result );
 		$this->assertArrayHasKey( 'frblGridOption', $result['attributes'] );
 		$this->assertSame( '4', $result['attributes']['frblItemsToView']['default'] );
+		$this->assertTrue( $result['attributes']['frblPauseOnHover']['default'], 'Pause on hover must default to enabled.' );
 	}
 
 	public function test_register_query_block_attributes_ignores_unrelated_block_types() {
