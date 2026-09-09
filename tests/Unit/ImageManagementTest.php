@@ -102,51 +102,13 @@ class ImageManagementTest extends TestCase {
 	}
 
 	// ------------------------------------------------------------------
-	// is_enabled()
-	// ------------------------------------------------------------------
-
-	public function test_is_enabled_is_false_by_default() {
-		$this->assertFalse( $this->image_management->is_enabled() );
-	}
-
-	public function test_is_enabled_reflects_the_option() {
-		update_option( 'frontblocks_settings', array( 'enable_image_management' => true ) );
-		$this->assertTrue( $this->image_management->is_enabled() );
-
-		update_option( 'frontblocks_settings', array( 'enable_image_management' => false ) );
-		$this->assertFalse( $this->image_management->is_enabled() );
-	}
-
-	// ------------------------------------------------------------------
 	// register_custom_and_override_sizes()
 	// ------------------------------------------------------------------
-
-	public function test_register_custom_and_override_sizes_does_nothing_when_disabled() {
-		update_option(
-			'frontblocks_settings',
-			array(
-				'enable_image_management' => false,
-				'image_sizes_custom'      => array(
-					array(
-						'name'   => 'frbl_disabled_custom',
-						'width'  => 111,
-						'height' => 111,
-					),
-				),
-			)
-		);
-
-		$this->image_management->register_custom_and_override_sizes();
-
-		$sizes = wp_get_additional_image_sizes();
-		$this->assertArrayNotHasKey( 'frbl_disabled_custom', $sizes );
-	}
 
 	public function test_register_custom_and_override_sizes_applies_non_core_overrides() {
 		update_option(
 			'frontblocks_settings',
 			array(
-				'enable_image_management' => true,
 				'image_sizes_overrides'   => array(
 					'frbl_override_target' => array(
 						'width'  => 321,
@@ -170,7 +132,6 @@ class ImageManagementTest extends TestCase {
 		update_option(
 			'frontblocks_settings',
 			array(
-				'enable_image_management' => true,
 				'image_sizes_overrides'   => array(
 					'thumbnail' => array(
 						'width'  => 999,
@@ -191,7 +152,6 @@ class ImageManagementTest extends TestCase {
 		update_option(
 			'frontblocks_settings',
 			array(
-				'enable_image_management' => true,
 				'image_sizes_custom'      => array(
 					array(
 						'name'   => 'frbl_custom_hero',
@@ -215,7 +175,6 @@ class ImageManagementTest extends TestCase {
 		update_option(
 			'frontblocks_settings',
 			array(
-				'enable_image_management' => true,
 				'image_sizes_custom'      => array(
 					array(
 						'width'  => 400,
@@ -237,30 +196,10 @@ class ImageManagementTest extends TestCase {
 	// filter_image_size_names_choose()
 	// ------------------------------------------------------------------
 
-	public function test_filter_image_size_names_choose_does_nothing_when_disabled() {
-		update_option(
-			'frontblocks_settings',
-			array(
-				'enable_image_management' => false,
-				'image_sizes_custom'      => array(
-					array(
-						'name'           => 'frbl_picker_size',
-						'show_in_picker' => true,
-					),
-				),
-			)
-		);
-
-		$result = $this->image_management->filter_image_size_names_choose( array( 'thumbnail' => 'Thumbnail' ) );
-
-		$this->assertArrayNotHasKey( 'frbl_picker_size', $result );
-	}
-
 	public function test_filter_image_size_names_choose_adds_only_picker_flagged_sizes() {
 		update_option(
 			'frontblocks_settings',
 			array(
-				'enable_image_management' => true,
 				'image_sizes_custom'      => array(
 					array(
 						'name'           => 'frbl_visible_size',
@@ -288,7 +227,6 @@ class ImageManagementTest extends TestCase {
 		update_option(
 			'frontblocks_settings',
 			array(
-				'enable_image_management' => true,
 				'image_sizes_custom'      => array(
 					array(
 						'name'           => 'frbl_no_label_size',
@@ -307,29 +245,10 @@ class ImageManagementTest extends TestCase {
 	// filter_intermediate_sizes_advanced() / filter_intermediate_sizes()
 	// ------------------------------------------------------------------
 
-	public function test_filter_intermediate_sizes_advanced_does_nothing_when_disabled() {
-		update_option(
-			'frontblocks_settings',
-			array(
-				'enable_image_management' => false,
-				'image_sizes_disabled'    => array( 'medium' ),
-			)
-		);
-
-		$sizes  = array(
-			'thumbnail' => array( 'width' => 150 ),
-			'medium'    => array( 'width' => 300 ),
-		);
-		$result = $this->image_management->filter_intermediate_sizes_advanced( $sizes );
-
-		$this->assertSame( $sizes, $result );
-	}
-
 	public function test_filter_intermediate_sizes_advanced_removes_disabled_sizes() {
 		update_option(
 			'frontblocks_settings',
 			array(
-				'enable_image_management' => true,
 				'image_sizes_disabled'    => array( 'medium', 'large' ),
 			)
 		);
@@ -347,26 +266,10 @@ class ImageManagementTest extends TestCase {
 		$this->assertArrayNotHasKey( 'large', $result );
 	}
 
-	public function test_filter_intermediate_sizes_does_nothing_when_disabled() {
-		update_option(
-			'frontblocks_settings',
-			array(
-				'enable_image_management' => false,
-				'image_sizes_disabled'    => array( 'medium' ),
-			)
-		);
-
-		$sizes  = array( 'thumbnail', 'medium', 'large' );
-		$result = $this->image_management->filter_intermediate_sizes( $sizes );
-
-		$this->assertSame( $sizes, $result );
-	}
-
 	public function test_filter_intermediate_sizes_removes_disabled_sizes_from_plain_list() {
 		update_option(
 			'frontblocks_settings',
 			array(
-				'enable_image_management' => true,
 				'image_sizes_disabled'    => array( 'medium' ),
 			)
 		);
@@ -381,19 +284,10 @@ class ImageManagementTest extends TestCase {
 	// filter_big_image_size_threshold()
 	// ------------------------------------------------------------------
 
-	public function test_big_image_size_threshold_returns_core_default_when_disabled() {
-		update_option( 'frontblocks_settings', array( 'enable_image_management' => false ) );
-
-		$result = $this->image_management->filter_big_image_size_threshold( 2560 );
-
-		$this->assertSame( 2560, $result );
-	}
-
 	public function test_big_image_size_threshold_returns_false_when_explicitly_disabled() {
 		update_option(
 			'frontblocks_settings',
 			array(
-				'enable_image_management'             => true,
 				'image_max_upload_dimension_enabled'  => false,
 			)
 		);
@@ -406,10 +300,7 @@ class ImageManagementTest extends TestCase {
 	public function test_big_image_size_threshold_defaults_to_2048_when_never_saved() {
 		// The option key was simply never set (as opposed to explicitly
 		// false) -- must NOT be treated as disabled.
-		update_option(
-			'frontblocks_settings',
-			array( 'enable_image_management' => true )
-		);
+		update_option( 'frontblocks_settings', array() );
 
 		$result = $this->image_management->filter_big_image_size_threshold( 2560 );
 
@@ -420,7 +311,6 @@ class ImageManagementTest extends TestCase {
 		update_option(
 			'frontblocks_settings',
 			array(
-				'enable_image_management'            => true,
 				'image_max_upload_dimension_enabled' => true,
 				'image_max_upload_dimension'         => 3000,
 			)
@@ -468,20 +358,10 @@ class ImageManagementTest extends TestCase {
 	// maybe_generate_modern_formats()
 	// ------------------------------------------------------------------
 
-	public function test_maybe_generate_modern_formats_does_nothing_when_disabled() {
-		update_option( 'frontblocks_settings', array( 'enable_image_management' => false ) );
-
-		$metadata = array( 'file' => 'test.jpg' );
-		$result   = $this->image_management->maybe_generate_modern_formats( $metadata, 123 );
-
-		$this->assertSame( $metadata, $result );
-	}
-
 	public function test_maybe_generate_modern_formats_does_nothing_when_target_is_none() {
 		update_option(
 			'frontblocks_settings',
 			array(
-				'enable_image_management' => true,
 				'image_format_target'     => 'none',
 			)
 		);
@@ -496,7 +376,6 @@ class ImageManagementTest extends TestCase {
 		update_option(
 			'frontblocks_settings',
 			array(
-				'enable_image_management' => true,
 				'image_format_target'     => 'webp',
 			)
 		);
@@ -510,7 +389,6 @@ class ImageManagementTest extends TestCase {
 		update_option(
 			'frontblocks_settings',
 			array(
-				'enable_image_management' => true,
 				'image_format_target'     => 'webp',
 			)
 		);
@@ -621,16 +499,12 @@ class ImageManagementTest extends TestCase {
 	// filter_content_img_tag()
 	// ------------------------------------------------------------------
 
-	public function test_filter_content_img_tag_returns_tag_unchanged_when_disabled() {
-		update_option( 'frontblocks_settings', array( 'enable_image_management' => false ) );
-
+	public function test_filter_content_img_tag_returns_tag_unchanged_without_attachment_id() {
 		$tag = '<img src="https://example.com/wp-content/uploads/test.jpg" />';
-		$this->assertSame( $tag, $this->image_management->filter_content_img_tag( $tag, 'the_content', 123 ) );
+		$this->assertSame( $tag, $this->image_management->filter_content_img_tag( $tag, 'the_content', 0 ) );
 	}
 
 	public function test_filter_content_img_tag_returns_tag_unchanged_without_variants() {
-		update_option( 'frontblocks_settings', array( 'enable_image_management' => true ) );
-
 		list( $attachment_id, $metadata ) = $this->create_uploaded_attachment_with_metadata();
 
 		$src = wp_get_attachment_url( $attachment_id );
@@ -642,8 +516,6 @@ class ImageManagementTest extends TestCase {
 	}
 
 	public function test_filter_content_img_tag_rewrites_src_and_srcset_to_matching_mime() {
-		update_option( 'frontblocks_settings', array( 'enable_image_management' => true ) );
-
 		list( $attachment_id, $metadata ) = $this->create_uploaded_attachment_with_metadata();
 
 		$file     = get_attached_file( $attachment_id );

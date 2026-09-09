@@ -285,7 +285,7 @@ class AdminImageManagementTest extends TestCase {
 		$this->assertArrayHasKey(
 			'enable_image_management',
 			$wp_settings_fields['frontblocks-settings']['frontblocks_section_image_management'],
-			'The enable_image_management field must be registered under the Image Management section.'
+			'The Image Management settings field must be registered under the Image Management section.'
 		);
 	}
 
@@ -442,7 +442,7 @@ class AdminImageManagementTest extends TestCase {
 
 	public function test_sanitize_settings_returns_value_unchanged_without_a_nonce() {
 		unset( $_POST['_wpnonce'] );
-		$_POST['frontblocks_settings'] = array( 'enable_image_management' => '1' );
+		$_POST['frontblocks_settings'] = array( 'image_format_target' => 'webp' );
 
 		$result = $this->admin->sanitize_settings( array( 'untouched' => true ), 'frontblocks_settings' );
 
@@ -451,7 +451,7 @@ class AdminImageManagementTest extends TestCase {
 
 	public function test_sanitize_settings_returns_value_unchanged_with_an_invalid_nonce() {
 		$_POST['_wpnonce']             = 'not-a-valid-nonce';
-		$_POST['frontblocks_settings'] = array( 'enable_image_management' => '1' );
+		$_POST['frontblocks_settings'] = array( 'image_format_target' => 'webp' );
 
 		$result = $this->admin->sanitize_settings( array( 'untouched' => true ), 'frontblocks_settings' );
 
@@ -465,16 +465,6 @@ class AdminImageManagementTest extends TestCase {
 		$result = $this->admin->sanitize_settings( array( 'untouched' => true ), 'frontblocks_settings' );
 
 		$this->assertSame( array( 'untouched' => true ), $result );
-	}
-
-	public function test_sanitize_settings_casts_enable_flag_to_boolean() {
-		$this->post_settings( array( 'enable_image_management' => '1' ) );
-		$sanitized = $this->admin->sanitize_settings( array(), 'frontblocks_settings' );
-		$this->assertTrue( $sanitized['enable_image_management'] );
-
-		$this->post_settings( array() );
-		$sanitized = $this->admin->sanitize_settings( array(), 'frontblocks_settings' );
-		$this->assertFalse( $sanitized['enable_image_management'], 'Absent means an unchecked checkbox.' );
 	}
 
 	public function test_sanitize_settings_image_format_target_only_accepts_whitelisted_values() {
@@ -681,7 +671,6 @@ class AdminImageManagementTest extends TestCase {
 	public function test_sanitize_settings_no_longer_persists_the_removed_picture_element_option() {
 		$this->post_settings(
 			array(
-				'enable_image_management'  => '1',
 				'image_format_use_picture' => '1',
 			)
 		);

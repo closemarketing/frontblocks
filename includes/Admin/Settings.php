@@ -1100,6 +1100,8 @@ class Settings {
 			'frontblocks_section_features'
 		);
 
+		do_action( 'frontblocks_register_settings' );
+
 		// Maintenance Mode section (own full-width section, needs room for title + image fields).
 		add_settings_section(
 			'frontblocks_section_maintenance',
@@ -1312,8 +1314,6 @@ class Settings {
 
 		// Note: License section is rendered separately outside the main form.
 		// See render_license_section() method called from render_page().
-
-		do_action( 'frontblocks_register_settings' );
 	}
 
 	/**
@@ -1357,12 +1357,12 @@ class Settings {
 				'total' => $features_total,
 			),
 			array(
-				'id'    => 'maintenance',
-				'label' => __( 'Maintenance', 'frontblocks' ),
-			),
-			array(
 				'id'    => 'image-management',
 				'label' => __( 'Image Management', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'maintenance',
+				'label' => __( 'Maintenance', 'frontblocks' ),
 			),
 			array(
 				'id'    => 'woocommerce',
@@ -1569,12 +1569,12 @@ class Settings {
 						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_features' ); ?>
 					</div>
 
-					<div class="frbl-tab-panel" data-tab-panel="maintenance" hidden>
-						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_maintenance' ); ?>
-					</div>
-
 					<div class="frbl-tab-panel" data-tab-panel="image-management" hidden>
 						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_image_management' ); ?>
+					</div>
+
+					<div class="frbl-tab-panel" data-tab-panel="maintenance" hidden>
+						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_maintenance' ); ?>
 					</div>
 
 					<div class="frbl-tab-panel" data-tab-panel="woocommerce" hidden>

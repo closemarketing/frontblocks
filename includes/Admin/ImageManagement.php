@@ -75,7 +75,7 @@ class ImageManagement {
 
 		add_settings_field(
 			'enable_image_management',
-			__( 'Enable Image Management', 'frontblocks' ),
+			__( 'Image Management', 'frontblocks' ),
 			array( $this, 'field_enable_image_management' ),
 			$this->page_slug,
 			'frontblocks_section_image_management'
@@ -186,7 +186,6 @@ class ImageManagement {
 	 */
 	public function field_enable_image_management() {
 		$options                      = get_option( 'frontblocks_settings', array() );
-		$enabled                      = (bool) ( $options['enable_image_management'] ?? false );
 		$disabled                     = (array) ( $options['image_sizes_disabled'] ?? array() );
 		$overrides                    = (array) ( $options['image_sizes_overrides'] ?? array() );
 		$custom                       = (array) ( $options['image_sizes_custom'] ?? array() );
@@ -215,22 +214,7 @@ class ImageManagement {
 		);
 		?>
 		<div class="frbl-image-management">
-			<div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
-				<label for="enable_image_management" class="tw:text-base tw:font-medium tw:text-gray-900">
-					<?php echo esc_html__( 'Enable Image Management', 'frontblocks' ); ?>
-				</label>
-				<label class="frbl-toggle">
-					<input type="checkbox"
-						id="enable_image_management"
-						name="frontblocks_settings[enable_image_management]"
-						value="1"
-						<?php checked( true, $enabled ); ?>
-					/>
-					<span></span>
-				</label>
-			</div>
-
-			<div id="image-management-fields-wrapper" style="<?php echo $enabled ? '' : 'display: none;'; ?>">
+			<div id="image-management-fields-wrapper">
 				<input type="hidden" id="frbl-image-sizes-config" name="frontblocks_settings[image_sizes_config]" value="<?php echo esc_attr( $sizes_config_json ); ?>" />
 
 				<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200 tw:mb-4">
@@ -347,8 +331,6 @@ class ImageManagement {
 		}
 
 		$posted = wp_unslash( $_POST['frontblocks_settings'] ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- nonce verified above; every value read from $posted below is sanitized individually.
-
-		$value['enable_image_management'] = ! empty( $posted['enable_image_management'] );
 
 		$allowed_targets              = array( 'none', 'webp', 'avif', 'both' );
 		$posted_target                = $posted['image_format_target'] ?? 'none';

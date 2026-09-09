@@ -81,16 +81,6 @@ class ImageManagement {
 	}
 
 	/**
-	 * Whether the Image Management module is enabled.
-	 *
-	 * @return bool
-	 */
-	public function is_enabled() {
-		$options = $this->get_options();
-		return (bool) ( $options['enable_image_management'] ?? false );
-	}
-
-	/**
 	 * Register custom image sizes and re-apply non-core size overrides.
 	 * Core size overrides (thumbnail/medium/medium_large/large) are
 	 * written to their wp_options directly when settings are saved, so
@@ -99,10 +89,6 @@ class ImageManagement {
 	 * @return void
 	 */
 	public function register_custom_and_override_sizes() {
-		if ( ! $this->is_enabled() ) {
-			return;
-		}
-
 		$options   = $this->get_options();
 		$overrides = (array) ( $options['image_sizes_overrides'] ?? array() );
 		$custom    = (array) ( $options['image_sizes_custom'] ?? array() );
@@ -135,10 +121,6 @@ class ImageManagement {
 	 * @return int|false
 	 */
 	public function filter_big_image_size_threshold( $threshold ) {
-		if ( ! $this->is_enabled() ) {
-			return $threshold;
-		}
-
 		$options = $this->get_options();
 
 		if ( empty( $options['image_max_upload_dimension_enabled'] ) && isset( $options['image_max_upload_dimension_enabled'] ) ) {
@@ -159,10 +141,6 @@ class ImageManagement {
 	 * @return array
 	 */
 	public function filter_image_size_names_choose( $sizes ) {
-		if ( ! $this->is_enabled() ) {
-			return $sizes;
-		}
-
 		$custom = (array) ( $this->get_options()['image_sizes_custom'] ?? array() );
 
 		foreach ( $custom as $size ) {
@@ -183,10 +161,6 @@ class ImageManagement {
 	 * @return array
 	 */
 	public function filter_intermediate_sizes_advanced( $sizes ) {
-		if ( ! $this->is_enabled() ) {
-			return $sizes;
-		}
-
 		$disabled = (array) ( $this->get_options()['image_sizes_disabled'] ?? array() );
 		foreach ( $disabled as $name ) {
 			unset( $sizes[ $name ] );
@@ -202,10 +176,6 @@ class ImageManagement {
 	 * @return string[]
 	 */
 	public function filter_intermediate_sizes( $sizes ) {
-		if ( ! $this->is_enabled() ) {
-			return $sizes;
-		}
-
 		$disabled = (array) ( $this->get_options()['image_sizes_disabled'] ?? array() );
 
 		return array_values( array_diff( $sizes, $disabled ) );
@@ -220,10 +190,6 @@ class ImageManagement {
 	 * @return array
 	 */
 	public function maybe_generate_modern_formats( $metadata, $attachment_id ) {
-		if ( ! $this->is_enabled() ) {
-			return $metadata;
-		}
-
 		$options = $this->get_options();
 		$target  = (string) ( $options['image_format_target'] ?? 'none' );
 
@@ -492,7 +458,7 @@ class ImageManagement {
 	 * @return string
 	 */
 	public function filter_content_img_tag( $filtered_image, $context, $attachment_id ) {
-		if ( ! $this->is_enabled() || ! $attachment_id ) {
+		if ( ! $attachment_id ) {
 			return $filtered_image;
 		}
 

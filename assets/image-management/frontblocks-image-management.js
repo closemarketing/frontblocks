@@ -17,8 +17,6 @@
 	const JOB_STORAGE_KEY = 'frblImageManagementActiveJob';
 
 	document.addEventListener( 'DOMContentLoaded', function () {
-		const enableCheckbox = document.getElementById( 'enable_image_management' );
-		const fieldsWrapper  = document.getElementById( 'image-management-fields-wrapper' );
 		const configInput    = document.getElementById( 'frbl-image-sizes-config' );
 		const tableContainer = document.getElementById( 'frbl-image-sizes-table' );
 		const configScript   = document.getElementById( 'frbl-image-management-config' );
@@ -29,7 +27,7 @@
 			{ input: document.getElementById( 'image_format_quality_avif' ), value: document.getElementById( 'frbl-image-quality-avif-value' ) },
 		];
 
-		if ( ! enableCheckbox || ! fieldsWrapper || ! configInput || ! tableContainer || ! configScript ) {
+		if ( ! configInput || ! tableContainer || ! configScript ) {
 			return;
 		}
 
@@ -45,10 +43,6 @@
 			overrides: payload.overrides || {},
 			custom:    payload.custom || [],
 		};
-
-		enableCheckbox.addEventListener( 'change', function () {
-			fieldsWrapper.style.display = enableCheckbox.checked ? '' : 'none';
-		} );
 
 		if ( maxDimensionToggle && maxDimensionField ) {
 			maxDimensionToggle.addEventListener( 'change', function () {
@@ -108,8 +102,8 @@
 					'<tr data-size="' + escapeHtml( size.name ) + '">' +
 					'<td>' + escapeHtml( size.name ) + '</td>' +
 					'<td>' + escapeHtml( size.source ) + '</td>' +
-					'<td><input type="number" class="frbl-size-width" min="0" value="' + width + '" style="width:70px" /></td>' +
-					'<td><input type="number" class="frbl-size-height" min="0" value="' + height + '" style="width:70px" /></td>' +
+					'<td><input type="number" class="frbl-size-width" min="0" value="' + width + '" style="width:90px" /></td>' +
+					'<td><input type="number" class="frbl-size-height" min="0" value="' + height + '" style="width:90px" /></td>' +
 					'<td><input type="checkbox" class="frbl-size-crop" ' + ( crop ? 'checked' : '' ) + ' /></td>' +
 					'<td>—</td>' +
 					'<td>—</td>' +
@@ -124,8 +118,8 @@
 					'<tr data-custom-index="' + index + '">' +
 					'<td><input type="text" class="frbl-custom-name" value="' + escapeHtml( size.name ) + '" style="width:120px" /></td>' +
 					'<td>custom</td>' +
-					'<td><input type="number" class="frbl-custom-width" min="0" value="' + size.width + '" style="width:70px" /></td>' +
-					'<td><input type="number" class="frbl-custom-height" min="0" value="' + size.height + '" style="width:70px" /></td>' +
+					'<td><input type="number" class="frbl-custom-width" min="0" value="' + size.width + '" style="width:90px" /></td>' +
+					'<td><input type="number" class="frbl-custom-height" min="0" value="' + size.height + '" style="width:90px" /></td>' +
 					'<td><input type="checkbox" class="frbl-custom-crop" ' + ( size.crop ? 'checked' : '' ) + ' /></td>' +
 					'<td><input type="text" class="frbl-custom-label" placeholder="' + escapeHtml( size.name ) + '" value="' + escapeHtml( size.label || '' ) + '" style="width:110px" /></td>' +
 					'<td><input type="checkbox" class="frbl-custom-show-in-picker" ' + ( size.show_in_picker ? 'checked' : '' ) + ' /></td>' +
