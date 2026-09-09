@@ -4,8 +4,8 @@ Tags: carrusel, cookies, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.5.2
-Version: 1.5.2
+Stable tag: 1.5.3
+Version: 1.5.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -224,10 +224,8 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Changelog ==
 
-= Unreleased =
-*   Added: "FrontBlocks - Table of Content" block — accessible, headings-based navigation generated from the post's `<h2>`-`<h6>` tags, with configurable level range, list style, collapsible and sticky options, and support for being placed directly in a block-theme Template as well as inside the post content.
-
 = 1.5.3 =
+*   Added: "FrontBlocks - Table of Content" block — accessible, headings-based navigation generated from the post's `<h2>`-`<h6>` tags, with configurable level range, list style, collapsible and sticky options, and support for being placed directly in a block-theme Template as well as inside the post content.
 *   Added: Google Sign-In — "Sign in with Google" / "Sign up with Google" for the wp-admin login screen, WooCommerce My Account (login and registration) and Checkout, plus a shortcode and a Google Login block. Verifies the Google ID token server-side; no third-party PHP library required.
 *   Improved: Cookie Notice Google Tag Manager and GA4 now use the same "Add a tracking ID or code integration" field as Clientify/Brevo/ChatGPT Ads instead of two dedicated fields — paste a bare `GTM-XXXXXXX` / `G-XXXXXXXXXX` id or either tool's own install snippet and it's auto-detected. Existing GTM/GA4 ids are migrated automatically on upgrade; no action needed.
 
