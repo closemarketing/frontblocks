@@ -1452,7 +1452,7 @@
 }
 .frbl-settings-save-bar {
   position: fixed;
-  left: 0;
+  left: 160px;
   right: 0;
   bottom: 0;
   z-index: 30;
@@ -1465,6 +1465,19 @@
   border-radius: 0;
   max-width: 100%;
   padding: 12px max(24px, calc((100% - 1240px) / 2));
+}
+.auto-fold .frbl-settings-save-bar {
+  left: 36px;
+}
+@media screen and (max-width: 960px) {
+  .auto-fold .frbl-settings-save-bar {
+    left: 0;
+  }
+}
+@media screen and (max-width: 782px) {
+  .frbl-settings-save-bar {
+    left: 0;
+  }
 }
 .frbl-save-status {
   color: #646970;
