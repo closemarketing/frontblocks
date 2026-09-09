@@ -57,8 +57,63 @@ class TableOfContents {
 	private function init_hooks() {
 		add_action( 'init', array( $this, 'register_block' ) );
 		add_filter( 'the_content', array( $this, 'inject_toc_into_content' ), 30 );
+		add_action( 'template_redirect', array( $this, 'maybe_start_output_buffer' ) );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_block_style' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_assets' ) );
+	}
+
+	/**
+	 * Enqueue the block's stylesheet on both the frontend and in the editor,
+	 * via `enqueue_block_assets` rather than `enqueue_block_editor_assets`.
+	 * Since WordPress 5.9 the block canvas renders inside an iframe, and only
+	 * styles registered through `enqueue_block_assets` are mirrored into that
+	 * iframe — a style enqueued solely via `enqueue_block_editor_assets` only
+	 * reaches the top-level admin document, never the iframed preview. That
+	 * previously left the per-level indentation rules (`.frbl-toc__item--
+	 * level-*`) missing from the editor preview even though the same classes
+	 * and the same stylesheet made it to the published page.
+	 *
+	 * @return void
+	 */
+	public function enqueue_block_style() {
+		wp_enqueue_style(
+			'frontblocks-toc-style',
+			FRBL_PLUGIN_URL . 'assets/table-of-contents/frontblocks-toc.css',
+			array(),
+			FRBL_VERSION
+		);
+	}
+
+	/**
+	 * Start a whole-page output buffer so a Table of Contents block placed
+	 * directly in a block-theme Template (outside the Post Content block) is
+	 * still filled in. `the_content` alone isn't enough there: only
+	 * core/post-content runs that filter, so a TOC block rendered as a
+	 * sibling of Post Content in the Template never receives it, and can't
+	 * see the headings that live inside Post Content either since those are
+	 * filtered in a separate, isolated pass. Buffering the entire page lets
+	 * the same placeholder/heading-discovery logic run once over the final,
+	 * fully assembled HTML. inject_toc_into_content() is idempotent and
+	 * exits immediately when no placeholder is present, so this is a no-op
+	 * for every request that doesn't use the block outside Post Content.
+	 *
+	 * @return void
+	 */
+	public function maybe_start_output_buffer() {
+		if ( is_admin() || is_feed() || is_robots() || is_trackback() || wp_doing_ajax() || wp_doing_cron() ) {
+			return;
+		}
+
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			return;
+		}
+
+		if ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
+			return;
+		}
+
+		ob_start( array( $this, 'inject_toc_into_content' ) );
 	}
 
 	/**
@@ -196,6 +251,12 @@ class TableOfContents {
 	 * @return string Content with heading ids/tabindex added where missing.
 	 */
 	private function assign_heading_ids( $content, array &$headings, array &$used_ids ) {
+		if ( preg_match_all( '/\bid=["\']([^"\']+)["\']/i', $content, $id_matches ) ) {
+			foreach ( $id_matches[1] as $existing_id ) {
+				$used_ids[ $existing_id ] = true;
+			}
+		}
+
 		return preg_replace_callback(
 			'/<h([1-6])((?:\s[^>]*)?)>(.*?)<\/h\1>/is',
 			function ( $matches ) use ( &$headings, &$used_ids ) {
@@ -365,13 +426,6 @@ class TableOfContents {
 	 * @return void
 	 */
 	public function enqueue_block_editor_assets() {
-		wp_enqueue_style(
-			'frontblocks-toc-style',
-			FRBL_PLUGIN_URL . 'assets/table-of-contents/frontblocks-toc.css',
-			array(),
-			FRBL_VERSION
-		);
-
 		wp_enqueue_script(
 			'frontblocks-toc-option',
 			FRBL_PLUGIN_URL . 'assets/table-of-contents/frontblocks-toc-option.js',
@@ -384,22 +438,20 @@ class TableOfContents {
 	}
 
 	/**
-	 * Enqueue frontend assets, only when the block is present on the page.
+	 * Enqueue frontend assets.
+	 *
+	 * Not gated behind has_block(): that only inspects the current post's
+	 * content, so it misses the block when it's placed directly in a
+	 * block-theme Template (outside the Post Content block) instead — the
+	 * same placement the whole-page output buffer in
+	 * maybe_start_output_buffer() exists to support. Both files are a few KB
+	 * combined, so loading them unconditionally on the frontend is a simpler
+	 * and more reliable trade-off than trying to detect every possible
+	 * placement up front.
 	 *
 	 * @return void
 	 */
 	public function enqueue_frontend_assets() {
-		if ( ! has_block( self::BLOCK_NAME ) ) {
-			return;
-		}
-
-		wp_enqueue_style(
-			'frontblocks-toc-style',
-			FRBL_PLUGIN_URL . 'assets/table-of-contents/frontblocks-toc.css',
-			array(),
-			FRBL_VERSION
-		);
-
 		wp_enqueue_script(
 			'frontblocks-toc-frontend',
 			FRBL_PLUGIN_URL . 'assets/table-of-contents/frontblocks-toc-frontend.js',

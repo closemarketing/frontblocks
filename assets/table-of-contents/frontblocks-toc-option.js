@@ -184,7 +184,7 @@ function TableOfContentsEdit(props) {
   }))));
 }
 registerBlockType('frontblocks/table-of-contents', {
-  title: __('Table of Contents', 'frontblocks'),
+  title: __('FrontBlocks - Table of Content', 'frontblocks'),
   description: __('An accessible table of contents generated from the headings in this post.', 'frontblocks'),
   category: 'widgets',
   icon: 'list-view',

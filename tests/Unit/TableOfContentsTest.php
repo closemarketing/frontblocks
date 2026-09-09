@@ -280,4 +280,19 @@ class TableOfContentsTest extends TestCase {
 		$this->assertStringContainsString( 'href="#real-heading"', $result );
 		$this->assertSame( 1, substr_count( $result, '<a class="frbl-toc__link"' ) );
 	}
+
+	/**
+	 * A generated heading id must not collide with an id already used by a
+	 * non-heading element (e.g. a Group block anchor) earlier in the
+	 * content — the occupied-id set must be seeded from every existing id
+	 * attribute in the content, not only from other headings.
+	 */
+	public function test_generated_id_avoids_colliding_with_a_non_heading_element_id() {
+		$content = $this->placeholder() . '<div id="overview">Custom anchor target</div><h2>Overview</h2>';
+
+		$result = $this->toc->inject_toc_into_content( $content );
+
+		$this->assertStringContainsString( '<a class="frbl-toc__link" href="#overview-2">Overview</a>', $result );
+		$this->assertStringContainsString( '<h2 id="overview-2"', $result );
+	}
 }
