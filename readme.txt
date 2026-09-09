@@ -1,6 +1,6 @@
-=== FrontBlocks Web Toolkit ===
+=== FrontBlocks Site Tools ===
 Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit2sumit, alexcm13
-Tags: carrusel, slider, lightweight, generatepress, gutenberg
+Tags: carrusel, cookies, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.8
 Tested up to: 7.1
@@ -9,13 +9,13 @@ Version: 1.5.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Plugin extending Gutenberg and GeneratePress with carousel, slider, animations, sticky columns, edge alignment and post insertion capabilities.
+Essential toolkit for a WordPress site: block editor enhancements, cookie consent, maintenance mode, image optimization, login and more.
 
 == Description ==
 
-FrontBlocks is a lightweight toolkit that extends the WordPress Block Editor (aka Gutenberg) with layout controls, interactive blocks, and content enhancements. Build richer pages with the blocks you already use, without relying on a page builder or custom code.
+FrontBlocks Site Tools is a lightweight, all-in-one toolkit covering the everyday needs of a WordPress site. Instead of installing a separate plugin for every small requirement, get block editor enhancements, cookie consent, maintenance mode, image optimization, social login and other practical site utilities from a single, well-maintained plugin.
 
-Turn Query Loops and grids into carousels, add animations and visual effects, improve layouts, and enable practical site utilities. FrontBlocks works with native WordPress blocks as well as supported GenerateBlocks elements, with optional integrations for WooCommerce, GenerateBlocks/GeneratePress and Gravity Forms.
+Turn Query Loops and grids into carousels, add animations and visual effects, improve layouts, and cover common site needs — from GDPR-friendly cookie notices to maintenance mode and modern image delivery. FrontBlocks works with native WordPress blocks as well as supported GenerateBlocks elements, with optional integrations for WooCommerce, GenerateBlocks/GeneratePress and Gravity Forms.
 
 **Container Edge Alignment**
 Add custom controls to GenerateBlocks Container blocks and native WordPress Group/Container blocks to remove padding from the left or right side, creating edge-to-edge layouts. This feature only appears for containers using GeneratePress global max-width settings, perfect for creating asymmetric layouts where content extends to one browser edge while maintaining proper spacing on the other side.

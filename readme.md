@@ -1,6 +1,6 @@
-# FrontBlocks Repository for WordPress Plugin
+# FrontBlocks Site Tools Repository for WordPress Plugin
 
-Repository for WordPress Plugin that add features to GeneratePress blocks ( GenerateBlocks).
+Repository for FrontBlocks Site Tools, a WordPress plugin covering the everyday needs of a site: block editor (Gutenberg/GenerateBlocks) enhancements alongside general-purpose site utilities such as cookie consent, maintenance mode, image management and login.
 
 ## Functionalities
 
@@ -24,8 +24,12 @@ Repository for WordPress Plugin that add features to GeneratePress blocks ( Gene
 - Headline Marquee - Infinite scrolling marquee effect for headline/text blocks with customizable speed (Fast, Medium, Slow)
 - Modern Settings Page with Card-based Layout
 - Custom SVG Animations
+
+### Site Tools
 - **Cookie Notice** - Configurable cookie consent banner (bar/box/popup) that gates Google Tag Manager, GA4, and supported tracking integrations behind consent, with Google Consent Mode v2 support for compatibility with Google Site Kit and other analytics plugins
 - **Image Management** - Enable/disable/override registered image sizes, define custom sizes, bulk-regenerate thumbnails, and automatically serve WebP/AVIF variants on the frontend
+- **Maintenance Mode** - Show a customizable maintenance page to visitors while keeping the site accessible to logged-in administrators
+- **Google Sign-In** - "Sign in / Sign up with Google" button for wp-login.php, WooCommerce My Account and Checkout, plus a shortcode and block, with server-side ID token verification
 - **Review Notice** - Dismissible admin notice inviting site owners to leave a WordPress.org review, shown 14 days after activation
 - **Redundant Plugins Notice** - Persistent admin notice detecting third-party plugins made unnecessary by an active FrontBlocks feature (e.g. SVG upload plugins, GDPR cookie consent plugins), extensible via the `frontblocks_redundant_plugins` filter
 - **Google Sign-In** - "Sign in / Sign up with Google" button for wp-login.php, WooCommerce My Account and Checkout, plus a shortcode and block, with server-side ID token verification

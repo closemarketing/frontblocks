@@ -4,7 +4,7 @@ Guidelines for AI coding agents working on this WordPress plugin.
 
 ## Project Overview
 
-**FrontBlocks** is a free WordPress plugin that extends Gutenberg and GeneratePress blocks. The PRO companion lives at `wp-content/plugins/frontblocks-pro/`.
+**FrontBlocks Site Tools** is a free, all-in-one WordPress plugin covering the everyday needs of a site — not just a block-extension add-on. It bundles Gutenberg/GeneratePress block enhancements alongside general-purpose site utilities: cookie consent, maintenance mode, image management (size control + WebP/AVIF delivery), social login, and more. New features do not need to be block-related to belong here — evaluate additions against "does a typical WordPress site commonly need this," not "is this a block." The PRO companion lives at `wp-content/plugins/frontblocks-pro/`.
 
 - **PHP minimum:** 7.0
 - **WordPress minimum:** 5.8 (required for the image-format-output filters used by Image Management)
@@ -103,16 +103,16 @@ Always run `composer lint` and `composer phpstan` before considering PHP work do
 
 1. **`frontblocks.php`** — entry point; defines constants (`FRBL_VERSION`, `FRBL_PLUGIN`, `FRBL_PLUGIN_URL`, `FRBL_PLUGIN_PATH`), loads Composer autoloader, hooks `plugins_loaded` → singleton `FrontBlocks\Plugin_Main::get_instance()`.
 2. **`includes/Plugin_Main.php`** — singleton; `load_modules()` instantiates all frontend and admin feature classes.
-3. **`includes/Frontend/*.php`** — each feature is a self-contained class; constructor calls `init_hooks()` which registers WordPress actions/filters for asset enqueuing and block filtering.
+3. **`includes/Frontend/*.php`** — each feature is a self-contained class; constructor calls `init_hooks()` which registers the WordPress actions/filters it needs (block filtering for block-related features; other hooks — uploads, `wp_head`, `template_redirect`, etc. — for general site-tool features).
 4. **`includes/Admin/Settings.php`** — settings page at `themes.php?page=frontblocks-settings`.
 
 ### Module Pattern
 
-Every frontend feature follows the same pattern:
-- Class in `includes/Frontend/FeatureName.php`
-- Assets in `assets/feature-name/` (JSX source + compiled JS + CSS)
-- Scripts/styles registered globally, enqueued only when the relevant block is present
-- Block output modified via `render_block` or `render_block_generateblocks/*` filters
+Every feature is a self-contained class following the same shape:
+- Class in `includes/Frontend/FeatureName.php` (and, if it needs admin UI, a matching `includes/Admin/FeatureName.php`)
+- Assets in `assets/feature-name/` (JSX source + compiled JS + CSS), when the feature has frontend/admin assets
+- For block-related features: scripts/styles enqueued only when the relevant block is present, block output modified via `render_block` or `render_block_generateblocks/*` filters
+- For general site-tool features (cookie consent, maintenance mode, image management, login, etc.): hooked wherever WordPress core exposes the relevant behavior — not tied to block presence
 
 ### Build Pipeline
 

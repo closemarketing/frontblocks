@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: FrontBlocks Web Toolkit
+ * Plugin Name: FrontBlocks Site Tools
  * Plugin URI:  https://wordpress.org/plugins/frontblocks/
- * Description: Blocks and helpers that extends Gutenberg and GeneratePress blocks.
+ * Description: Essential toolkit for a WordPress site: block editor enhancements, cookie consent, maintenance mode, image optimization, login and more.
  * Version:     1.5.3-beta.3
  * Author:      Closemarketing
  * Author URI:  https://close.marketing
