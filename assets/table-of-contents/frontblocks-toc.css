@@ -1,0 +1,125 @@
+/**
+ * FrontBlocks Table of Contents.
+ */
+
+.frbl-toc,
+.frbl-toc--collapsible {
+  --frbl-toc-accent: #0073aa;
+  box-sizing: border-box;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 1em 1.25em;
+  margin: 0 0 1.5em;
+}
+
+.frbl-toc *,
+.frbl-toc--collapsible * {
+  box-sizing: inherit;
+}
+
+.frbl-toc__title {
+  margin: 0 0 0.5em;
+  font-weight: 600;
+}
+
+.frbl-toc--collapsible > summary.frbl-toc__title {
+  cursor: pointer;
+  margin: 0;
+  list-style: none;
+}
+
+.frbl-toc--collapsible > summary.frbl-toc__title::-webkit-details-marker {
+  display: none;
+}
+
+.frbl-toc--collapsible > summary.frbl-toc__title::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 0.4em;
+  transition: transform 150ms ease;
+}
+
+.frbl-toc--collapsible[open] > summary.frbl-toc__title::before {
+  transform: rotate(90deg);
+}
+
+.frbl-toc--collapsible > .frbl-toc__nav {
+  margin-top: 0.75em;
+}
+
+.frbl-toc__list {
+  margin: 0;
+  padding: 0 0 0 1.25em;
+}
+
+.frbl-toc__list--plain {
+  list-style: none;
+  padding-left: 0;
+}
+
+.frbl-toc__item {
+  margin: 0.25em 0;
+}
+
+.frbl-toc__item--level-3 {
+  margin-left: 1em;
+}
+
+.frbl-toc__item--level-4 {
+  margin-left: 2em;
+}
+
+.frbl-toc__item--level-5 {
+  margin-left: 3em;
+}
+
+.frbl-toc__item--level-6 {
+  margin-left: 4em;
+}
+
+.frbl-toc__link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.frbl-toc__link:hover {
+  text-decoration: underline;
+}
+
+.frbl-toc__link[aria-current='location'] {
+  font-weight: 600;
+  color: var(--frbl-toc-accent);
+}
+
+.frbl-toc__link:focus-visible {
+  outline: 2px solid var(--frbl-toc-accent);
+  outline-offset: 2px;
+}
+
+.frbl-toc--sticky {
+  position: sticky;
+  top: 1em;
+  max-height: calc(100vh - 2em);
+  overflow-y: auto;
+}
+
+/* Headings targeted by a Table of Contents link get tabindex="-1" so they
+ * can receive focus programmatically. Scoped to [data-frbl-toc-heading]
+ * rather than a bare [tabindex="-1"] selector, so this doesn't affect
+ * focus styling on unrelated tabindex="-1" elements elsewhere on the site. */
+[data-frbl-toc-heading]:focus {
+  outline: 2px solid var(--frbl-toc-accent);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frbl-toc,
+  .frbl-toc--collapsible,
+  .frbl-toc--collapsible > summary.frbl-toc__title::before {
+    transition: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
