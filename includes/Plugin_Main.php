@@ -190,6 +190,9 @@ class Plugin_Main {
 		// Columns Same Height module (equal-height columns for native columns block).
 		new Frontend\ColumnsSameHeight();
 
+		// Column Link module (makes the native column block clickable).
+		new Frontend\ColumnLink();
+
 		// Download Button module (download option for the native button block).
 		new Frontend\DownloadButton();
 
