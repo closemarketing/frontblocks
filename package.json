@@ -56,6 +56,7 @@
     "test:cookie-notice": "node --test tests/js/cookie-notice-injection.test.js",
     "test:accessibility-utils": "node --test tests/js/accessibility-utils.test.js",
     "test:carousel-accessibility": "node --test tests/js/carousel-accessibility.test.js",
+    "test:text-animation": "node --test tests/js/text-animation-inline-formatting.test.js",
     "build:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css",
     "watch:css": "postcss assets/admin/settings-src.css -o assets/admin/settings.css --watch",
     "build:download-button": "babel assets/download-button/frontblocks-download-button-option.jsx --out-file assets/download-button/frontblocks-download-button-option.js",

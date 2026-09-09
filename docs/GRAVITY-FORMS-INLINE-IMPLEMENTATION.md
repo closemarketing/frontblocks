@@ -217,7 +217,7 @@ npm run build
 
 ## Compatibility
 
-- **WordPress**: 5.0+
+- **WordPress**: 5.5+
 - **PHP**: 7.0+
 - **Gravity Forms**: Any version with block editor support
 - **GeneratePress**: Optional (plugin works independently)
@@ -235,4 +235,3 @@ npm run build
 - CSS uses modern features (flexbox, custom properties) - IE11 not supported
 - Feature is completely optional - doesn't affect existing forms
 - Can be disabled per-form basis (just toggle off)
-

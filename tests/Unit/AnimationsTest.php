@@ -207,4 +207,28 @@ class AnimationsTest extends TestCase {
 		$this->assertStringContainsString( 'frbl-glass-effect', $result );
 		$this->assertStringContainsString( 'frbl-hover-bg-scale', $result );
 	}
+
+	/**
+	 * register_native_block_attributes() must register the same
+	 * frblAnimation* schema server-side that the JS filter injects
+	 * client-side, so REST block-renderer requests for third-party blocks
+	 * don't get rejected with rest_additional_properties_forbidden.
+	 */
+	public function test_native_registration_adds_animation_attributes() {
+		$attributes = $this->animations->register_native_block_attributes(
+			array(
+				'attributes' => array(
+					'customAttribute' => array(
+						'type' => 'string',
+					),
+				),
+			),
+			'frontblocks/test-animation-attributes'
+		);
+
+		$this->assertArrayHasKey( 'customAttribute', $attributes['attributes'] );
+		$this->assertSame( 'string', $attributes['attributes']['frblAnimation']['type'] );
+		$this->assertSame( 0, $attributes['attributes']['frblAnimationDelay']['default'] );
+		$this->assertFalse( $attributes['attributes']['frblAnimationRepeat']['default'] );
+	}
 }

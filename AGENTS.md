@@ -7,7 +7,7 @@ Guidelines for AI coding agents working on this WordPress plugin.
 **FrontBlocks** is a free WordPress plugin that extends Gutenberg and GeneratePress blocks. The PRO companion lives at `wp-content/plugins/frontblocks-pro/`.
 
 - **PHP minimum:** 7.0
-- **WordPress minimum:** 5.0
+- **WordPress minimum:** 5.5
 - **Namespace:** `FrontBlocks\`
 - **Prefix (constants/functions):** `FRBL_` / `frbl_` / `frontblocks_`
 - **Text domain:** `frontblocks`
@@ -144,15 +144,15 @@ Every frontend feature follows the same pattern:
 - Do not commit compiled JS/CSS without also committing the source files.
 - Do not write code, comments, or documentation in any language other than English.
 
-## Release
+## Build a release
 
 Actions for making a release:
-- Update readme Stable Tag, and Version.
-- Update Plugin Header and constant.
-- Build the assets.
-- Create release in GitHub.
+- Update the Stable Tag in `readme.txt` and the plugin version in its header and `CCRMRE_VERSION` constant.
+- Finalize the `= Unreleased =` changelog entries under the released version and create a new empty `= Unreleased =` section.
+- Create the matching GitHub release and tag.
 
 ## Test Enforcement
 
 - Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
-- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test` with a specific filename or filter.
+- Run the minimum number of PHPUnit tests needed to ensure code quality and speed. Use `composer test -- --filter=<test-name>` for focused coverage.
+

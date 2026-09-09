@@ -1276,20 +1276,12 @@ class Settings {
 			'frontblocks_section_features'
 		);
 
-		// Popups section.
-		add_settings_section(
-			'frontblocks_section_popups',
-			__( 'Popups', 'frontblocks' ),
-			array( $this, 'section_popups_callback' ),
-			$this->page_slug
-		);
-
 		add_settings_field(
 			$this->option_enable_popups,
 			__( 'Enable Popups', 'frontblocks' ),
 			array( $this, 'field_enable_popups' ),
 			$this->page_slug,
-			'frontblocks_section_popups'
+			'frontblocks_section_features'
 		);
 
 		add_settings_field(
@@ -1348,7 +1340,6 @@ class Settings {
 
 		list( $features_on, $features_total ) = $this->count_section_toggles( 'frontblocks_section_features' );
 		list( $woo_on, $woo_total )           = $this->count_section_toggles( 'frontblocks_section_woocommerce_features' );
-		list( $popups_on, $popups_total )     = $this->count_section_toggles( 'frontblocks_section_popups' );
 
 		$tabs = array(
 			array(
@@ -1376,18 +1367,12 @@ class Settings {
 				'total' => $woo_total,
 			),
 			array(
-				'id'    => 'popups',
-				'label' => __( 'Popups', 'frontblocks' ),
-				'on'    => $popups_on,
-				'total' => $popups_total,
-			),
-			array(
 				'id'    => 'cookies',
 				'label' => __( 'Cookies', 'frontblocks' ),
 			),
 			array(
 				'id'    => 'google-signin',
-				'label' => __( 'Google Sign-In', 'frontblocks' ),
+				'label' => __( 'Social Login', 'frontblocks' ),
 			),
 			array(
 				'id'    => 'cpt',
@@ -1598,22 +1583,6 @@ class Settings {
 							<?php endif; ?>
 						</div>
 						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_woocommerce_features' ); ?>
-					</div>
-
-					<div class="frbl-tab-panel" data-tab-panel="popups" hidden>
-						<div class="frbl-tab-panel-head">
-							<div>
-								<h2><?php esc_html_e( 'Popups', 'frontblocks' ); ?></h2>
-								<p><?php esc_html_e( 'Create popup content with the block editor and choose when and where it appears.', 'frontblocks' ); ?></p>
-							</div>
-							<?php if ( $popups_total > 0 ) : ?>
-								<div class="frbl-bulk-actions">
-									<button type="button" class="frbl-btn-outline" data-bulk-action="enable"><?php esc_html_e( 'Enable all', 'frontblocks' ); ?></button>
-									<button type="button" class="frbl-btn-ghost" data-bulk-action="disable"><?php esc_html_e( 'Disable all', 'frontblocks' ); ?></button>
-								</div>
-							<?php endif; ?>
-						</div>
-						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_popups' ); ?>
 					</div>
 
 					<div class="frbl-tab-panel" data-tab-panel="cookies" hidden>
@@ -2063,19 +2032,6 @@ class Settings {
 	}
 
 	/**
-	 * Popups section callback.
-	 *
-	 * @return void
-	 */
-	private function section_popups_callback() {
-		?>
-		<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
-			<?php echo esc_html__( 'Create popup content with the block editor and configure when and where it appears.', 'frontblocks' ); ?>
-		</p>
-		<?php
-	}
-
-	/**
 	 * Maintenance mode section callback.
 	 *
 	 * @return void
@@ -2224,10 +2180,10 @@ class Settings {
 			<?php
 		} else {
 			// Render regular sections with feature grid. The "Optional features" and
-			// "WooCommerce" and "Popups" tabs already print their own <h2>/description
+			// "WooCommerce" tabs already print their own <h2>/description
 			// in the tab head, so skip the duplicate title for those sections — the callback (which
 			// may render a PRO upsell notice) still runs.
-			$suppress_title = in_array( $section['id'], array( 'frontblocks_section_features', 'frontblocks_section_woocommerce_features', 'frontblocks_section_popups' ), true );
+			$suppress_title = in_array( $section['id'], array( 'frontblocks_section_features', 'frontblocks_section_woocommerce_features' ), true );
 			?>
 			<div class="frbl-section-wrapper">
 				<?php if ( ! $suppress_title ) : ?>
@@ -2253,7 +2209,7 @@ class Settings {
 				<!-- Features Grid -->
 				<div class="frbl-features-grid">
 					<?php
-					foreach ( (array) $wp_settings_fields[ $this->page_slug ][ $section['id'] ] as $field ) {
+					foreach ( $this->get_section_fields( $section['id'] ) as $field ) {
 						$this->render_settings_field( $field );
 					}
 					?>
@@ -2264,15 +2220,46 @@ class Settings {
 	}
 
 	/**
-	 * Render a single settings field as a card.
+	 * Get the fields for a settings section in display order.
 	 *
-	 * @param array $field Field data.
-	 * @return void
+	 * Optional features show PRO cards before the free cards while preserving the
+	 * registration order within each group.
+	 *
+	 * @param string $section_id Settings section ID.
+	 * @return array
 	 */
-	private function render_settings_field( $field ) {
-		// Determine if this is a PRO feature (always, regardless of license status).
-		$is_pro_feature = in_array(
-			$field['id'],
+	private function get_section_fields( $section_id ) {
+		global $wp_settings_fields;
+
+		$fields = (array) $wp_settings_fields[ $this->page_slug ][ $section_id ];
+
+		if ( 'frontblocks_section_features' !== $section_id ) {
+			return $fields;
+		}
+
+		$pro_fields  = array();
+		$free_fields = array();
+
+		foreach ( $fields as $field ) {
+			if ( isset( $field['id'] ) && $this->is_pro_feature( $field['id'] ) ) {
+				$pro_fields[] = $field;
+			} else {
+				$free_fields[] = $field;
+			}
+		}
+
+		return array_merge( $pro_fields, $free_fields );
+	}
+
+	/**
+	 * Check whether a setting belongs to a PRO feature.
+	 *
+	 * @param string $field_id Settings field ID.
+	 * @return bool
+	 */
+	private function is_pro_feature( $field_id ) {
+		return in_array(
+			$field_id,
 			array(
 				$this->option_enable_gutenberg,
 				$this->option_enable_simple_prices_variable_products,
@@ -2296,6 +2283,17 @@ class Settings {
 			),
 			true
 		);
+	}
+
+	/**
+	 * Render a single settings field as a card.
+	 *
+	 * @param array $field Field data.
+	 * @return void
+	 */
+	private function render_settings_field( $field ) {
+		// Determine if this is a PRO feature (always, regardless of license status).
+		$is_pro_feature = $this->is_pro_feature( $field['id'] );
 
 		// Apply PRO styling only if license is not valid.
 		$needs_license = $is_pro_feature && ! $this->is_license_valid;
