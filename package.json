@@ -66,6 +66,6 @@
   },
   "dependencies": {
     "react": "^19.3.0",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.3.0"
   }
 }
