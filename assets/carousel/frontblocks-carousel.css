@@ -184,40 +184,6 @@
   transform: translate(-50%, -50%) scale(1.2);
 }
 
-/* Accessible pause/resume control (WCAG 2.2.2). Always at least 24x24
- * CSS px (WCAG 2.5.8), with a visible focus indicator (WCAG 2.4.7). */
-.frontblocks .glide__pause {
-  position: absolute;
-  z-index: 2;
-  top: 0.75em;
-  right: 0.75em;
-  box-sizing: border-box;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  background-color: rgba(0, 0, 0, 0.45);
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background-color 150ms ease;
-}
-
-.frontblocks .glide__pause:hover {
-  background-color: rgba(0, 0, 0, 0.7);
-}
-
-.frontblocks .glide__pause:focus {
-  outline: 2px solid white;
-  outline-offset: 2px;
-}
-
-.frontblocks .glide__pause:focus:not(:focus-visible) {
-  outline: none;
-}
-
 .frontblocks.glide--swipeable {
   cursor: grab;
   cursor: -moz-grab;

@@ -87,8 +87,7 @@ function createEnvironment(attrs = {}, { matchesReducedMotion = false } = {}) {
 	return {
 		glideConfig,
 		glideCalls,
-		wrapperParent: wrapperParentEl,
-		pauseButton: wrapperParentEl.children.find((child) => child.classList.contains('glide__pause'))
+		wrapperParent: wrapperParentEl
 	};
 }
 
@@ -104,43 +103,7 @@ test('autoplay is forced off for visitors with prefers-reduced-motion, regardles
 	assert.equal(glideConfig.autoplay, false);
 });
 
-test('no pause button is rendered when autoplay is off', () => {
-	const { pauseButton } = createEnvironment({ 'data-autoplay': '' });
-
-	assert.equal(pauseButton, undefined);
-});
-
-test('no pause button is rendered for a reduced-motion visitor even if autoplay was configured', () => {
-	const { pauseButton } = createEnvironment({ 'data-autoplay': '5000' }, { matchesReducedMotion: true });
-
-	assert.equal(pauseButton, undefined);
-});
-
-test('an accessible pause button is rendered whenever autoplay is actually running', () => {
-	const { pauseButton } = createEnvironment({ 'data-autoplay': '5000' });
-
-	assert.ok(pauseButton);
-	assert.equal(pauseButton.getAttribute('aria-pressed'), 'false');
-	assert.equal(pauseButton.getAttribute('aria-label'), 'Pause automatic slideshow');
-});
-
-test('clicking the pause button pauses Glide and flips its own label/state', () => {
-	const { pauseButton, glideCalls } = createEnvironment({ 'data-autoplay': '5000' });
-
-	pauseButton.dispatch('click');
-
-	assert.equal(glideCalls.pause, 1);
-	assert.equal(pauseButton.getAttribute('aria-pressed'), 'true');
-	assert.equal(pauseButton.getAttribute('aria-label'), 'Play automatic slideshow');
-
-	pauseButton.dispatch('click');
-
-	assert.equal(glideCalls.play, 1);
-	assert.equal(pauseButton.getAttribute('aria-pressed'), 'false');
-	assert.equal(pauseButton.getAttribute('aria-label'), 'Pause automatic slideshow');
-});
-
-test('keyboard/AT focus inside the carousel pauses autoplay and resumes it on blur, independent of the pause button state', () => {
+test('keyboard/AT focus inside the carousel pauses autoplay and resumes it on blur', () => {
 	const { wrapperParent, glideCalls } = createEnvironment({ 'data-autoplay': '5000', 'data-pause-on-hover': 'true' });
 
 	wrapperParent.dispatch('focusin');
@@ -159,14 +122,18 @@ test('hover/focus auto-pause is skipped entirely when the pause-on-hover attribu
 	assert.equal(glideCalls.pause, 0);
 });
 
-test('a manual pause survives the mouse leaving the carousel — the two pause reasons don\'t fight each other', () => {
-	const { wrapperParent, pauseButton, glideCalls } = createEnvironment({ 'data-autoplay': '5000' });
+test('hover and keyboard/AT focus pause reasons don\'t fight each other', () => {
+	const { wrapperParent, glideCalls } = createEnvironment({ 'data-autoplay': '5000' });
 
 	wrapperParent.dispatch('mouseenter');
-	pauseButton.dispatch('click');
-	assert.ok(glideCalls.pause > 0);
+	wrapperParent.dispatch('focusin');
+	assert.equal(glideCalls.pause, 2, 'Both reasons call pause() independently — Glide.pause() is idempotent.');
 
 	wrapperParent.dispatch('mouseleave');
 
-	assert.equal(glideCalls.play, 0, 'Autoplay must stay paused: the manual pause reason is still active even though hover ended.');
+	assert.equal(glideCalls.play, 0, 'Autoplay must stay paused: focus is still active even though hover ended.');
+
+	wrapperParent.dispatch('focusout');
+
+	assert.equal(glideCalls.play, 1, 'Autoplay resumes once neither reason applies any more.');
 });
