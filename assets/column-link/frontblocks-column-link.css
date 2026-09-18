@@ -1,0 +1,8 @@
+.frbl-column-link {
+	cursor: pointer;
+}
+
+.frbl-column-link:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}

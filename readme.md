@@ -14,6 +14,7 @@ Repository for FrontBlocks Site Tools, a WordPress plugin covering the everyday 
 - Carousel/Slider
 - Native Gallery
 - Sticky Columns
+- **Column Link** - Make an entire native Column block clickable, redirecting to a configured URL
 - Insert Post
 - Counter Block
 - Reading Time Block
@@ -78,6 +79,7 @@ Repository for FrontBlocks Site Tools, a WordPress plugin covering the everyday 
 - [Google Sign-In](./docs/GOOGLE-SIGNIN.md) - "Sign in / Sign up with Google" for wp-login.php and WooCommerce
 - [Extending Settings Tabs](./docs/SETTINGS-TAB-EXTENSIONS.md) - Add a companion-plugin tab and matching panel to FrontBlocks settings
 - [Table of Contents](./docs/TABLE-OF-CONTENTS.md) - Accessible, headings-based navigation block
+- [Column Link](./docs/COLUMN-LINK.md) - Make an entire native Column block clickable
 
 ## Release
 Actions for making a release:
