@@ -4,8 +4,8 @@ Tags: carrusel, cookies, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.5.3
-Version: 1.5.3
+Stable tag: 1.5.4
+Version: 1.5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -223,6 +223,14 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 2. Go to Settings > FrontBlocks > Features and enable the features you want to use.
 
 == Changelog ==
+
+= Unreleased =
+
+= 1.5.4 =
+*   Added: Column Link controls for native WordPress Column blocks — make an entire column clickable, optionally open the destination in a new tab, and preserve the behaviour of links and buttons placed inside it.
+*   Changed: Removed the Carousel's visible manual pause/resume button. Carousel autoplay still pauses while the carousel is hovered or focused.
+*   Fixed: Rebuilt the admin settings stylesheet so the fixed save bar aligns correctly with the WordPress admin layout.
+*   Updated: Action Scheduler and build/development dependencies.
 
 = 1.5.3 =
 *   Added: "FrontBlocks - Table of Content" block — accessible, headings-based navigation generated from the post's `<h2>`-`<h6>` tags, with configurable level range, list style, collapsible and sticky options, and support for being placed directly in a block-theme Template as well as inside the post content.

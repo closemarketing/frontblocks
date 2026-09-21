@@ -224,8 +224,14 @@
   .frbl-settings-wrapper .tw\:mt-0 {
     margin-top: 0px;
   }
+  .frbl-settings-wrapper .tw\:mt-1 {
+    margin-top: var(--tw-spacing);
+  }
   .frbl-settings-wrapper .tw\:mt-2 {
     margin-top: calc(var(--tw-spacing) * 2);
+  }
+  .frbl-settings-wrapper .tw\:mt-3 {
+    margin-top: calc(var(--tw-spacing) * 3);
   }
   .frbl-settings-wrapper .tw\:mt-4 {
     margin-top: calc(var(--tw-spacing) * 4);
@@ -1452,7 +1458,7 @@
 }
 .frbl-settings-save-bar {
   position: fixed;
-  left: 160px;
+  left: 0;
   right: 0;
   bottom: 0;
   z-index: 30;
@@ -1465,19 +1471,6 @@
   border-radius: 0;
   max-width: 100%;
   padding: 12px max(24px, calc((100% - 1240px) / 2));
-}
-.auto-fold .frbl-settings-save-bar {
-  left: 36px;
-}
-@media screen and (max-width: 960px) {
-  .auto-fold .frbl-settings-save-bar {
-    left: 0;
-  }
-}
-@media screen and (max-width: 782px) {
-  .frbl-settings-save-bar {
-    left: 0;
-  }
 }
 .frbl-save-status {
   color: #646970;
