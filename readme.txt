@@ -181,11 +181,8 @@ Register and manage events directly from WordPress. Enable the Events feature fr
 **Language Recommendation Banner:**
 Display a smart banner that detects the visitor's browser language and suggests switching to the matching version of the site. Enable the banner from the FrontBlocks settings page. The banner only appears when the site has a translated version matching the user's browser language, and respects user dismissal via a cookie.
 
-**Cookie Notice (moving to FrontConsent):**
-The Cookie Notice module is being extracted into its own dedicated free plugin, **FrontConsent** (https://wordpress.org/plugins/front-consent/), so cookie consent is easier to find and keeps improving on its own. It keeps working here during the transition, but if you have it enabled you'll see a notice offering a one-click install of FrontConsent, which automatically migrates your existing settings and stats and turns this module off. New sites should install FrontConsent directly instead of enabling Cookie Notice here.
-
-**Advanced Cookie Management (FrontBlocks PRO):**
-Extend Cookie Notice with separate Necessary, Analytics and Marketing preferences, a customizable preferences dialog and a reusable trigger that lets visitors update their choices later. Google Ads, Meta Pixel and Microsoft Clarity only run after the relevant category is accepted. It also supports the official Meta Pixel for WordPress plugin by holding its Pixel and Conversions API signals until Marketing consent.
+**Cookie Notice (moved to FrontConsent):**
+Cookie consent — including the Advanced Cookie Management upsell (per-category consent, Google Ads/Meta Pixel/Microsoft Clarity) — moved out of FrontBlocks entirely into its own dedicated free plugin, **FrontConsent** (https://wordpress.org/plugins/front-consent/), so it's easier to find and keeps improving on its own. The Cookie Notice module keeps working here during the transition, but if you have it enabled you'll see a notice offering a one-click install of FrontConsent, which automatically migrates your existing settings and stats and turns this module off. New sites should install FrontConsent directly instead of enabling Cookie Notice here.
 
 **WooCommerce Features:**
 Included features for WooCommerce FrontBlocks PRO.
@@ -225,7 +222,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 == Changelog ==
 
 = Unreleased =
-*   Deprecated: Cookie Notice is being extracted into its own dedicated plugin, FrontConsent. This module keeps working for now; sites with it enabled see an admin notice offering a one-click install of FrontConsent, which migrates settings/stats automatically and disables this module.
+*   Deprecated: Cookie Notice is being extracted into its own dedicated plugin, FrontConsent — including the Advanced Cookie Management PRO upsell, which now lives in FrontConsent's own readme/settings. This module keeps working for now; sites with it enabled see an admin notice offering a one-click install of FrontConsent, which migrates settings/stats automatically and disables this module. The Cookie Notice settings tab no longer shows configuration fields — only an install/manage link.
 
 = 1.5.4 =
 *   Added: Column Link controls for native WordPress Column blocks — make an entire column clickable, optionally open the destination in a new tab, and preserve the behaviour of links and buttons placed inside it.
