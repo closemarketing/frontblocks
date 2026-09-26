@@ -56,7 +56,6 @@
     "build:columns-same-height": "babel assets/columns-same-height/frontblocks-columns-same-height-option.jsx --out-file assets/columns-same-height/frontblocks-columns-same-height-option.js",
     "build:column-link": "babel assets/column-link/frontblocks-column-link-option.jsx --out-file assets/column-link/frontblocks-column-link-option.js",
     "test:column-link": "node --test tests/js/column-link-frontend.test.js",
-    "test:cookie-notice": "node --test tests/js/cookie-notice-injection.test.js",
     "test:table-of-contents": "node --test tests/js/table-of-contents-frontend.test.js",
     "test:accessibility-utils": "node --test tests/js/accessibility-utils.test.js",
     "test:carousel-accessibility": "node --test tests/js/carousel-accessibility.test.js",
