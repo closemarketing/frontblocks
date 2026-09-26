@@ -84,6 +84,11 @@ class Plugin_Main {
 				require_once FRBL_PLUGIN_PATH . 'includes/Admin/RedundantPlugins.php';
 			}
 			new Admin\RedundantPlugins();
+
+			if ( ! class_exists( 'FrontBlocks\Admin\CookieNoticeDeprecationNotice' ) ) {
+				require_once FRBL_PLUGIN_PATH . 'includes/Admin/CookieNoticeDeprecationNotice.php';
+			}
+			new Admin\CookieNoticeDeprecationNotice();
 		}
 
 		// Image Management admin UI (settings section + bulk actions). Loaded

@@ -192,9 +192,21 @@ class CookieNotice {
 	/**
 	 * Check if the Cookie Notice module is enabled.
 	 *
+	 * Always disabled once FrontConsent is active: FrontConsent is the
+	 * dedicated cookie-consent plugin this module is being retired in favor
+	 * of, and its own Migration class already flips
+	 * frontblocks_settings['enable_cookie_notice'] to false on activation —
+	 * this check is what keeps both banners from ever rendering together in
+	 * the narrow window before that migration has run (or if a site's admin
+	 * hand-edits the option back afterward).
+	 *
 	 * @return bool
 	 */
 	private function is_enabled() {
+		if ( defined( 'FRCN_VERSION' ) ) {
+			return false;
+		}
+
 		$options = get_option( 'frontblocks_settings', array() );
 		return (bool) ( $options['enable_cookie_notice'] ?? false );
 	}

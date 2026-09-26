@@ -181,8 +181,8 @@ Register and manage events directly from WordPress. Enable the Events feature fr
 **Language Recommendation Banner:**
 Display a smart banner that detects the visitor's browser language and suggests switching to the matching version of the site. Enable the banner from the FrontBlocks settings page. The banner only appears when the site has a translated version matching the user's browser language, and respects user dismissal via a cookie.
 
-**Cookie Notice:**
-Show a lightweight, configurable cookie consent banner with Accept and Reject actions. Choose between a full-width bottom bar, a boxed panel (bottom-left or bottom-right) or a centered popup, and customize the message, button labels, cookie policy page, accent color and cookie expiration. Google Tag Manager and/or GA4 are only requested and loaded after a visitor accepts — never before — and returning visitors who already accepted get the scripts on normal page load. The settings page also shows a simple accepted/rejected acceptance-rate stat (admins are excluded from the count). Implements Google Consent Mode v2, so it also holds back tracking from other analytics/ads plugins that respect it — including **Google Site Kit** — until the visitor decides.
+**Cookie Notice (moving to FrontConsent):**
+The Cookie Notice module is being extracted into its own dedicated free plugin, **FrontConsent** (https://wordpress.org/plugins/front-consent/), so cookie consent is easier to find and keeps improving on its own. It keeps working here during the transition, but if you have it enabled you'll see a notice offering a one-click install of FrontConsent, which automatically migrates your existing settings and stats and turns this module off. New sites should install FrontConsent directly instead of enabling Cookie Notice here.
 
 **Advanced Cookie Management (FrontBlocks PRO):**
 Extend Cookie Notice with separate Necessary, Analytics and Marketing preferences, a customizable preferences dialog and a reusable trigger that lets visitors update their choices later. Google Ads, Meta Pixel and Microsoft Clarity only run after the relevant category is accepted. It also supports the official Meta Pixel for WordPress plugin by holding its Pixel and Conversions API signals until Marketing consent.
@@ -225,6 +225,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 == Changelog ==
 
 = Unreleased =
+*   Deprecated: Cookie Notice is being extracted into its own dedicated plugin, FrontConsent. This module keeps working for now; sites with it enabled see an admin notice offering a one-click install of FrontConsent, which migrates settings/stats automatically and disables this module.
 
 = 1.5.4 =
 *   Added: Column Link controls for native WordPress Column blocks — make an entire column clickable, optionally open the destination in a new tab, and preserve the behaviour of links and buttons placed inside it.
