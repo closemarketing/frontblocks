@@ -1,7 +1,4 @@
-"use strict";
-
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
@@ -1871,7 +1868,7 @@ function TextAnimationEdit(props) {
     text: stripHtml(content) || __('Write your text here…', 'frontblocks'),
     style: previewStyle,
     Tag: htmlTag
-  }) : /*#__PURE__*/React.createElement(RichText, _extends({}, blockProps, {
+  }) : /*#__PURE__*/React.createElement(RichText, _objectSpread(_objectSpread({}, blockProps), {}, {
     tagName: htmlTag,
     value: content,
     onChange: function onChange(value) {
