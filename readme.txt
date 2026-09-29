@@ -4,8 +4,8 @@ Tags: carrusel, cookies, lightweight, generatepress, gutenberg
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.5.4
-Version: 1.5.4
+Stable tag: 1.5.5
+Version: 1.5.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -221,8 +221,11 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Changelog ==
 
+= 1.5.5 =
+*   Changed: Cookie Notice configuration has moved to the dedicated FrontConsent plugin, including the Advanced Cookie Management PRO upsell. Existing sites keep the legacy module during the transition and can install FrontConsent from the Cookie Notice tab or admin notice; settings and statistics migrate automatically and the legacy banner is disabled.
+*   Updated: Bundled Action Scheduler and development/build dependencies.
+
 = Unreleased =
-*   Deprecated: Cookie Notice is being extracted into its own dedicated plugin, FrontConsent — including the Advanced Cookie Management PRO upsell, which now lives in FrontConsent's own readme/settings. This module keeps working for now; sites with it enabled see an admin notice offering a one-click install of FrontConsent, which migrates settings/stats automatically and disables this module. The Cookie Notice settings tab no longer shows configuration fields — only an install/manage link.
 
 = 1.5.4 =
 *   Added: Column Link controls for native WordPress Column blocks — make an entire column clickable, optionally open the destination in a new tab, and preserve the behaviour of links and buttons placed inside it.
