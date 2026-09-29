@@ -26,6 +26,16 @@
       "step": "installPlugin",
       "pluginZipFile": {
         "resource": "wordpress.org/plugins",
+        "slug": "frontconsent"
+      },
+      "options": {
+        "activate": true
+      }
+    },
+    {
+      "step": "installPlugin",
+      "pluginZipFile": {
+        "resource": "wordpress.org/plugins",
         "slug": "generateblocks"
       },
       "options": {

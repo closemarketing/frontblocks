@@ -192,9 +192,21 @@ class CookieNotice {
 	/**
 	 * Check if the Cookie Notice module is enabled.
 	 *
+	 * Always disabled once FrontConsent is active: FrontConsent is the
+	 * dedicated cookie-consent plugin this module is being retired in favor
+	 * of, and its own Migration class already flips
+	 * frontblocks_settings['enable_cookie_notice'] to false on activation —
+	 * this check is what keeps both banners from ever rendering together in
+	 * the narrow window before that migration has run (or if a site's admin
+	 * hand-edits the option back afterward).
+	 *
 	 * @return bool
 	 */
 	private function is_enabled() {
+		if ( defined( 'FRCN_VERSION' ) ) {
+			return false;
+		}
+
 		$options = get_option( 'frontblocks_settings', array() );
 		return (bool) ( $options['enable_cookie_notice'] ?? false );
 	}
@@ -1301,6 +1313,23 @@ class CookieNotice {
 				$integrations[ $type ] = array(
 					'type' => $type,
 					'id'   => $id,
+				);
+			}
+		}
+
+		// Keep sites upgrading directly from the retired dedicated fields working
+		// until FrontConsent migrates them into its shared integrations list.
+		$legacy_ids = array(
+			'cookie_notice_gtm_id' => 'gtm',
+			'cookie_notice_ga4_id' => 'ga4',
+		);
+
+		foreach ( $legacy_ids as $option_key => $type ) {
+			$legacy_id = sanitize_text_field( $options[ $option_key ] ?? '' );
+			if ( '' !== $legacy_id && ! isset( $integrations[ $type ] ) ) {
+				$integrations[ $type ] = array(
+					'type' => $type,
+					'id'   => $legacy_id,
 				);
 			}
 		}

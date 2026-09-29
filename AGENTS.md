@@ -4,7 +4,9 @@ Guidelines for AI coding agents working on this WordPress plugin.
 
 ## Project Overview
 
-**FrontBlocks Site Tools** is a free, all-in-one WordPress plugin covering the everyday needs of a site — not just a block-extension add-on. It bundles Gutenberg/GeneratePress block enhancements alongside general-purpose site utilities: cookie consent, maintenance mode, image management (size control + WebP/AVIF delivery), social login, and more. New features do not need to be block-related to belong here — evaluate additions against "does a typical WordPress site commonly need this," not "is this a block." The PRO companion lives at `wp-content/plugins/frontblocks-pro/`.
+**FrontBlocks Site Tools** is a free, all-in-one WordPress plugin covering the everyday needs of a site — not just a block-extension add-on. It bundles Gutenberg/GeneratePress block enhancements alongside general-purpose site utilities: maintenance mode, image management (size control + WebP/AVIF delivery), social login, and more. New features do not need to be block-related to belong here — evaluate additions against "does a typical WordPress site commonly need this," not "is this a block." The PRO companion lives at `wp-content/plugins/frontblocks-pro/`.
+
+**Cookie Notice is deprecated here and moving to FrontConsent** (`wp-content/plugins/frontconsent/`), a dedicated standalone plugin. It still ships and works in FrontBlocks during the transition (see `includes/Frontend/CookieNotice.php` and `includes/Admin/CookieNoticeDeprecationNotice.php`), but do not extend it further — new cookie-consent work belongs in FrontConsent's own `AGENTS.md`. FrontBlocks' module disables itself automatically once FrontConsent is active (`FRCN_VERSION` defined), and FrontConsent migrates the site's settings/stats on activation.
 
 - **PHP minimum:** 7.0
 - **WordPress minimum:** 5.8 (required for the image-format-output filters used by Image Management)
@@ -148,7 +150,7 @@ Every feature is a self-contained class following the same shape:
 
 Actions for making a release:
 - Update the Stable Tag in `readme.txt` and the plugin version in its header and `CCRMRE_VERSION` constant.
-- Finalize the `= Unreleased =` changelog entries under the released version and create a new empty `= Unreleased =` section.
+- Finalize the `= Unreleased =` changelog entries under the released version.
 - Create the matching GitHub release and tag.
 
 ## Test Enforcement

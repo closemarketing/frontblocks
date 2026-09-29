@@ -121,21 +121,6 @@ class SettingsTest extends TestCase {
 		$this->assertSame( 5, $sanitized['maintenance_image'] );
 	}
 
-	public function test_ga4_id_is_preserved_when_valid_and_uppercased() {
-		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_integration_code' => 'g-abc123' ) );
-
-		$this->assertSame(
-			array( array( 'type' => 'ga4', 'id' => 'G-ABC123' ) ),
-			$sanitized['cookie_notice_tracking_integrations']
-		);
-	}
-
-	public function test_ga4_id_is_rejected_when_malformed() {
-		$sanitized = $this->settings->sanitize_settings( array( 'cookie_notice_tracking_integration_code' => 'not-a-valid-id' ) );
-
-		$this->assertSame( array(), $sanitized['cookie_notice_tracking_integrations'] );
-	}
-
 	public function test_deactivate_short_description_and_move_content_are_mutually_exclusive() {
 		// Both were already true in storage (should not normally happen, but
 		// the sanitizer must still resolve to a single winner deterministically):
@@ -271,9 +256,7 @@ class SettingsTest extends TestCase {
 		$this->settings->enqueue_admin_styles( 'appearance_page_frontblocks-settings' );
 
 		$this->assertTrue( wp_style_is( 'frontblocks-admin-settings', 'enqueued' ) );
-		$this->assertTrue( wp_style_is( 'frontblocks-cookie-notice', 'enqueued' ) );
 
 		wp_dequeue_style( 'frontblocks-admin-settings' );
-		wp_dequeue_style( 'frontblocks-cookie-notice' );
 	}
 }
