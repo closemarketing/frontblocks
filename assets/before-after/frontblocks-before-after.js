@@ -1,3 +1,5 @@
+"use strict";
+
 var registerBlockType = wp.blocks.registerBlockType;
 var _wp$element = wp.element,
   Fragment = _wp$element.Fragment,

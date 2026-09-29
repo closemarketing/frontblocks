@@ -1,3 +1,5 @@
+"use strict";
+
 var addFilter = wp.hooks.addFilter;
 var Fragment = wp.element.Fragment;
 var InspectorControls = wp.blockEditor.InspectorControls;
