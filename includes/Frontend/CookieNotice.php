@@ -1317,6 +1317,23 @@ class CookieNotice {
 			}
 		}
 
+		// Keep sites upgrading directly from the retired dedicated fields working
+		// until FrontConsent migrates them into its shared integrations list.
+		$legacy_ids = array(
+			'cookie_notice_gtm_id' => 'gtm',
+			'cookie_notice_ga4_id' => 'ga4',
+		);
+
+		foreach ( $legacy_ids as $option_key => $type ) {
+			$legacy_id = sanitize_text_field( $options[ $option_key ] ?? '' );
+			if ( '' !== $legacy_id && ! isset( $integrations[ $type ] ) ) {
+				$integrations[ $type ] = array(
+					'type' => $type,
+					'id'   => $legacy_id,
+				);
+			}
+		}
+
 		return array_values( $integrations );
 	}
 

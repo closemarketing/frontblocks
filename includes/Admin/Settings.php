@@ -1875,7 +1875,7 @@ class Settings {
 	 * @return void
 	 */
 	private function render_cookie_notice_promo_tab() {
-		$is_frontconsent_active = defined( 'FRCN_VERSION' );
+		$is_frontconsent_active = CookieNoticeDeprecationNotice::is_frontconsent_active();
 		?>
 		<div class="frbl-tab-panel-head">
 			<div>
@@ -1898,7 +1898,7 @@ class Settings {
 					<?php esc_html_e( 'Manage in FrontConsent', 'frontblocks' ); ?>
 				</a>
 			<?php else : ?>
-				<a href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'update.php?action=install-plugin&plugin=front-consent' ), 'install-plugin_front-consent' ) ); ?>" class="frbl-btn-primary">
+				<a href="<?php echo esc_url( CookieNoticeDeprecationNotice::get_frontconsent_action_url() ); ?>" class="frbl-btn-primary">
 					<?php esc_html_e( 'Install FrontConsent', 'frontblocks' ); ?>
 				</a>
 				<p class="tw:text-xs tw:text-blue-700 tw:mt-3 tw:mb-0">

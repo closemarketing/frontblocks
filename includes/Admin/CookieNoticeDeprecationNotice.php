@@ -54,10 +54,58 @@ class CookieNoticeDeprecationNotice {
 	 *
 	 * @return bool
 	 */
-	private function is_frontconsent_active() {
-		return function_exists( 'is_plugin_active' )
-			? is_plugin_active( 'frontconsent/frontconsent.php' )
-			: defined( 'FRCN_VERSION' );
+	public static function is_frontconsent_active() {
+		if ( defined( 'FRCN_VERSION' ) ) {
+			return true;
+		}
+
+		if ( ! function_exists( 'is_plugin_active' ) ) {
+			return false;
+		}
+
+		foreach ( self::get_frontconsent_plugin_basenames() as $plugin_basename ) {
+			if ( is_plugin_active( $plugin_basename ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Return the possible plugin basenames used by FrontConsent distributions.
+	 *
+	 * WordPress.org installs FrontConsent in the frontconsent directory. Keep
+	 * the former front-consent basename for manually-installed copies.
+	 *
+	 * @return string[]
+	 */
+	private static function get_frontconsent_plugin_basenames() {
+		return array(
+			'frontconsent/frontconsent.php',
+			'front-consent/frontconsent.php',
+		);
+	}
+
+	/**
+	 * Return an install URL, or an activation URL when FrontConsent is present.
+	 *
+	 * @return string
+	 */
+	public static function get_frontconsent_action_url() {
+		foreach ( self::get_frontconsent_plugin_basenames() as $plugin_basename ) {
+			if ( file_exists( WP_PLUGIN_DIR . '/' . $plugin_basename ) ) {
+				return wp_nonce_url(
+					self_admin_url( 'plugins.php?action=activate&plugin=' . rawurlencode( $plugin_basename ) ),
+					'activate-plugin_' . $plugin_basename
+				);
+			}
+		}
+
+		return wp_nonce_url(
+			self_admin_url( 'update.php?action=install-plugin&plugin=frontconsent' ),
+			'install-plugin_frontconsent'
+		);
 	}
 
 	/**
@@ -89,10 +137,7 @@ class CookieNoticeDeprecationNotice {
 			return;
 		}
 
-		$install_url = wp_nonce_url(
-			self_admin_url( 'update.php?action=install-plugin&plugin=front-consent' ),
-			'install-plugin_front-consent'
-		);
+		$action_url = self::get_frontconsent_action_url();
 		?>
 		<div id="frbl-cookie-notice-deprecation" class="notice notice-warning">
 			<p><strong><?php echo esc_html__( 'FrontBlocks: Cookie Notice is moving to its own plugin', 'frontblocks' ); ?></strong></p>
@@ -100,7 +145,7 @@ class CookieNoticeDeprecationNotice {
 				<?php echo esc_html__( 'Cookie Notice is being extracted from FrontBlocks into a dedicated free plugin, FrontConsent, so it is easier to find and keeps improving on its own. Install FrontConsent and your existing settings and stats are migrated automatically, and this module turns itself off.', 'frontblocks' ); ?>
 			</p>
 			<p>
-				<a href="<?php echo esc_url( $install_url ); ?>" class="button button-primary"><?php echo esc_html__( 'Install FrontConsent', 'frontblocks' ); ?></a>
+				<a href="<?php echo esc_url( $action_url ); ?>" class="button button-primary"><?php echo esc_html__( 'Install FrontConsent', 'frontblocks' ); ?></a>
 				&nbsp;&nbsp;<a href="#" class="button-link frbl-dismiss-cookie-notice-deprecation"><?php echo esc_html__( 'Dismiss for now', 'frontblocks' ); ?></a>
 			</p>
 		</div>
