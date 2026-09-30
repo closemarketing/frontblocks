@@ -78,8 +78,24 @@
 
 .frbl-cookie-notice__link {
 	color: var(--frbl-cookie-accent-on-light);
+	background-color: transparent;
 	text-decoration: underline;
-	white-space: nowrap;
+}
+
+/*
+ * Explicit hover/focus color so a theme's own global `a:hover` style (some
+ * themes swap the text to white, expecting a colored background underneath)
+ * can't make this link's text unreadable against the notice's own background.
+ */
+.frbl-cookie-notice__link:hover,
+.frbl-cookie-notice__link:focus {
+	color: var(--frbl-cookie-accent-on-light);
+	background-color: transparent;
+}
+
+.frbl-cookie-notice__link:focus-visible {
+	outline: 2px solid var(--frbl-cookie-accent-on-light);
+	outline-offset: 2px;
 }
 
 .frbl-cookie-notice__actions {
