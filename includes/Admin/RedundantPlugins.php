@@ -92,7 +92,7 @@ class RedundantPlugins {
 		$google_signin_settings = GoogleSignInSettings::get_options();
 
 		return array(
-			'svg-upload'    => array(
+			'svg-upload'   => array(
 				'feature' => __( 'SVG Upload', 'frontblocks' ),
 				// Always active: FrontBlocks enables sanitized SVG uploads in the media library out of the box.
 				'enabled' => true,
@@ -102,7 +102,7 @@ class RedundantPlugins {
 				),
 				'doc_url' => admin_url( 'themes.php?page=frontblocks-settings' ),
 			),
-			'login-google'  => array(
+			'login-google' => array(
 				'feature' => __( 'Google Login', 'frontblocks' ),
 				'enabled' => GoogleSignInSettings::is_configured() && ( ! empty( $google_signin_settings['enable_wp_login'] ) || ! empty( $google_signin_settings['enable_myaccount_login'] ) || ! empty( $google_signin_settings['enable_myaccount_register'] ) || ! empty( $google_signin_settings['enable_checkout'] ) ),
 				'plugins' => array(
