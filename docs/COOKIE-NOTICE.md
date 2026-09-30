@@ -14,8 +14,13 @@ had it enabled will show no cookie banner at all until FrontConsent is
 installed — this is intentional, to push migration forward.
 
 **Appearance → FrontBlocks → Cookie Notice** is now a static promo panel: it
-explains the move and offers a one-click install/activation link for
-FrontConsent. Installing and activating FrontConsent automatically:
+explains the move and links to install FrontConsent. If FrontConsent isn't
+installed yet, that link only installs it — WordPress still requires a
+separate activation step (a confirmation screen with an "Activate Plugin"
+link) before it actually runs; the panel's own link becomes an activation
+link automatically once FrontConsent is detected as installed but inactive.
+Until FrontConsent is both installed and active, the site has no cookie
+consent banner at all. Once active, it automatically:
 
 - Copies the existing Cookie Notice settings and acceptance statistics.
 - Converts retired dedicated Google Tag Manager and GA4 IDs into its shared

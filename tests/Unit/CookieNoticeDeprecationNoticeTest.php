@@ -61,4 +61,63 @@ class CookieNoticeDeprecationNoticeTest extends TestCase {
 
 		$this->assertStringContainsString( 'FrontConsent', $output );
 	}
+
+	/**
+	 * A user who cannot install plugins (e.g. a multisite subsite admin with
+	 * `edit_theme_options` but not `install_plugins`) must never see a CTA
+	 * whose nonce-bearing install URL will fail authorization for them —
+	 * they get a message pointing at a site/network administrator instead.
+	 */
+	public function test_promo_tab_hides_the_install_cta_without_install_plugins_capability() {
+		$user_id = self::factory()->user->create( array( 'role' => 'editor' ) );
+		wp_set_current_user( $user_id );
+
+		$this->assertFalse( current_user_can( 'install_plugins' ) );
+
+		$settings = new Settings();
+		$method   = new ReflectionMethod( Settings::class, 'render_cookie_notice_promo_tab' );
+		$method->setAccessible( true );
+
+		ob_start();
+		$method->invoke( $settings );
+		$output = ob_get_clean();
+
+		$this->assertStringNotContainsString( 'action=install-plugin', $output );
+		$this->assertStringContainsString( 'administrator', $output );
+	}
+
+	/**
+	 * A user who does have the capability still sees the real install link.
+	 */
+	public function test_promo_tab_shows_the_install_cta_with_install_plugins_capability() {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		$this->assertTrue( current_user_can( 'install_plugins' ) );
+
+		$settings = new Settings();
+		$method   = new ReflectionMethod( Settings::class, 'render_cookie_notice_promo_tab' );
+		$method->setAccessible( true );
+
+		ob_start();
+		$method->invoke( $settings );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'action=install-plugin', html_entity_decode( $output, ENT_QUOTES, 'UTF-8' ) );
+	}
+
+	/**
+	 * The hard cutover makes this notice urgent in a way the original,
+	 * lower-stakes transition notice never was: an admin who dismissed that
+	 * old notice must still see this one, since their site now has no
+	 * consent banner at all until FrontConsent is installed. The dismissal
+	 * meta key was bumped to a new name specifically so every prior
+	 * dismissal (stored under the old key) becomes irrelevant.
+	 */
+	public function test_dismissal_meta_key_was_bumped_for_the_hard_cutover() {
+		$this->assertSame(
+			'frbl_cookie_notice_deprecation_dismissed_v2',
+			CookieNoticeDeprecationNotice::DISMISSED_META_KEY
+		);
+	}
 }

@@ -32,7 +32,7 @@ Repository for FrontBlocks Site Tools, a WordPress plugin covering the everyday 
 - **Maintenance Mode** - Show a customizable maintenance page to visitors while keeping the site accessible to logged-in administrators
 - **Google Sign-In** - "Sign in / Sign up with Google" button for wp-login.php, WooCommerce My Account and Checkout, plus a shortcode and block, with server-side ID token verification
 - **Review Notice** - Dismissible admin notice inviting site owners to leave a WordPress.org review, shown 14 days after activation
-- **Redundant Plugins Notice** - Persistent admin notice detecting third-party plugins made unnecessary by an active FrontBlocks feature (e.g. SVG upload plugins, GDPR cookie consent plugins), extensible via the `frontblocks_redundant_plugins` filter
+- **Redundant Plugins Notice** - Persistent admin notice detecting third-party plugins made unnecessary by an active FrontBlocks feature (e.g. SVG upload plugins, Google Login plugins), extensible via the `frontblocks_redundant_plugins` filter
 - **Google Sign-In** - "Sign in / Sign up with Google" button for wp-login.php, WooCommerce My Account and Checkout, plus a shortcode and block, with server-side ID token verification
 - **Table of Contents** - Accessible navigation block generated from the headings in the post, with collapsible and sticky options
 

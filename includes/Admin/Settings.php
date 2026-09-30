@@ -1876,6 +1876,7 @@ class Settings {
 	 */
 	private function render_cookie_notice_promo_tab() {
 		$is_frontconsent_active = CookieNoticeDeprecationNotice::is_frontconsent_active();
+		$can_install_plugins    = current_user_can( 'install_plugins' );
 		?>
 		<div class="frbl-tab-panel-head">
 			<div>
@@ -1897,12 +1898,16 @@ class Settings {
 				<a href="<?php echo esc_url( admin_url( 'options-general.php?page=frontconsent-settings' ) ); ?>" class="frbl-btn-primary">
 					<?php esc_html_e( 'Manage in FrontConsent', 'frontblocks' ); ?>
 				</a>
-			<?php else : ?>
+			<?php elseif ( $can_install_plugins ) : ?>
 				<a href="<?php echo esc_url( CookieNoticeDeprecationNotice::get_frontconsent_action_url() ); ?>" class="frbl-btn-primary">
 					<?php esc_html_e( 'Install FrontConsent', 'frontblocks' ); ?>
 				</a>
 				<p class="tw:text-xs tw:text-blue-700 tw:mt-3 tw:mb-0">
-					<?php esc_html_e( 'Installing and activating it automatically imports your existing Cookie Notice settings and stats from FrontBlocks, and turns this banner off so the two never overlap.', 'frontblocks' ); ?>
+					<?php esc_html_e( 'Installing and activating it imports your existing Cookie Notice settings and stats from FrontBlocks automatically. Your site currently has no cookie consent banner until you do.', 'frontblocks' ); ?>
+				</p>
+			<?php else : ?>
+				<p class="tw:text-sm tw:text-red-800 tw:font-medium tw:mb-0">
+					<?php esc_html_e( 'Your site currently has no cookie consent banner. You do not have permission to install plugins — ask a site or network administrator to install and activate FrontConsent.', 'frontblocks' ); ?>
 				</p>
 			<?php endif; ?>
 		</div>
