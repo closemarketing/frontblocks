@@ -89,7 +89,6 @@ class RedundantPlugins {
 	 * @return array
 	 */
 	private static function get_default_entries() {
-		$settings               = get_option( 'frontblocks_settings', array() );
 		$google_signin_settings = GoogleSignInSettings::get_options();
 
 		return array(
@@ -100,15 +99,6 @@ class RedundantPlugins {
 				'plugins' => array(
 					'safe-svg/safe-svg.php'       => 'Safe SVG',
 					'svg-support/svg-support.php' => 'SVG Support',
-				),
-				'doc_url' => admin_url( 'themes.php?page=frontblocks-settings' ),
-			),
-			'cookie-notice' => array(
-				'feature' => __( 'Cookie Notice', 'frontblocks' ),
-				'enabled' => (bool) ( $settings['enable_cookie_notice'] ?? false ),
-				'plugins' => array(
-					'gdpr-cookie-compliance/moove-gdpr.php' => 'GDPR Cookie Compliance',
-					'cookie-law-info/cookie-law-info.php' => 'CookieYes',
 				),
 				'doc_url' => admin_url( 'themes.php?page=frontblocks-settings' ),
 			),

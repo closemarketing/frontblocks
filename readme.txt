@@ -182,7 +182,7 @@ Register and manage events directly from WordPress. Enable the Events feature fr
 Display a smart banner that detects the visitor's browser language and suggests switching to the matching version of the site. Enable the banner from the FrontBlocks settings page. The banner only appears when the site has a translated version matching the user's browser language, and respects user dismissal via a cookie.
 
 **Cookie Notice (moved to FrontConsent):**
-Cookie consent — including the Advanced Cookie Management upsell (per-category consent, Google Ads/Meta Pixel/Microsoft Clarity) — moved out of FrontBlocks entirely into its own dedicated free plugin, **FrontConsent** (https://wordpress.org/plugins/frontconsent/), so it's easier to find and keeps improving on its own. The Cookie Notice module keeps working here during the transition, but if you have it enabled you'll see a notice offering a one-click install of FrontConsent, which automatically migrates your existing settings and stats and turns this module off. New sites should install FrontConsent directly instead of enabling Cookie Notice here.
+Cookie consent — including the Advanced Cookie Management upsell (per-category consent, Google Ads/Meta Pixel/Microsoft Clarity) — has moved out of FrontBlocks entirely into its own dedicated free plugin, **FrontConsent** (https://wordpress.org/plugins/frontconsent/), so it's easier to find and keeps improving on its own. FrontBlocks no longer ships a cookie consent banner of its own: the Cookie Notice settings tab is now a promo panel offering a one-click install of FrontConsent, which automatically migrates your existing settings and stats. Install FrontConsent to keep showing a cookie banner on your site.
 
 **WooCommerce Features:**
 Included features for WooCommerce FrontBlocks PRO.
@@ -226,6 +226,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 *   Updated: Bundled Action Scheduler and development/build dependencies.
 
 = Unreleased =
+*   Changed: Removed the legacy Cookie Notice runtime (banner, AJAX consent endpoints, and GTM/GA4/other tracking integrations) from FrontBlocks — a hard cutover, not a transition. Cookie consent now lives entirely in the standalone FrontConsent plugin; the Cookie Notice settings tab remains as a promo panel pointing to it.
 
 = 1.5.4 =
 *   Added: Column Link controls for native WordPress Column blocks — make an entire column clickable, optionally open the destination in a new tab, and preserve the behaviour of links and buttons placed inside it.

@@ -6,7 +6,7 @@ const vm = require('node:vm');
 
 // This test builds its own tiny DOM shim (below) instead of pulling in a
 // real DOM implementation, matching this repo's existing frontend JS tests
-// (see tests/js/cookie-notice-injection.test.js).
+// (see tests/js/table-of-contents-frontend.test.js).
 const scriptPath = path.resolve(__dirname, '../../assets/column-link/frontblocks-column-link.js');
 const columnLinkScript = fs.readFileSync(scriptPath, 'utf8');
 

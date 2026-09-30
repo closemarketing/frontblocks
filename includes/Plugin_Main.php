@@ -204,9 +204,6 @@ class Plugin_Main {
 		// Maintenance Mode module.
 		new Frontend\Maintenance();
 
-		// Cookie Notice module.
-		new Frontend\CookieNotice();
-
 		// Image Management module (size control + WebP/AVIF delivery).
 		new Frontend\ImageManagement();
 

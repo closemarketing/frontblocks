@@ -1865,12 +1865,12 @@ class Settings {
 	/**
 	 * Render the Cookie Notice tab as a promo panel for FrontConsent.
 	 *
-	 * Cookie Notice configuration moved out of FrontBlocks entirely (see
-	 * `includes/Frontend/CookieNotice.php` and
-	 * `includes/Admin/CookieNoticeDeprecationNotice.php`) — this tab no
-	 * longer renders any settings fields, only an explanation and an
-	 * install/manage call to action, so site owners who click the tab
-	 * looking for cookie settings find where they actually live now.
+	 * Cookie Notice's runtime module has been removed from FrontBlocks
+	 * entirely — a hard cutover, not a transition — leaving only this promo
+	 * panel and `includes/Admin/CookieNoticeDeprecationNotice.php`. This tab
+	 * renders no settings fields, only an explanation and an install/manage
+	 * call to action, so site owners who click the tab looking for cookie
+	 * settings find where they actually live now.
 	 *
 	 * @return void
 	 */
