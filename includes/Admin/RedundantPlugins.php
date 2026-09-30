@@ -89,11 +89,10 @@ class RedundantPlugins {
 	 * @return array
 	 */
 	private static function get_default_entries() {
-		$settings               = get_option( 'frontblocks_settings', array() );
 		$google_signin_settings = GoogleSignInSettings::get_options();
 
 		return array(
-			'svg-upload'    => array(
+			'svg-upload'   => array(
 				'feature' => __( 'SVG Upload', 'frontblocks' ),
 				// Always active: FrontBlocks enables sanitized SVG uploads in the media library out of the box.
 				'enabled' => true,
@@ -103,16 +102,7 @@ class RedundantPlugins {
 				),
 				'doc_url' => admin_url( 'themes.php?page=frontblocks-settings' ),
 			),
-			'cookie-notice' => array(
-				'feature' => __( 'Cookie Notice', 'frontblocks' ),
-				'enabled' => (bool) ( $settings['enable_cookie_notice'] ?? false ),
-				'plugins' => array(
-					'gdpr-cookie-compliance/moove-gdpr.php' => 'GDPR Cookie Compliance',
-					'cookie-law-info/cookie-law-info.php' => 'CookieYes',
-				),
-				'doc_url' => admin_url( 'themes.php?page=frontblocks-settings' ),
-			),
-			'login-google'  => array(
+			'login-google' => array(
 				'feature' => __( 'Google Login', 'frontblocks' ),
 				'enabled' => GoogleSignInSettings::is_configured() && ( ! empty( $google_signin_settings['enable_wp_login'] ) || ! empty( $google_signin_settings['enable_myaccount_login'] ) || ! empty( $google_signin_settings['enable_myaccount_register'] ) || ! empty( $google_signin_settings['enable_checkout'] ) ),
 				'plugins' => array(

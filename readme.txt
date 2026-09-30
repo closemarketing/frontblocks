@@ -1,6 +1,6 @@
 === FrontBlocks Site Tools ===
 Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit2sumit, alexcm13
-Tags: carrusel, cookies, lightweight, generatepress, gutenberg
+Tags: carrusel, lightweight, generatepress, gutenberg, maintenance-mode
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.8
 Tested up to: 7.1
@@ -9,13 +9,15 @@ Version: 1.5.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Essential toolkit for a WordPress site: block editor enhancements, cookie consent, maintenance mode, image optimization, login and more.
+Essential toolkit for a WordPress site: block editor enhancements, maintenance mode, image optimization, login and more.
 
 == Description ==
 
-FrontBlocks Site Tools is a lightweight, all-in-one toolkit covering the everyday needs of a WordPress site. Instead of installing a separate plugin for every small requirement, get block editor enhancements, cookie consent, maintenance mode, image optimization, social login and other practical site utilities from a single, well-maintained plugin.
+FrontBlocks Site Tools is a lightweight, all-in-one toolkit covering the everyday needs of a WordPress site. Instead of installing a separate plugin for every small requirement, get block editor enhancements, maintenance mode, image optimization, social login and other practical site utilities from a single, well-maintained plugin.
 
-Turn Query Loops and grids into carousels, add animations and visual effects, improve layouts, and cover common site needs — from GDPR-friendly cookie notices to maintenance mode and modern image delivery. FrontBlocks works with native WordPress blocks as well as supported GenerateBlocks elements, with optional integrations for WooCommerce, GenerateBlocks/GeneratePress and Gravity Forms.
+Turn Query Loops and grids into carousels, add animations and visual effects, improve layouts, and cover common site needs — from maintenance mode to modern image delivery. FrontBlocks works with native WordPress blocks as well as supported GenerateBlocks elements, with optional integrations for WooCommerce, GenerateBlocks/GeneratePress and Gravity Forms.
+
+Looking for cookie consent? That moved into its own free, dedicated plugin: [FrontConsent](https://wordpress.org/plugins/frontconsent/).
 
 **Container Edge Alignment**
 Add custom controls to GenerateBlocks Container blocks and native WordPress Group/Container blocks to remove padding from the left or right side, creating edge-to-edge layouts. This feature only appears for containers using GeneratePress global max-width settings, perfect for creating asymmetric layouts where content extends to one browser edge while maintaining proper spacing on the other side.
@@ -182,7 +184,7 @@ Register and manage events directly from WordPress. Enable the Events feature fr
 Display a smart banner that detects the visitor's browser language and suggests switching to the matching version of the site. Enable the banner from the FrontBlocks settings page. The banner only appears when the site has a translated version matching the user's browser language, and respects user dismissal via a cookie.
 
 **Cookie Notice (moved to FrontConsent):**
-Cookie consent — including the Advanced Cookie Management upsell (per-category consent, Google Ads/Meta Pixel/Microsoft Clarity) — moved out of FrontBlocks entirely into its own dedicated free plugin, **FrontConsent** (https://wordpress.org/plugins/frontconsent/), so it's easier to find and keeps improving on its own. The Cookie Notice module keeps working here during the transition, but if you have it enabled you'll see a notice offering a one-click install of FrontConsent, which automatically migrates your existing settings and stats and turns this module off. New sites should install FrontConsent directly instead of enabling Cookie Notice here.
+Cookie consent — including the Advanced Cookie Management upsell (per-category consent, Google Ads/Meta Pixel/Microsoft Clarity) — has moved out of FrontBlocks entirely into its own dedicated free plugin, **FrontConsent** (https://wordpress.org/plugins/frontconsent/), so it's easier to find and keeps improving on its own. FrontBlocks no longer ships a cookie consent banner of its own: the Cookie Notice settings tab is now a promo panel offering a one-click install of FrontConsent, which automatically migrates your existing settings and stats. Install FrontConsent to keep showing a cookie banner on your site.
 
 **WooCommerce Features:**
 Included features for WooCommerce FrontBlocks PRO.
@@ -226,6 +228,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 *   Updated: Bundled Action Scheduler and development/build dependencies.
 
 = Unreleased =
+*   Changed: Removed the legacy Cookie Notice runtime (banner, AJAX consent endpoints, and GTM/GA4/other tracking integrations) from FrontBlocks — a hard cutover, not a transition. Cookie consent now lives entirely in the standalone FrontConsent plugin; the Cookie Notice settings tab remains as a promo panel pointing to it.
 
 = 1.5.4 =
 *   Added: Column Link controls for native WordPress Column blocks — make an entire column clickable, optionally open the destination in a new tab, and preserve the behaviour of links and buttons placed inside it.

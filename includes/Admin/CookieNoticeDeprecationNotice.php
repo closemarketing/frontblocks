@@ -13,15 +13,18 @@ namespace FrontBlocks\Admin;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Tells site owners still using FrontBlocks' bundled Cookie Notice module that
- * it moved to its own dedicated plugin, FrontConsent, and offers a one-click
- * install/activate link from wp-admin.
+ * Tells site owners who had FrontBlocks' Cookie Notice module enabled that
+ * its runtime has been removed entirely (a hard cutover, not a transition)
+ * and moved into its own dedicated plugin, FrontConsent, and offers a
+ * one-click install/activate link from wp-admin.
  *
- * FrontBlocks' own Cookie Notice module keeps working during this transition
- * period — this is a heads-up, not a functional change. Once FrontConsent is
- * installed and active, it migrates the site's settings/stats on its own and
- * disables this module automatically (see FrontConsent's own Migration class),
- * so no coordination happens from this side beyond the notice itself.
+ * Unlike the original transition-period version of this notice, there is no
+ * functional overlap left to manage: FrontBlocks no longer renders any
+ * banner at all, so this is now an urgent "your site has no consent banner"
+ * warning, not a heads-up. Once FrontConsent is installed and active, it
+ * migrates the site's settings/stats on its own (see FrontConsent's own
+ * Migration class), so no coordination happens from this side beyond the
+ * notice itself.
  *
  * @since 1.0.0
  */
@@ -30,9 +33,17 @@ class CookieNoticeDeprecationNotice {
 	/**
 	 * User meta key storing whether this notice was dismissed.
 	 *
+	 * Versioned with a `_v2` suffix: the hard cutover that removed Cookie
+	 * Notice's runtime module entirely (rather than just deprecating it)
+	 * makes this notice urgent in a way the original "Dismiss for now" never
+	 * anticipated — an admin who dismissed the old, lower-stakes transition
+	 * notice must still see this one, since their site now has no consent
+	 * banner at all until they install FrontConsent. Bumping the meta key
+	 * makes every prior dismissal irrelevant without needing a migration.
+	 *
 	 * @var string
 	 */
-	const DISMISSED_META_KEY = 'frbl_cookie_notice_deprecation_dismissed';
+	const DISMISSED_META_KEY = 'frbl_cookie_notice_deprecation_dismissed_v2';
 
 	/**
 	 * Nonce action used to protect the dismissal AJAX endpoint.
@@ -140,9 +151,9 @@ class CookieNoticeDeprecationNotice {
 		$action_url = self::get_frontconsent_action_url();
 		?>
 		<div id="frbl-cookie-notice-deprecation" class="notice notice-warning">
-			<p><strong><?php echo esc_html__( 'FrontBlocks: Cookie Notice is moving to its own plugin', 'frontblocks' ); ?></strong></p>
+			<p><strong><?php echo esc_html__( 'FrontBlocks: your site no longer shows a cookie consent banner', 'frontblocks' ); ?></strong></p>
 			<p>
-				<?php echo esc_html__( 'Cookie Notice is being extracted from FrontBlocks into a dedicated free plugin, FrontConsent, so it is easier to find and keeps improving on its own. Install FrontConsent and your existing settings and stats are migrated automatically, and this module turns itself off.', 'frontblocks' ); ?>
+				<?php echo esc_html__( 'Cookie Notice has been removed from FrontBlocks entirely and moved into its own dedicated free plugin, FrontConsent. Your site currently has no cookie consent banner at all until you install and activate it. Doing so automatically imports your existing settings and stats.', 'frontblocks' ); ?>
 			</p>
 			<p>
 				<a href="<?php echo esc_url( $action_url ); ?>" class="button button-primary"><?php echo esc_html__( 'Install FrontConsent', 'frontblocks' ); ?></a>

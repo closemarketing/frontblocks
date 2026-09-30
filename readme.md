@@ -27,12 +27,12 @@ Repository for FrontBlocks Site Tools, a WordPress plugin covering the everyday 
 - Custom SVG Animations
 
 ### Site Tools
-- **Cookie Notice (moved to FrontConsent)** - Cookie consent configuration now lives in the dedicated free [FrontConsent](https://wordpress.org/plugins/frontconsent/) plugin. The legacy FrontBlocks module remains active for existing sites until FrontConsent migrates its settings and stats.
+- **Cookie Notice (moved to FrontConsent)** - Cookie consent now lives entirely in the dedicated free [FrontConsent](https://wordpress.org/plugins/frontconsent/) plugin. FrontBlocks no longer ships a banner of its own; the "Cookie Notice" settings tab is a promo panel pointing existing sites at FrontConsent, which migrates their settings and stats on install.
 - **Image Management** - Enable/disable/override registered image sizes, define custom sizes, bulk-regenerate thumbnails, and automatically serve WebP/AVIF variants on the frontend
 - **Maintenance Mode** - Show a customizable maintenance page to visitors while keeping the site accessible to logged-in administrators
 - **Google Sign-In** - "Sign in / Sign up with Google" button for wp-login.php, WooCommerce My Account and Checkout, plus a shortcode and block, with server-side ID token verification
 - **Review Notice** - Dismissible admin notice inviting site owners to leave a WordPress.org review, shown 14 days after activation
-- **Redundant Plugins Notice** - Persistent admin notice detecting third-party plugins made unnecessary by an active FrontBlocks feature (e.g. SVG upload plugins, GDPR cookie consent plugins), extensible via the `frontblocks_redundant_plugins` filter
+- **Redundant Plugins Notice** - Persistent admin notice detecting third-party plugins made unnecessary by an active FrontBlocks feature (e.g. SVG upload plugins, Google Login plugins), extensible via the `frontblocks_redundant_plugins` filter
 - **Google Sign-In** - "Sign in / Sign up with Google" button for wp-login.php, WooCommerce My Account and Checkout, plus a shortcode and block, with server-side ID token verification
 - **Table of Contents** - Accessible navigation block generated from the headings in the post, with collapsible and sticky options
 
@@ -72,7 +72,7 @@ Repository for FrontBlocks Site Tools, a WordPress plugin covering the everyday 
 - [Full Page Implementation](./docs/FULLPAGE-IMPLEMENTATION-SUMMARY.md) - Technical implementation details
 - [Changelog Full Page](./docs/CHANGELOG-FULLPAGE.md) - Full Page feature changelog
 - [Carousel Pattern](./docs/CAROUSEL-PATTERN.md) - Hero carousel pattern with native WordPress blocks
-- [Cookie Notice migration](./docs/COOKIE-NOTICE.md) - Moving legacy Cookie Notice settings to FrontConsent
+- [Cookie Notice migration](./docs/COOKIE-NOTICE.md) - Cookie consent has moved entirely to FrontConsent
 - [Image Management](./docs/IMAGE-MANAGEMENT.md) - Image size control and automatic WebP/AVIF delivery
 - [Review Notice](./docs/REVIEW-NOTICE.md) - Dismissible WordPress.org review prompt
 - [Redundant Plugins Notice](./docs/REDUNDANT-PLUGINS.md) - Detects plugins made unnecessary by FrontBlocks features and how to register new pairings

@@ -15,11 +15,10 @@ class RedundantPluginsTest extends TestCase {
 		parent::tear_down();
 	}
 
-	public function test_default_entries_include_svg_upload_and_cookie_notice() {
+	public function test_default_entries_include_svg_upload() {
 		$entries = RedundantPlugins::get_entries();
 
 		$this->assertArrayHasKey( 'svg-upload', $entries );
-		$this->assertArrayHasKey( 'cookie-notice', $entries );
 	}
 
 	public function test_svg_upload_entry_is_always_enabled() {
@@ -30,21 +29,15 @@ class RedundantPluginsTest extends TestCase {
 		$this->assertArrayHasKey( 'svg-support/svg-support.php', $entries['svg-upload']['plugins'] );
 	}
 
-	public function test_cookie_notice_entry_enabled_follows_the_setting() {
-		update_option( 'frontblocks_settings', array( 'enable_cookie_notice' => true ) );
-		$entries = RedundantPlugins::get_entries();
-		$this->assertTrue( $entries['cookie-notice']['enabled'] );
-
-		update_option( 'frontblocks_settings', array( 'enable_cookie_notice' => false ) );
-		$entries = RedundantPlugins::get_entries();
-		$this->assertFalse( $entries['cookie-notice']['enabled'] );
-	}
-
-	public function test_cookie_notice_entry_lists_supported_cookie_plugins() {
+	/**
+	 * Cookie Notice's entry was removed along with the module itself: with no
+	 * runtime banner left in FrontBlocks, this feature no longer makes any
+	 * third-party cookie-consent plugin redundant.
+	 */
+	public function test_cookie_notice_entry_no_longer_exists() {
 		$entries = RedundantPlugins::get_entries();
 
-		$this->assertArrayHasKey( 'gdpr-cookie-compliance/moove-gdpr.php', $entries['cookie-notice']['plugins'] );
-		$this->assertArrayHasKey( 'cookie-law-info/cookie-law-info.php', $entries['cookie-notice']['plugins'] );
+		$this->assertArrayNotHasKey( 'cookie-notice', $entries );
 	}
 
 	/**

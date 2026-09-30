@@ -14,7 +14,6 @@ on:
       - 'composer.lock'
       - 'package.json'
       - 'package-lock.json'
-      - 'assets/cookie-notice/**'
       - 'tests/js/**'
   pull_request:
     branches:
@@ -30,7 +29,6 @@ on:
       - 'composer.lock'
       - 'package.json'
       - 'package-lock.json'
-      - 'assets/cookie-notice/**'
       - 'tests/js/**'
     types:
       - opened
