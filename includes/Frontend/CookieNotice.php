@@ -444,7 +444,10 @@ class CookieNotice {
 					echo esc_html( $message );
 
 					if ( $policy_url ) {
-						echo ' <a href="' . esc_url( $policy_url ) . '" class="frbl-cookie-notice__link" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Learn more', 'frontblocks' ) . '</a>';
+						$policy_title = $policy_page_id ? get_the_title( $policy_page_id ) : '';
+						$link_text    = '' !== $policy_title ? $policy_title : __( 'Learn more', 'frontblocks' );
+
+						echo ' <a href="' . esc_url( $policy_url ) . '" class="frbl-cookie-notice__link" target="_blank" rel="noopener noreferrer">' . esc_html( $link_text ) . '</a>';
 					}
 					?>
 				</p>
