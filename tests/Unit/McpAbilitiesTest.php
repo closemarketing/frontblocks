@@ -102,12 +102,25 @@ class McpAbilitiesTest extends TestCase {
 	}
 
 	public function test_register_category_and_ability_integrate_with_the_abilities_api_when_available() {
-		if ( ! function_exists( 'wp_register_ability_category' ) || ! function_exists( 'wp_register_ability' ) ) {
+		if ( ! function_exists( 'wp_has_ability_category' ) || ! function_exists( 'wp_has_ability' ) ) {
 			$this->markTestSkipped( 'The Abilities API is not available in this WordPress version.' );
 		}
 
-		do_action( 'wp_abilities_api_categories_init' );
-		do_action( 'wp_abilities_api_init' );
+		// This test's own set_up() just hooked a second McpAbilities instance on top
+		// of the one Plugin_Main::load_modules() created at bootstrap. The Abilities
+		// API's registries are a lazy, process-wide singleton: wp_has_ability_category()
+		// below fires wp_abilities_api_categories_init/wp_abilities_api_init at most
+		// once per process, the very first time anything calls into them. If that
+		// first-ever firing happens during this test, both hooked instances would try
+		// to register the same ability, and the registry's "already registered" guard
+		// calls _doing_it_wrong(), which this suite's strict PHPUnit settings turn into
+		// a thrown exception. Reducing to exactly one hooked instance first avoids
+		// that; it's a harmless no-op if the singleton already fired earlier, since the
+		// hooks below then simply never run again.
+		remove_all_actions( 'wp_abilities_api_categories_init' );
+		remove_all_actions( 'wp_abilities_api_init' );
+		add_action( 'wp_abilities_api_categories_init', array( $this->abilities, 'register_category' ) );
+		add_action( 'wp_abilities_api_init', array( $this->abilities, 'register_abilities' ) );
 
 		$this->assertTrue( wp_has_ability_category( McpAbilities::CATEGORY ) );
 		$this->assertTrue( wp_has_ability( 'frontblocks/maintenance-mode' ) );
