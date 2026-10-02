@@ -223,13 +223,14 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Changelog ==
 
-= 1.5.5 =
-*   Changed: Cookie Notice configuration has moved to the dedicated FrontConsent plugin, including the Advanced Cookie Management PRO upsell. Existing sites keep the legacy module during the transition and can install FrontConsent from the Cookie Notice tab or admin notice; settings and statistics migrate automatically and the legacy banner is disabled.
-*   Updated: Bundled Action Scheduler and development/build dependencies.
-
 = Unreleased =
 *   Changed: Removed the legacy Cookie Notice runtime (banner, AJAX consent endpoints, and GTM/GA4/other tracking integrations) from FrontBlocks — a hard cutover, not a transition. Cookie consent now lives entirely in the standalone FrontConsent plugin; the Cookie Notice settings tab remains as a promo panel pointing to it.
 *   Added: Include/exclude category filters for the Product Categories block, with support for nested (parent/child) categories.
+*   Added: An MCP ability to read and toggle maintenance mode for AI/automation clients (e.g. a go-live checklist), gated behind WordPress's Abilities API and the `manage_options` capability. It also reports WooCommerce's own "Coming soon" site visibility independently.
+
+= 1.5.5 =
+*   Changed: Cookie Notice configuration has moved to the dedicated FrontConsent plugin, including the Advanced Cookie Management PRO upsell. Existing sites keep the legacy module during the transition and can install FrontConsent from the Cookie Notice tab or admin notice; settings and statistics migrate automatically and the legacy banner is disabled.
+*   Updated: Bundled Action Scheduler and development/build dependencies.
 
 = 1.5.4 =
 *   Added: Column Link controls for native WordPress Column blocks — make an entire column clickable, optionally open the destination in a new tab, and preserve the behaviour of links and buttons placed inside it.

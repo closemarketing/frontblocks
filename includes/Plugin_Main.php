@@ -207,6 +207,9 @@ class Plugin_Main {
 		// Image Management module (size control + WebP/AVIF delivery).
 		new Frontend\ImageManagement();
 
+		// MCP abilities (maintenance mode, cookie consent banner) for AI/automation clients.
+		new Frontend\McpAbilities();
+
 		// User Text block is provided by FrontBlocks Pro when license is active.
 	}
 

@@ -134,4 +134,28 @@ class MaintenanceTest extends TestCase {
 
 		$this->assertSame( $expected, $this->invoke_private( $maintenance, 'get_maintenance_css' ) );
 	}
+
+	public function test_set_enabled_turns_maintenance_mode_on() {
+		Maintenance::set_enabled( true );
+
+		$this->assertTrue( Maintenance::is_enabled() );
+	}
+
+	public function test_set_enabled_turns_maintenance_mode_off() {
+		update_option( 'frontblocks_settings', array( 'enable_maintenance' => true ) );
+
+		Maintenance::set_enabled( false );
+
+		$this->assertFalse( Maintenance::is_enabled() );
+	}
+
+	public function test_set_enabled_preserves_other_frontblocks_settings() {
+		update_option( 'frontblocks_settings', array( 'maintenance_title' => 'Back soon' ) );
+
+		Maintenance::set_enabled( true );
+
+		$options = get_option( 'frontblocks_settings' );
+		$this->assertSame( 'Back soon', $options['maintenance_title'] );
+		$this->assertTrue( $options['enable_maintenance'] );
+	}
 }
