@@ -24,12 +24,12 @@ class Maintenance {
 	 */
 	public function __construct() {
 		// Only intercept the frontend if maintenance mode is enabled.
-		if ( ! is_admin() && $this->is_enabled() ) {
+		if ( ! is_admin() && self::is_enabled() ) {
 			add_action( 'template_redirect', array( $this, 'maybe_render_maintenance_page' ) );
 		}
 
 		// Flag maintenance mode in the admin bar (front and back office) so admins don't forget it's on.
-		if ( $this->is_enabled() ) {
+		if ( self::is_enabled() ) {
 			add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_node' ), 999 );
 		}
 	}
@@ -60,11 +60,27 @@ class Maintenance {
 	/**
 	 * Check if maintenance mode is enabled.
 	 *
+	 * Public and static so other modules (e.g. the MCP abilities exposed by
+	 * McpAbilities) can read this status without instantiating the class and
+	 * triggering its constructor's hook registrations.
+	 *
 	 * @return bool
 	 */
-	private function is_enabled() {
+	public static function is_enabled() {
 		$options = get_option( 'frontblocks_settings', array() );
 		return (bool) ( $options['enable_maintenance'] ?? false );
+	}
+
+	/**
+	 * Turn maintenance mode on or off.
+	 *
+	 * @param bool $enabled Whether maintenance mode should be enabled.
+	 * @return void
+	 */
+	public static function set_enabled( $enabled ) {
+		$options                       = get_option( 'frontblocks_settings', array() );
+		$options['enable_maintenance'] = (bool) $enabled;
+		update_option( 'frontblocks_settings', $options );
 	}
 
 	/**
