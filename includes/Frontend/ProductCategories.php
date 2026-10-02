@@ -343,6 +343,16 @@ class ProductCategories {
 
 		if ( ! empty( $exclude ) ) {
 			$include = array_values( array_diff( $include, $exclude ) );
+
+			if ( empty( $include ) ) {
+				// Every explicitly included category was also excluded: the block
+				// must show none, not fall back to showing everything. 0 is never
+				// a valid term ID, so this always matches zero terms in get_terms().
+				return array(
+					'include' => array( 0 ),
+					'exclude' => array(),
+				);
+			}
 		}
 
 		return array(

@@ -84,8 +84,19 @@ function ProductCategoriesEdit(props) {
 
    const [categories, setCategories] = useState([]);
    const [isLoading, setIsLoading] = useState(true);
-   const [allCategories, setAllCategories] = useState([]);
-   const [isLoadingAllCategories, setIsLoadingAllCategories] = useState(true);
+
+   // Picker data: rather than loading every store category up front (which breaks
+   // down once a store has more than one page of categories), we only ever fetch
+   // (a) the handful of categories already selected, by ID, and (b) small batches
+   // of live search matches as the user types. categoryById accumulates whatever
+   // categories we've resolved so far, by ID, which is enough to render chips and
+   // build "Parent > Child" labels.
+   const [categoryById, setCategoryById] = useState({});
+   const [isResolvingSelected, setIsResolvingSelected] = useState(true);
+   const [includeSearch, setIncludeSearch] = useState('');
+   const [excludeSearch, setExcludeSearch] = useState('');
+   const [includeSuggestions, setIncludeSuggestions] = useState([]);
+   const [excludeSuggestions, setExcludeSuggestions] = useState([]);
 
    const blockProps = useBlockProps({
       className: `frbl-product-categories-block ${className}`
@@ -110,11 +121,15 @@ function ProductCategoriesEdit(props) {
       let apiPath = `/wp/v2/product_cat?per_page=${queryLimit}&orderby=${orderby}&order=${orderParam}&hide_empty=${hideEmpty}&_fields=id,name,slug,count,category_image`;
 
       // Excluding always wins: drop any excluded ID from the include list before sending it.
+      const hasInclude = (includeCategories || []).length > 0;
       const effectiveInclude = (includeCategories || []).filter(
          (id) => ! (excludeCategories || []).includes(id)
       );
-      if (effectiveInclude.length) {
-         apiPath += `&include=${effectiveInclude.join(',')}`;
+      if (hasInclude) {
+         // 0 is never a valid term ID: if every included category was also
+         // excluded, this must show nothing, not fall back to the exclude-only
+         // query (which would show everything except the excluded ones).
+         apiPath += `&include=${effectiveInclude.length ? effectiveInclude.join(',') : '0'}`;
       } else if ((excludeCategories || []).length) {
          apiPath += `&exclude=${excludeCategories.join(',')}`;
       }
@@ -133,44 +148,107 @@ function ProductCategoriesEdit(props) {
       });
    }, [count, orderby, order, hideEmpty, includeCategories, excludeCategories]);
 
-   // Load the full, unfiltered category list once, used to build the include/exclude pickers.
-   useEffect(() => {
-      apiFetch({
-         path: '/wp/v2/product_cat?per_page=100&orderby=name&order=asc&_fields=id,name,parent',
-      })
-      .then((data) => {
-         setAllCategories(Array.isArray(data) ? data : []);
-         setIsLoadingAllCategories(false);
-      })
-      .catch((error) => {
-         console.error('FrontBlocks: Error loading the category list:', error);
-         setAllCategories([]);
-         setIsLoadingAllCategories(false);
+   // Merge newly-fetched categories into the id → category map the picker reads from.
+   const mergeCategories = (list) => {
+      if (!list || !list.length) {
+         return;
+      }
+      setCategoryById((prev) => {
+         const next = { ...prev };
+         list.forEach((category) => { next[category.id] = category; });
+         return next;
       });
-   }, []);
+   };
+
+   // Fetches categories by ID, plus one extra round-trip for any parent category
+   // not already known, so "Parent > Child" labels can be built for them too.
+   const fetchCategoriesWithParents = (ids, knownIds) => {
+      if (!ids.length) {
+         return Promise.resolve([]);
+      }
+      return apiFetch({
+         path: `/wp/v2/product_cat?include=${ids.join(',')}&per_page=100&_fields=id,name,parent`,
+      }).then((found) => {
+         const have = new Set([...knownIds, ...found.map((c) => c.id)]);
+         const missingParents = [...new Set(
+            found.map((c) => c.parent).filter((id) => id && !have.has(id))
+         )];
+         if (!missingParents.length) {
+            return found;
+         }
+         return apiFetch({
+            path: `/wp/v2/product_cat?include=${missingParents.join(',')}&per_page=100&_fields=id,name,parent`,
+         }).then((parents) => [...found, ...parents]).catch(() => found);
+      });
+   };
+
+   // Resolve the names of already-selected categories (from attributes), so their
+   // chips render correctly even if they never show up in a live search result.
+   useEffect(() => {
+      const allIds = [...new Set([...(includeCategories || []), ...(excludeCategories || [])])];
+      const neededIds = allIds.filter((id) => !categoryById[id]);
+      if (!neededIds.length) {
+         setIsResolvingSelected(false);
+         return;
+      }
+      let cancelled = false;
+      fetchCategoriesWithParents(neededIds, Object.keys(categoryById).map(Number))
+         .then((found) => { if (!cancelled) mergeCategories(found); })
+         .catch((error) => console.error('FrontBlocks: Error resolving selected categories:', error))
+         .finally(() => { if (!cancelled) setIsResolvingSelected(false); });
+      return () => { cancelled = true; };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [includeCategories, excludeCategories, categoryById]);
+
+   // Debounced live search against the REST API, so stores with any number of
+   // categories can still find and pick ones beyond the first page.
+   const useCategorySearch = (query, setSuggestions) => {
+      useEffect(() => {
+         if (!query) {
+            setSuggestions([]);
+            return;
+         }
+         let cancelled = false;
+         const timer = setTimeout(() => {
+            apiFetch({
+               path: `/wp/v2/product_cat?search=${encodeURIComponent(query)}&per_page=20&_fields=id,name,parent`,
+            })
+            .then((found) => {
+               if (cancelled) return;
+               mergeCategories(found);
+               setSuggestions(found.map((c) => c.id));
+            })
+            .catch((error) => {
+               console.error('FrontBlocks: Error searching categories:', error);
+               if (!cancelled) setSuggestions([]);
+            });
+         }, 250);
+         return () => { cancelled = true; clearTimeout(timer); };
+         // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [query]);
+   };
+   useCategorySearch(includeSearch, setIncludeSuggestions);
+   useCategorySearch(excludeSearch, setExcludeSuggestions);
 
    // Shows nested categories as "Parent > Child" so the picker makes the hierarchy clear.
    const getCategoryLabel = (category) => {
       if (!category.parent) {
          return category.name;
       }
-      const parent = allCategories.find((item) => item.id === category.parent);
+      const parent = categoryById[category.parent];
       return parent ? `${parent.name} > ${category.name}` : category.name;
    };
 
-   const categoryLabels = allCategories.map(getCategoryLabel);
+   const idsToLabels = (ids) => (ids || [])
+      .map((id) => (categoryById[id] ? getCategoryLabel(categoryById[id]) : null))
+      .filter(Boolean);
 
+   // Built from every category resolved so far (selected + whatever has shown up
+   // in search results), which is all a label could possibly have come from.
    const labelToId = {};
-   allCategories.forEach((category) => {
+   Object.values(categoryById).forEach((category) => {
       labelToId[getCategoryLabel(category)] = category.id;
    });
-
-   const idsToLabels = (ids) => (ids || [])
-      .map((id) => {
-         const category = allCategories.find((item) => item.id === id);
-         return category ? getCategoryLabel(category) : null;
-      })
-      .filter(Boolean);
 
    const labelsToIds = (labels) => labels
       .map((label) => labelToId[label])
@@ -280,20 +358,20 @@ function ProductCategoriesEdit(props) {
                <FormTokenField
                   label={__('Include Categories', 'frontblocks')}
                   value={idsToLabels(includeCategories)}
-                  suggestions={categoryLabels}
+                  suggestions={idsToLabels(includeSuggestions)}
                   onChange={(labels) => setAttributes({ includeCategories: labelsToIds(labels) })}
-                  __experimentalExpandOnFocus={true}
-                  help={__('Only show these categories. Leave empty to show all.', 'frontblocks')}
+                  onInputChange={(input) => setIncludeSearch(input)}
+                  help={__('Only show these categories. Type to search. Leave empty to show all.', 'frontblocks')}
                />
                <FormTokenField
                   label={__('Exclude Categories', 'frontblocks')}
                   value={idsToLabels(excludeCategories)}
-                  suggestions={categoryLabels}
+                  suggestions={idsToLabels(excludeSuggestions)}
                   onChange={(labels) => setAttributes({ excludeCategories: labelsToIds(labels) })}
-                  __experimentalExpandOnFocus={true}
-                  help={__('Always hide these categories, even if also listed above.', 'frontblocks')}
+                  onInputChange={(input) => setExcludeSearch(input)}
+                  help={__('Always hide these categories, even if also listed above. Type to search.', 'frontblocks')}
                />
-               {isLoadingAllCategories && <Spinner />}
+               {isResolvingSelected && <Spinner />}
             </PanelBody>
 
             <PanelBody

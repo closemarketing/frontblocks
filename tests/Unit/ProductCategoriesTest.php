@@ -135,7 +135,7 @@ class ProductCategoriesTest extends TestCase {
 		$this->assertSame( array(), $result['exclude'], 'Exclude must be folded into include, not applied separately.' );
 	}
 
-	public function test_resolve_category_filters_can_exclude_every_included_category() {
+	public function test_resolve_category_filters_shows_nothing_when_every_included_category_is_also_excluded() {
 		$result = $this->product_categories->resolve_category_filters(
 			array(
 				'includeCategories' => array( 1, 2 ),
@@ -143,7 +143,10 @@ class ProductCategoriesTest extends TestCase {
 			)
 		);
 
-		$this->assertSame( array(), $result['include'] );
+		// An empty 'include' means "no restriction" to get_terms(), which would
+		// show every category instead of none — 0 is never a valid term ID, so
+		// this forces a zero-result query instead.
+		$this->assertSame( array( 0 ), $result['include'] );
 		$this->assertSame( array(), $result['exclude'] );
 	}
 
