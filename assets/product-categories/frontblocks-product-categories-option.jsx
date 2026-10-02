@@ -13,6 +13,7 @@ const {
    Button,
    TabPanel,
    Spinner,
+   FormTokenField,
 } = wp.components;
 const { __ } = wp.i18n;
 const apiFetch = wp.apiFetch;
@@ -77,10 +78,14 @@ function ProductCategoriesEdit(props) {
       btnHoverTextColor,
       btnHoverBorderColor,
       className,
+      includeCategories,
+      excludeCategories,
    } = attributes;
 
    const [categories, setCategories] = useState([]);
    const [isLoading, setIsLoading] = useState(true);
+   const [allCategories, setAllCategories] = useState([]);
+   const [isLoadingAllCategories, setIsLoadingAllCategories] = useState(true);
 
    const blockProps = useBlockProps({
       className: `frbl-product-categories-block ${className}`
@@ -97,13 +102,23 @@ function ProductCategoriesEdit(props) {
    // Load categories from API.
    useEffect(() => {
       setIsLoading(true);
-      
+
       const queryLimit = count === 999 ? 100 : count;
       const orderParam = order.toLowerCase();
-      
+
       // Build the API path.
-      const apiPath = `/wp/v2/product_cat?per_page=${queryLimit}&orderby=${orderby}&order=${orderParam}&hide_empty=${hideEmpty}&_fields=id,name,slug,count,category_image`;
-      
+      let apiPath = `/wp/v2/product_cat?per_page=${queryLimit}&orderby=${orderby}&order=${orderParam}&hide_empty=${hideEmpty}&_fields=id,name,slug,count,category_image`;
+
+      // Excluding always wins: drop any excluded ID from the include list before sending it.
+      const effectiveInclude = (includeCategories || []).filter(
+         (id) => ! (excludeCategories || []).includes(id)
+      );
+      if (effectiveInclude.length) {
+         apiPath += `&include=${effectiveInclude.join(',')}`;
+      } else if ((excludeCategories || []).length) {
+         apiPath += `&exclude=${excludeCategories.join(',')}`;
+      }
+
       apiFetch({
          path: apiPath,
       })
@@ -116,7 +131,50 @@ function ProductCategoriesEdit(props) {
          setCategories([]);
          setIsLoading(false);
       });
-   }, [count, orderby, order, hideEmpty]);
+   }, [count, orderby, order, hideEmpty, includeCategories, excludeCategories]);
+
+   // Load the full, unfiltered category list once, used to build the include/exclude pickers.
+   useEffect(() => {
+      apiFetch({
+         path: '/wp/v2/product_cat?per_page=100&orderby=name&order=asc&_fields=id,name,parent',
+      })
+      .then((data) => {
+         setAllCategories(Array.isArray(data) ? data : []);
+         setIsLoadingAllCategories(false);
+      })
+      .catch((error) => {
+         console.error('FrontBlocks: Error loading the category list:', error);
+         setAllCategories([]);
+         setIsLoadingAllCategories(false);
+      });
+   }, []);
+
+   // Shows nested categories as "Parent > Child" so the picker makes the hierarchy clear.
+   const getCategoryLabel = (category) => {
+      if (!category.parent) {
+         return category.name;
+      }
+      const parent = allCategories.find((item) => item.id === category.parent);
+      return parent ? `${parent.name} > ${category.name}` : category.name;
+   };
+
+   const categoryLabels = allCategories.map(getCategoryLabel);
+
+   const labelToId = {};
+   allCategories.forEach((category) => {
+      labelToId[getCategoryLabel(category)] = category.id;
+   });
+
+   const idsToLabels = (ids) => (ids || [])
+      .map((id) => {
+         const category = allCategories.find((item) => item.id === id);
+         return category ? getCategoryLabel(category) : null;
+      })
+      .filter(Boolean);
+
+   const labelsToIds = (labels) => labels
+      .map((label) => labelToId[label])
+      .filter((id) => typeof id === 'number');
 
    const styleVars = {
       '--frbl-grid-columns': columns,
@@ -213,6 +271,29 @@ function ProductCategoriesEdit(props) {
                   help={__('Image size for each category.', 'frontblocks')}
                />
 
+            </PanelBody>
+
+            <PanelBody
+               title={__('Category Filters', 'frontblocks')}
+               initialOpen={false}
+            >
+               <FormTokenField
+                  label={__('Include Categories', 'frontblocks')}
+                  value={idsToLabels(includeCategories)}
+                  suggestions={categoryLabels}
+                  onChange={(labels) => setAttributes({ includeCategories: labelsToIds(labels) })}
+                  __experimentalExpandOnFocus={true}
+                  help={__('Only show these categories. Leave empty to show all.', 'frontblocks')}
+               />
+               <FormTokenField
+                  label={__('Exclude Categories', 'frontblocks')}
+                  value={idsToLabels(excludeCategories)}
+                  suggestions={categoryLabels}
+                  onChange={(labels) => setAttributes({ excludeCategories: labelsToIds(labels) })}
+                  __experimentalExpandOnFocus={true}
+                  help={__('Always hide these categories, even if also listed above.', 'frontblocks')}
+               />
+               {isLoadingAllCategories && <Spinner />}
             </PanelBody>
 
             <PanelBody
@@ -492,6 +573,8 @@ registerBlockType('frontblocks/product-categories', {
       btnHoverBgColor:    { type: 'string',  default: '' },
       btnHoverTextColor:  { type: 'string',  default: '' },
       btnHoverBorderColor:{ type: 'string',  default: '' },
+      includeCategories:  { type: 'array',   default: [] },
+      excludeCategories:  { type: 'array',   default: [] },
    },
    edit: ProductCategoriesEdit,
    save: () => null,

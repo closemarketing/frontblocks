@@ -88,4 +88,72 @@ class ProductCategoriesTest extends TestCase {
 
 		$this->assertSame( '', $result );
 	}
+
+	public function test_resolve_category_filters_defaults_to_empty_when_attributes_are_missing() {
+		$result = $this->product_categories->resolve_category_filters( array() );
+
+		$this->assertSame(
+			array(
+				'include' => array(),
+				'exclude' => array(),
+			),
+			$result
+		);
+	}
+
+	public function test_resolve_category_filters_returns_include_only() {
+		$result = $this->product_categories->resolve_category_filters(
+			array(
+				'includeCategories' => array( 3, 1, 2 ),
+			)
+		);
+
+		$this->assertSame( array( 3, 1, 2 ), $result['include'] );
+		$this->assertSame( array(), $result['exclude'] );
+	}
+
+	public function test_resolve_category_filters_returns_exclude_only() {
+		$result = $this->product_categories->resolve_category_filters(
+			array(
+				'excludeCategories' => array( 4, 5 ),
+			)
+		);
+
+		$this->assertSame( array(), $result['include'] );
+		$this->assertSame( array( 4, 5 ), $result['exclude'] );
+	}
+
+	public function test_resolve_category_filters_removes_excluded_ids_from_include() {
+		$result = $this->product_categories->resolve_category_filters(
+			array(
+				'includeCategories' => array( 1, 2, 3 ),
+				'excludeCategories' => array( 2 ),
+			)
+		);
+
+		$this->assertSame( array( 1, 3 ), $result['include'] );
+		$this->assertSame( array(), $result['exclude'], 'Exclude must be folded into include, not applied separately.' );
+	}
+
+	public function test_resolve_category_filters_can_exclude_every_included_category() {
+		$result = $this->product_categories->resolve_category_filters(
+			array(
+				'includeCategories' => array( 1, 2 ),
+				'excludeCategories' => array( 1, 2 ),
+			)
+		);
+
+		$this->assertSame( array(), $result['include'] );
+		$this->assertSame( array(), $result['exclude'] );
+	}
+
+	public function test_resolve_category_filters_sanitizes_non_numeric_and_duplicate_values() {
+		$result = $this->product_categories->resolve_category_filters(
+			array(
+				'includeCategories' => array( '2', '2', 'not-a-number', 0, 5 ),
+			)
+		);
+
+		$this->assertSame( array( 2, 5 ), $result['include'] );
+	}
 }

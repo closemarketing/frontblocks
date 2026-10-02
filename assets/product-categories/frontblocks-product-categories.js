@@ -25,7 +25,8 @@ var _wp$components = wp.components,
   Dropdown = _wp$components.Dropdown,
   Button = _wp$components.Button,
   TabPanel = _wp$components.TabPanel,
-  Spinner = _wp$components.Spinner;
+  Spinner = _wp$components.Spinner,
+  FormTokenField = _wp$components.FormTokenField;
 var __ = wp.i18n.__;
 var apiFetch = wp.apiFetch;
 function CompactColorPicker(_ref) {
@@ -106,7 +107,9 @@ function ProductCategoriesEdit(props) {
     btnHoverBgColor = attributes.btnHoverBgColor,
     btnHoverTextColor = attributes.btnHoverTextColor,
     btnHoverBorderColor = attributes.btnHoverBorderColor,
-    className = attributes.className;
+    className = attributes.className,
+    includeCategories = attributes.includeCategories,
+    excludeCategories = attributes.excludeCategories;
   var _useState = useState([]),
     _useState2 = _slicedToArray(_useState, 2),
     categories = _useState2[0],
@@ -115,6 +118,14 @@ function ProductCategoriesEdit(props) {
     _useState4 = _slicedToArray(_useState3, 2),
     isLoading = _useState4[0],
     setIsLoading = _useState4[1];
+  var _useState5 = useState([]),
+    _useState6 = _slicedToArray(_useState5, 2),
+    allCategories = _useState6[0],
+    setAllCategories = _useState6[1];
+  var _useState7 = useState(true),
+    _useState8 = _slicedToArray(_useState7, 2),
+    isLoadingAllCategories = _useState8[0],
+    setIsLoadingAllCategories = _useState8[1];
   var blockProps = useBlockProps({
     className: "frbl-product-categories-block ".concat(className)
   });
@@ -129,6 +140,16 @@ function ProductCategoriesEdit(props) {
 
     // Build the API path.
     var apiPath = "/wp/v2/product_cat?per_page=".concat(queryLimit, "&orderby=").concat(orderby, "&order=").concat(orderParam, "&hide_empty=").concat(hideEmpty, "&_fields=id,name,slug,count,category_image");
+
+    // Excluding always wins: drop any excluded ID from the include list before sending it.
+    var effectiveInclude = (includeCategories || []).filter(function (id) {
+      return !(excludeCategories || []).includes(id);
+    });
+    if (effectiveInclude.length) {
+      apiPath += "&include=".concat(effectiveInclude.join(','));
+    } else if ((excludeCategories || []).length) {
+      apiPath += "&exclude=".concat(excludeCategories.join(','));
+    }
     apiFetch({
       path: apiPath
     }).then(function (data) {
@@ -139,7 +160,52 @@ function ProductCategoriesEdit(props) {
       setCategories([]);
       setIsLoading(false);
     });
-  }, [count, orderby, order, hideEmpty]);
+  }, [count, orderby, order, hideEmpty, includeCategories, excludeCategories]);
+
+  // Load the full, unfiltered category list once, used to build the include/exclude pickers.
+  useEffect(function () {
+    apiFetch({
+      path: '/wp/v2/product_cat?per_page=100&orderby=name&order=asc&_fields=id,name,parent'
+    }).then(function (data) {
+      setAllCategories(Array.isArray(data) ? data : []);
+      setIsLoadingAllCategories(false);
+    }).catch(function (error) {
+      console.error('FrontBlocks: Error loading the category list:', error);
+      setAllCategories([]);
+      setIsLoadingAllCategories(false);
+    });
+  }, []);
+
+  // Shows nested categories as "Parent > Child" so the picker makes the hierarchy clear.
+  var getCategoryLabel = function getCategoryLabel(category) {
+    if (!category.parent) {
+      return category.name;
+    }
+    var parent = allCategories.find(function (item) {
+      return item.id === category.parent;
+    });
+    return parent ? "".concat(parent.name, " > ").concat(category.name) : category.name;
+  };
+  var categoryLabels = allCategories.map(getCategoryLabel);
+  var labelToId = {};
+  allCategories.forEach(function (category) {
+    labelToId[getCategoryLabel(category)] = category.id;
+  });
+  var idsToLabels = function idsToLabels(ids) {
+    return (ids || []).map(function (id) {
+      var category = allCategories.find(function (item) {
+        return item.id === id;
+      });
+      return category ? getCategoryLabel(category) : null;
+    }).filter(Boolean);
+  };
+  var labelsToIds = function labelsToIds(labels) {
+    return labels.map(function (label) {
+      return labelToId[label];
+    }).filter(function (id) {
+      return typeof id === 'number';
+    });
+  };
   var styleVars = {
     '--frbl-grid-columns': columns,
     '--frbl-bg-color': bgColor,
@@ -260,6 +326,31 @@ function ProductCategoriesEdit(props) {
     },
     help: __('Image size for each category.', 'frontblocks')
   })), /*#__PURE__*/React.createElement(PanelBody, {
+    title: __('Category Filters', 'frontblocks'),
+    initialOpen: false
+  }, /*#__PURE__*/React.createElement(FormTokenField, {
+    label: __('Include Categories', 'frontblocks'),
+    value: idsToLabels(includeCategories),
+    suggestions: categoryLabels,
+    onChange: function onChange(labels) {
+      return setAttributes({
+        includeCategories: labelsToIds(labels)
+      });
+    },
+    __experimentalExpandOnFocus: true,
+    help: __('Only show these categories. Leave empty to show all.', 'frontblocks')
+  }), /*#__PURE__*/React.createElement(FormTokenField, {
+    label: __('Exclude Categories', 'frontblocks'),
+    value: idsToLabels(excludeCategories),
+    suggestions: categoryLabels,
+    onChange: function onChange(labels) {
+      return setAttributes({
+        excludeCategories: labelsToIds(labels)
+      });
+    },
+    __experimentalExpandOnFocus: true,
+    help: __('Always hide these categories, even if also listed above.', 'frontblocks')
+  }), isLoadingAllCategories && /*#__PURE__*/React.createElement(Spinner, null)), /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Card Style Settings', 'frontblocks'),
     initialOpen: false
   }, /*#__PURE__*/React.createElement(RangeControl, {
@@ -661,6 +752,14 @@ registerBlockType('frontblocks/product-categories', {
     btnHoverBorderColor: {
       type: 'string',
       default: ''
+    },
+    includeCategories: {
+      type: 'array',
+      default: []
+    },
+    excludeCategories: {
+      type: 'array',
+      default: []
     }
   },
   edit: ProductCategoriesEdit,
