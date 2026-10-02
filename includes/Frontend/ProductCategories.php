@@ -290,6 +290,20 @@ class ProductCategories {
 					'type'    => 'string',
 					'default' => '',
 				),
+				'includeCategories'   => array(
+					'type'    => 'array',
+					'default' => array(),
+					'items'   => array(
+						'type' => 'number',
+					),
+				),
+				'excludeCategories'   => array(
+					'type'    => 'array',
+					'default' => array(),
+					'items'   => array(
+						'type' => 'number',
+					),
+				),
 			),
 		);
 
@@ -299,6 +313,52 @@ class ProductCategories {
 				$args
 			);
 		}
+	}
+
+	/**
+	 * Resolve the include/exclude product category term ID filters from block attributes.
+	 *
+	 * When both an include and an exclude list are set, the excluded term IDs are
+	 * removed from the include list so that excluding a category always wins, even
+	 * for a category that was also explicitly included. This keeps the logic
+	 * independent from `get_terms()`'s own `include`/`exclude` precedence, which
+	 * silently drops `exclude` entirely whenever `include` is non-empty.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return array {
+	 *     @type int[] $include Term IDs to pass as `include`. Empty when no include filter is set.
+	 *     @type int[] $exclude Term IDs to pass as `exclude`. Always empty when `include` is non-empty.
+	 * }
+	 */
+	public function resolve_category_filters( $attributes ) {
+		$include = array_values( array_unique( array_filter( array_map( 'absint', (array) ( $attributes['includeCategories'] ?? array() ) ) ) ) );
+		$exclude = array_values( array_unique( array_filter( array_map( 'absint', (array) ( $attributes['excludeCategories'] ?? array() ) ) ) ) );
+
+		if ( empty( $include ) ) {
+			return array(
+				'include' => array(),
+				'exclude' => $exclude,
+			);
+		}
+
+		if ( ! empty( $exclude ) ) {
+			$include = array_values( array_diff( $include, $exclude ) );
+
+			if ( empty( $include ) ) {
+				// Every explicitly included category was also excluded: the block
+				// must show none, not fall back to showing everything. 0 is never
+				// a valid term ID, so this always matches zero terms in get_terms().
+				return array(
+					'include' => array( 0 ),
+					'exclude' => array(),
+				);
+			}
+		}
+
+		return array(
+			'include' => $include,
+			'exclude' => array(),
+		);
 	}
 
 	/**
@@ -353,13 +413,22 @@ class ProductCategories {
 		 */
 		$query_limit = ( 999 === $count ) ? 0 : $count;
 
-		$args       = array(
+		$category_filters = $this->resolve_category_filters( $attributes );
+
+		$args = array(
 			'taxonomy'   => 'product_cat',
 			'orderby'    => $orderby,
 			'order'      => $order,
 			'number'     => $query_limit,
 			'hide_empty' => (bool) $hide_empty,
 		);
+
+		if ( ! empty( $category_filters['include'] ) ) {
+			$args['include'] = $category_filters['include'];
+		} elseif ( ! empty( $category_filters['exclude'] ) ) {
+			$args['exclude'] = $category_filters['exclude'];
+		}
+
 		$categories = get_terms( $args );
 
 		if ( is_wp_error( $categories ) || empty( $categories ) ) {

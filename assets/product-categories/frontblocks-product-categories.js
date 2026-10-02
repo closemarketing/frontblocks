@@ -1,5 +1,15 @@
 "use strict";
 
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -25,7 +35,8 @@ var _wp$components = wp.components,
   Dropdown = _wp$components.Dropdown,
   Button = _wp$components.Button,
   TabPanel = _wp$components.TabPanel,
-  Spinner = _wp$components.Spinner;
+  Spinner = _wp$components.Spinner,
+  FormTokenField = _wp$components.FormTokenField;
 var __ = wp.i18n.__;
 var apiFetch = wp.apiFetch;
 function CompactColorPicker(_ref) {
@@ -106,7 +117,9 @@ function ProductCategoriesEdit(props) {
     btnHoverBgColor = attributes.btnHoverBgColor,
     btnHoverTextColor = attributes.btnHoverTextColor,
     btnHoverBorderColor = attributes.btnHoverBorderColor,
-    className = attributes.className;
+    className = attributes.className,
+    includeCategories = attributes.includeCategories,
+    excludeCategories = attributes.excludeCategories;
   var _useState = useState([]),
     _useState2 = _slicedToArray(_useState, 2),
     categories = _useState2[0],
@@ -115,6 +128,37 @@ function ProductCategoriesEdit(props) {
     _useState4 = _slicedToArray(_useState3, 2),
     isLoading = _useState4[0],
     setIsLoading = _useState4[1];
+
+  // Picker data: rather than loading every store category up front (which breaks
+  // down once a store has more than one page of categories), we only ever fetch
+  // (a) the handful of categories already selected, by ID, and (b) small batches
+  // of live search matches as the user types. categoryById accumulates whatever
+  // categories we've resolved so far, by ID, which is enough to render chips and
+  // build "Parent > Child" labels.
+  var _useState5 = useState({}),
+    _useState6 = _slicedToArray(_useState5, 2),
+    categoryById = _useState6[0],
+    setCategoryById = _useState6[1];
+  var _useState7 = useState(true),
+    _useState8 = _slicedToArray(_useState7, 2),
+    isResolvingSelected = _useState8[0],
+    setIsResolvingSelected = _useState8[1];
+  var _useState9 = useState(''),
+    _useState0 = _slicedToArray(_useState9, 2),
+    includeSearch = _useState0[0],
+    setIncludeSearch = _useState0[1];
+  var _useState1 = useState(''),
+    _useState10 = _slicedToArray(_useState1, 2),
+    excludeSearch = _useState10[0],
+    setExcludeSearch = _useState10[1];
+  var _useState11 = useState([]),
+    _useState12 = _slicedToArray(_useState11, 2),
+    includeSuggestions = _useState12[0],
+    setIncludeSuggestions = _useState12[1];
+  var _useState13 = useState([]),
+    _useState14 = _slicedToArray(_useState13, 2),
+    excludeSuggestions = _useState14[0],
+    setExcludeSuggestions = _useState14[1];
   var blockProps = useBlockProps({
     className: "frbl-product-categories-block ".concat(className)
   });
@@ -129,6 +173,20 @@ function ProductCategoriesEdit(props) {
 
     // Build the API path.
     var apiPath = "/wp/v2/product_cat?per_page=".concat(queryLimit, "&orderby=").concat(orderby, "&order=").concat(orderParam, "&hide_empty=").concat(hideEmpty, "&_fields=id,name,slug,count,category_image");
+
+    // Excluding always wins: drop any excluded ID from the include list before sending it.
+    var hasInclude = (includeCategories || []).length > 0;
+    var effectiveInclude = (includeCategories || []).filter(function (id) {
+      return !(excludeCategories || []).includes(id);
+    });
+    if (hasInclude) {
+      // 0 is never a valid term ID: if every included category was also
+      // excluded, this must show nothing, not fall back to the exclude-only
+      // query (which would show everything except the excluded ones).
+      apiPath += "&include=".concat(effectiveInclude.length ? effectiveInclude.join(',') : '0');
+    } else if ((excludeCategories || []).length) {
+      apiPath += "&exclude=".concat(excludeCategories.join(','));
+    }
     apiFetch({
       path: apiPath
     }).then(function (data) {
@@ -139,7 +197,137 @@ function ProductCategoriesEdit(props) {
       setCategories([]);
       setIsLoading(false);
     });
-  }, [count, orderby, order, hideEmpty]);
+  }, [count, orderby, order, hideEmpty, includeCategories, excludeCategories]);
+
+  // Merge newly-fetched categories into the id → category map the picker reads from.
+  var mergeCategories = function mergeCategories(list) {
+    if (!list || !list.length) {
+      return;
+    }
+    setCategoryById(function (prev) {
+      var next = _objectSpread({}, prev);
+      list.forEach(function (category) {
+        next[category.id] = category;
+      });
+      return next;
+    });
+  };
+
+  // Fetches categories by ID, plus one extra round-trip for any parent category
+  // not already known, so "Parent > Child" labels can be built for them too.
+  var fetchCategoriesWithParents = function fetchCategoriesWithParents(ids, knownIds) {
+    if (!ids.length) {
+      return Promise.resolve([]);
+    }
+    return apiFetch({
+      path: "/wp/v2/product_cat?include=".concat(ids.join(','), "&per_page=100&_fields=id,name,parent")
+    }).then(function (found) {
+      var have = new Set([].concat(_toConsumableArray(knownIds), _toConsumableArray(found.map(function (c) {
+        return c.id;
+      }))));
+      var missingParents = _toConsumableArray(new Set(found.map(function (c) {
+        return c.parent;
+      }).filter(function (id) {
+        return id && !have.has(id);
+      })));
+      if (!missingParents.length) {
+        return found;
+      }
+      return apiFetch({
+        path: "/wp/v2/product_cat?include=".concat(missingParents.join(','), "&per_page=100&_fields=id,name,parent")
+      }).then(function (parents) {
+        return [].concat(_toConsumableArray(found), _toConsumableArray(parents));
+      }).catch(function () {
+        return found;
+      });
+    });
+  };
+
+  // Resolve the names of already-selected categories (from attributes), so their
+  // chips render correctly even if they never show up in a live search result.
+  useEffect(function () {
+    var allIds = _toConsumableArray(new Set([].concat(_toConsumableArray(includeCategories || []), _toConsumableArray(excludeCategories || []))));
+    var neededIds = allIds.filter(function (id) {
+      return !categoryById[id];
+    });
+    if (!neededIds.length) {
+      setIsResolvingSelected(false);
+      return;
+    }
+    var cancelled = false;
+    fetchCategoriesWithParents(neededIds, Object.keys(categoryById).map(Number)).then(function (found) {
+      if (!cancelled) mergeCategories(found);
+    }).catch(function (error) {
+      return console.error('FrontBlocks: Error resolving selected categories:', error);
+    }).finally(function () {
+      if (!cancelled) setIsResolvingSelected(false);
+    });
+    return function () {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [includeCategories, excludeCategories, categoryById]);
+
+  // Debounced live search against the REST API, so stores with any number of
+  // categories can still find and pick ones beyond the first page.
+  var useCategorySearch = function useCategorySearch(query, setSuggestions) {
+    useEffect(function () {
+      if (!query) {
+        setSuggestions([]);
+        return;
+      }
+      var cancelled = false;
+      var timer = setTimeout(function () {
+        apiFetch({
+          path: "/wp/v2/product_cat?search=".concat(encodeURIComponent(query), "&per_page=20&_fields=id,name,parent")
+        }).then(function (found) {
+          if (cancelled) return;
+          mergeCategories(found);
+          setSuggestions(found.map(function (c) {
+            return c.id;
+          }));
+        }).catch(function (error) {
+          console.error('FrontBlocks: Error searching categories:', error);
+          if (!cancelled) setSuggestions([]);
+        });
+      }, 250);
+      return function () {
+        cancelled = true;
+        clearTimeout(timer);
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [query]);
+  };
+  useCategorySearch(includeSearch, setIncludeSuggestions);
+  useCategorySearch(excludeSearch, setExcludeSuggestions);
+
+  // Shows nested categories as "Parent > Child" so the picker makes the hierarchy clear.
+  var getCategoryLabel = function getCategoryLabel(category) {
+    if (!category.parent) {
+      return category.name;
+    }
+    var parent = categoryById[category.parent];
+    return parent ? "".concat(parent.name, " > ").concat(category.name) : category.name;
+  };
+  var idsToLabels = function idsToLabels(ids) {
+    return (ids || []).map(function (id) {
+      return categoryById[id] ? getCategoryLabel(categoryById[id]) : null;
+    }).filter(Boolean);
+  };
+
+  // Built from every category resolved so far (selected + whatever has shown up
+  // in search results), which is all a label could possibly have come from.
+  var labelToId = {};
+  Object.values(categoryById).forEach(function (category) {
+    labelToId[getCategoryLabel(category)] = category.id;
+  });
+  var labelsToIds = function labelsToIds(labels) {
+    return labels.map(function (label) {
+      return labelToId[label];
+    }).filter(function (id) {
+      return typeof id === 'number';
+    });
+  };
   var styleVars = {
     '--frbl-grid-columns': columns,
     '--frbl-bg-color': bgColor,
@@ -260,6 +448,35 @@ function ProductCategoriesEdit(props) {
     },
     help: __('Image size for each category.', 'frontblocks')
   })), /*#__PURE__*/React.createElement(PanelBody, {
+    title: __('Category Filters', 'frontblocks'),
+    initialOpen: false
+  }, /*#__PURE__*/React.createElement(FormTokenField, {
+    label: __('Include Categories', 'frontblocks'),
+    value: idsToLabels(includeCategories),
+    suggestions: idsToLabels(includeSuggestions),
+    onChange: function onChange(labels) {
+      return setAttributes({
+        includeCategories: labelsToIds(labels)
+      });
+    },
+    onInputChange: function onInputChange(input) {
+      return setIncludeSearch(input);
+    },
+    help: __('Only show these categories. Type to search. Leave empty to show all.', 'frontblocks')
+  }), /*#__PURE__*/React.createElement(FormTokenField, {
+    label: __('Exclude Categories', 'frontblocks'),
+    value: idsToLabels(excludeCategories),
+    suggestions: idsToLabels(excludeSuggestions),
+    onChange: function onChange(labels) {
+      return setAttributes({
+        excludeCategories: labelsToIds(labels)
+      });
+    },
+    onInputChange: function onInputChange(input) {
+      return setExcludeSearch(input);
+    },
+    help: __('Always hide these categories, even if also listed above. Type to search.', 'frontblocks')
+  }), isResolvingSelected && /*#__PURE__*/React.createElement(Spinner, null)), /*#__PURE__*/React.createElement(PanelBody, {
     title: __('Card Style Settings', 'frontblocks'),
     initialOpen: false
   }, /*#__PURE__*/React.createElement(RangeControl, {
@@ -661,6 +878,14 @@ registerBlockType('frontblocks/product-categories', {
     btnHoverBorderColor: {
       type: 'string',
       default: ''
+    },
+    includeCategories: {
+      type: 'array',
+      default: []
+    },
+    excludeCategories: {
+      type: 'array',
+      default: []
     }
   },
   edit: ProductCategoriesEdit,
