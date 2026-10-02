@@ -229,6 +229,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 = Unreleased =
 *   Changed: Removed the legacy Cookie Notice runtime (banner, AJAX consent endpoints, and GTM/GA4/other tracking integrations) from FrontBlocks — a hard cutover, not a transition. Cookie consent now lives entirely in the standalone FrontConsent plugin; the Cookie Notice settings tab remains as a promo panel pointing to it.
+*   Added: An MCP ability to read and toggle maintenance mode for AI/automation clients (e.g. a go-live checklist), gated behind WordPress's Abilities API and the `manage_options` capability. It also reports WooCommerce's own "Coming soon" site visibility independently.
 
 = 1.5.4 =
 *   Added: Column Link controls for native WordPress Column blocks — make an entire column clickable, optionally open the destination in a new tab, and preserve the behaviour of links and buttons placed inside it.
