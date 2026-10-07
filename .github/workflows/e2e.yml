@@ -24,6 +24,16 @@ jobs:
           node-version: 24
           cache: npm
 
+      # The plugin loads its classes through vendor/autoload.php; without it
+      # activation fatals inside the Playground blueprint.
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+
+      - name: Install PHP dependencies
+        run: composer install --no-dev --prefer-dist --no-progress
+
       - name: Install dependencies
         run: npm ci
 
