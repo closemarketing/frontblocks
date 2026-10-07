@@ -317,5 +317,3 @@ class ReadingTime {
 	}
 }
 
-new ReadingTime();
-
