@@ -84,5 +84,3 @@ class BackButton {
 	}
 }
 
-new BackButton();
-

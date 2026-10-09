@@ -185,5 +185,3 @@ class StackedImages {
 		return ob_get_clean();
 	}
 }
-
-new StackedImages();

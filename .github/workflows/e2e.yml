@@ -1,0 +1,54 @@
+name: E2E
+
+on:
+  pull_request:
+    branches:
+      - trunk
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  playwright:
+    name: Playwright (Chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      # @wp-playground/cli requires Node >= 24.18.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # The plugin loads its classes through vendor/autoload.php; without it
+      # activation fatals inside the Playground blueprint.
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+
+      - name: Install PHP dependencies
+        run: composer install --no-dev --prefer-dist --no-progress
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      # playwright.config.ts boots the WordPress Playground server itself
+      # (the plugin checkout is auto-mounted and activated).
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload HTML report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14

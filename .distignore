@@ -32,6 +32,10 @@ phpunit.xml.dist
 phpcs.xml.dist
 .phpcs.xml.dist
 phpstan.neon.dist
+playwright.config.ts
+tsconfig.json
+playwright-report/
+test-results/
 tests/
 bin/
 .wp-env.json

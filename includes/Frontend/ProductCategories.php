@@ -514,5 +514,3 @@ class ProductCategories {
 		return ob_get_clean();
 	}
 }
-
-new ProductCategories();
