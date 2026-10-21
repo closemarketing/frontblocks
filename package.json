@@ -7,7 +7,7 @@
     "@playwright/test": "^1.64.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.6.4",
-    "@wp-playground/cli": "^3.1.57",
+    "@wp-playground/cli": "^3.1.58",
     "autoprefixer": "^10.6.1",
     "gulp": "^5.0.1",
     "gulp-clean-css": "^4.3.0",
