@@ -58,6 +58,15 @@ class Staging {
 	const ANALYTICS_REMOVED_MARKER = '<!-- FrontBlocks staging: tracking snippet removed -->';
 
 	/**
+	 * Version of the hooks that add-ons (FrontBlocks PRO) rely on:
+	 * `frontblocks_staging_allow_request`, `frontblocks_staging_block_email`
+	 * and Staging::record_email().
+	 *
+	 * @var int
+	 */
+	const EXTENSION_API = 1;
+
+	/**
 	 * Reasons why staging mode can be active.
 	 */
 	const REASON_CONSTANT    = 'constant';
@@ -597,6 +606,25 @@ class Staging {
 	}
 
 	/**
+	 * Whether this module decides what happens to an email.
+	 *
+	 * @param mixed $atts Email attributes.
+	 * @return bool
+	 */
+	private static function handles_email( $atts ) {
+		/**
+		 * Filters whether the core staging module blocks or redirects an email.
+		 *
+		 * An add-on that routes email itself (FrontBlocks PRO email routing)
+		 * returns false so the core measure steps aside.
+		 *
+		 * @param bool  $handles Whether the core measure handles the email. Default true.
+		 * @param array $atts    Email attributes.
+		 */
+		return (bool) apply_filters( 'frontblocks_staging_block_email', true, is_array( $atts ) ? $atts : array() );
+	}
+
+	/**
 	 * Stored address that receives every email instead of its real recipients.
 	 *
 	 * @return string Valid email address, or an empty string.
@@ -620,13 +648,13 @@ class Staging {
 	 */
 	public function block_mail( $pre, $atts ) {
 		// Another short-circuit already decided, or the emails are redirected instead.
-		if ( null !== $pre || '' !== self::get_redirect_email() ) {
+		if ( null !== $pre || '' !== self::get_redirect_email() || ! self::handles_email( $atts ) ) {
 			return $pre;
 		}
 
 		$atts = is_array( $atts ) ? $atts : array();
 
-		$this->log_email( 'blocked', $atts['to'] ?? '', $atts['subject'] ?? '' );
+		self::record_email( 'blocked', $atts['to'] ?? '', $atts['subject'] ?? '' );
 
 		return true;
 	}
@@ -639,13 +667,13 @@ class Staging {
 	 */
 	public function redirect_mail( $atts ) {
 		$redirect = self::get_redirect_email();
-		if ( ! is_array( $atts ) || '' === $redirect ) {
+		if ( ! is_array( $atts ) || '' === $redirect || ! self::handles_email( $atts ) ) {
 			return $atts;
 		}
 
 		$original = self::recipients_to_string( $atts['to'] ?? '' );
 
-		$this->log_email( 'redirected', $original, $atts['subject'] ?? '' );
+		self::record_email( 'redirected', $original, $atts['subject'] ?? '' );
 
 		$atts['to']      = $redirect;
 		$atts['subject'] = '[Staging] ' . (string) ( $atts['subject'] ?? '' );
@@ -704,12 +732,14 @@ class Staging {
 	/**
 	 * Cap and store a blocked email in the log.
 	 *
+	 * Public so add-ons that block or route email themselves can use the same log.
+	 *
 	 * @param string       $type    `blocked`, `redirected` or `api`.
 	 * @param string|array $to      Recipients, or the API host for `api`.
 	 * @param string       $subject Subject, empty for `api`.
 	 * @return void
 	 */
-	private function log_email( $type, $to, $subject ) {
+	public static function record_email( $type, $to, $subject ) {
 		$log = get_option( self::LOG_OPTION, array() );
 		$log = is_array( $log ) ? $log : array();
 
@@ -720,7 +750,7 @@ class Staging {
 				'type'    => $type,
 				'to'      => sanitize_text_field( self::recipients_to_string( $to ) ),
 				'subject' => sanitize_text_field( (string) $subject ),
-				'caller'  => $this->get_caller(),
+				'caller'  => self::get_caller(),
 			)
 		);
 
@@ -758,7 +788,7 @@ class Staging {
 	 *
 	 * @return string
 	 */
-	private function get_caller() {
+	private static function get_caller() {
 		$frames = wp_debug_backtrace_summary( __CLASS__, 0, false ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_wp_debug_backtrace_summary -- Records which code triggered a blocked email.
 		$frames = is_array( $frames ) ? $frames : array();
 
@@ -797,7 +827,19 @@ class Staging {
 			return false;
 		}
 
-		return ! is_user_logged_in();
+		if ( is_user_logged_in() ) {
+			return false;
+		}
+
+		/**
+		 * Filters whether a visitor who is not logged in may view the restricted staging site.
+		 *
+		 * Lets add-ons grant access without a WordPress user, for example
+		 * FrontBlocks PRO with its expiring client share links.
+		 *
+		 * @param bool $allowed Whether the current request is allowed. Default false.
+		 */
+		return ! apply_filters( 'frontblocks_staging_allow_request', false );
 	}
 
 	/**
@@ -1112,7 +1154,7 @@ class Staging {
 		}
 
 		if ( self::is_measure_enabled( 'staging_block_email' ) && self::host_matches( $host, self::get_mail_api_hosts() ) ) {
-			$this->log_email( 'api', strtolower( $host ), '' );
+			self::record_email( 'api', strtolower( $host ), '' );
 
 			return new \WP_Error( 'frontblocks_staging_blocked', __( 'Blocked by FrontBlocks staging mode: transactional email APIs are disabled on staging sites.', 'frontblocks' ) );
 		}

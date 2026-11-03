@@ -1011,4 +1011,66 @@ class StagingTest extends TestCase {
 
 		$this->assertDoesNotMatchRegularExpression( '/id="enable_staging"[^>]*checked/s', $html );
 	}
+
+	/*
+	 * ------------------------------------------------------------------
+	 * Extension points for add-ons (FrontBlocks PRO).
+	 * ------------------------------------------------------------------
+	 */
+
+	public function test_the_extension_api_version_is_exposed() {
+		$this->assertSame( 1, Staging::EXTENSION_API );
+	}
+
+	public function test_an_add_on_can_allow_a_visitor_through_the_restricted_page() {
+		$staging = $this->boot_staging( array( 'staging_restrict_access' => true ) );
+		$this->assertTrue( $staging->should_restrict_request() );
+
+		add_filter( 'frontblocks_staging_allow_request', '__return_true' );
+
+		$this->assertFalse( $staging->should_restrict_request() );
+	}
+
+	public function test_an_add_on_can_take_over_email_from_the_core_measure() {
+		$staging = $this->boot_staging();
+		$atts    = array( 'to' => 'customer@example.org', 'subject' => 'Order', 'message' => 'Body', 'headers' => array(), 'attachments' => array() );
+
+		$this->assertTrue( $staging->block_mail( null, $atts ) );
+		delete_option( Staging::LOG_OPTION );
+
+		add_filter( 'frontblocks_staging_block_email', '__return_false' );
+
+		$this->assertNull( $staging->block_mail( null, $atts ), 'The email must be left to the add-on.' );
+		$this->assertSame( array(), Staging::get_email_log() );
+	}
+
+	public function test_an_add_on_can_take_over_the_redirect_from_the_core_measure() {
+		$staging = $this->boot_staging( array( 'staging_redirect_email' => 'qa@example.org' ) );
+		$atts    = array( 'to' => 'customer@example.org', 'subject' => 'Order', 'message' => 'Body', 'headers' => array(), 'attachments' => array() );
+		add_filter( 'frontblocks_staging_block_email', '__return_false' );
+
+		$this->assertSame( $atts, $staging->redirect_mail( $atts ) );
+	}
+
+	public function test_add_ons_can_write_to_the_email_log() {
+		Staging::record_email( 'blocked', array( 'a@example.org', 'b@example.org' ), 'Receipt' );
+
+		$log = Staging::get_email_log();
+		$this->assertCount( 1, $log );
+		$this->assertSame( 'a@example.org, b@example.org', $log[0]['to'] );
+		$this->assertSame( 'Receipt', $log[0]['subject'] );
+	}
+
+	public function test_settings_show_a_locked_preview_of_the_pro_options_without_a_license() {
+		$settings = new Settings();
+		$settings->register_settings();
+
+		global $wp_settings_fields;
+		$this->assertArrayHasKey( 'staging_pro_teaser', $wp_settings_fields['frontblocks-settings']['frontblocks_section_staging'] );
+
+		$html = $this->capture( array( $settings, 'field_staging_pro_teaser' ) );
+		$this->assertStringContainsString( 'frbl-pro-badge', $html );
+		$this->assertStringContainsString( 'Stripe, WooPayments, Redsys and PayPal', $html );
+		$this->assertStringContainsString( 'utm_campaign=settings-staging', $html );
+	}
 }

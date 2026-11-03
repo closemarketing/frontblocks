@@ -980,6 +980,18 @@ class Settings {
 			'frontblocks_section_staging'
 		);
 
+		// Locked preview of the PRO staging options. With a valid license FrontBlocks PRO
+		// adds its own fields to this section instead.
+		if ( ! $this->is_license_valid ) {
+			add_settings_field(
+				'staging_pro_teaser',
+				__( 'Staging Mode PRO', 'frontblocks' ),
+				array( $this, 'field_staging_pro_teaser' ),
+				$this->page_slug,
+				'frontblocks_section_staging'
+			);
+		}
+
 		// Cookie Notice is no longer a configurable section here — it moved to
 		// FrontConsent. Its settings tab (see render_cookie_notice_promo_tab())
 		// is now a static promo panel, not backed by the Settings API.
@@ -2726,6 +2738,47 @@ class Settings {
 			</div>
 
 			<?php $this->render_staging_email_log(); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render the locked preview of the PRO staging options.
+	 *
+	 * @return void
+	 */
+	public function field_staging_pro_teaser() {
+		$features = array(
+			__( 'Payment gateways in test mode: Stripe, WooPayments, Redsys and PayPal switch to sandbox at runtime, and live-only gateways are hidden.', 'frontblocks' ),
+			__( 'Pause WP-Cron and Action Scheduler, with an allow-list of hooks that may still run.', 'frontblocks' ),
+			__( 'Cut external connections by category: ERP/CRM, email marketing, automation webhooks, ad conversions, shipping and invoicing, with a log.', 'frontblocks' ),
+			__( 'Disable selected plugins only on staging, without touching the active plugins saved in the database.', 'frontblocks' ),
+			__( 'Email routing to a test inbox or an allow-list of team addresses.', 'frontblocks' ),
+			__( 'Expiring client share links to view a restricted staging site without a WordPress user.', 'frontblocks' ),
+			__( 'Self-test of every protection, an early email guard and WP-CLI commands for deploy scripts.', 'frontblocks' ),
+		);
+		?>
+		<div class="frbl-feature-card frbl-feature-pro tw:mt-4">
+			<div class="frbl-pro-badge">PRO</div>
+			<div class="frbl-feature-content">
+				<div class="frbl-feature-info">
+					<h3 class="frbl-feature-title"><?php echo esc_html__( 'Staging Mode PRO', 'frontblocks' ); ?></h3>
+					<p class="frbl-feature-description"><?php echo esc_html__( 'Advanced protections for payments, integrations and client workflows.', 'frontblocks' ); ?></p>
+					<ul class="tw:text-sm tw:text-gray-600">
+						<?php foreach ( $features as $feature ) : ?>
+							<li><?php echo esc_html( $feature ); ?></li>
+						<?php endforeach; ?>
+					</ul>
+					<a
+						href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-staging"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="button button-primary"
+					>
+						<?php echo esc_html__( 'Get FrontBlocks PRO', 'frontblocks' ); ?>
+					</a>
+				</div>
+			</div>
 		</div>
 		<?php
 	}
