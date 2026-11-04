@@ -1101,3 +1101,46 @@
 		height: 0;
 	}
 }
+
+/* Staging mode: safety measures as read-only cards */
+.frbl-staging-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	gap: 12px;
+}
+
+.frbl-staging-card {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 12px;
+	border: 1px solid #bbf7d0;
+	border-radius: 8px;
+	background-color: #f0fdf4;
+}
+
+.frbl-staging-card__check {
+	flex-shrink: 0;
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	background-color: #16a34a;
+	color: #ffffff;
+	font-size: 13px;
+	line-height: 22px;
+	text-align: center;
+}
+
+.frbl-staging-card__title {
+	margin: 0 0 2px;
+	font-size: 14px;
+	font-weight: 600;
+	color: #111827;
+}
+
+.frbl-staging-card__text {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.5;
+	color: #4b5563;
+}

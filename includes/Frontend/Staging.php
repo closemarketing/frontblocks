@@ -84,7 +84,9 @@ class Staging {
 	}
 
 	/**
-	 * Register the hooks of every enabled measure, when staging mode is active.
+	 * Register the hooks of every safety measure, when staging mode is active.
+	 *
+	 * Measures are always on: they cannot be switched off one by one.
 	 *
 	 * @return void
 	 */
@@ -94,44 +96,26 @@ class Staging {
 		}
 
 		// Visual indicators.
-		if ( self::is_measure_enabled( 'staging_indicators' ) ) {
-			add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_node' ), 999 );
-			add_filter( 'document_title_parts', array( $this, 'prefix_title_parts' ), 999 );
-			add_filter( 'pre_get_document_title', array( $this, 'prefix_title' ), 999 );
-			add_filter( 'admin_title', array( $this, 'prefix_admin_title' ), 999 );
-			add_action( 'admin_notices', array( $this, 'render_admin_notice' ) );
-		}
+		add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_node' ), 999 );
+		add_filter( 'document_title_parts', array( $this, 'prefix_title_parts' ), 999 );
+		add_filter( 'pre_get_document_title', array( $this, 'prefix_title' ), 999 );
+		add_filter( 'admin_title', array( $this, 'prefix_admin_title' ), 999 );
+		add_action( 'admin_notices', array( $this, 'render_admin_notice' ) );
+		add_action( 'wp_body_open', array( $this, 'render_top_bar' ) );
 
-		if ( self::is_measure_enabled( 'staging_top_bar' ) ) {
-			add_action( 'wp_body_open', array( $this, 'render_top_bar' ) );
-		}
+		$this->register_noindex();
+		$this->register_email_blocking();
 
-		if ( self::is_measure_enabled( 'staging_noindex' ) ) {
-			$this->register_noindex();
-		}
-
-		if ( self::is_measure_enabled( 'staging_block_email' ) ) {
-			$this->register_email_blocking();
-		}
-
-		if ( self::is_measure_enabled( 'staging_restrict_access' ) && ! is_admin() ) {
-			add_action( 'template_redirect', array( $this, 'maybe_restrict_access' ), 0 );
-		}
-
-		if ( self::is_measure_enabled( 'staging_woocommerce' ) && class_exists( 'WooCommerce' ) ) {
+		if ( class_exists( 'WooCommerce' ) ) {
 			$this->register_woocommerce_safety();
 		}
 
-		if ( self::is_measure_enabled( 'staging_pause_cron' ) ) {
-			// An array (even empty) short-circuits the list of events due to run.
-			add_filter( 'pre_get_ready_cron_jobs', '__return_empty_array' );
-			// Action Scheduler does not claim batches when no concurrent batch is allowed.
-			add_filter( 'action_scheduler_queue_runner_concurrent_batches', '__return_zero', 999 );
-		}
+		// An array (even empty) short-circuits the list of events due to run.
+		add_filter( 'pre_get_ready_cron_jobs', '__return_empty_array' );
+		// Action Scheduler does not claim batches when no concurrent batch is allowed.
+		add_filter( 'action_scheduler_queue_runner_concurrent_batches', '__return_zero', 999 );
 
-		if ( self::is_measure_enabled( 'staging_block_analytics' ) ) {
-			$this->register_analytics_removal();
-		}
+		$this->register_analytics_removal();
 
 		// A single HTTP guard covers the email APIs and the configured hosts.
 		add_filter( 'pre_http_request', array( $this, 'filter_http_request' ), 1, 3 );
@@ -412,49 +396,6 @@ class Staging {
 		}
 
 		return $lines;
-	}
-
-	/**
-	 * Whether a measure is enabled.
-	 *
-	 * Measures are enabled by default (except restricting access), so a
-	 * staging site is protected without any configuration. A saved value wins.
-	 *
-	 * @param string $key Measure option key.
-	 * @return bool
-	 */
-	public static function is_measure_enabled( $key ) {
-		$options = get_option( self::OPTION_NAME, array() );
-
-		if ( is_array( $options ) && array_key_exists( $key, $options ) ) {
-			return (bool) $options[ $key ];
-		}
-
-		$defaults = self::get_measure_defaults();
-
-		return (bool) ( $defaults[ $key ] ?? false );
-	}
-
-	/**
-	 * Default value of every measure checkbox.
-	 *
-	 * Restricting access is the only measure off by default: a client
-	 * reviewing a `beta.` site would otherwise land on a login wall.
-	 *
-	 * @return bool[]
-	 */
-	public static function get_measure_defaults() {
-		return array(
-			'staging_noindex'         => true,
-			'staging_block_email'     => true,
-			'staging_restrict_access' => false,
-			'staging_indicators'      => true,
-			'staging_top_bar'         => true,
-			'staging_woocommerce'     => true,
-			'staging_pause_cron'      => true,
-			'staging_block_http'      => true,
-			'staging_block_analytics' => true,
-		);
 	}
 
 	/*
@@ -775,55 +716,6 @@ class Staging {
 
 	/*
 	 * ------------------------------------------------------------------
-	 * 3. Restrict access.
-	 * ------------------------------------------------------------------
-	 */
-
-	/**
-	 * Whether the current visitor must be stopped by the private staging page.
-	 *
-	 * Reuses the Maintenance rules for system requests (AJAX, cron, REST,
-	 * Customizer), lets robots.txt through and lets any logged-in user through.
-	 *
-	 * @return bool
-	 */
-	public function should_restrict_request() {
-		if ( Maintenance::is_system_request() ) {
-			return false;
-		}
-
-		// Crawlers must read the closed robots.txt: an error there means "no restrictions".
-		if ( is_robots() ) {
-			return false;
-		}
-
-		return ! is_user_logged_in();
-	}
-
-	/**
-	 * Show the "Private staging site" page to visitors who are not logged in.
-	 *
-	 * @return void
-	 */
-	public function maybe_restrict_access() {
-		if ( ! $this->should_restrict_request() ) {
-			return;
-		}
-
-		status_header( 403 );
-		nocache_headers();
-
-		Maintenance::output_curtain(
-			__( 'Private staging site', 'frontblocks' ),
-			'',
-			wp_login_url(),
-			__( 'Log in', 'frontblocks' )
-		);
-		exit;
-	}
-
-	/*
-	 * ------------------------------------------------------------------
 	 * 4. Visual indicators.
 	 * ------------------------------------------------------------------
 	 */
@@ -1111,13 +1003,13 @@ class Staging {
 			return $preempt;
 		}
 
-		if ( self::is_measure_enabled( 'staging_block_email' ) && self::host_matches( $host, self::get_mail_api_hosts() ) ) {
+		if ( self::host_matches( $host, self::get_mail_api_hosts() ) ) {
 			$this->log_email( 'api', strtolower( $host ), '' );
 
 			return new \WP_Error( 'frontblocks_staging_blocked', __( 'Blocked by FrontBlocks staging mode: transactional email APIs are disabled on staging sites.', 'frontblocks' ) );
 		}
 
-		if ( self::is_measure_enabled( 'staging_block_http' ) && self::host_matches( $host, self::get_blocked_hosts() ) ) {
+		if ( self::host_matches( $host, self::get_blocked_hosts() ) ) {
 			return new \WP_Error( 'frontblocks_staging_blocked', __( 'Blocked by FrontBlocks staging mode: outgoing requests to this host are disabled on staging sites.', 'frontblocks' ) );
 		}
 

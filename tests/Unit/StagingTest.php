@@ -323,23 +323,13 @@ class StagingTest extends TestCase {
 		$this->assertNotFalse( has_action( 'init', array( $staging, 'boot' ) ) );
 	}
 
-	public function test_a_single_measure_can_be_turned_off() {
-		$staging = $this->boot_staging( array( 'staging_noindex' => false ) );
+	public function test_measures_cannot_be_turned_off() {
+		// Values left in the database by older versions must not switch a measure off.
+		$staging = $this->boot_staging( array( 'staging_noindex' => false, 'staging_pause_cron' => false ) );
 
-		$this->assertFalse( has_filter( 'wp_robots', array( $staging, 'filter_robots' ) ) );
+		$this->assertNotFalse( has_filter( 'wp_robots', array( $staging, 'filter_robots' ) ) );
 		$this->assertNotFalse( has_filter( 'pre_wp_mail', array( $staging, 'block_mail' ) ) );
-	}
-
-	public function test_measures_default_to_enabled_except_restricting_access() {
-		$this->assertTrue( Staging::is_measure_enabled( 'staging_noindex' ) );
-		$this->assertTrue( Staging::is_measure_enabled( 'staging_block_email' ) );
-		$this->assertTrue( Staging::is_measure_enabled( 'staging_pause_cron' ) );
-		$this->assertFalse( Staging::is_measure_enabled( 'staging_restrict_access' ) );
-		$this->assertFalse( Staging::is_measure_enabled( 'unknown_measure' ) );
-
-		update_option( 'frontblocks_settings', array( 'staging_noindex' => false, 'staging_restrict_access' => true ) );
-		$this->assertFalse( Staging::is_measure_enabled( 'staging_noindex' ) );
-		$this->assertTrue( Staging::is_measure_enabled( 'staging_restrict_access' ) );
+		$this->assertNotFalse( has_filter( 'pre_get_ready_cron_jobs', '__return_empty_array' ) );
 	}
 
 	/*
@@ -585,48 +575,6 @@ class StagingTest extends TestCase {
 		$this->assertSame( $cached, $staging->filter_http_request( $cached, array(), 'https://api.sendgrid.com/v3/mail/send' ) );
 	}
 
-	/*
-	 * ------------------------------------------------------------------
-	 * 3. Restrict access.
-	 * ------------------------------------------------------------------
-	 */
-
-	public function test_access_is_not_restricted_by_default() {
-		$staging = $this->boot_staging();
-
-		$this->assertFalse( has_action( 'template_redirect', array( $staging, 'maybe_restrict_access' ) ) );
-	}
-
-	public function test_restricted_access_stops_visitors_but_not_logged_in_users() {
-		$staging = $this->boot_staging( array( 'staging_restrict_access' => true ) );
-
-		$this->assertSame( 0, has_action( 'template_redirect', array( $staging, 'maybe_restrict_access' ) ) );
-		$this->assertTrue( $staging->should_restrict_request() );
-
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
-		$this->assertFalse( $staging->should_restrict_request() );
-	}
-
-	public function test_restricted_access_reuses_the_maintenance_system_request_rules() {
-		$staging = $this->boot_staging( array( 'staging_restrict_access' => true ) );
-
-		add_filter( 'wp_doing_ajax', '__return_true' );
-		$this->assertFalse( $staging->should_restrict_request(), 'AJAX must never be blocked.' );
-		remove_filter( 'wp_doing_ajax', '__return_true' );
-
-		add_filter( 'wp_doing_cron', '__return_true' );
-		$this->assertFalse( $staging->should_restrict_request(), 'Cron must never be blocked.' );
-	}
-
-	public function test_robots_txt_is_never_hidden_behind_the_private_page() {
-		$staging = $this->boot_staging( array( 'staging_restrict_access' => true ) );
-		$this->assertTrue( $staging->should_restrict_request() );
-
-		$GLOBALS['wp_query']->is_robots = true;
-
-		$this->assertFalse( $staging->should_restrict_request() );
-	}
-
 	public function test_the_curtain_page_can_be_rendered_with_a_login_link() {
 		$html = $this->capture(
 			static function () {
@@ -783,15 +731,6 @@ class StagingTest extends TestCase {
 		$this->assertSame( 0, apply_filters( 'action_scheduler_queue_runner_concurrent_batches', 1 ) );
 	}
 
-	public function test_background_tasks_run_when_pausing_is_turned_off() {
-		wp_schedule_single_event( time() - 60, 'frbl_staging_test_event' );
-		$this->boot_staging( array( 'staging_pause_cron' => false ) );
-
-		$this->assertNotEmpty( wp_get_ready_cron_jobs() );
-		$this->assertSame( 1, apply_filters( 'action_scheduler_queue_runner_concurrent_batches', 1 ) );
-		wp_clear_scheduled_hook( 'frbl_staging_test_event' );
-	}
-
 	public function test_requests_to_configured_hosts_and_their_subdomains_are_blocked() {
 		$this->boot_staging( array( 'staging_blocked_hosts' => "hooks.zapier.com\nerp.client.es" ) );
 
@@ -799,17 +738,6 @@ class StagingTest extends TestCase {
 		$this->assertWPError( apply_filters( 'pre_http_request', false, array(), 'https://api.erp.client.es/v1/orders' ) );
 		$this->assertFalse( apply_filters( 'pre_http_request', false, array(), 'https://example.org/' ) );
 		$this->assertFalse( apply_filters( 'pre_http_request', false, array(), 'https://notzapier.com/' ) );
-	}
-
-	public function test_blocking_hosts_can_be_turned_off() {
-		$this->boot_staging(
-			array(
-				'staging_blocked_hosts' => 'hooks.zapier.com',
-				'staging_block_http'    => false,
-			)
-		);
-
-		$this->assertFalse( apply_filters( 'pre_http_request', false, array(), 'https://hooks.zapier.com/hooks/catch/123/abc' ) );
 	}
 
 	public function test_add_ons_can_add_blocked_hosts_through_a_filter() {
@@ -927,36 +855,22 @@ class StagingTest extends TestCase {
 		$this->assertFalse( apply_filters( 'frcn_cookie_notice_has_tracking_consent', true ) );
 	}
 
-	public function test_tracking_is_left_alone_when_the_measure_is_off() {
-		$this->boot_staging( array( 'staging_block_analytics' => false ) );
-
-		$this->assertTrue( apply_filters( 'frcn_cookie_notice_has_tracking_consent', true ) );
-	}
-
 	/*
 	 * ------------------------------------------------------------------
 	 * Settings.
 	 * ------------------------------------------------------------------
 	 */
 
-	public function test_settings_save_the_manual_toggle_and_every_measure() {
+	public function test_settings_only_save_the_manual_toggle_for_staging() {
 		$_POST['_wpnonce'] = wp_create_nonce( 'frontblocks_settings-options' );
 		$settings          = new Settings();
 
-		$saved = $settings->sanitize_settings(
-			array(
-				'enable_staging'         => '1',
-				'staging_noindex'        => '1',
-				'staging_restrict_access' => '1',
-			)
-		);
+		$saved = $settings->sanitize_settings( array( 'enable_staging' => '1' ) );
 
 		$this->assertTrue( $saved['enable_staging'] );
-		$this->assertTrue( $saved['staging_noindex'] );
-		$this->assertTrue( $saved['staging_restrict_access'] );
-		// Unchecked checkboxes are not submitted and must be saved as off.
-		$this->assertFalse( $saved['staging_block_email'] );
-		$this->assertFalse( $saved['staging_pause_cron'] );
+		// Measures are always on: they are not settings anymore.
+		$this->assertArrayNotHasKey( 'staging_noindex', $saved );
+		$this->assertArrayNotHasKey( 'staging_restrict_access', $saved );
 	}
 
 	public function test_unchecking_the_manual_toggle_turns_it_off() {

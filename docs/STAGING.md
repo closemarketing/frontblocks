@@ -13,7 +13,7 @@ Staging mode is active when **any** of these is true:
 | Signal | Details |
 |---|---|
 | Domain | The host of the site URL starts with `beta.` (for example `beta.example.com`). The list of prefixes is filterable with `frontblocks_staging_host_prefixes`. |
-| Manual toggle | **Enable staging mode** in the Maintenance tab. |
+| Manual toggle | **Enable staging mode** in the Maintenance tab. When staging is detected from the domain, the environment or the constant, the toggle shows as on and is locked. |
 | Environment | `wp_get_environment_type()` returns `staging` or `development` (respects `WP_ENVIRONMENT_TYPE`). |
 | Constant | `define( 'FRBL_STAGING', true );` in `wp-config.php`. |
 
@@ -23,13 +23,12 @@ Only the manual toggle is stored in the database. Domain, environment and consta
 
 ## Safety measures
 
-Each measure is a checkbox in the Staging Mode section. All are enabled by default while staging mode is active, **except Restrict access**, which is off by default so clients can review a `beta.` site without a login.
+Measures are always on while staging mode is active and cannot be switched off one by one. The Staging Mode section shows them as read-only cards. The only options are the address that receives the emails and the list of hosts to block.
 
 | Measure | What it does |
 |---|---|
 | Prevent indexing | Forces `noindex, nofollow` in the robots meta tag (`wp_robots`), sends `X-Robots-Tag: noindex, nofollow`, serves a closed `robots.txt` (`Disallow: /`) and makes sitemaps answer 404. Covers the core sitemaps and Rank Math (tested); Yoast SEO reads the same `sitemap` query variable. |
 | Block outgoing email | `wp_mail()` never sends (`pre_wp_mail`) and the SendGrid, Mailgun, Brevo, Postmark, Amazon SES, SparkPost and Mailjet APIs are blocked at `pre_http_request`. Each blocked email is added to a log (recipient, subject, time, caller) capped at 50 entries and shown in the settings. With **Redirect emails to** set, emails are sent to that address instead (with the original recipients in the message and without Cc/Bcc). |
-| Restrict access | Only logged-in users can view the frontend. Visitors get a "Private staging site" page (HTTP 403) that reuses the maintenance curtain. AJAX, cron, REST and Customizer requests are never blocked (same rules as Maintenance Mode). |
 | Visual indicators | A `STAGING` node in the admin bar, a `[STAGING]` prefix in the browser tab title (also when an SEO plugin builds the title) and an admin notice on the dashboard and the FrontBlocks settings. |
 | Frontend top bar | A "Staging site — changes here are not live" bar for logged-in users (needs `wp_body_open`). |
 | WooCommerce safety | Only when WooCommerce is active: a "test site" notice on cart and checkout (classic and block), Subscriptions renewals forced to manual (`woocommerce_subscriptions_is_duplicate_site`) and webhooks paused (`woocommerce_webhook_should_deliver`). |
@@ -72,4 +71,4 @@ $state = FrontBlocks\Frontend\Staging::get_state();
 
 ## Settings keys
 
-Stored in `frontblocks_settings`: `enable_staging` (manual toggle), `staging_noindex`, `staging_block_email`, `staging_redirect_email`, `staging_restrict_access`, `staging_indicators`, `staging_top_bar`, `staging_woocommerce`, `staging_pause_cron`, `staging_block_http`, `staging_blocked_hosts` and `staging_block_analytics`. The email log is kept in the `frontblocks_staging_email_log` option, which is not autoloaded.
+Stored in `frontblocks_settings`: `enable_staging` (manual toggle), `staging_redirect_email` and `staging_blocked_hosts`. The email log is kept in the `frontblocks_staging_email_log` option, which is not autoloaded.
