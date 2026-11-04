@@ -917,12 +917,17 @@ class StagingTest extends TestCase {
 		$this->assertMatchesRegularExpression( '/id="enable_staging"[^>]*\\/>/', $html );
 	}
 
-	public function test_settings_screen_manual_checkbox_ignores_auto_detection() {
+	public function test_settings_screen_toggle_is_locked_when_auto_detected_and_keeps_the_manual_value() {
 		$this->set_site_host( 'beta.example.com' );
 		$settings = new Settings();
 
 		$html = $this->capture( array( $settings, 'field_enable_staging' ) );
 
-		$this->assertDoesNotMatchRegularExpression( '/id="enable_staging"[^>]*checked/s', $html );
+		// The toggle shows the real state but cannot be switched off from here.
+		$this->assertMatchesRegularExpression( '/id="enable_staging"[^>]*checked/s', $html );
+		$this->assertMatchesRegularExpression( '/id="enable_staging"[^>]*disabled/s', $html );
+		// A disabled checkbox is not submitted, so the saved manual value travels in a hidden input
+		// and auto-detection is never written to the database.
+		$this->assertMatchesRegularExpression( '/<input type="hidden" name="frontblocks_settings\[enable_staging\]" value="" \/>/', $html );
 	}
 }
