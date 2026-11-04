@@ -2614,34 +2614,42 @@ class Settings {
 
 		$measures = array(
 			'staging_noindex'         => array(
+				'staging_noindex',
 				__( 'Prevent indexing', 'frontblocks' ),
 				__( 'Sends noindex and nofollow (meta tag and X-Robots-Tag header), serves a closed robots.txt and disables the sitemaps. The "Search engine visibility" setting is not changed.', 'frontblocks' ),
 			),
 			'staging_block_email'     => array(
+				'staging_email',
 				__( 'Block outgoing email', 'frontblocks' ),
 				__( 'wp_mail() never sends, and the SendGrid, Mailgun, Brevo, Postmark, Amazon SES, SparkPost and Mailjet APIs are blocked. Blocked emails are listed below.', 'frontblocks' ),
 			),
 			'staging_indicators'      => array(
+				'staging_indicators',
 				__( 'Visual indicators', 'frontblocks' ),
 				__( 'STAGING node in the admin bar, [STAGING] prefix in the browser tab title and an admin notice on the dashboard and this screen.', 'frontblocks' ),
 			),
 			'staging_top_bar'         => array(
+				'staging_top_bar',
 				__( 'Frontend top bar', 'frontblocks' ),
 				__( 'Shows "Staging site — changes here are not live" at the top of the frontend to logged-in users.', 'frontblocks' ),
 			),
 			'staging_woocommerce'     => array(
+				'staging_woocommerce',
 				__( 'WooCommerce safety', 'frontblocks' ),
 				__( 'Test site notice on cart and checkout, Subscriptions renewals forced to manual so customers are not charged twice, and WooCommerce webhooks paused. Only applies when WooCommerce is active.', 'frontblocks' ),
 			),
 			'staging_pause_cron'      => array(
+				'staging_pause',
 				__( 'Pause background tasks', 'frontblocks' ),
 				__( 'Pauses WP-Cron and Action Scheduler, so scheduled posts, renewals and syncs do not run on the copy.', 'frontblocks' ),
 			),
 			'staging_block_http'      => array(
+				'staging_hosts',
 				__( 'Block outgoing requests to selected hosts', 'frontblocks' ),
 				__( 'Requests to the hosts listed below fail on staging. Use it for CRMs, ERPs and automation webhooks (Zapier, Make).', 'frontblocks' ),
 			),
 			'staging_block_analytics' => array(
+				'staging_tracking',
 				__( 'Remove tracking', 'frontblocks' ),
 				__( 'Removes Google Analytics and Google Tag Manager snippets (and stops FrontConsent from loading them) so test traffic does not pollute production data.', 'frontblocks' ),
 			),
@@ -2688,22 +2696,16 @@ class Settings {
 				?>
 			</p>
 
-			<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200">
-				<p class="tw:text-sm tw:font-medium tw:text-gray-700 tw:mt-0 tw:mb-2">
-					<?php echo esc_html__( 'Safety measures applied while staging mode is active', 'frontblocks' ); ?>
-				</p>
-				<div class="frbl-staging-cards">
-					<?php foreach ( $measures as $measure ) : ?>
-						<div class="frbl-staging-card">
-							<span class="frbl-staging-card__check" aria-hidden="true">&#10003;</span>
-							<div>
-								<p class="frbl-staging-card__title"><?php echo esc_html( $measure[0] ); ?></p>
-								<p class="frbl-staging-card__text"><?php echo esc_html( $measure[1] ); ?></p>
-							</div>
-						</div>
-					<?php endforeach; ?>
-				</div>
+			<p class="tw:text-sm tw:font-medium tw:text-gray-700 tw:mt-0 tw:mb-3">
+				<?php echo esc_html__( 'Safety measures applied while staging mode is active', 'frontblocks' ); ?>
+			</p>
+			<div class="frbl-features-grid tw:mb-4">
+				<?php foreach ( $measures as $measure ) : ?>
+					<?php UI::show_info_card( $measure[0], $measure[1], $measure[2] ); ?>
+				<?php endforeach; ?>
+			</div>
 
+			<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200">
 				<label for="<?php echo esc_attr( $this->option_staging_redirect_email ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mt-4 tw:mb-2">
 					<?php echo esc_html__( 'Redirect emails to', 'frontblocks' ); ?>
 				</label>
