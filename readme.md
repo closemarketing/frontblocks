@@ -30,6 +30,7 @@ Repository for FrontBlocks Site Tools, a WordPress plugin covering the everyday 
 - **Cookie Notice (moved to FrontConsent)** - Cookie consent now lives entirely in the dedicated free [FrontConsent](https://wordpress.org/plugins/frontconsent/) plugin. FrontBlocks no longer ships a banner of its own; the "Cookie Notice" settings tab is a promo panel pointing existing sites at FrontConsent, which migrates their settings and stats on install.
 - **Image Management** - Enable/disable/override registered image sizes, define custom sizes, bulk-regenerate thumbnails, and automatically serve WebP/AVIF variants on the frontend
 - **Maintenance Mode** - Show a customizable maintenance page to visitors while keeping the site accessible to logged-in administrators
+- **Staging Mode** - Safety measures for staging and copy environments, activated automatically on `beta.` domains, on `staging`/`development` environment types, with a manual toggle or with the `FRBL_STAGING` constant: no indexing, no real emails, no real side effects (WooCommerce webhooks, Subscriptions renewals, cron, selected outgoing hosts), no tracking, and a clear STAGING label. Exposes `frontblocks_is_staging()` for add-ons
 - **Google Sign-In** - "Sign in / Sign up with Google" button for wp-login.php, WooCommerce My Account and Checkout, plus a shortcode and block, with server-side ID token verification
 - **Review Notice** - Dismissible admin notice inviting site owners to leave a WordPress.org review, shown 14 days after activation
 - **Redundant Plugins Notice** - Persistent admin notice detecting third-party plugins made unnecessary by an active FrontBlocks feature (e.g. SVG upload plugins, Google Login plugins), extensible via the `frontblocks_redundant_plugins` filter
@@ -75,6 +76,7 @@ Repository for FrontBlocks Site Tools, a WordPress plugin covering the everyday 
 - [Carousel Pattern](./docs/CAROUSEL-PATTERN.md) - Hero carousel pattern with native WordPress blocks
 - [Cookie Notice migration](./docs/COOKIE-NOTICE.md) - Cookie consent has moved entirely to FrontConsent
 - [Image Management](./docs/IMAGE-MANAGEMENT.md) - Image size control and automatic WebP/AVIF delivery
+- [Staging Mode](./docs/STAGING.md) - Safety measures for staging sites, how they are detected and how add-ons can hook into them
 - [Review Notice](./docs/REVIEW-NOTICE.md) - Dismissible WordPress.org review prompt
 - [Redundant Plugins Notice](./docs/REDUNDANT-PLUGINS.md) - Detects plugins made unnecessary by FrontBlocks features and how to register new pairings
 - [Google Sign-In](./docs/GOOGLE-SIGNIN.md) - "Sign in / Sign up with Google" for wp-login.php and WooCommerce

@@ -13,6 +13,7 @@ namespace FrontBlocks\Admin;
 defined( 'ABSPATH' ) || exit;
 
 use FrontBlocks\Admin\UI;
+use FrontBlocks\Frontend\Staging;
 
 /**
  * Settings class
@@ -95,6 +96,27 @@ class Settings {
 	 * @var string
 	 */
 	private $option_maintenance_image = 'maintenance_image';
+
+	/**
+	 * Option key for the manual staging mode toggle.
+	 *
+	 * @var string
+	 */
+	private $option_enable_staging = 'enable_staging';
+
+	/**
+	 * Option key for the address that receives every email on staging.
+	 *
+	 * @var string
+	 */
+	private $option_staging_redirect_email = 'staging_redirect_email';
+
+	/**
+	 * Option key for the hosts blocked on staging (one per line).
+	 *
+	 * @var string
+	 */
+	private $option_staging_blocked_hosts = 'staging_blocked_hosts';
 
 	/**
 	 * Option key for popups feature.
@@ -942,6 +964,22 @@ class Settings {
 			'frontblocks_section_maintenance'
 		);
 
+		// Staging Mode section (shown in the Maintenance tab, below Maintenance Mode).
+		add_settings_section(
+			'frontblocks_section_staging',
+			__( 'Staging Mode', 'frontblocks' ),
+			array( $this, 'section_staging_callback' ),
+			$this->page_slug
+		);
+
+		add_settings_field(
+			$this->option_enable_staging,
+			__( 'Enable staging mode', 'frontblocks' ),
+			array( $this, 'field_enable_staging' ),
+			$this->page_slug,
+			'frontblocks_section_staging'
+		);
+
 		// Cookie Notice is no longer a configurable section here — it moved to
 		// FrontConsent. Its settings tab (see render_cookie_notice_promo_tab())
 		// is now a static promo panel, not backed by the Settings API.
@@ -1385,6 +1423,7 @@ class Settings {
 
 					<div class="frbl-tab-panel" data-tab-panel="maintenance" hidden>
 						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_maintenance' ); ?>
+						<?php $this->render_section_if_exists( $sections, 'frontblocks_section_staging' ); ?>
 					</div>
 
 					<div class="frbl-tab-panel" data-tab-panel="woocommerce" hidden>
@@ -1934,7 +1973,7 @@ class Settings {
 		$is_callback_only = ! $has_fields && $section['callback'];
 
 		// Check if this is a section that needs full width (rich fields, not a simple toggle grid).
-		$is_cpt_section = in_array( $section['id'], array( 'frontblocks_section_custom_post_types', 'frontblocks_section_maintenance', 'frontblocks_section_image_management' ), true );
+		$is_cpt_section = in_array( $section['id'], array( 'frontblocks_section_custom_post_types', 'frontblocks_section_maintenance', 'frontblocks_section_staging', 'frontblocks_section_image_management' ), true );
 
 		// Show PRO CTA button before the Optional Features section.
 		if ( 'frontblocks_section_features' === $section['id'] && ! $this->is_license_valid ) {
@@ -2543,6 +2582,209 @@ class Settings {
 				</div>
 			</div>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Staging mode section callback.
+	 *
+	 * @return void
+	 */
+	private function section_staging_callback() {
+		?>
+		<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
+			<?php echo esc_html__( 'Safety measures for staging and copy environments: no indexing, no real emails, no real side effects, and a clear STAGING label for anyone using the site.', 'frontblocks' ); ?>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Render the staging mode toggle, its status and its safety measures.
+	 *
+	 * @return void
+	 */
+	public function field_enable_staging() {
+		$options  = get_option( 'frontblocks_settings', array() );
+		$manual   = (bool) ( $options[ $this->option_enable_staging ] ?? false );
+		$state    = Staging::get_state();
+		$locked   = $state['active'] && ! empty( array_diff( (array) $state['reasons'], array( Staging::REASON_MANUAL ) ) );
+		$redirect = (string) ( $options[ $this->option_staging_redirect_email ] ?? '' );
+		$hosts    = (string) ( $options[ $this->option_staging_blocked_hosts ] ?? '' );
+		$input    = 'tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base';
+
+		$measures = array(
+			'staging_noindex'         => array(
+				'staging_noindex',
+				__( 'Prevent indexing', 'frontblocks' ),
+				__( 'Sends noindex and nofollow (meta tag and X-Robots-Tag header), serves a closed robots.txt and disables the sitemaps. The "Search engine visibility" setting is not changed.', 'frontblocks' ),
+			),
+			'staging_block_email'     => array(
+				'staging_email',
+				__( 'Block outgoing email', 'frontblocks' ),
+				__( 'wp_mail() never sends, and the SendGrid, Mailgun, Brevo, Postmark, Amazon SES, SparkPost and Mailjet APIs are blocked. Blocked emails are listed below.', 'frontblocks' ),
+			),
+			'staging_indicators'      => array(
+				'staging_indicators',
+				__( 'Visual indicators', 'frontblocks' ),
+				__( 'STAGING node in the admin bar, [STAGING] prefix in the browser tab title and an admin notice on the dashboard and this screen.', 'frontblocks' ),
+			),
+			'staging_top_bar'         => array(
+				'staging_top_bar',
+				__( 'Frontend top bar', 'frontblocks' ),
+				__( 'Shows "Staging site — changes here are not live" at the top of the frontend to logged-in users.', 'frontblocks' ),
+			),
+			'staging_woocommerce'     => array(
+				'staging_woocommerce',
+				__( 'WooCommerce safety', 'frontblocks' ),
+				__( 'Test site notice on cart and checkout, Subscriptions renewals forced to manual so customers are not charged twice, and WooCommerce webhooks paused. Only applies when WooCommerce is active.', 'frontblocks' ),
+			),
+			'staging_pause_cron'      => array(
+				'staging_pause',
+				__( 'Pause background tasks', 'frontblocks' ),
+				__( 'Pauses WP-Cron and Action Scheduler, so scheduled posts, renewals and syncs do not run on the copy.', 'frontblocks' ),
+			),
+			'staging_block_http'      => array(
+				'staging_hosts',
+				__( 'Block outgoing requests to selected hosts', 'frontblocks' ),
+				__( 'Requests to the hosts listed below fail on staging. Use it for CRMs, ERPs and automation webhooks (Zapier, Make).', 'frontblocks' ),
+			),
+			'staging_block_analytics' => array(
+				'staging_tracking',
+				__( 'Remove tracking', 'frontblocks' ),
+				__( 'Removes Google Analytics and Google Tag Manager snippets (and stops FrontConsent from loading them) so test traffic does not pollute production data.', 'frontblocks' ),
+			),
+		);
+		?>
+		<div class="frbl-staging-wrapper">
+			<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200 tw:mb-4">
+				<p class="tw:text-sm tw:font-medium tw:text-gray-900 tw:mt-0 tw:mb-2">
+					<?php echo esc_html( $state['active'] ? __( 'Staging mode is active on this site.', 'frontblocks' ) : __( 'Staging mode is not active on this site.', 'frontblocks' ) ); ?>
+				</p>
+				<?php foreach ( Staging::describe_reasons( $state ) as $reason ) : ?>
+					<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-0"><?php echo esc_html( $reason ); ?></p>
+				<?php endforeach; ?>
+			</div>
+
+			<div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
+				<label for="<?php echo esc_attr( $this->option_enable_staging ); ?>" class="tw:text-base tw:font-medium tw:text-gray-900">
+					<?php echo esc_html__( 'Enable staging mode', 'frontblocks' ); ?>
+				</label>
+				<label class="frbl-toggle">
+					<?php if ( $locked ) : ?>
+						<?php // A disabled checkbox is not submitted: keep the saved manual value. ?>
+						<input type="hidden" name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_staging ); ?>]" value="<?php echo $manual ? '1' : ''; ?>" />
+					<?php endif; ?>
+					<input type="checkbox"
+						id="<?php echo esc_attr( $this->option_enable_staging ); ?>"
+						<?php if ( ! $locked ) : ?>
+						name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_staging ); ?>]"
+						<?php endif; ?>
+						value="1"
+						<?php checked( true, $state['active'] ); ?>
+						<?php disabled( true, $locked ); ?>
+					/>
+					<span></span>
+				</label>
+			</div>
+			<p class="tw:text-xs tw:text-gray-500 tw:mt-0 tw:mb-4">
+				<?php
+				if ( $locked ) {
+					echo esc_html__( 'Staging mode is on because of the environment (a "beta." domain, the environment type or FRBL_STAGING in wp-config.php), so this toggle cannot be switched off here. FRBL_STAGING = false forces it off.', 'frontblocks' );
+				} else {
+					echo esc_html__( 'Turns staging mode on for any domain. It is also activated automatically on domains starting with "beta.", when the environment type is staging or development, and with FRBL_STAGING = true in wp-config.php (FRBL_STAGING = false forces it off). Only this toggle is saved in the database, so copying the database to production does not carry staging mode over.', 'frontblocks' );
+				}
+				?>
+			</p>
+
+			<p class="tw:text-sm tw:font-medium tw:text-gray-700 tw:mt-0 tw:mb-3">
+				<?php echo esc_html__( 'Safety measures applied while staging mode is active', 'frontblocks' ); ?>
+			</p>
+			<div class="frbl-features-grid tw:mb-4">
+				<?php foreach ( $measures as $measure ) : ?>
+					<?php UI::show_info_card( $measure[0], $measure[1], $measure[2] ); ?>
+				<?php endforeach; ?>
+			</div>
+
+			<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200">
+				<label for="<?php echo esc_attr( $this->option_staging_redirect_email ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mt-4 tw:mb-2">
+					<?php echo esc_html__( 'Redirect emails to', 'frontblocks' ); ?>
+				</label>
+				<input
+					type="email"
+					id="<?php echo esc_attr( $this->option_staging_redirect_email ); ?>"
+					name="frontblocks_settings[<?php echo esc_attr( $this->option_staging_redirect_email ); ?>]"
+					value="<?php echo esc_attr( $redirect ); ?>"
+					class="<?php echo esc_attr( $input ); ?>"
+				/>
+				<p class="tw:text-xs tw:text-gray-500 tw:mt-2 tw:mb-0">
+					<?php echo esc_html__( 'Optional. When set, every email is sent to this address instead of being blocked, with the original recipients in the message. Copies (Cc and Bcc) are removed.', 'frontblocks' ); ?>
+				</p>
+
+				<label for="<?php echo esc_attr( $this->option_staging_blocked_hosts ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mt-4 tw:mb-2">
+					<?php echo esc_html__( 'Hosts to block', 'frontblocks' ); ?>
+				</label>
+				<textarea
+					id="<?php echo esc_attr( $this->option_staging_blocked_hosts ); ?>"
+					name="frontblocks_settings[<?php echo esc_attr( $this->option_staging_blocked_hosts ); ?>]"
+					rows="4"
+					class="<?php echo esc_attr( $input ); ?>"
+				><?php echo esc_textarea( $hosts ); ?></textarea>
+				<p class="tw:text-xs tw:text-gray-500 tw:mt-2 tw:mb-0">
+					<?php echo esc_html__( 'Optional. External servers this site must not talk to while it is staging, so tests never write to live systems (CRM, ERP, Zapier or Make webhooks, shipping or invoicing APIs). One host per line, for example hooks.zapier.com. A host also blocks its subdomains. Leave it empty if you do not use any.', 'frontblocks' ); ?>
+				</p>
+			</div>
+
+			<?php $this->render_staging_email_log(); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render the log of blocked emails.
+	 *
+	 * @return void
+	 */
+	private function render_staging_email_log() {
+		$log = Staging::get_email_log();
+
+		$types = array(
+			'blocked'    => __( 'Blocked', 'frontblocks' ),
+			'redirected' => __( 'Redirected', 'frontblocks' ),
+			'api'        => __( 'Email API blocked', 'frontblocks' ),
+		);
+		?>
+		<p class="tw:text-sm tw:font-medium tw:text-gray-700 tw:mt-4 tw:mb-2">
+			<?php
+			/* translators: %d: maximum number of log entries. */
+			echo esc_html( sprintf( __( 'Blocked emails (last %d)', 'frontblocks' ), Staging::LOG_LIMIT ) );
+			?>
+		</p>
+		<?php if ( ! $log ) : ?>
+			<p class="tw:text-xs tw:text-gray-500 tw:mt-0 tw:mb-0"><?php echo esc_html__( 'No emails have been blocked yet.', 'frontblocks' ); ?></p>
+		<?php else : ?>
+		<table class="widefat striped">
+			<thead>
+				<tr>
+					<th><?php echo esc_html__( 'Time', 'frontblocks' ); ?></th>
+					<th><?php echo esc_html__( 'Result', 'frontblocks' ); ?></th>
+					<th><?php echo esc_html__( 'Recipient', 'frontblocks' ); ?></th>
+					<th><?php echo esc_html__( 'Subject', 'frontblocks' ); ?></th>
+					<th><?php echo esc_html__( 'Triggered by', 'frontblocks' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ( $log as $entry ) : ?>
+					<tr>
+						<td><?php echo esc_html( wp_date( 'Y-m-d H:i:s', (int) ( $entry['time'] ?? 0 ) ) ); ?></td>
+						<td><?php echo esc_html( $types[ $entry['type'] ?? '' ] ?? '' ); ?></td>
+						<td><?php echo esc_html( (string) ( $entry['to'] ?? '' ) ); ?></td>
+						<td><?php echo esc_html( (string) ( $entry['subject'] ?? '' ) ); ?></td>
+						<td><?php echo esc_html( (string) ( $entry['caller'] ?? '' ) ); ?></td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+		<?php endif; ?>
 		<?php
 	}
 
@@ -3235,6 +3477,7 @@ class Settings {
 			$this->option_enable_events,
 			$this->option_enable_fluid_typography,
 			$this->option_enable_maintenance,
+			$this->option_enable_staging,
 			$this->option_enable_gutenberg,
 			$this->option_enable_simple_prices_variable_products,
 			$this->option_enable_after_add_to_cart,
@@ -3277,6 +3520,10 @@ class Settings {
 				$sanitized[ $key ] = sanitize_text_field( $val );
 			} elseif ( $this->option_maintenance_image === $key ) {
 				$sanitized[ $key ] = absint( $val );
+			} elseif ( $this->option_staging_redirect_email === $key ) {
+				$sanitized[ $key ] = is_email( sanitize_email( (string) $val ) ) ? sanitize_email( (string) $val ) : '';
+			} elseif ( $this->option_staging_blocked_hosts === $key ) {
+				$sanitized[ $key ] = implode( "\n", Staging::parse_hosts( (string) $val ) );
 			}
 		}
 
