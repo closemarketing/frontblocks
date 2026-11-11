@@ -21,6 +21,10 @@ defined( 'ABSPATH' ) || exit;
  * never written. The import merges: only the keys present in the file change,
  * and every value is validated against a schema before it is stored.
  *
+ * Add-ons can also move content, such as the popups of FrontBlocks PRO, in the
+ * optional `content` section of the file through the `frontblocks_export_content`
+ * and `frontblocks_import_content` filters.
+ *
  * See docs/SETTINGS-EXPORT-IMPORT.md for the file format and the extension hooks.
  *
  * @since 1.6.0
@@ -46,7 +50,7 @@ class SettingsTransfer {
 	 *
 	 * @var int
 	 */
-	const MAX_FILE_SIZE = 262144;
+	const MAX_FILE_SIZE = 2097152;
 
 	/**
 	 * Option that stores the FrontBlocks settings.
@@ -331,7 +335,7 @@ class SettingsTransfer {
 		 */
 		$settings = apply_filters( 'frontblocks_export_settings', $settings, $options );
 
-		return array(
+		$payload = array(
 			'format'         => self::FORMAT,
 			'format_version' => self::FORMAT_VERSION,
 			'plugin_version' => defined( 'FRBL_VERSION' ) ? FRBL_VERSION : '',
@@ -339,6 +343,56 @@ class SettingsTransfer {
 			'source_site'    => (string) wp_parse_url( home_url(), PHP_URL_HOST ),
 			'settings'       => is_array( $settings ) ? $settings : array(),
 		);
+
+		$content = self::collect_content();
+		if ( ! empty( $content ) ) {
+			$payload['content'] = $content;
+		}
+
+		return $payload;
+	}
+
+	/**
+	 * Whether a content section id is valid.
+	 *
+	 * @param mixed $id Section id.
+	 * @return bool
+	 */
+	private static function is_valid_section_id( $id ) {
+		return is_string( $id ) && 1 === preg_match( '/^[a-z0-9_-]{1,40}$/', $id );
+	}
+
+	/**
+	 * Ask the add-ons for the content that goes in the export.
+	 *
+	 * @return array Section id => data.
+	 */
+	private static function collect_content() {
+		/**
+		 * Filters the content written to the `content` section of an export file.
+		 *
+		 * Add-ons return their data under their own section id (lowercase letters,
+		 * numbers, hyphens and underscores). Use it for things that are not settings,
+		 * such as the popups of FrontBlocks PRO. Never add credentials, and replace
+		 * IDs that only mean something on this site (pages, media) with something
+		 * that can be found again on another site, such as a path.
+		 *
+		 * @since 1.6.0
+		 * @param array $content Section id => data to export.
+		 */
+		$content = apply_filters( 'frontblocks_export_content', array() );
+		if ( ! is_array( $content ) ) {
+			return array();
+		}
+
+		$clean = array();
+		foreach ( $content as $id => $data ) {
+			if ( self::is_valid_section_id( $id ) && is_array( $data ) && array() !== $data ) {
+				$clean[ $id ] = $data;
+			}
+		}
+
+		return $clean;
 	}
 
 	/**
@@ -392,6 +446,10 @@ class SettingsTransfer {
 
 		if ( ! isset( $data['settings'] ) || ! is_array( $data['settings'] ) || array() === $data['settings'] ) {
 			return new \WP_Error( 'frbl_transfer_no_settings', __( 'The file does not contain any settings.', 'frontblocks' ) );
+		}
+
+		if ( isset( $data['content'] ) && ! is_array( $data['content'] ) ) {
+			return new \WP_Error( 'frbl_transfer_invalid_content', __( 'The content section of the file is not valid.', 'frontblocks' ) );
 		}
 
 		return $data;
@@ -502,12 +560,93 @@ class SettingsTransfer {
 		$checked = self::validate_settings( $data['settings'] );
 		$applied = self::apply_settings( $checked['valid'], $checked['adjusted'] );
 
+		// Settings go first: an add-on may depend on a toggle that was just imported.
+		$content = self::import_content( isset( $data['content'] ) ? $data['content'] : array() );
+
 		return array(
 			'applied'        => $applied['applied'],
 			'skipped'        => $checked['skipped'],
 			'adjusted'       => $applied['adjusted'],
+			'content'        => $content,
 			'source_site'    => isset( $data['source_site'] ) && is_string( $data['source_site'] ) ? sanitize_text_field( $data['source_site'] ) : '',
 			'source_version' => isset( $data['plugin_version'] ) && is_string( $data['plugin_version'] ) ? sanitize_text_field( $data['plugin_version'] ) : '',
+		);
+	}
+
+	/**
+	 * Hand the content sections of a file to the add-ons that know them.
+	 *
+	 * @param array $content Section id => data from the file.
+	 * @return array Section id => report (label, created, updated, skipped and notes).
+	 */
+	public static function import_content( $content ) {
+		if ( ! is_array( $content ) || array() === $content ) {
+			return array();
+		}
+
+		$sections = array();
+		foreach ( $content as $id => $data ) {
+			if ( self::is_valid_section_id( $id ) && is_array( $data ) ) {
+				$sections[ $id ] = $data;
+			}
+		}
+
+		/**
+		 * Imports the content sections of a settings file.
+		 *
+		 * Each add-on handles the sections it exported, validates everything it
+		 * reads, and adds a report under the section id: `label` (text), `created` and
+		 * `updated` (counts), `skipped` (label => reason) and `notes` (label => what
+		 * needs a review). It runs after the settings are applied, only for users who
+		 * can import settings, and the add-on must still check what the user may create.
+		 *
+		 * @since 1.6.0
+		 * @param array $report   Section id => report, filled by the handlers.
+		 * @param array $sections Section id => data from the file.
+		 */
+		$report = apply_filters( 'frontblocks_import_content', array(), $sections );
+		$report = is_array( $report ) ? $report : array();
+
+		$result = array();
+		foreach ( array_keys( $sections ) as $id ) {
+			$result[ $id ] = isset( $report[ $id ] ) && is_array( $report[ $id ] )
+				? self::normalize_section_report( $id, $report[ $id ] )
+				: array(
+					'label'   => $id,
+					'created' => 0,
+					'updated' => 0,
+					'skipped' => array( $id => __( 'nothing on this site can import this content', 'frontblocks' ) ),
+					'notes'   => array(),
+				);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Keep only the expected, plain values of an add-on report.
+	 *
+	 * @param string $id     Section id.
+	 * @param array  $report Report returned by the add-on.
+	 * @return array
+	 */
+	private static function normalize_section_report( $id, $report ) {
+		$lists = array();
+		foreach ( array( 'skipped', 'notes' ) as $list ) {
+			$lists[ $list ] = array();
+			foreach ( isset( $report[ $list ] ) && is_array( $report[ $list ] ) ? $report[ $list ] : array() as $label => $text ) {
+				if ( is_scalar( $text ) ) {
+					$lists[ $list ][ sanitize_text_field( (string) $label ) ] = sanitize_text_field( (string) $text );
+				}
+			}
+		}
+
+		return array(
+			'label'   => isset( $report['label'] ) && is_string( $report['label'] ) && '' !== $report['label'] ? sanitize_text_field( $report['label'] ) : $id,
+			'created' => isset( $report['created'] ) ? absint( $report['created'] ) : 0,
+			'updated' => isset( $report['updated'] ) ? absint( $report['updated'] ) : 0,
+			'skipped' => $lists['skipped'],
+			'notes'   => $lists['notes'],
 		);
 	}
 
@@ -697,7 +836,7 @@ class SettingsTransfer {
 				<div>
 					<p class="tw:text-base tw:font-medium tw:text-gray-900 tw:mt-0 tw:mb-2"><?php esc_html_e( 'Export settings', 'frontblocks' ); ?></p>
 					<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
-						<?php esc_html_e( 'Downloads a JSON file with every module toggle and the options that are not tied to this site. It contains no credentials or license keys, so it is safe to keep in a repository.', 'frontblocks' ); ?>
+						<?php esc_html_e( 'Downloads a JSON file with every module toggle and the options that are not tied to this site, plus the content that add-ons provide, such as the popups of FrontBlocks PRO. It contains no credentials or license keys, so it is safe to keep in a repository.', 'frontblocks' ); ?>
 					</p>
 					<a href="<?php echo esc_url( $export_url ); ?>" class="frbl-btn-primary">
 						<?php esc_html_e( 'Download settings file', 'frontblocks' ); ?>
@@ -712,7 +851,7 @@ class SettingsTransfer {
 				<div>
 					<p class="tw:text-base tw:font-medium tw:text-gray-900 tw:mt-0 tw:mb-2"><?php esc_html_e( 'Import settings', 'frontblocks' ); ?></p>
 					<p class="tw:text-sm tw:text-gray-600 tw:mt-0 tw:mb-4">
-						<?php esc_html_e( 'Choose a file exported from FrontBlocks. Only the settings in the file change; the rest stay as they are. Values that are not valid are skipped and listed afterwards.', 'frontblocks' ); ?>
+						<?php esc_html_e( 'Choose a file exported from FrontBlocks. Only the settings in the file change; the rest stay as they are. Content such as popups is created, or updated when it already exists. Values that are not valid are skipped and listed afterwards.', 'frontblocks' ); ?>
 					</p>
 					<label for="<?php echo esc_attr( self::FILE_FIELD ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-2">
 						<?php esc_html_e( 'Settings file (.json)', 'frontblocks' ); ?>
@@ -796,6 +935,51 @@ class SettingsTransfer {
 		<?php
 		$this->render_notes( $adjusted, __( 'Adjusted to fit this site', 'frontblocks' ) );
 		$this->render_notes( $skipped, __( 'Skipped', 'frontblocks' ) );
+
+		foreach ( isset( $result['content'] ) ? (array) $result['content'] : array() as $section ) {
+			$this->render_content_section( (array) $section );
+		}
+	}
+
+	/**
+	 * Show what an add-on did with its content, and what needs a review.
+	 *
+	 * @param array $section Normalized section report.
+	 * @return void
+	 */
+	private function render_content_section( $section ) {
+		$label   = isset( $section['label'] ) ? (string) $section['label'] : '';
+		$created = isset( $section['created'] ) ? (int) $section['created'] : 0;
+		$updated = isset( $section['updated'] ) ? (int) $section['updated'] : 0;
+
+		if ( $created > 0 || $updated > 0 ) {
+			?>
+			<div class="tw:mb-4 tw:p-3 tw:rounded-lg tw:bg-green-50 tw:border tw:border-green-200 tw:text-sm tw:text-green-700" role="status">
+				<?php
+				echo esc_html(
+					sprintf(
+						/* translators: 1: kind of content, for example Popups; 2: number created; 3: number updated */
+						__( '%1$s: %2$d created, %3$d updated.', 'frontblocks' ),
+						$label,
+						$created,
+						$updated
+					)
+				);
+				?>
+			</div>
+			<?php
+		}
+
+		$this->render_notes(
+			isset( $section['notes'] ) ? (array) $section['notes'] : array(),
+			/* translators: %s: kind of content, for example Popups */
+			sprintf( __( '%s: needs a review', 'frontblocks' ), $label )
+		);
+		$this->render_notes(
+			isset( $section['skipped'] ) ? (array) $section['skipped'] : array(),
+			/* translators: %s: kind of content, for example Popups */
+			sprintf( __( '%s: skipped', 'frontblocks' ), $label )
+		);
 	}
 
 	/**
