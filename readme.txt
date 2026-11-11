@@ -224,7 +224,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 == Changelog ==
 
 = Unreleased =
-*   Added: Export and import the FrontBlocks settings as a JSON file from the new Backup tab, to clone a configuration between sites. Credentials, license keys and values tied to a site are never exported, every imported value is validated, and add-ons can extend it with the `frontblocks_import_settings_schema` and `frontblocks_export_settings` filters.
+*   Added: Export and import the FrontBlocks settings as a JSON file from the new Backup tab, to clone a configuration between sites. Credentials, license keys and values tied to a site are never exported, every imported value is validated, and add-ons can extend it with the `frontblocks_import_settings_schema` and `frontblocks_export_settings` filters, and move content such as the popups of FrontBlocks PRO with `frontblocks_export_content` and `frontblocks_import_content`.
 *   Changed: Removed the legacy Cookie Notice runtime (banner, AJAX consent endpoints, and GTM/GA4/other tracking integrations) from FrontBlocks — a hard cutover, not a transition. Cookie consent now lives entirely in the standalone FrontConsent plugin; the Cookie Notice settings tab remains as a promo panel pointing to it.
 *   Added: Include/exclude category filters for the Product Categories block, with support for nested (parent/child) categories.
 *   Added: An MCP ability to read and toggle maintenance mode for AI/automation clients (e.g. a go-live checklist), gated behind WordPress's Abilities API and the `manage_options` capability. It also reports WooCommerce's own "Coming soon" site visibility independently.
