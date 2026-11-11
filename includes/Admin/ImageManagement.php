@@ -101,7 +101,7 @@ class ImageManagement {
 	 * @param string $target Requested target: 'none', 'webp', 'avif', or 'both'.
 	 * @return string A target the current server can produce, or 'none'.
 	 */
-	private function downgrade_target_to_supported_formats( $target ) {
+	public static function downgrade_target_to_supported_formats( $target ) {
 		$webp_supported = wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) );
 		$avif_supported = wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) );
 
@@ -335,7 +335,7 @@ class ImageManagement {
 		$allowed_targets              = array( 'none', 'webp', 'avif', 'both' );
 		$posted_target                = $posted['image_format_target'] ?? 'none';
 		$requested_target             = in_array( $posted_target, $allowed_targets, true ) ? $posted_target : 'none';
-		$value['image_format_target'] = $this->downgrade_target_to_supported_formats( $requested_target );
+		$value['image_format_target'] = self::downgrade_target_to_supported_formats( $requested_target );
 
 		$value['image_max_upload_dimension_enabled'] = ! empty( $posted['image_max_upload_dimension_enabled'] );
 

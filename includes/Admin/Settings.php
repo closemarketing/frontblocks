@@ -656,7 +656,7 @@ class Settings {
 					});
 
 					if (saveBar) {
-						saveBar.hidden = found && 'google-signin' === tabId;
+						saveBar.hidden = found && ('google-signin' === tabId || 'backup' === tabId);
 					}
 
 					if (! found) {
@@ -3202,12 +3202,57 @@ class Settings {
 	}
 
 	/**
+	 * Keys of the boolean (checkbox) settings stored in `frontblocks_settings`.
+	 *
+	 * Shared with the settings export/import, so both agree on which settings are toggles.
+	 *
+	 * @since 1.6.0
+	 * @return string[]
+	 */
+	public static function get_boolean_option_keys() {
+		return array(
+			'enable_testimonials',
+			'enable_reading_progress',
+			'enable_back_button',
+			'enable_scroll_top',
+			'enable_events',
+			'enable_fluid_typography',
+			'enable_maintenance',
+			'enable_gutenberg',
+			'enable_simple_prices_variable_products',
+			'enable_after_add_to_cart',
+			'deactivate_short_description',
+			'move_content_to_short_description',
+			'disable_zoom_images',
+			'add_share_buttons',
+			'deactivate_product_tabs',
+			'horizontal_product_form',
+			'enable_variant_display_mode',
+			'enable_custom_post_types',
+			'enable_fullpage_scroll',
+			'enable_language_banner',
+			'enable_popups',
+			'checkout_inline',
+			'disable_cart_coupon',
+			'disable_cart_cross_sells',
+			'disable_checkout_coupon',
+			'disable_checkout_order_notes',
+			'disable_checkout_login_prompt',
+		);
+	}
+
+	/**
 	 * Sanitize settings array.
 	 *
 	 * @param array $value Raw value.
 	 * @return array
 	 */
 	public function sanitize_settings( $value ) {
+		// A settings import validates every value itself and has no form nonce.
+		if ( class_exists( __NAMESPACE__ . '\\SettingsTransfer' ) && SettingsTransfer::is_importing() ) {
+			return is_array( $value ) ? $value : array();
+		}
+
 		// Nonce verification.
 		$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
 		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'frontblocks_settings-options' ) ) {
@@ -3227,35 +3272,7 @@ class Settings {
 		$sanitized = $current_options;
 
 		// List of all boolean options (checkboxes).
-		$boolean_options = array(
-			$this->option_enable_testimonials,
-			$this->option_enable_reading_progress,
-			$this->option_enable_back_button,
-			$this->option_enable_scroll_top,
-			$this->option_enable_events,
-			$this->option_enable_fluid_typography,
-			$this->option_enable_maintenance,
-			$this->option_enable_gutenberg,
-			$this->option_enable_simple_prices_variable_products,
-			$this->option_enable_after_add_to_cart,
-			$this->option_deactivate_short_description,
-			$this->option_move_content_to_short_description,
-			$this->option_disable_zoom_images,
-			$this->option_add_share_buttons,
-			$this->option_deactivate_product_tabs,
-			$this->option_horizontal_product_form,
-			$this->option_enable_variant_display_mode,
-			$this->option_enable_custom_post_types,
-			$this->option_enable_fullpage_scroll,
-			$this->option_enable_language_banner,
-			$this->option_enable_popups,
-			$this->option_checkout_inline,
-			$this->option_disable_cart_coupon,
-			$this->option_disable_cart_cross_sells,
-			$this->option_disable_checkout_coupon,
-			$this->option_disable_checkout_order_notes,
-			$this->option_disable_checkout_login_prompt,
-		);
+		$boolean_options = self::get_boolean_option_keys();
 
 		// Initialize all boolean options to false (unchecked checkboxes are not submitted).
 		foreach ( $boolean_options as $option ) {
