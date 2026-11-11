@@ -22,6 +22,8 @@ class SettingsTransferTest extends TestCase {
 		delete_option( 'frontblocks_settings' );
 		remove_all_filters( 'frontblocks_import_settings_schema' );
 		remove_all_filters( 'frontblocks_export_settings' );
+		remove_all_filters( 'frontblocks_export_content' );
+		remove_all_filters( 'frontblocks_import_content' );
 		remove_all_filters( 'wp_image_editors' );
 		wp_cache_delete( 'wp_image_editor_choose', 'image_editor' );
 		unset( $_POST['_wpnonce'], $_REQUEST['_wpnonce'], $_FILES['frbl_settings_file'] );
@@ -857,5 +859,209 @@ class SettingsTransferTest extends TestCase {
 		}
 
 		unlink( $tmp );
+	}
+
+	/*
+	 * ---------------------------------------------------------------
+	 * Content sections (add-ons such as the popups of FrontBlocks PRO)
+	 * ---------------------------------------------------------------
+	 */
+
+	public function test_export_has_no_content_section_when_no_add_on_provides_content() {
+		$this->assertArrayNotHasKey( 'content', SettingsTransfer::build_export_payload() );
+	}
+
+	public function test_export_includes_the_content_that_add_ons_provide() {
+		add_filter(
+			'frontblocks_export_content',
+			function ( $content ) {
+				$content['popups'] = array( array( 'slug' => 'welcome' ) );
+				return $content;
+			}
+		);
+
+		$this->assertSame( array( 'popups' => array( array( 'slug' => 'welcome' ) ) ), SettingsTransfer::build_export_payload()['content'] );
+	}
+
+	public function test_export_drops_invalid_content_sections() {
+		add_filter(
+			'frontblocks_export_content',
+			function () {
+				return array(
+					'popups'        => array( 'ok' ),
+					'Bad Id'        => array( 'x' ),
+					0               => array( 'x' ),
+					'not-an-array'  => 'text',
+					'empty'         => array(),
+					str_repeat( 'a', 41 ) => array( 'x' ),
+				);
+			}
+		);
+
+		$this->assertSame( array( 'popups' ), array_keys( SettingsTransfer::build_export_payload()['content'] ) );
+	}
+
+	public function test_export_ignores_a_content_filter_that_does_not_return_an_array() {
+		add_filter( 'frontblocks_export_content', '__return_false' );
+
+		$this->assertArrayNotHasKey( 'content', SettingsTransfer::build_export_payload() );
+	}
+
+	public function test_rejects_a_content_section_that_is_not_an_object() {
+		foreach ( array( 'text', 5, true ) as $content ) {
+			$error = SettingsTransfer::parse_file_contents( $this->document( array( 'enable_back_button' => true ), array( 'content' => $content ) ) );
+
+			$this->assertWPError( $error, wp_json_encode( $content ) );
+			$this->assertSame( 'frbl_transfer_invalid_content', $error->get_error_code(), wp_json_encode( $content ) );
+		}
+	}
+
+	public function test_import_hands_valid_sections_to_the_add_ons_and_normalizes_their_report() {
+		$received = null;
+		add_filter(
+			'frontblocks_import_content',
+			function ( $report, $sections ) use ( &$received ) {
+				$received          = $sections;
+				$report['popups']  = array(
+					'label'   => '<b>Popups</b>',
+					'created' => '2',
+					'updated' => -4,
+					'skipped' => array( 'Old' => 'gone', 'bad' => array( 'nested' ) ),
+					'notes'   => array( 'Welcome' => '<i>check the form</i>' ),
+					'extra'   => 'ignored',
+				);
+				return $report;
+			},
+			10,
+			2
+		);
+
+		$result = SettingsTransfer::import_content(
+			array(
+				'popups'  => array( array( 'slug' => 'welcome' ) ),
+				'Bad Id'  => array( 'x' ),
+				'text'    => 'not an array',
+			)
+		);
+
+		$this->assertSame( array( 'popups' ), array_keys( $received ), 'Only valid sections reach the add-ons.' );
+		$this->assertSame(
+			array(
+				'popups' => array(
+					'label'   => 'Popups',
+					'created' => 2,
+					'updated' => 4,
+					'skipped' => array( 'Old' => 'gone' ),
+					'notes'   => array( 'Welcome' => 'check the form' ),
+				),
+			),
+			$result
+		);
+	}
+
+	public function test_import_reports_content_that_no_add_on_handles() {
+		$result = SettingsTransfer::import_content( array( 'popups' => array( array( 'slug' => 'welcome' ) ) ) );
+
+		$this->assertSame( 0, $result['popups']['created'] );
+		$this->assertSame( array( 'popups' => 'nothing on this site can import this content' ), $result['popups']['skipped'] );
+	}
+
+	public function test_import_without_content_does_nothing_with_content() {
+		$called = false;
+		add_filter(
+			'frontblocks_import_content',
+			function ( $report ) use ( &$called ) {
+				$called = true;
+				return $report;
+			}
+		);
+
+		$this->assertSame( array(), SettingsTransfer::import_content( array() ) );
+		$this->assertSame( array(), SettingsTransfer::import_content( 'text' ) );
+		$this->assertFalse( $called );
+	}
+
+	public function test_content_is_imported_after_the_settings_are_applied() {
+		$seen = null;
+		add_filter(
+			'frontblocks_import_content',
+			function ( $report ) use ( &$seen ) {
+				$stored = get_option( 'frontblocks_settings' );
+				$seen   = ! empty( $stored['enable_popups'] );
+				return $report;
+			}
+		);
+
+		$result = SettingsTransfer::import_from_string(
+			$this->document(
+				array( 'enable_popups' => true ),
+				array( 'content' => array( 'popups' => array( array( 'slug' => 'welcome' ) ) ) )
+			)
+		);
+
+		$this->assertTrue( $seen, 'An add-on must see the toggles that were just imported.' );
+		$this->assertArrayHasKey( 'popups', $result['content'] );
+	}
+
+	public function test_a_file_without_content_returns_an_empty_content_report() {
+		$result = SettingsTransfer::import_from_string( $this->document( array( 'enable_back_button' => true ) ) );
+
+		$this->assertSame( array(), $result['content'] );
+	}
+
+	public function test_invalid_settings_do_not_stop_the_content_import() {
+		add_filter(
+			'frontblocks_import_content',
+			function ( $report ) {
+				$report['popups'] = array( 'created' => 1 );
+				return $report;
+			}
+		);
+
+		$result = SettingsTransfer::import_from_string(
+			$this->document(
+				array( 'enable_back_button' => 'maybe' ),
+				array( 'content' => array( 'popups' => array( array( 'slug' => 'welcome' ) ) ) )
+			)
+		);
+
+		$this->assertSame( array(), $result['applied'] );
+		$this->assertSame( 1, $result['content']['popups']['created'] );
+	}
+
+	public function test_panel_shows_what_an_add_on_imported_and_what_needs_a_review() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		set_transient(
+			'frbl_transfer_result_' . get_current_user_id(),
+			array(
+				'applied'  => array( 'enable_popups' ),
+				'skipped'  => array(),
+				'adjusted' => array(),
+				'content'  => array(
+					'popups' => array(
+						'label'   => 'Popups',
+						'created' => 2,
+						'updated' => 1,
+						'skipped' => array( 'Old offer' => 'no permission' ),
+						'notes'   => array( '<script>x</script>' => '<img src=x onerror=alert(1)>' ),
+					),
+				),
+			),
+			60
+		);
+		$_GET['frbl-transfer'] = '1';
+
+		ob_start();
+		( new SettingsTransfer() )->render_panel();
+		$html = ob_get_clean();
+
+		unset( $_GET['frbl-transfer'] );
+
+		$this->assertStringContainsString( 'Popups: 2 created, 1 updated.', $html );
+		$this->assertStringContainsString( 'Popups: needs a review', $html );
+		$this->assertStringContainsString( 'Popups: skipped', $html );
+		$this->assertStringContainsString( 'Old offer', $html );
+		$this->assertStringNotContainsString( '<script>x', $html );
+		$this->assertStringNotContainsString( '<img src=x', $html );
 	}
 }
