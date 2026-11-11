@@ -36,6 +36,7 @@ Repository for FrontBlocks Site Tools, a WordPress plugin covering the everyday 
 - **Google Sign-In** - "Sign in / Sign up with Google" button for wp-login.php, WooCommerce My Account and Checkout, plus a shortcode and block, with server-side ID token verification
 - **Table of Contents** - Accessible navigation block generated from the headings in the post, with collapsible and sticky options
 - **MCP Abilities** - Exposes maintenance mode as an ability via WordPress's Abilities API, so MCP/AI clients can read and toggle it (e.g. for a site go-live checklist), gated behind the `manage_options` capability. Also reports WooCommerce's own "Coming soon" site visibility independently
+- **Settings Export / Import** - Download the FrontBlocks configuration as a JSON file and import it on another site to set it up in one step. Credentials, license keys and values tied to a site are never exported, and every imported value is validated. Add-ons can move content too, such as the popups of FrontBlocks PRO
 
 ### PRO Features (FrontBlocks PRO)
 - **Custom Post Types Builder** - Create and manage custom post types with advanced configuration options:
@@ -79,6 +80,7 @@ Repository for FrontBlocks Site Tools, a WordPress plugin covering the everyday 
 - [Redundant Plugins Notice](./docs/REDUNDANT-PLUGINS.md) - Detects plugins made unnecessary by FrontBlocks features and how to register new pairings
 - [Google Sign-In](./docs/GOOGLE-SIGNIN.md) - "Sign in / Sign up with Google" for wp-login.php and WooCommerce
 - [Extending Settings Tabs](./docs/SETTINGS-TAB-EXTENSIONS.md) - Add a companion-plugin tab and matching panel to FrontBlocks settings
+- [Settings Export and Import](./docs/SETTINGS-EXPORT-IMPORT.md) - Clone the FrontBlocks configuration between sites with a JSON file, what is and is not included, and how add-ons extend it
 - [Table of Contents](./docs/TABLE-OF-CONTENTS.md) - Accessible, headings-based navigation block
 - [Column Link](./docs/COLUMN-LINK.md) - Make an entire native Column block clickable
 

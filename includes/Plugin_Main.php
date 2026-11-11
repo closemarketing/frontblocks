@@ -75,6 +75,11 @@ class Plugin_Main {
 			}
 			new Admin\Settings();
 
+			if ( ! class_exists( 'FrontBlocks\Admin\SettingsTransfer' ) ) {
+				require_once FRBL_PLUGIN_PATH . 'includes/Admin/SettingsTransfer.php';
+			}
+			new Admin\SettingsTransfer();
+
 			if ( ! class_exists( 'FrontBlocks\Admin\ReviewNotice' ) ) {
 				require_once FRBL_PLUGIN_PATH . 'includes/Admin/ReviewNotice.php';
 			}
