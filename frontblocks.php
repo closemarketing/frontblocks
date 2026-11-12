@@ -69,7 +69,7 @@ function frbl_plugin_activation_redirect() {
 	// Redirect to settings page.
 	if ( get_option( 'frbl_activation_redirect', false ) ) {
 		delete_option( 'frbl_activation_redirect' );
-		wp_safe_redirect( admin_url( 'themes.php?page=frontblocks-settings' ) );
+		wp_safe_redirect( class_exists( '\FrontBlocks\Admin\Settings' ) ? \FrontBlocks\Admin\Settings::get_settings_url() : admin_url( 'admin.php?page=frontblocks-settings' ) );
 		exit;
 	}
 }
