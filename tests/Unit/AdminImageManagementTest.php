@@ -695,7 +695,7 @@ class AdminImageManagementTest extends TestCase {
 		$this->assertFalse( wp_script_is( 'frontblocks-image-management', 'enqueued' ) );
 		$this->assertFalse( wp_style_is( 'frontblocks-image-management', 'enqueued' ) );
 
-		$this->admin->enqueue_assets( 'appearance_page_frontblocks-settings' );
+		$this->admin->enqueue_assets( 'toplevel_page_frontblocks-settings' );
 		$this->assertTrue( wp_script_is( 'frontblocks-image-management', 'enqueued' ) );
 		$this->assertTrue( wp_style_is( 'frontblocks-image-management', 'enqueued' ) );
 

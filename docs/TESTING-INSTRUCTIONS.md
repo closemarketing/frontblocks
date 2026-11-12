@@ -22,7 +22,7 @@ Apariencia → Frontblocks
 
 O directamente:
 ```
-http://tu-sitio.local/wp-admin/themes.php?page=frontblocks-settings
+http://tu-sitio.local/wp-admin/admin.php?page=frontblocks-settings
 ```
 
 ---

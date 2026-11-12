@@ -176,27 +176,6 @@ class SettingsTest extends TestCase {
 		$this->assertFalse( $sanitized['move_content_to_short_description'] );
 	}
 
-	public function test_register_menu_adds_the_settings_page_under_appearance() {
-		global $submenu;
-
-		set_current_screen( 'dashboard' );
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-
-		$this->settings->register_menu();
-
-		$this->assertArrayHasKey( 'themes.php', $submenu );
-
-		$found = false;
-		foreach ( $submenu['themes.php'] as $item ) {
-			if ( 'frontblocks-settings' === $item[2] ) {
-				$found = true;
-				break;
-			}
-		}
-
-		$this->assertTrue( $found, 'Expected a "frontblocks-settings" entry under the Appearance menu.' );
-	}
-
 	public function test_settings_tab_extensions_render_matching_tabs_and_panels() {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 
@@ -253,7 +232,7 @@ class SettingsTest extends TestCase {
 	}
 
 	public function test_enqueue_admin_styles_enqueues_assets_on_the_settings_page_hook() {
-		$this->settings->enqueue_admin_styles( 'appearance_page_frontblocks-settings' );
+		$this->settings->enqueue_admin_styles( 'toplevel_page_frontblocks-settings' );
 
 		$this->assertTrue( wp_style_is( 'frontblocks-admin-settings', 'enqueued' ) );
 

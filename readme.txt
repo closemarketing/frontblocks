@@ -224,6 +224,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 == Changelog ==
 
 = Unreleased =
+*   Changed: FrontBlocks has a menu of its own in the admin sidebar, with a submenu entry for each settings tab, instead of a page under Appearance. The old Appearance URL redirects to the new menu, keeping its arguments and tab. Companion plugins can link to a tab with `Settings::get_settings_url()` and recognize its screens with `Settings::is_settings_screen()`.
 *   Changed: Removed the legacy Cookie Notice runtime (banner, AJAX consent endpoints, and GTM/GA4/other tracking integrations) from FrontBlocks — a hard cutover, not a transition. Cookie consent now lives entirely in the standalone FrontConsent plugin; the Cookie Notice settings tab remains as a promo panel pointing to it.
 *   Added: Include/exclude category filters for the Product Categories block, with support for nested (parent/child) categories.
 *   Added: An MCP ability to read and toggle maintenance mode for AI/automation clients (e.g. a go-live checklist), gated behind WordPress's Abilities API and the `manage_options` capability. It also reports WooCommerce's own "Coming soon" site visibility independently.

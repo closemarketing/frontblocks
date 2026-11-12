@@ -100,7 +100,7 @@ class RedundantPlugins {
 					'safe-svg/safe-svg.php'       => 'Safe SVG',
 					'svg-support/svg-support.php' => 'SVG Support',
 				),
-				'doc_url' => admin_url( 'themes.php?page=frontblocks-settings' ),
+				'doc_url' => Settings::get_settings_url(),
 			),
 			'login-google' => array(
 				'feature' => __( 'Google Login', 'frontblocks' ),
@@ -109,7 +109,7 @@ class RedundantPlugins {
 					'login-with-google/login-with-google.php' => 'Login with Google',
 					'login-with/login-with.php' => 'Login with',
 				),
-				'doc_url' => admin_url( 'themes.php?page=frontblocks-settings' ),
+				'doc_url' => Settings::get_settings_url( 'google-signin' ),
 			),
 		);
 	}
@@ -130,8 +130,8 @@ class RedundantPlugins {
 			return;
 		}
 
-		$allowed_screens = array( 'appearance_page_frontblocks-settings', 'dashboard', 'plugins' );
-		if ( ! in_array( $screen->id, $allowed_screens, true ) && false === strpos( $screen->id, 'frontblocks' ) ) {
+		$allowed_screens = array( 'dashboard', 'plugins' );
+		if ( ! in_array( $screen->id, $allowed_screens, true ) && ! Settings::is_settings_screen( $screen->id ) && false === strpos( $screen->id, 'frontblocks' ) ) {
 			return;
 		}
 

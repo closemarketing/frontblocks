@@ -13,7 +13,7 @@ intermediate image sizes WordPress generates on upload, and automatically
 serves modern image formats (WebP/AVIF) on the frontend when the server
 supports them.
 
-Enable it from **Appearance → FrontBlocks → Image Management**.
+Enable it from **FrontBlocks → Image Management**.
 
 ## Settings
 

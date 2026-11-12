@@ -248,7 +248,7 @@ class Settings {
 	 *
 	 * @var string
 	 */
-	private $page_slug = 'frontblocks-settings';
+	private $page_slug = self::PAGE_SLUG;
 
 	/**
 	 * Is license valid.
@@ -265,6 +265,7 @@ class Settings {
 		$this->is_license_valid = function_exists( 'frblp_is_license_valid' ) && frblp_is_license_valid();
 
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
+		add_action( 'admin_menu', array( $this, 'redirect_legacy_url' ), 99 );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
 		add_action( 'admin_head', array( $this, 'add_menu_icon_styles' ) );
@@ -296,7 +297,7 @@ class Settings {
 	 * @return void
 	 */
 	public function enqueue_admin_styles( $hook ) {
-		if ( 'appearance_page_' . $this->page_slug !== $hook ) {
+		if ( ! self::is_settings_screen( $hook ) ) {
 			return;
 		}
 
@@ -646,6 +647,62 @@ class Settings {
 					var tabPanels  = document.querySelectorAll('[data-tab-panel]');
 					var saveBar    = document.querySelector('.frbl-settings-save-bar');
 
+				var wrapper  = document.querySelector('.frbl-settings-wrapper');
+				var tabPages = {};
+				try {
+					tabPages = JSON.parse(wrapper ? wrapper.getAttribute('data-tab-pages') : '{}') || {};
+				} catch (error) {
+					tabPages = {};
+				}
+
+				// Highlight the FrontBlocks submenu entry of the tab being shown.
+				function syncMenu(tabId) {
+					var menu = document.getElementById('toplevel_page_frontblocks-settings');
+					var page = tabPages[tabId];
+
+					if (! menu || ! page) {
+						return;
+					}
+
+					menu.querySelectorAll('.wp-submenu li').forEach(function (item) {
+						var link  = item.querySelector('a');
+						var match = false;
+
+						if (link) {
+							try {
+								match = new URL(link.href, window.location.href).searchParams.get('page') === page;
+							} catch (error) {
+								match = false;
+							}
+						}
+
+						item.classList.toggle('current', match);
+						if (link) {
+							link.classList.toggle('current', match);
+							if (match) {
+								link.setAttribute('aria-current', 'page');
+							} else {
+								link.removeAttribute('aria-current');
+							}
+						}
+					});
+				}
+
+				// Point the address bar at the page of the tab, so a reload or a copied link opens it.
+				function updateUrl(tabId) {
+					var page = tabPages[tabId];
+
+					if (! page || ! window.history || ! window.history.replaceState) {
+						return;
+					}
+
+					var url = new URL(window.location.href);
+					url.search = '';
+					url.hash = '';
+					url.searchParams.set('page', page);
+					window.history.replaceState(null, '', url.toString());
+				}
+
 				function activateTab(tabId) {
 					var found = false;
 
@@ -671,11 +728,14 @@ class Settings {
 						btn.classList.toggle('is-active', active);
 						btn.setAttribute('aria-selected', active ? 'true' : 'false');
 					});
+
+					syncMenu(tabId);
 				}
 
 				tabButtons.forEach(function (btn) {
 					btn.addEventListener('click', function () {
 						activateTab(btn.getAttribute('data-tab-target'));
+						updateUrl(btn.getAttribute('data-tab-target'));
 					});
 				});
 
@@ -691,6 +751,10 @@ class Settings {
 				});
 
 				var initialTab = 'blocks';
+				var defaultTab = wrapper ? wrapper.getAttribute('data-default-tab') : '';
+				if (defaultTab && document.querySelector('[data-tab-panel=\"' + defaultTab + '\"]')) {
+					initialTab = defaultTab;
+				}
 				var hash = window.location.hash.replace('#', '');
 				if (hash === 'frontblocks_section_license') {
 					hash = 'license';
@@ -699,6 +763,17 @@ class Settings {
 					initialTab = hash;
 				}
 				activateTab(initialTab);
+
+				// A link to a tab with a #hash, followed while the screen is open.
+				window.addEventListener('hashchange', function () {
+					var next = window.location.hash.replace('#', '');
+					if (next === 'frontblocks_section_license') {
+						next = 'license';
+					}
+					if (next && document.querySelector('[data-tab-panel=\"' + next + '\"]')) {
+						activateTab(next);
+					}
+				});
 
 				// Keep the active tab across a save (WordPress redirects back to
 				// the referring URL after options.php processes the form).
@@ -786,18 +861,163 @@ class Settings {
 	}
 
 	/**
-	 * Register options page as dedicated menu.
+	 * Slug of the settings page, and of its first tab.
+	 *
+	 * @since 1.6.0
+	 * @var string
+	 */
+	const PAGE_SLUG = 'frontblocks-settings';
+
+	/**
+	 * Tab that opens when none is requested.
+	 *
+	 * @since 1.6.0
+	 * @var string
+	 */
+	const DEFAULT_TAB = 'blocks';
+
+	/**
+	 * Capability needed to open the settings screen and its menu.
+	 *
+	 * @since 1.6.0
+	 * @var string
+	 */
+	const CAPABILITY = 'edit_theme_options';
+
+	/**
+	 * Slug of the menu page that opens a tab.
+	 *
+	 * The first tab uses the slug of the menu itself, every other tab adds its id.
+	 *
+	 * @since 1.6.0
+	 * @param string $tab Tab id, empty for the first tab.
+	 * @return string
+	 */
+	public static function get_page_slug( $tab = '' ) {
+		$tab = sanitize_key( $tab );
+
+		return '' === $tab || self::DEFAULT_TAB === $tab ? self::PAGE_SLUG : self::PAGE_SLUG . '-' . $tab;
+	}
+
+	/**
+	 * Tab id behind the slug of a menu page.
+	 *
+	 * @since 1.6.0
+	 * @param string $page Menu page slug.
+	 * @return string The tab id, or an empty string when the slug is not a settings page.
+	 */
+	public static function get_tab_from_page( $page ) {
+		if ( ! is_string( $page ) ) {
+			return '';
+		}
+
+		if ( self::PAGE_SLUG === $page ) {
+			return self::DEFAULT_TAB;
+		}
+
+		$prefix = self::PAGE_SLUG . '-';
+
+		return 0 === strpos( $page, $prefix ) ? substr( $page, strlen( $prefix ) ) : '';
+	}
+
+	/**
+	 * URL of the settings screen, optionally on a given tab.
+	 *
+	 * Use it instead of building the URL by hand, so a link keeps working wherever the menu is.
+	 *
+	 * @since 1.6.0
+	 * @param string $tab Tab id, empty for the first tab.
+	 * @return string
+	 */
+	public static function get_settings_url( $tab = '' ) {
+		return admin_url( 'admin.php?page=' . self::get_page_slug( $tab ) );
+	}
+
+	/**
+	 * Whether an admin screen ID (or hook suffix) is one of the settings screens.
+	 *
+	 * It matches the screens of every tab, and the one the page had under Appearance.
+	 *
+	 * @since 1.6.0
+	 * @param mixed $screen_id Screen ID or hook suffix.
+	 * @return bool
+	 */
+	public static function is_settings_screen( $screen_id ) {
+		return is_string( $screen_id ) && false !== strpos( $screen_id, self::PAGE_SLUG );
+	}
+
+	/**
+	 * Register the FrontBlocks menu, with a submenu for each tab.
 	 *
 	 * @return void
 	 */
 	public function register_menu() {
-		add_theme_page(
+		$icon_path = FRBL_PLUGIN_PATH . 'assets/admin/icons/icon-menu.svg';
+		$icon      = file_exists( $icon_path ) ? FRBL_PLUGIN_URL . 'assets/admin/icons/icon-menu.svg' : 'dashicons-block-default';
+
+		// The page callback goes on the first submenu, so the page is not rendered twice.
+		add_menu_page(
 			__( 'FrontBlocks Settings', 'frontblocks' ),
 			__( 'FrontBlocks', 'frontblocks' ),
-			'edit_theme_options',
-			$this->page_slug,
-			array( $this, 'render_page' )
+			self::CAPABILITY,
+			self::PAGE_SLUG,
+			'',
+			$icon,
+			60.5
 		);
+
+		foreach ( $this->get_tabs() as $tab ) {
+			if ( ! isset( $tab['id'], $tab['label'] ) || ! is_string( $tab['id'] ) || ! is_string( $tab['label'] ) || '' === $tab['id'] ) {
+				continue;
+			}
+
+			// A companion plugin can keep a tab out of the menu with 'menu' => false.
+			if ( isset( $tab['menu'] ) && false === $tab['menu'] ) {
+				continue;
+			}
+
+			add_submenu_page(
+				self::PAGE_SLUG,
+				/* translators: %s: name of the settings tab, for example Backup */
+				sprintf( __( 'FrontBlocks: %s', 'frontblocks' ), $tab['label'] ),
+				$tab['label'],
+				self::CAPABILITY,
+				self::get_page_slug( $tab['id'] ),
+				array( $this, 'render_page' )
+			);
+		}
+	}
+
+	/**
+	 * Send the old settings URL, under Appearance, to the FrontBlocks menu.
+	 *
+	 * Bookmarks, links in other plugins and the notices of older versions point at
+	 * themes.php?page=frontblocks-settings. The query arguments and the #tab of the
+	 * old link are kept, so a link that opened a tab or showed a notice still does.
+	 *
+	 * @since 1.6.0
+	 * @return void
+	 */
+	public function redirect_legacy_url() {
+		global $pagenow;
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the page being asked for, nothing is processed.
+		$page = isset( $_GET['page'] ) && is_string( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+
+		if ( 'themes.php' !== $pagenow || self::PAGE_SLUG !== $page || ! current_user_can( self::CAPABILITY ) ) {
+			return;
+		}
+
+		$args = array();
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only forwards sanitized values to the new URL.
+		foreach ( $_GET as $key => $value ) {
+			if ( 'page' !== $key && is_string( $value ) ) {
+				$args[ sanitize_key( $key ) ] = sanitize_text_field( wp_unslash( $value ) );
+			}
+		}
+
+		wp_safe_redirect( add_query_arg( $args, self::get_settings_url() ) );
+		exit;
 	}
 
 	/**
@@ -1129,6 +1349,80 @@ class Settings {
 	}
 
 	/**
+	 * Tabs of the settings screen, which are also the entries of the submenu.
+	 *
+	 * @since 1.6.0
+	 * @param array $counts Tab id => array( toggles on, toggles total ), to show next to a tab. The settings fields they come from exist once the page renders, not when the menu is registered.
+	 * @return array
+	 */
+	private function get_tabs( $counts = array() ) {
+		$tabs = array(
+			array(
+				'id'    => 'blocks',
+				'label' => __( 'Blocks', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'pro',
+				'label' => __( 'PRO blocks', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'optional',
+				'label' => __( 'Optional features', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'image-management',
+				'label' => __( 'Image Management', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'maintenance',
+				'label' => __( 'Maintenance', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'woocommerce',
+				'label' => __( 'WooCommerce', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'cookies',
+				'label' => __( 'Cookie Notice', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'google-signin',
+				'label' => __( 'Social Login', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'cpt',
+				'label' => __( 'Post types', 'frontblocks' ),
+			),
+			array(
+				'id'    => 'license',
+				'label' => __( 'License', 'frontblocks' ),
+			),
+		);
+
+		foreach ( $tabs as $index => $tab ) {
+			if ( isset( $counts[ $tab['id'] ] ) ) {
+				$tabs[ $index ]['on']    = $counts[ $tab['id'] ][0];
+				$tabs[ $index ]['total'] = $counts[ $tab['id'] ][1];
+			}
+		}
+
+		/**
+		 * Filters the settings tabs displayed in the FrontBlocks admin screen.
+		 *
+		 * Companion plugins can add a tab by appending an array with an `id` and
+		 * `label` key, then render its matching panel on
+		 * `frontblocks_settings_tab_panels`. Every tab also gets an entry in the
+		 * FrontBlocks menu. Add `'menu' => false` to keep a tab out of it.
+		 *
+		 * @since 1.5.3
+		 * @param array $tabs Settings tabs.
+		 */
+		$tabs = apply_filters( 'frontblocks_settings_tabs', $tabs );
+
+		return is_array( $tabs ) ? $tabs : array();
+	}
+
+	/**
 	 * Render settings page.
 	 *
 	 * @return void
@@ -1153,66 +1447,24 @@ class Settings {
 		list( $features_on, $features_total ) = $this->count_section_toggles( 'frontblocks_section_features' );
 		list( $woo_on, $woo_total )           = $this->count_section_toggles( 'frontblocks_section_woocommerce_features' );
 
-		$tabs = array(
+		$tabs = $this->get_tabs(
 			array(
-				'id'    => 'blocks',
-				'label' => __( 'Blocks', 'frontblocks' ),
-			),
-			array(
-				'id'    => 'pro',
-				'label' => __( 'PRO blocks', 'frontblocks' ),
-			),
-			array(
-				'id'    => 'optional',
-				'label' => __( 'Optional features', 'frontblocks' ),
-				'on'    => $features_on,
-				'total' => $features_total,
-			),
-			array(
-				'id'    => 'image-management',
-				'label' => __( 'Image Management', 'frontblocks' ),
-			),
-			array(
-				'id'    => 'maintenance',
-				'label' => __( 'Maintenance', 'frontblocks' ),
-			),
-			array(
-				'id'    => 'woocommerce',
-				'label' => __( 'WooCommerce', 'frontblocks' ),
-				'on'    => $woo_on,
-				'total' => $woo_total,
-			),
-			array(
-				'id'    => 'cookies',
-				'label' => __( 'Cookie Notice', 'frontblocks' ),
-			),
-			array(
-				'id'    => 'google-signin',
-				'label' => __( 'Social Login', 'frontblocks' ),
-			),
-			array(
-				'id'    => 'cpt',
-				'label' => __( 'Post types', 'frontblocks' ),
-			),
-			array(
-				'id'    => 'license',
-				'label' => __( 'License', 'frontblocks' ),
-			),
+				'optional'    => array( $features_on, $features_total ),
+				'woocommerce' => array( $woo_on, $woo_total ),
+			)
 		);
 
-		/**
-		 * Filters the settings tabs displayed in the FrontBlocks admin screen.
-		 *
-		 * Companion plugins can add a tab by appending an array with an `id` and
-		 * `label` key, then render its matching panel on
-		 * `frontblocks_settings_tab_panels`.
-		 *
-		 * @since 1.5.3
-		 * @param array $tabs Settings tabs.
-		 */
-		$tabs = apply_filters( 'frontblocks_settings_tabs', $tabs );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads which tab to open first, nothing is processed.
+		$requested_page = isset( $_GET['page'] ) && is_string( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : self::PAGE_SLUG;
+		$default_tab    = self::get_tab_from_page( $requested_page );
+		$tab_pages      = array();
+		foreach ( $tabs as $tab ) {
+			if ( isset( $tab['id'] ) && is_string( $tab['id'] ) ) {
+				$tab_pages[ $tab['id'] ] = self::get_page_slug( $tab['id'] );
+			}
+		}
 		?>
-		<div class="frbl-settings-wrapper">
+		<div class="frbl-settings-wrapper" data-default-tab="<?php echo esc_attr( $default_tab ); ?>" data-tab-pages="<?php echo esc_attr( wp_json_encode( $tab_pages ) ); ?>">
 			<div class="frbl-admin-header">
 				<div class="frbl-admin-header-top">
 					<div class="frbl-admin-title-group">

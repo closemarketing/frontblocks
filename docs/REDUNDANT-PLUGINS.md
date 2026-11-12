@@ -27,7 +27,7 @@ add_filter( 'frontblocks_redundant_plugins', function ( $entries ) {
 			'shortpixel-image-optimiser/wp-shortpixel.php' => 'ShortPixel Image Optimizer',
 		),
 		// Optional: link shown on the notice for more information.
-		'doc_url' => admin_url( 'themes.php?page=frontblocks-settings' ),
+		'doc_url' => \FrontBlocks\Admin\Settings::get_settings_url(),
 	);
 
 	return $entries;
