@@ -2619,44 +2619,49 @@ class Settings {
 		$options  = get_option( 'frontblocks_settings', array() );
 		$manual   = (bool) ( $options[ $this->option_enable_staging ] ?? false );
 		$state    = Staging::get_state();
+		$locked   = $state['active'] && ! empty( array_diff( (array) $state['reasons'], array( Staging::REASON_MANUAL ) ) );
 		$redirect = (string) ( $options[ $this->option_staging_redirect_email ] ?? '' );
 		$hosts    = (string) ( $options[ $this->option_staging_blocked_hosts ] ?? '' );
 		$input    = 'tw:block tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:text-base';
 
 		$measures = array(
 			'staging_noindex'         => array(
+				'staging_noindex',
 				__( 'Prevent indexing', 'frontblocks' ),
 				__( 'Sends noindex and nofollow (meta tag and X-Robots-Tag header), serves a closed robots.txt and disables the sitemaps. The "Search engine visibility" setting is not changed.', 'frontblocks' ),
 			),
 			'staging_block_email'     => array(
+				'staging_email',
 				__( 'Block outgoing email', 'frontblocks' ),
 				__( 'wp_mail() never sends, and the SendGrid, Mailgun, Brevo, Postmark, Amazon SES, SparkPost and Mailjet APIs are blocked. Blocked emails are listed below.', 'frontblocks' ),
 			),
-			'staging_restrict_access' => array(
-				__( 'Restrict access', 'frontblocks' ),
-				__( 'Only logged-in users can view the frontend. Visitors see a "Private staging site" page. Off by default so clients can review a beta site.', 'frontblocks' ),
-			),
 			'staging_indicators'      => array(
+				'staging_indicators',
 				__( 'Visual indicators', 'frontblocks' ),
 				__( 'STAGING node in the admin bar, [STAGING] prefix in the browser tab title and an admin notice on the dashboard and this screen.', 'frontblocks' ),
 			),
 			'staging_top_bar'         => array(
+				'staging_top_bar',
 				__( 'Frontend top bar', 'frontblocks' ),
 				__( 'Shows "Staging site — changes here are not live" at the top of the frontend to logged-in users.', 'frontblocks' ),
 			),
 			'staging_woocommerce'     => array(
+				'staging_woocommerce',
 				__( 'WooCommerce safety', 'frontblocks' ),
 				__( 'Test site notice on cart and checkout, Subscriptions renewals forced to manual so customers are not charged twice, and WooCommerce webhooks paused. Only applies when WooCommerce is active.', 'frontblocks' ),
 			),
 			'staging_pause_cron'      => array(
+				'staging_pause',
 				__( 'Pause background tasks', 'frontblocks' ),
 				__( 'Pauses WP-Cron and Action Scheduler, so scheduled posts, renewals and syncs do not run on the copy.', 'frontblocks' ),
 			),
 			'staging_block_http'      => array(
+				'staging_hosts',
 				__( 'Block outgoing requests to selected hosts', 'frontblocks' ),
 				__( 'Requests to the hosts listed below fail on staging. Use it for CRMs, ERPs and automation webhooks (Zapier, Make).', 'frontblocks' ),
 			),
 			'staging_block_analytics' => array(
+				'staging_tracking',
 				__( 'Remove tracking', 'frontblocks' ),
 				__( 'Removes Google Analytics and Google Tag Manager snippets (and stops FrontConsent from loading them) so test traffic does not pollute production data.', 'frontblocks' ),
 			),
@@ -2677,38 +2682,60 @@ class Settings {
 					<?php echo esc_html__( 'Enable staging mode', 'frontblocks' ); ?>
 				</label>
 				<label class="frbl-toggle">
+					<?php if ( $locked ) : ?>
+						<?php // A disabled checkbox is not submitted: keep the saved manual value. ?>
+						<input type="hidden" name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_staging ); ?>]" value="<?php echo $manual ? '1' : ''; ?>" />
+					<?php endif; ?>
 					<input type="checkbox"
 						id="<?php echo esc_attr( $this->option_enable_staging ); ?>"
+						<?php if ( ! $locked ) : ?>
 						name="frontblocks_settings[<?php echo esc_attr( $this->option_enable_staging ); ?>]"
+						<?php endif; ?>
 						value="1"
-						<?php checked( true, $manual ); ?>
+						<?php checked( true, $state['active'] ); ?>
+						<?php disabled( true, $locked ); ?>
 					/>
 					<span></span>
 				</label>
 			</div>
 			<p class="tw:text-xs tw:text-gray-500 tw:mt-0 tw:mb-4">
-				<?php echo esc_html__( 'Turns staging mode on for any domain. It is also activated automatically on domains starting with "beta.", when the environment type is staging or development, and with FRBL_STAGING = true in wp-config.php (FRBL_STAGING = false forces it off). Only this toggle is saved in the database, so copying the database to production does not carry staging mode over.', 'frontblocks' ); ?>
+				<?php
+				if ( $locked ) {
+					echo esc_html__( 'Staging mode is on because of the environment (a "beta." domain, the environment type or FRBL_STAGING in wp-config.php), so this toggle cannot be switched off here. FRBL_STAGING = false forces it off.', 'frontblocks' );
+				} else {
+					echo esc_html__( 'Turns staging mode on for any domain. It is also activated automatically on domains starting with "beta.", when the environment type is staging or development, and with FRBL_STAGING = true in wp-config.php (FRBL_STAGING = false forces it off). Only this toggle is saved in the database, so copying the database to production does not carry staging mode over.', 'frontblocks' );
+				}
+				?>
+			</p>
+
+			<p class="tw:text-sm tw:font-medium tw:text-gray-700 tw:mt-0 tw:mb-3">
+				<?php echo esc_html__( 'Safety measures applied while staging mode is active', 'frontblocks' ); ?>
+			</p>
+			<div class="frbl-features-grid tw:mb-4">
+				<?php foreach ( $measures as $measure ) : ?>
+					<?php UI::show_info_card( $measure[0], $measure[1], $measure[2] ); ?>
+				<?php endforeach; ?>
+			</div>
+
+			<div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
+				<label for="<?php echo esc_attr( Staging::RESTRICT_ACCESS ); ?>" class="tw:text-base tw:font-medium tw:text-gray-900">
+					<?php echo esc_html__( 'Restrict access', 'frontblocks' ); ?>
+				</label>
+				<label class="frbl-toggle">
+					<input type="checkbox"
+						id="<?php echo esc_attr( Staging::RESTRICT_ACCESS ); ?>"
+						name="frontblocks_settings[<?php echo esc_attr( Staging::RESTRICT_ACCESS ); ?>]"
+						value="1"
+						<?php checked( true, Staging::is_measure_enabled( Staging::RESTRICT_ACCESS ) ); ?>
+					/>
+					<span></span>
+				</label>
+			</div>
+			<p class="tw:text-xs tw:text-gray-500 tw:mt-0 tw:mb-4">
+				<?php echo esc_html__( 'Optional. Only logged-in users can view the frontend, and visitors see a "Private staging site" page. It is the one measure that is off by default, so clients can review a beta site without logging in.', 'frontblocks' ); ?>
 			</p>
 
 			<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200">
-				<p class="tw:text-sm tw:font-medium tw:text-gray-700 tw:mt-0 tw:mb-2">
-					<?php echo esc_html__( 'Safety measures applied while staging mode is active', 'frontblocks' ); ?>
-				</p>
-				<?php foreach ( $measures as $key => $measure ) : ?>
-					<p class="tw:mt-2 tw:mb-0">
-						<label for="<?php echo esc_attr( $key ); ?>" class="tw:text-sm tw:font-medium tw:text-gray-900">
-							<input type="checkbox"
-								id="<?php echo esc_attr( $key ); ?>"
-								name="frontblocks_settings[<?php echo esc_attr( $key ); ?>]"
-								value="1"
-								<?php checked( true, Staging::is_measure_enabled( $key ) ); ?>
-							/>
-							<?php echo esc_html( $measure[0] ); ?>
-						</label>
-					</p>
-					<p class="tw:text-xs tw:text-gray-500 tw:mt-0 tw:mb-0"><?php echo esc_html( $measure[1] ); ?></p>
-				<?php endforeach; ?>
-
 				<label for="<?php echo esc_attr( $this->option_staging_redirect_email ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mt-4 tw:mb-2">
 					<?php echo esc_html__( 'Redirect emails to', 'frontblocks' ); ?>
 				</label>
@@ -2733,7 +2760,7 @@ class Settings {
 					class="<?php echo esc_attr( $input ); ?>"
 				><?php echo esc_textarea( $hosts ); ?></textarea>
 				<p class="tw:text-xs tw:text-gray-500 tw:mt-2 tw:mb-0">
-					<?php echo esc_html__( 'One host per line, for example hooks.zapier.com. A host also blocks its subdomains.', 'frontblocks' ); ?>
+					<?php echo esc_html__( 'Optional. External servers this site must not talk to while it is staging, so tests never write to live systems (CRM, ERP, Zapier or Make webhooks, shipping or invoicing APIs). One host per line, for example hooks.zapier.com. A host also blocks its subdomains. Leave it empty if you do not use any.', 'frontblocks' ); ?>
 				</p>
 			</div>
 
@@ -3522,6 +3549,7 @@ class Settings {
 			$this->option_enable_fluid_typography,
 			$this->option_enable_maintenance,
 			$this->option_enable_staging,
+			Staging::RESTRICT_ACCESS,
 			$this->option_enable_gutenberg,
 			$this->option_enable_simple_prices_variable_products,
 			$this->option_enable_after_add_to_cart,
@@ -3543,9 +3571,6 @@ class Settings {
 			$this->option_disable_checkout_order_notes,
 			$this->option_disable_checkout_login_prompt,
 		);
-
-		// Every staging measure is a checkbox too.
-		$boolean_options = array_merge( $boolean_options, array_keys( Staging::get_measure_defaults() ) );
 
 		// Initialize all boolean options to false (unchecked checkboxes are not submitted).
 		foreach ( $boolean_options as $option ) {
