@@ -323,6 +323,30 @@ class StagingTest extends TestCase {
 		$this->assertNotFalse( has_action( 'init', array( $staging, 'boot' ) ) );
 	}
 
+	public function test_every_measure_is_on_except_restricting_access() {
+		foreach ( array( 'staging_noindex', 'staging_block_email', 'staging_indicators', 'staging_top_bar', 'staging_woocommerce', 'staging_pause_cron', 'staging_block_http', 'staging_block_analytics' ) as $key ) {
+			$this->assertTrue( Staging::is_measure_enabled( $key ), $key );
+		}
+
+		$this->assertFalse( Staging::is_measure_enabled( 'staging_restrict_access' ), 'Restricting access is optional and off by default.' );
+		$this->assertFalse( Staging::is_measure_enabled( 'unknown_measure' ) );
+	}
+
+	public function test_a_stored_value_cannot_switch_off_a_measure_but_switches_on_restricting_access() {
+		update_option( 'frontblocks_settings', array( 'staging_noindex' => false, 'staging_restrict_access' => true ) );
+
+		$this->assertTrue( Staging::is_measure_enabled( 'staging_noindex' ) );
+		$this->assertTrue( Staging::is_measure_enabled( 'staging_restrict_access' ) );
+	}
+
+	public function test_the_measure_defaults_list_every_measure() {
+		$defaults = Staging::get_measure_defaults();
+
+		$this->assertCount( 9, $defaults );
+		$this->assertFalse( $defaults['staging_restrict_access'] );
+		$this->assertSame( 8, count( array_filter( $defaults ) ) );
+	}
+
 	public function test_measures_cannot_be_turned_off() {
 		// Values left in the database by older versions must not switch a measure off.
 		$staging = $this->boot_staging( array( 'staging_noindex' => false, 'staging_pause_cron' => false ) );
@@ -586,6 +610,48 @@ class StagingTest extends TestCase {
 		$this->assertStringContainsString( 'frbl-maintenance-link', $html );
 		$this->assertStringContainsString( 'https://example.org/wp-login.php', $html );
 		$this->assertStringContainsString( 'noindex, nofollow', $html );
+	}
+
+	/*
+	 * ------------------------------------------------------------------
+	 * 3. Restrict access.
+	 * ------------------------------------------------------------------
+	 */
+
+	public function test_access_is_not_restricted_by_default() {
+		$staging = $this->boot_staging();
+
+		$this->assertFalse( has_action( 'template_redirect', array( $staging, 'maybe_restrict_access' ) ) );
+	}
+
+	public function test_restricted_access_stops_visitors_but_not_logged_in_users() {
+		$staging = $this->boot_staging( array( 'staging_restrict_access' => true ) );
+
+		$this->assertSame( 0, has_action( 'template_redirect', array( $staging, 'maybe_restrict_access' ) ) );
+		$this->assertTrue( $staging->should_restrict_request() );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
+		$this->assertFalse( $staging->should_restrict_request() );
+	}
+
+	public function test_restricted_access_reuses_the_maintenance_system_request_rules() {
+		$staging = $this->boot_staging( array( 'staging_restrict_access' => true ) );
+
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		$this->assertFalse( $staging->should_restrict_request(), 'AJAX must never be blocked.' );
+		remove_filter( 'wp_doing_ajax', '__return_true' );
+
+		add_filter( 'wp_doing_cron', '__return_true' );
+		$this->assertFalse( $staging->should_restrict_request(), 'Cron must never be blocked.' );
+	}
+
+	public function test_robots_txt_is_never_hidden_behind_the_private_page() {
+		$staging = $this->boot_staging( array( 'staging_restrict_access' => true ) );
+		$this->assertTrue( $staging->should_restrict_request() );
+
+		$GLOBALS['wp_query']->is_robots = true;
+
+		$this->assertFalse( $staging->should_restrict_request() );
 	}
 
 	/*
@@ -861,16 +927,27 @@ class StagingTest extends TestCase {
 	 * ------------------------------------------------------------------
 	 */
 
-	public function test_settings_only_save_the_manual_toggle_for_staging() {
+	public function test_settings_save_the_manual_toggle_and_restricting_access_for_staging() {
 		$_POST['_wpnonce'] = wp_create_nonce( 'frontblocks_settings-options' );
 		$settings          = new Settings();
 
-		$saved = $settings->sanitize_settings( array( 'enable_staging' => '1' ) );
+		$saved = $settings->sanitize_settings( array( 'enable_staging' => '1', 'staging_restrict_access' => '1' ) );
 
 		$this->assertTrue( $saved['enable_staging'] );
-		// Measures are always on: they are not settings anymore.
+		$this->assertTrue( $saved['staging_restrict_access'] );
+		// The other measures are always on: they are not settings anymore.
 		$this->assertArrayNotHasKey( 'staging_noindex', $saved );
-		$this->assertArrayNotHasKey( 'staging_restrict_access', $saved );
+		$this->assertArrayNotHasKey( 'staging_block_email', $saved );
+	}
+
+	public function test_an_unchecked_restricting_access_is_saved_as_off() {
+		$_POST['_wpnonce'] = wp_create_nonce( 'frontblocks_settings-options' );
+		update_option( 'frontblocks_settings', array( 'staging_restrict_access' => true ) );
+		$settings = new Settings();
+
+		$saved = $settings->sanitize_settings( array( 'enable_staging' => '1' ) );
+
+		$this->assertFalse( $saved['staging_restrict_access'], 'An unchecked checkbox is not submitted and must be saved as off.' );
 	}
 
 	public function test_unchecking_the_manual_toggle_turns_it_off() {
@@ -929,5 +1006,67 @@ class StagingTest extends TestCase {
 		// A disabled checkbox is not submitted, so the saved manual value travels in a hidden input
 		// and auto-detection is never written to the database.
 		$this->assertMatchesRegularExpression( '/<input type="hidden" name="frontblocks_settings\[enable_staging\]" value="" \/>/', $html );
+	}
+
+	/*
+	 * ------------------------------------------------------------------
+	 * Extension points for add-ons (FrontBlocks PRO).
+	 * ------------------------------------------------------------------
+	 */
+
+	public function test_the_extension_api_version_is_exposed() {
+		$this->assertSame( 1, Staging::EXTENSION_API );
+	}
+
+	public function test_an_add_on_can_allow_a_visitor_through_the_restricted_page() {
+		$staging = $this->boot_staging( array( 'staging_restrict_access' => true ) );
+		$this->assertTrue( $staging->should_restrict_request() );
+
+		add_filter( 'frontblocks_staging_allow_request', '__return_true' );
+
+		$this->assertFalse( $staging->should_restrict_request() );
+	}
+
+	public function test_an_add_on_can_take_over_email_from_the_core_measure() {
+		$staging = $this->boot_staging();
+		$atts    = array( 'to' => 'customer@example.org', 'subject' => 'Order', 'message' => 'Body', 'headers' => array(), 'attachments' => array() );
+
+		$this->assertTrue( $staging->block_mail( null, $atts ) );
+		delete_option( Staging::LOG_OPTION );
+
+		add_filter( 'frontblocks_staging_block_email', '__return_false' );
+
+		$this->assertNull( $staging->block_mail( null, $atts ), 'The email must be left to the add-on.' );
+		$this->assertSame( array(), Staging::get_email_log() );
+	}
+
+	public function test_an_add_on_can_take_over_the_redirect_from_the_core_measure() {
+		$staging = $this->boot_staging( array( 'staging_redirect_email' => 'qa@example.org' ) );
+		$atts    = array( 'to' => 'customer@example.org', 'subject' => 'Order', 'message' => 'Body', 'headers' => array(), 'attachments' => array() );
+		add_filter( 'frontblocks_staging_block_email', '__return_false' );
+
+		$this->assertSame( $atts, $staging->redirect_mail( $atts ) );
+	}
+
+	public function test_add_ons_can_write_to_the_email_log() {
+		Staging::record_email( 'blocked', array( 'a@example.org', 'b@example.org' ), 'Receipt' );
+
+		$log = Staging::get_email_log();
+		$this->assertCount( 1, $log );
+		$this->assertSame( 'a@example.org, b@example.org', $log[0]['to'] );
+		$this->assertSame( 'Receipt', $log[0]['subject'] );
+	}
+
+	public function test_settings_show_a_locked_preview_of_the_pro_options_without_a_license() {
+		$settings = new Settings();
+		$settings->register_settings();
+
+		global $wp_settings_fields;
+		$this->assertArrayHasKey( 'staging_pro_teaser', $wp_settings_fields['frontblocks-settings']['frontblocks_section_staging'] );
+
+		$html = $this->capture( array( $settings, 'field_staging_pro_teaser' ) );
+		$this->assertStringContainsString( 'frbl-pro-badge', $html );
+		$this->assertStringContainsString( 'Stripe, WooPayments, Redsys and PayPal', $html );
+		$this->assertStringContainsString( 'utm_campaign=settings-staging', $html );
 	}
 }

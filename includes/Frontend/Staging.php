@@ -44,6 +44,13 @@ class Staging {
 	const LOG_OPTION = 'frontblocks_staging_email_log';
 
 	/**
+	 * Option key of the only optional measure: restricting access.
+	 *
+	 * @var string
+	 */
+	const RESTRICT_ACCESS = 'staging_restrict_access';
+
+	/**
 	 * Maximum number of entries kept in the email log.
 	 *
 	 * @var int
@@ -56,6 +63,15 @@ class Staging {
 	 * @var string
 	 */
 	const ANALYTICS_REMOVED_MARKER = '<!-- FrontBlocks staging: tracking snippet removed -->';
+
+	/**
+	 * Version of the hooks that add-ons (FrontBlocks PRO) rely on:
+	 * `frontblocks_staging_allow_request`, `frontblocks_staging_block_email`
+	 * and Staging::record_email().
+	 *
+	 * @var int
+	 */
+	const EXTENSION_API = 1;
 
 	/**
 	 * Reasons why staging mode can be active.
@@ -86,7 +102,10 @@ class Staging {
 	/**
 	 * Register the hooks of every safety measure, when staging mode is active.
 	 *
-	 * Measures are always on: they cannot be switched off one by one.
+	 * Measures are always on: they cannot be switched off one by one. The only
+	 * exception is restricting access, which is optional because it stops every
+	 * visitor who is not logged in, and a client reviewing a `beta.` site would
+	 * otherwise land on a login wall.
 	 *
 	 * @return void
 	 */
@@ -105,6 +124,10 @@ class Staging {
 
 		$this->register_noindex();
 		$this->register_email_blocking();
+
+		if ( self::is_measure_enabled( self::RESTRICT_ACCESS ) && ! is_admin() ) {
+			add_action( 'template_redirect', array( $this, 'maybe_restrict_access' ), 0 );
+		}
 
 		if ( class_exists( 'WooCommerce' ) ) {
 			$this->register_woocommerce_safety();
@@ -398,6 +421,50 @@ class Staging {
 		return $lines;
 	}
 
+	/**
+	 * Whether a measure applies.
+	 *
+	 * Every measure is always on while staging mode is active, except restricting
+	 * access, which is optional and off unless it was switched on. Kept public so
+	 * add-ons (FrontBlocks PRO) can ask the same question.
+	 *
+	 * @param string $key Measure key.
+	 * @return bool
+	 */
+	public static function is_measure_enabled( $key ) {
+		if ( self::RESTRICT_ACCESS === $key ) {
+			$options = get_option( self::OPTION_NAME, array() );
+
+			return is_array( $options ) && ! empty( $options[ $key ] );
+		}
+
+		$defaults = self::get_measure_defaults();
+
+		return (bool) ( isset( $defaults[ $key ] ) ? $defaults[ $key ] : false );
+	}
+
+	/**
+	 * The measures and whether each one is on by default.
+	 *
+	 * Restricting access is the only one that is off by default: a client
+	 * reviewing a `beta.` site would otherwise land on a login wall.
+	 *
+	 * @return bool[]
+	 */
+	public static function get_measure_defaults() {
+		return array(
+			'staging_noindex'         => true,
+			'staging_block_email'     => true,
+			self::RESTRICT_ACCESS     => false,
+			'staging_indicators'      => true,
+			'staging_top_bar'         => true,
+			'staging_woocommerce'     => true,
+			'staging_pause_cron'      => true,
+			'staging_block_http'      => true,
+			'staging_block_analytics' => true,
+		);
+	}
+
 	/*
 	 * ------------------------------------------------------------------
 	 * 1. Prevent indexing.
@@ -538,6 +605,25 @@ class Staging {
 	}
 
 	/**
+	 * Whether this module decides what happens to an email.
+	 *
+	 * @param mixed $atts Email attributes.
+	 * @return bool
+	 */
+	private static function handles_email( $atts ) {
+		/**
+		 * Filters whether the core staging module blocks or redirects an email.
+		 *
+		 * An add-on that routes email itself (FrontBlocks PRO email routing)
+		 * returns false so the core measure steps aside.
+		 *
+		 * @param bool  $handles Whether the core measure handles the email. Default true.
+		 * @param array $atts    Email attributes.
+		 */
+		return (bool) apply_filters( 'frontblocks_staging_block_email', true, is_array( $atts ) ? $atts : array() );
+	}
+
+	/**
 	 * Stored address that receives every email instead of its real recipients.
 	 *
 	 * @return string Valid email address, or an empty string.
@@ -561,13 +647,13 @@ class Staging {
 	 */
 	public function block_mail( $pre, $atts ) {
 		// Another short-circuit already decided, or the emails are redirected instead.
-		if ( null !== $pre || '' !== self::get_redirect_email() ) {
+		if ( null !== $pre || '' !== self::get_redirect_email() || ! self::handles_email( $atts ) ) {
 			return $pre;
 		}
 
 		$atts = is_array( $atts ) ? $atts : array();
 
-		$this->log_email( 'blocked', $atts['to'] ?? '', $atts['subject'] ?? '' );
+		self::record_email( 'blocked', $atts['to'] ?? '', $atts['subject'] ?? '' );
 
 		return true;
 	}
@@ -580,13 +666,13 @@ class Staging {
 	 */
 	public function redirect_mail( $atts ) {
 		$redirect = self::get_redirect_email();
-		if ( ! is_array( $atts ) || '' === $redirect ) {
+		if ( ! is_array( $atts ) || '' === $redirect || ! self::handles_email( $atts ) ) {
 			return $atts;
 		}
 
 		$original = self::recipients_to_string( $atts['to'] ?? '' );
 
-		$this->log_email( 'redirected', $original, $atts['subject'] ?? '' );
+		self::record_email( 'redirected', $original, $atts['subject'] ?? '' );
 
 		$atts['to']      = $redirect;
 		$atts['subject'] = '[Staging] ' . (string) ( $atts['subject'] ?? '' );
@@ -645,12 +731,14 @@ class Staging {
 	/**
 	 * Cap and store a blocked email in the log.
 	 *
+	 * Public so add-ons that block or route email themselves can use the same log.
+	 *
 	 * @param string       $type    `blocked`, `redirected` or `api`.
 	 * @param string|array $to      Recipients, or the API host for `api`.
 	 * @param string       $subject Subject, empty for `api`.
 	 * @return void
 	 */
-	private function log_email( $type, $to, $subject ) {
+	public static function record_email( $type, $to, $subject ) {
 		$log = get_option( self::LOG_OPTION, array() );
 		$log = is_array( $log ) ? $log : array();
 
@@ -661,7 +749,7 @@ class Staging {
 				'type'    => $type,
 				'to'      => sanitize_text_field( self::recipients_to_string( $to ) ),
 				'subject' => sanitize_text_field( (string) $subject ),
-				'caller'  => $this->get_caller(),
+				'caller'  => self::get_caller(),
 			)
 		);
 
@@ -699,7 +787,7 @@ class Staging {
 	 *
 	 * @return string
 	 */
-	private function get_caller() {
+	private static function get_caller() {
 		$frames = wp_debug_backtrace_summary( __CLASS__, 0, false ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_wp_debug_backtrace_summary -- Records which code triggered a blocked email.
 		$frames = is_array( $frames ) ? $frames : array();
 
@@ -712,6 +800,67 @@ class Staging {
 		);
 
 		return substr( implode( ' > ', array_slice( array_values( $frames ), 0, 3 ) ), 0, 255 );
+	}
+
+	/*
+	 * ------------------------------------------------------------------
+	 * 3. Restrict access.
+	 * ------------------------------------------------------------------
+	 */
+
+	/**
+	 * Whether the current visitor must be stopped by the private staging page.
+	 *
+	 * Reuses the Maintenance rules for system requests (AJAX, cron, REST,
+	 * Customizer), lets robots.txt through and lets any logged-in user through.
+	 *
+	 * @return bool
+	 */
+	public function should_restrict_request() {
+		if ( Maintenance::is_system_request() ) {
+			return false;
+		}
+
+		// Crawlers must read the closed robots.txt: an error there means "no restrictions".
+		if ( is_robots() ) {
+			return false;
+		}
+
+		if ( is_user_logged_in() ) {
+			return false;
+		}
+
+		/**
+		 * Filters whether a visitor who is not logged in may view the restricted staging site.
+		 *
+		 * Lets add-ons grant access without a WordPress user, for example
+		 * FrontBlocks PRO with its expiring client share links.
+		 *
+		 * @param bool $allowed Whether the current request is allowed. Default false.
+		 */
+		return ! apply_filters( 'frontblocks_staging_allow_request', false );
+	}
+
+	/**
+	 * Show the "Private staging site" page to visitors who are not logged in.
+	 *
+	 * @return void
+	 */
+	public function maybe_restrict_access() {
+		if ( ! $this->should_restrict_request() ) {
+			return;
+		}
+
+		status_header( 403 );
+		nocache_headers();
+
+		Maintenance::output_curtain(
+			__( 'Private staging site', 'frontblocks' ),
+			'',
+			wp_login_url(),
+			__( 'Log in', 'frontblocks' )
+		);
+		exit;
 	}
 
 	/*
@@ -1004,7 +1153,7 @@ class Staging {
 		}
 
 		if ( self::host_matches( $host, self::get_mail_api_hosts() ) ) {
-			$this->log_email( 'api', strtolower( $host ), '' );
+			self::record_email( 'api', strtolower( $host ), '' );
 
 			return new \WP_Error( 'frontblocks_staging_blocked', __( 'Blocked by FrontBlocks staging mode: transactional email APIs are disabled on staging sites.', 'frontblocks' ) );
 		}

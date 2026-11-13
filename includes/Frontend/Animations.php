@@ -351,7 +351,7 @@ class Animations {
 
 		// Add animation classes and styles to the first HTML tag.
 		$block_content = preg_replace_callback(
-			'/^<([a-z][a-z0-9]*)\s*((?:[^>]|\\n)*?)(?:style="([^"]*?)")?([^>]*?)>/i',
+			'/^\s*<([a-z][a-z0-9]*)\s*((?:[^>]|\\n)*?)(?:style="([^"]*?)")?([^>]*?)>/i',
 			function ( $matches ) use ( $properties, $style_attr, $has_animation, $has_glass_effect, $has_hover_bg_scale ) {
 				$tag            = $matches[1] ?? 'div';
 				$beginning      = $matches[2] ?? '';

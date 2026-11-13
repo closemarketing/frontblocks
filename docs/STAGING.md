@@ -23,7 +23,7 @@ Only the manual toggle is stored in the database. Domain, environment and consta
 
 ## Safety measures
 
-Measures are always on while staging mode is active and cannot be switched off one by one. The Staging Mode section shows them as read-only cards. The only options are the address that receives the emails and the list of hosts to block.
+Measures are always on while staging mode is active and cannot be switched off one by one. The Staging Mode section shows them as read-only cards. The options are the address that receives the emails, the list of hosts to block and **Restrict access**, the one measure that is optional and off by default: it stops every visitor who is not logged in, so it cannot be always on.
 
 | Measure | What it does |
 |---|---|
@@ -35,6 +35,7 @@ Measures are always on while staging mode is active and cannot be switched off o
 | Pause background tasks | Pauses WP-Cron (`pre_get_ready_cron_jobs`) and Action Scheduler (no concurrent batches). This also pauses FrontBlocks' own Image Management bulk jobs. |
 | Block hosts | Outgoing requests to the hosts listed in the settings fail, subdomains included. The site's own host is never blocked. |
 | Remove tracking | Removes Google Analytics and Google Tag Manager scripts (enqueued scripts and snippets printed in the page) and stops FrontConsent from loading them. |
+| Restrict access (optional) | Only logged-in users can view the frontend. Visitors get a "Private staging site" page (HTTP 403) that reuses the maintenance curtain. AJAX, cron, REST and Customizer requests and `robots.txt` are never blocked (same rules as Maintenance Mode). Off by default so clients can review a `beta.` site without a login. Add-ons can let a visitor through with the `frontblocks_staging_allow_request` filter. |
 
 ### Limitations
 
@@ -61,6 +62,10 @@ if ( function_exists( 'frontblocks_is_staging' ) && frontblocks_is_staging() ) {
 | `frontblocks_staging_mail_api_hosts` | filter | Transactional email API hosts that are blocked. Host names, or regular expressions starting with `#`. |
 | `frontblocks_staging_analytics_hosts` | filter | Tracking hosts whose scripts are removed. |
 | `frontblocks_staging_analytics_protected_script_ids` | filter | Script ID prefixes that tracking removal never touches. Default `array( 'frontconsent-' )`. |
+| `frontblocks_staging_allow_request` | filter | Whether a visitor who is not logged in may view the site while **Restrict access** is on. Default `false`. Lets an add-on grant access without a WordPress user, for example expiring client share links. |
+| `frontblocks_staging_block_email` | filter | `( bool $handles, array $atts )`. Return `false` when an add-on routes the email itself, so the core measure steps aside and neither blocks nor redirects it. |
+
+Add-ons that block or route email themselves can write to the same log with `FrontBlocks\Frontend\Staging::record_email( $type, $to, $subject )` (`blocked`, `redirected` or `api`). `Staging::EXTENSION_API` is the version of these hooks, so an add-on can check it before it relies on them, and `Staging::is_measure_enabled( $key )` tells whether a measure applies (every measure is on while staging mode is active, except Restrict access when it is off).
 
 The detection result, with the reasons, is available from `Staging::get_state()`:
 
@@ -71,4 +76,4 @@ $state = FrontBlocks\Frontend\Staging::get_state();
 
 ## Settings keys
 
-Stored in `frontblocks_settings`: `enable_staging` (manual toggle), `staging_redirect_email` and `staging_blocked_hosts`. The email log is kept in the `frontblocks_staging_email_log` option, which is not autoloaded.
+Stored in `frontblocks_settings`: `enable_staging` (manual toggle), `staging_restrict_access` (optional measure), `staging_redirect_email` and `staging_blocked_hosts`. The email log is kept in the `frontblocks_staging_email_log` option, which is not autoloaded.

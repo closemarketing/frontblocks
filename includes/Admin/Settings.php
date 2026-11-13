@@ -980,6 +980,18 @@ class Settings {
 			'frontblocks_section_staging'
 		);
 
+		// Locked preview of the PRO staging options. With a valid license FrontBlocks PRO
+		// adds its own fields to this section instead.
+		if ( ! $this->is_license_valid ) {
+			add_settings_field(
+				'staging_pro_teaser',
+				__( 'Staging Mode PRO', 'frontblocks' ),
+				array( $this, 'field_staging_pro_teaser' ),
+				$this->page_slug,
+				'frontblocks_section_staging'
+			);
+		}
+
 		// Cookie Notice is no longer a configurable section here — it moved to
 		// FrontConsent. Its settings tab (see render_cookie_notice_promo_tab())
 		// is now a static promo panel, not backed by the Settings API.
@@ -2705,6 +2717,24 @@ class Settings {
 				<?php endforeach; ?>
 			</div>
 
+			<div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
+				<label for="<?php echo esc_attr( Staging::RESTRICT_ACCESS ); ?>" class="tw:text-base tw:font-medium tw:text-gray-900">
+					<?php echo esc_html__( 'Restrict access', 'frontblocks' ); ?>
+				</label>
+				<label class="frbl-toggle">
+					<input type="checkbox"
+						id="<?php echo esc_attr( Staging::RESTRICT_ACCESS ); ?>"
+						name="frontblocks_settings[<?php echo esc_attr( Staging::RESTRICT_ACCESS ); ?>]"
+						value="1"
+						<?php checked( true, Staging::is_measure_enabled( Staging::RESTRICT_ACCESS ) ); ?>
+					/>
+					<span></span>
+				</label>
+			</div>
+			<p class="tw:text-xs tw:text-gray-500 tw:mt-0 tw:mb-4">
+				<?php echo esc_html__( 'Optional. Only logged-in users can view the frontend, and visitors see a "Private staging site" page. It is the one measure that is off by default, so clients can review a beta site without logging in.', 'frontblocks' ); ?>
+			</p>
+
 			<div class="tw:p-4 tw:bg-gray-50 tw:rounded-lg tw:border tw:border-gray-200">
 				<label for="<?php echo esc_attr( $this->option_staging_redirect_email ); ?>" class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mt-4 tw:mb-2">
 					<?php echo esc_html__( 'Redirect emails to', 'frontblocks' ); ?>
@@ -2735,6 +2765,47 @@ class Settings {
 			</div>
 
 			<?php $this->render_staging_email_log(); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render the locked preview of the PRO staging options.
+	 *
+	 * @return void
+	 */
+	public function field_staging_pro_teaser() {
+		$features = array(
+			__( 'Payment gateways in test mode: Stripe, WooPayments, Redsys and PayPal switch to sandbox at runtime, and live-only gateways are hidden.', 'frontblocks' ),
+			__( 'Pause WP-Cron and Action Scheduler, with an allow-list of hooks that may still run.', 'frontblocks' ),
+			__( 'Cut external connections by category: ERP/CRM, email marketing, automation webhooks, ad conversions, shipping and invoicing, with a log.', 'frontblocks' ),
+			__( 'Disable selected plugins only on staging, without touching the active plugins saved in the database.', 'frontblocks' ),
+			__( 'Email routing to a test inbox or an allow-list of team addresses.', 'frontblocks' ),
+			__( 'Expiring client share links to view a restricted staging site without a WordPress user.', 'frontblocks' ),
+			__( 'Self-test of every protection, an early email guard and WP-CLI commands for deploy scripts.', 'frontblocks' ),
+		);
+		?>
+		<div class="frbl-feature-card frbl-feature-pro tw:mt-4">
+			<div class="frbl-pro-badge">PRO</div>
+			<div class="frbl-feature-content">
+				<div class="frbl-feature-info">
+					<h3 class="frbl-feature-title"><?php echo esc_html__( 'Staging Mode PRO', 'frontblocks' ); ?></h3>
+					<p class="frbl-feature-description"><?php echo esc_html__( 'Advanced protections for payments, integrations and client workflows.', 'frontblocks' ); ?></p>
+					<ul class="tw:text-sm tw:text-gray-600">
+						<?php foreach ( $features as $feature ) : ?>
+							<li><?php echo esc_html( $feature ); ?></li>
+						<?php endforeach; ?>
+					</ul>
+					<a
+						href="https://close.technology/wordpress-plugins/frontblocks-pro/?utm_source=frontblocks&utm_medium=plugin&utm_campaign=settings-staging"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="button button-primary"
+					>
+						<?php echo esc_html__( 'Get FrontBlocks PRO', 'frontblocks' ); ?>
+					</a>
+				</div>
+			</div>
 		</div>
 		<?php
 	}
@@ -3478,6 +3549,7 @@ class Settings {
 			$this->option_enable_fluid_typography,
 			$this->option_enable_maintenance,
 			$this->option_enable_staging,
+			Staging::RESTRICT_ACCESS,
 			$this->option_enable_gutenberg,
 			$this->option_enable_simple_prices_variable_products,
 			$this->option_enable_after_add_to_cart,
