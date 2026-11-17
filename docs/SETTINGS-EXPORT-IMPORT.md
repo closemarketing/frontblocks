@@ -16,8 +16,8 @@ The `frontblocks_settings` option, limited to the settings that make sense on an
 
 | Group | Keys |
 | --- | --- |
-| Module toggles | Every checkbox of the settings screen (blocks, optional features, WooCommerce, PRO toggles such as `enable_popups` or `enable_language_banner`). A toggle that was never saved is exported as `false`. |
-| Options | `events_type`, `scroll_top_position`, `scroll_top_icon_url`, `maintenance_title` |
+| Module toggles | Every checkbox of the settings screen (blocks, optional features, WooCommerce, PRO toggles such as `enable_popups` or `enable_language_banner`). A toggle that was never saved is exported as `false` (`image_max_upload_dimension_enabled`, which is on until it is saved off, is exported as `true`). |
+| Options | `events_type`, `scroll_top_position`, `maintenance_title` |
 | Image Management | `image_format_target`, `image_max_upload_dimension_enabled`, `image_max_upload_dimension`, `image_format_quality_webp`, `image_format_quality_avif` |
 
 ## Content from add-ons
@@ -36,6 +36,8 @@ These belong to a single site or are secret, so they are never written to the fi
 
 - Google Sign-In credentials (client ID and secret) and any license key.
 - The maintenance image: it is a media library attachment ID.
+- `enable_maintenance` and `enable_staging`: they describe the state of one site, and importing them would put the destination in maintenance or staging mode. If a file has them, they are skipped and listed.
+- `scroll_top_icon_url`: it usually points to the media library of the source site, so the destination would hotlink it. If a file has it, it is skipped and listed.
 - The image size configuration (disabled, overridden and custom sizes) and the core size options it writes, because they depend on the sizes each theme registers.
 - Activation dates, dismissed notices and other per-site state.
 
@@ -71,7 +73,7 @@ The file contains no credentials, so it is safe to keep in a repository.
 
 - **It merges.** Only the keys present in the file change. Everything else on the destination site stays as it is, including the values that are never exported.
 - **Every value is validated** against a schema (boolean, one of a list, http or https URL, text up to a length, whole number between two bounds). A value that does not match is skipped and listed, never stored.
-- **Unknown keys are skipped** and listed, so a file cannot write arbitrary data into the option.
+- **Unknown keys are skipped** and listed, so a file cannot write arbitrary data into the option. The summary keeps at most 50 skipped entries (key names cut to 60 characters) and says how many more there were, so a file full of unknown keys cannot make a huge stored result.
 - **Values that depend on the server are adjusted.** An image format target the server cannot produce, for example AVIF without support, is downgraded the same way the settings screen does, and the summary says so.
 - **The two short description options exclude each other**, as they do on the settings screen. If an import would turn both on, one is turned off and the summary says which.
 - **Limits.** The file must be valid JSON, declare `"format": "frontblocks-settings"`, be at most 2 MB and have the `.json` extension. The file is only decoded, never executed or included. A rejected file changes nothing.
