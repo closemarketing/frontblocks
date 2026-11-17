@@ -80,7 +80,7 @@ class SettingsTransferTest extends TestCase {
 	public function test_schema_covers_every_boolean_setting_of_the_settings_screen() {
 		$schema = SettingsTransfer::get_schema();
 
-		foreach ( Settings::get_boolean_option_keys() as $key ) {
+		foreach ( array_diff( Settings::get_boolean_option_keys(), SettingsTransfer::SITE_BOUND_KEYS ) as $key ) {
 			$this->assertArrayHasKey( $key, $schema, $key );
 			$this->assertSame( 'bool', $schema[ $key ]['type'], $key );
 		}
@@ -203,7 +203,7 @@ class SettingsTransferTest extends TestCase {
 		$settings = SettingsTransfer::build_export_payload()['settings'];
 
 		$this->assertTrue( $settings['enable_back_button'] );
-		foreach ( Settings::get_boolean_option_keys() as $key ) {
+		foreach ( array_diff( Settings::get_boolean_option_keys(), SettingsTransfer::SITE_BOUND_KEYS ) as $key ) {
 			$this->assertArrayHasKey( $key, $settings, $key );
 		}
 		$this->assertFalse( $settings['enable_popups'], 'An unchecked toggle is exported as off.' );
@@ -250,6 +250,32 @@ class SettingsTransferTest extends TestCase {
 		foreach ( array( 'maintenance_image', 'image_sizes', 'client_secret', 'top-secret', 'something_else' ) as $leak ) {
 			$this->assertStringNotContainsString( $leak, $json, $leak );
 		}
+	}
+
+	public function test_export_leaves_out_values_that_belong_to_one_site() {
+		update_option(
+			'frontblocks_settings',
+			array(
+				'enable_maintenance'  => true,
+				'enable_staging'      => true,
+				'scroll_top_icon_url' => 'https://source.example/wp-content/uploads/icon.svg',
+			)
+		);
+
+		$settings = SettingsTransfer::build_export_payload()['settings'];
+
+		foreach ( SettingsTransfer::SITE_BOUND_KEYS as $key ) {
+			$this->assertArrayNotHasKey( $key, $settings, $key );
+			$this->assertArrayNotHasKey( $key, SettingsTransfer::get_schema(), $key );
+		}
+	}
+
+	public function test_export_includes_the_upload_dimension_toggle_even_when_never_saved() {
+		update_option( 'frontblocks_settings', array() );
+		$this->assertTrue( SettingsTransfer::build_export_payload()['settings']['image_max_upload_dimension_enabled'], 'It is on until it is saved off.' );
+
+		update_option( 'frontblocks_settings', array( 'image_max_upload_dimension_enabled' => false ) );
+		$this->assertFalse( SettingsTransfer::build_export_payload()['settings']['image_max_upload_dimension_enabled'] );
 	}
 
 	public function test_export_drops_stored_values_that_no_longer_validate() {
@@ -478,6 +504,70 @@ class SettingsTransferTest extends TestCase {
 		$this->assertTrue( $stored['move_content_to_short_description'], 'The imported setting wins.' );
 		$this->assertFalse( $stored['deactivate_short_description'] );
 		$this->assertArrayHasKey( 'deactivate_short_description', $result['adjusted'] );
+	}
+
+	public function test_import_skips_values_that_belong_to_one_site_and_says_why() {
+		$result = SettingsTransfer::validate_settings(
+			array(
+				'enable_maintenance'  => true,
+				'enable_staging'      => true,
+				'scroll_top_icon_url' => 'https://source.example/icon.svg',
+				'enable_popups'       => true,
+			)
+		);
+
+		$this->assertSame( array( 'enable_popups' => true ), $result['valid'] );
+		$this->assertSame( array( 'enable_maintenance', 'enable_staging', 'scroll_top_icon_url' ), array_keys( $result['skipped'] ) );
+		$this->assertStringContainsString( 'never imported', $result['skipped']['enable_maintenance'] );
+	}
+
+	public function test_import_does_not_turn_maintenance_on_at_the_destination() {
+		update_option( 'frontblocks_settings', array( 'enable_maintenance' => false ) );
+
+		SettingsTransfer::import_from_string( $this->document( array( 'enable_maintenance' => true, 'enable_popups' => true ) ) );
+
+		$stored = get_option( 'frontblocks_settings' );
+		$this->assertFalse( $stored['enable_maintenance'] );
+		$this->assertTrue( $stored['enable_popups'] );
+	}
+
+	public function test_the_skipped_list_of_the_summary_is_capped() {
+		$settings = array( 'enable_popups' => true );
+		for ( $i = 0; $i < 80; $i++ ) {
+			$settings[ 'unknown_' . $i . '_' . str_repeat( 'x', 100 ) ] = 1;
+		}
+
+		$result = SettingsTransfer::import_from_string( $this->document( $settings ) );
+
+		$this->assertCount( SettingsTransfer::MAX_REPORTED_SKIPPED, $result['skipped'] );
+		$this->assertSame( 30, $result['skipped_more'] );
+		foreach ( array_keys( $result['skipped'] ) as $key ) {
+			$this->assertLessThanOrEqual( 60, strlen( $key ) );
+		}
+	}
+
+	public function test_the_skipped_list_is_not_capped_when_it_is_short() {
+		$result = SettingsTransfer::import_from_string( $this->document( array( 'enable_popups' => true, 'bogus' => 1 ) ) );
+
+		$this->assertSame( array( 'bogus' => 'unknown setting' ), $result['skipped'] );
+		$this->assertSame( 0, $result['skipped_more'] );
+	}
+
+	public function test_a_file_that_touches_neither_short_description_option_turns_move_off_when_both_are_on() {
+		update_option(
+			'frontblocks_settings',
+			array(
+				'deactivate_short_description'      => true,
+				'move_content_to_short_description' => true,
+			)
+		);
+
+		$result = SettingsTransfer::apply_settings( array( 'enable_popups' => true ) );
+
+		$stored = get_option( 'frontblocks_settings' );
+		$this->assertTrue( $stored['deactivate_short_description'] );
+		$this->assertFalse( $stored['move_content_to_short_description'] );
+		$this->assertArrayHasKey( 'move_content_to_short_description', $result['adjusted'] );
 	}
 
 	public function test_apply_turns_off_the_move_option_when_the_file_enables_both() {
@@ -742,6 +832,22 @@ class SettingsTransferTest extends TestCase {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
 		$this->with_nonce( 'frbl_export_settings' );
 		add_filter( 'wp_die_handler', array( $this, 'get_wp_die_handler' ) );
+
+		$this->expectException( 'WPDieException' );
+
+		( new SettingsTransfer() )->handle_export();
+	}
+
+	public function test_export_dies_instead_of_downloading_an_empty_file_when_json_fails() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->with_nonce( 'frbl_export_settings' );
+		add_filter( 'wp_die_handler', array( $this, 'get_wp_die_handler' ) );
+		add_filter(
+			'frontblocks_export_settings',
+			function () {
+				return array( 'broken' => NAN );
+			}
+		);
 
 		$this->expectException( 'WPDieException' );
 

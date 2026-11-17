@@ -29,6 +29,20 @@ class RedundantPluginsTest extends TestCase {
 		$this->assertArrayHasKey( 'svg-support/svg-support.php', $entries['svg-upload']['plugins'] );
 	}
 
+	public function test_staging_mode_entry_is_only_enabled_while_staging_mode_is_active() {
+		\FrontBlocks\Frontend\Staging::flush_cache();
+		$entries = RedundantPlugins::get_entries();
+		$this->assertArrayHasKey( 'staging-mode', $entries );
+		$this->assertArrayHasKey( '360-orbit-staging-guard/360-orbit-staging-guard.php', $entries['staging-mode']['plugins'] );
+		$this->assertFalse( $entries['staging-mode']['enabled'] );
+
+		update_option( 'frontblocks_settings', array( 'enable_staging' => true ) );
+		\FrontBlocks\Frontend\Staging::flush_cache();
+		$this->assertTrue( RedundantPlugins::get_entries()['staging-mode']['enabled'] );
+
+		\FrontBlocks\Frontend\Staging::flush_cache();
+	}
+
 	/**
 	 * Cookie Notice's entry was removed along with the module itself: with no
 	 * runtime banner left in FrontBlocks, this feature no longer makes any

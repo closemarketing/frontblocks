@@ -102,6 +102,24 @@ class SettingsTransfer {
 	const FILE_FIELD = 'frbl_settings_file';
 
 	/**
+	 * Most skipped settings kept in the import summary. The summary is stored in a
+	 * transient and the keys come straight from the file, so the list is capped.
+	 *
+	 * @var int
+	 */
+	const MAX_REPORTED_SKIPPED = 50;
+
+	/**
+	 * Settings that describe the state of one site, not its configuration.
+	 *
+	 * They are neither exported nor imported: importing them would turn maintenance
+	 * or staging on at the destination, or hotlink a file of the source site.
+	 *
+	 * @var string[]
+	 */
+	const SITE_BOUND_KEYS = array( 'enable_maintenance', 'enable_staging', 'scroll_top_icon_url' );
+
+	/**
 	 * Whether an import is writing the option right now.
 	 *
 	 * @var bool
@@ -144,7 +162,9 @@ class SettingsTransfer {
 		$schema = array();
 
 		foreach ( Settings::get_boolean_option_keys() as $key ) {
-			$schema[ $key ] = array( 'type' => 'bool' );
+			if ( ! in_array( $key, self::SITE_BOUND_KEYS, true ) ) {
+				$schema[ $key ] = array( 'type' => 'bool' );
+			}
 		}
 
 		$schema['events_type']                        = array(
@@ -155,7 +175,6 @@ class SettingsTransfer {
 			'type'   => 'enum',
 			'values' => array( 'bottom-right', 'bottom-left' ),
 		);
-		$schema['scroll_top_icon_url']                = array( 'type' => 'url' );
 		$schema['maintenance_title']                  = array(
 			'type' => 'text',
 			'max'  => 200,
@@ -295,21 +314,39 @@ class SettingsTransfer {
 	}
 
 	/**
+	 * Effective value of the settings that have a default when they were never saved.
+	 *
+	 * @return array Setting key => default.
+	 */
+	private static function get_unsaved_defaults() {
+		return array(
+			'image_max_upload_dimension_enabled' => true,
+		);
+	}
+
+	/**
 	 * Build the document that an export downloads.
 	 *
 	 * @return array
 	 */
 	public static function build_export_payload() {
-		$options = get_option( self::OPTION, array() );
-		$options = is_array( $options ) ? $options : array();
-		$schema  = self::get_schema();
-		$boolean = Settings::get_boolean_option_keys();
+		$options  = get_option( self::OPTION, array() );
+		$options  = is_array( $options ) ? $options : array();
+		$schema   = self::get_schema();
+		$boolean  = Settings::get_boolean_option_keys();
+		$defaults = self::get_unsaved_defaults();
 
 		$settings = array();
 		foreach ( $schema as $key => $rule ) {
 			if ( in_array( $key, $boolean, true ) ) {
 				// An unchecked toggle is never saved, so export its effective state.
 				$settings[ $key ] = ! empty( $options[ $key ] );
+				continue;
+			}
+
+			// A toggle that is on until it is saved off would otherwise be missing, and an import could not turn it back on.
+			if ( ! array_key_exists( $key, $options ) && array_key_exists( $key, $defaults ) ) {
+				$settings[ $key ] = $defaults[ $key ];
 				continue;
 			}
 
@@ -474,6 +511,11 @@ class SettingsTransfer {
 		foreach ( $incoming as $key => $value ) {
 			$key = is_string( $key ) ? $key : (string) $key;
 
+			if ( in_array( $key, self::SITE_BOUND_KEYS, true ) ) {
+				$skipped[ $key ] = __( 'tied to the site it came from, so it is never imported', 'frontblocks' );
+				continue;
+			}
+
 			if ( ! isset( $schema[ $key ] ) ) {
 				$skipped[ $key ] = __( 'unknown setting', 'frontblocks' );
 				continue;
@@ -563,13 +605,37 @@ class SettingsTransfer {
 		// Settings go first: an add-on may depend on a toggle that was just imported.
 		$content = self::import_content( isset( $data['content'] ) ? $data['content'] : array() );
 
+		$skipped = self::cap_skipped( $checked['skipped'] );
+
 		return array(
 			'applied'        => $applied['applied'],
-			'skipped'        => $checked['skipped'],
+			'skipped'        => $skipped['list'],
+			'skipped_more'   => $skipped['more'],
 			'adjusted'       => $applied['adjusted'],
 			'content'        => $content,
 			'source_site'    => isset( $data['source_site'] ) && is_string( $data['source_site'] ) ? sanitize_text_field( $data['source_site'] ) : '',
 			'source_version' => isset( $data['plugin_version'] ) && is_string( $data['plugin_version'] ) ? sanitize_text_field( $data['plugin_version'] ) : '',
+		);
+	}
+
+	/**
+	 * Keep the skipped list small enough to store: the keys come from the file.
+	 *
+	 * @param array $skipped Setting key => reason.
+	 * @return array {
+	 *     @type array $list Setting key => reason, at most MAX_REPORTED_SKIPPED entries.
+	 *     @type int   $more How many entries were left out.
+	 * }
+	 */
+	private static function cap_skipped( $skipped ) {
+		$list = array();
+		foreach ( array_slice( $skipped, 0, self::MAX_REPORTED_SKIPPED, true ) as $key => $reason ) {
+			$list[ mb_substr( sanitize_text_field( (string) $key ), 0, 60 ) ] = (string) $reason;
+		}
+
+		return array(
+			'list' => $list,
+			'more' => max( 0, count( $skipped ) - count( $list ) ),
 		);
 	}
 
@@ -704,6 +770,9 @@ class SettingsTransfer {
 		check_admin_referer( self::EXPORT_ACTION );
 
 		$json = wp_json_encode( self::build_export_payload(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+		if ( false === $json ) {
+			wp_die( esc_html__( 'The settings could not be exported.', 'frontblocks' ), '', array( 'response' => 500 ) );
+		}
 
 		nocache_headers();
 		header( 'Content-Type: application/json; charset=utf-8' );
@@ -934,7 +1003,7 @@ class SettingsTransfer {
 		</div>
 		<?php
 		$this->render_notes( $adjusted, __( 'Adjusted to fit this site', 'frontblocks' ) );
-		$this->render_notes( $skipped, __( 'Skipped', 'frontblocks' ) );
+		$this->render_notes( $skipped, __( 'Skipped', 'frontblocks' ), isset( $result['skipped_more'] ) ? (int) $result['skipped_more'] : 0 );
 
 		foreach ( isset( $result['content'] ) ? (array) $result['content'] : array() as $section ) {
 			$this->render_content_section( (array) $section );
@@ -987,9 +1056,10 @@ class SettingsTransfer {
 	 *
 	 * @param array  $notes Setting key => reason.
 	 * @param string $title Heading of the list.
+	 * @param int    $more  Entries left out of the list.
 	 * @return void
 	 */
-	private function render_notes( $notes, $title ) {
+	private function render_notes( $notes, $title, $more = 0 ) {
 		if ( empty( $notes ) ) {
 			return;
 		}
@@ -999,6 +1069,14 @@ class SettingsTransfer {
 			<?php foreach ( $notes as $key => $reason ) : ?>
 				<p class="tw:mt-0 tw:mb-1"><code><?php echo esc_html( $key ); ?></code>: <?php echo esc_html( $reason ); ?></p>
 			<?php endforeach; ?>
+			<?php if ( $more > 0 ) : ?>
+				<p class="tw:mt-0 tw:mb-1">
+					<?php
+					/* translators: %d: number of entries not shown */
+					echo esc_html( sprintf( _n( 'and %d more', 'and %d more', $more, 'frontblocks' ), $more ) );
+					?>
+				</p>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
