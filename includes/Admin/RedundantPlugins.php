@@ -10,6 +10,7 @@
 
 namespace FrontBlocks\Admin;
 
+use FrontBlocks\Frontend\Staging;
 use FrontBlocks\GoogleSignIn\Settings as GoogleSignInSettings;
 
 defined( 'ABSPATH' ) || exit;
@@ -110,6 +111,15 @@ class RedundantPlugins {
 					'login-with/login-with.php' => 'Login with',
 				),
 				'doc_url' => Settings::get_settings_url( 'google-signin' ),
+			),
+			'staging-mode' => array(
+				'feature' => __( 'Staging Mode', 'frontblocks' ),
+				// Only while staging mode is active here: it is detected automatically, not an opt-in setting.
+				'enabled' => Staging::is_active(),
+				'plugins' => array(
+					'360-orbit-staging-guard/360-orbit-staging-guard.php' => '360 Orbit Staging Guard',
+				),
+				'doc_url' => Settings::get_settings_url( 'maintenance' ),
 			),
 		);
 	}

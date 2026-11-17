@@ -104,16 +104,7 @@ class Maintenance {
 	 * @return bool
 	 */
 	private function should_bypass() {
-		// Never intercept AJAX, cron or REST requests.
-		if ( wp_doing_ajax() || wp_doing_cron() ) {
-			return true;
-		}
-
-		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-			return true;
-		}
-
-		if ( is_customize_preview() ) {
+		if ( self::is_system_request() ) {
 			return true;
 		}
 
@@ -123,6 +114,27 @@ class Maintenance {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Whether the current request is a system request that a curtain page
+	 * (maintenance or staging) must never intercept: AJAX, cron, REST and
+	 * the Customizer preview.
+	 *
+	 * Public and static so other modules (e.g. Staging) share the same rules.
+	 *
+	 * @return bool
+	 */
+	public static function is_system_request() {
+		if ( wp_doing_ajax() || wp_doing_cron() ) {
+			return true;
+		}
+
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			return true;
+		}
+
+		return is_customize_preview();
 	}
 
 	/**
@@ -143,6 +155,23 @@ class Maintenance {
 		status_header( 503 );
 		header( 'Retry-After: 3600' );
 		nocache_headers();
+
+		self::output_curtain( $title, $image_url );
+	}
+
+	/**
+	 * Output the full-screen curtain page markup.
+	 *
+	 * Shared with the Staging module, which reuses the same rendering for its
+	 * "Private staging site" page. The caller sends the status code and headers.
+	 *
+	 * @param string $title      Page title and heading.
+	 * @param string $image_url  Optional full-screen background image URL.
+	 * @param string $link_url   Optional link shown under the heading.
+	 * @param string $link_label Label of the optional link.
+	 * @return void
+	 */
+	public static function output_curtain( $title, $image_url = '', $link_url = '', $link_label = '' ) {
 		?>
 		<!DOCTYPE html>
 		<html <?php language_attributes(); ?>>
@@ -151,12 +180,15 @@ class Maintenance {
 			<meta name="viewport" content="width=device-width, initial-scale=1">
 			<meta name="robots" content="noindex, nofollow">
 			<title><?php echo esc_html( $title ); ?></title>
-			<style><?php echo $this->get_maintenance_css(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></style>
+			<style><?php echo self::get_maintenance_css(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></style>
 		</head>
 		<body class="frbl-maintenance-body">
 			<div class="frbl-maintenance-overlay" <?php echo $image_url ? 'style="background-image: url(\'' . esc_url( $image_url ) . '\');"' : ''; ?>>
 				<div class="frbl-maintenance-content">
 					<h1 class="frbl-maintenance-title"><?php echo esc_html( $title ); ?></h1>
+					<?php if ( '' !== $link_url && '' !== $link_label ) : ?>
+						<p class="frbl-maintenance-link-wrapper"><a class="frbl-maintenance-link" href="<?php echo esc_url( $link_url ); ?>"><?php echo esc_html( $link_label ); ?></a></p>
+					<?php endif; ?>
 				</div>
 			</div>
 		</body>
@@ -172,7 +204,7 @@ class Maintenance {
 	 *
 	 * @return string
 	 */
-	private function get_maintenance_css() {
+	private static function get_maintenance_css() {
 		$css_path = FRBL_PLUGIN_PATH . 'assets/maintenance/frontblocks-maintenance.css';
 
 		if ( ! file_exists( $css_path ) ) {

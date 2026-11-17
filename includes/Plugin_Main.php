@@ -204,6 +204,9 @@ class Plugin_Main {
 		// Maintenance Mode module.
 		new Frontend\Maintenance();
 
+		// Staging Mode module (safety measures on staging/copy environments).
+		new Frontend\Staging();
+
 		// Image Management module (size control + WebP/AVIF delivery).
 		new Frontend\ImageManagement();
 

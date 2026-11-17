@@ -57,6 +57,20 @@ add_action(
 );
 
 /**
+ * Whether FrontBlocks staging mode is active on this site.
+ *
+ * Available to add-ons (and FrontBlocks PRO) so they can disable their own
+ * syncs, webhooks or other side effects on a staging site. The result can be
+ * overridden with the `frontblocks_is_staging` filter and the `FRBL_STAGING`
+ * constant.
+ *
+ * @return bool
+ */
+function frontblocks_is_staging() {
+	return FrontBlocks\Frontend\Staging::is_active();
+}
+
+/**
  * Redirect to settings page on plugin activation.
  */
 function frbl_plugin_activation_redirect() {
