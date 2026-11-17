@@ -44,6 +44,13 @@ class Staging {
 	const LOG_OPTION = 'frontblocks_staging_email_log';
 
 	/**
+	 * Option key of the only optional measure: restricting access.
+	 *
+	 * @var string
+	 */
+	const RESTRICT_ACCESS = 'staging_restrict_access';
+
+	/**
 	 * Maximum number of entries kept in the email log.
 	 *
 	 * @var int
@@ -93,7 +100,12 @@ class Staging {
 	}
 
 	/**
-	 * Register the hooks of every enabled measure, when staging mode is active.
+	 * Register the hooks of every safety measure, when staging mode is active.
+	 *
+	 * Measures are always on: they cannot be switched off one by one. The only
+	 * exception is restricting access, which is optional because it stops every
+	 * visitor who is not logged in, and a client reviewing a `beta.` site would
+	 * otherwise land on a login wall.
 	 *
 	 * @return void
 	 */
@@ -103,44 +115,30 @@ class Staging {
 		}
 
 		// Visual indicators.
-		if ( self::is_measure_enabled( 'staging_indicators' ) ) {
-			add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_node' ), 999 );
-			add_filter( 'document_title_parts', array( $this, 'prefix_title_parts' ), 999 );
-			add_filter( 'pre_get_document_title', array( $this, 'prefix_title' ), 999 );
-			add_filter( 'admin_title', array( $this, 'prefix_admin_title' ), 999 );
-			add_action( 'admin_notices', array( $this, 'render_admin_notice' ) );
-		}
+		add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_node' ), 999 );
+		add_filter( 'document_title_parts', array( $this, 'prefix_title_parts' ), 999 );
+		add_filter( 'pre_get_document_title', array( $this, 'prefix_title' ), 999 );
+		add_filter( 'admin_title', array( $this, 'prefix_admin_title' ), 999 );
+		add_action( 'admin_notices', array( $this, 'render_admin_notice' ) );
+		add_action( 'wp_body_open', array( $this, 'render_top_bar' ) );
 
-		if ( self::is_measure_enabled( 'staging_top_bar' ) ) {
-			add_action( 'wp_body_open', array( $this, 'render_top_bar' ) );
-		}
+		$this->register_noindex();
+		$this->register_email_blocking();
 
-		if ( self::is_measure_enabled( 'staging_noindex' ) ) {
-			$this->register_noindex();
-		}
-
-		if ( self::is_measure_enabled( 'staging_block_email' ) ) {
-			$this->register_email_blocking();
-		}
-
-		if ( self::is_measure_enabled( 'staging_restrict_access' ) && ! is_admin() ) {
+		if ( self::is_measure_enabled( self::RESTRICT_ACCESS ) && ! is_admin() ) {
 			add_action( 'template_redirect', array( $this, 'maybe_restrict_access' ), 0 );
 		}
 
-		if ( self::is_measure_enabled( 'staging_woocommerce' ) && class_exists( 'WooCommerce' ) ) {
+		if ( class_exists( 'WooCommerce' ) ) {
 			$this->register_woocommerce_safety();
 		}
 
-		if ( self::is_measure_enabled( 'staging_pause_cron' ) ) {
-			// An array (even empty) short-circuits the list of events due to run.
-			add_filter( 'pre_get_ready_cron_jobs', '__return_empty_array' );
-			// Action Scheduler does not claim batches when no concurrent batch is allowed.
-			add_filter( 'action_scheduler_queue_runner_concurrent_batches', '__return_zero', 999 );
-		}
+		// An array (even empty) short-circuits the list of events due to run.
+		add_filter( 'pre_get_ready_cron_jobs', '__return_empty_array' );
+		// Action Scheduler does not claim batches when no concurrent batch is allowed.
+		add_filter( 'action_scheduler_queue_runner_concurrent_batches', '__return_zero', 999 );
 
-		if ( self::is_measure_enabled( 'staging_block_analytics' ) ) {
-			$this->register_analytics_removal();
-		}
+		$this->register_analytics_removal();
 
 		// A single HTTP guard covers the email APIs and the configured hosts.
 		add_filter( 'pre_http_request', array( $this, 'filter_http_request' ), 1, 3 );
@@ -424,30 +422,31 @@ class Staging {
 	}
 
 	/**
-	 * Whether a measure is enabled.
+	 * Whether a measure applies.
 	 *
-	 * Measures are enabled by default (except restricting access), so a
-	 * staging site is protected without any configuration. A saved value wins.
+	 * Every measure is always on while staging mode is active, except restricting
+	 * access, which is optional and off unless it was switched on. Kept public so
+	 * add-ons (FrontBlocks PRO) can ask the same question.
 	 *
-	 * @param string $key Measure option key.
+	 * @param string $key Measure key.
 	 * @return bool
 	 */
 	public static function is_measure_enabled( $key ) {
-		$options = get_option( self::OPTION_NAME, array() );
+		if ( self::RESTRICT_ACCESS === $key ) {
+			$options = get_option( self::OPTION_NAME, array() );
 
-		if ( is_array( $options ) && array_key_exists( $key, $options ) ) {
-			return (bool) $options[ $key ];
+			return is_array( $options ) && ! empty( $options[ $key ] );
 		}
 
 		$defaults = self::get_measure_defaults();
 
-		return (bool) ( $defaults[ $key ] ?? false );
+		return (bool) ( isset( $defaults[ $key ] ) ? $defaults[ $key ] : false );
 	}
 
 	/**
-	 * Default value of every measure checkbox.
+	 * The measures and whether each one is on by default.
 	 *
-	 * Restricting access is the only measure off by default: a client
+	 * Restricting access is the only one that is off by default: a client
 	 * reviewing a `beta.` site would otherwise land on a login wall.
 	 *
 	 * @return bool[]
@@ -456,7 +455,7 @@ class Staging {
 		return array(
 			'staging_noindex'         => true,
 			'staging_block_email'     => true,
-			'staging_restrict_access' => false,
+			self::RESTRICT_ACCESS     => false,
 			'staging_indicators'      => true,
 			'staging_top_bar'         => true,
 			'staging_woocommerce'     => true,
@@ -1153,13 +1152,13 @@ class Staging {
 			return $preempt;
 		}
 
-		if ( self::is_measure_enabled( 'staging_block_email' ) && self::host_matches( $host, self::get_mail_api_hosts() ) ) {
+		if ( self::host_matches( $host, self::get_mail_api_hosts() ) ) {
 			self::record_email( 'api', strtolower( $host ), '' );
 
 			return new \WP_Error( 'frontblocks_staging_blocked', __( 'Blocked by FrontBlocks staging mode: transactional email APIs are disabled on staging sites.', 'frontblocks' ) );
 		}
 
-		if ( self::is_measure_enabled( 'staging_block_http' ) && self::host_matches( $host, self::get_blocked_hosts() ) ) {
+		if ( self::host_matches( $host, self::get_blocked_hosts() ) ) {
 			return new \WP_Error( 'frontblocks_staging_blocked', __( 'Blocked by FrontBlocks staging mode: outgoing requests to this host are disabled on staging sites.', 'frontblocks' ) );
 		}
 

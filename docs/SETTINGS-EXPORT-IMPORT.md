@@ -36,7 +36,7 @@ These belong to a single site or are secret, so they are never written to the fi
 
 - Google Sign-In credentials (client ID and secret) and any license key.
 - The maintenance image: it is a media library attachment ID.
-- `enable_maintenance` and `enable_staging`: they describe the state of one site, and importing them would put the destination in maintenance or staging mode. If a file has them, they are skipped and listed.
+- `enable_maintenance`, `enable_staging` and `staging_restrict_access`: they describe the state of one site, and importing them would put the destination in maintenance or staging mode. If a file has them, they are skipped and listed.
 - `scroll_top_icon_url`: it usually points to the media library of the source site, so the destination would hotlink it. If a file has it, it is skipped and listed.
 - The image size configuration (disabled, overridden and custom sizes) and the core size options it writes, because they depend on the sizes each theme registers.
 - Activation dates, dismissed notices and other per-site state.

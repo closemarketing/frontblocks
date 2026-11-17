@@ -258,6 +258,7 @@ class SettingsTransferTest extends TestCase {
 			array(
 				'enable_maintenance'  => true,
 				'enable_staging'      => true,
+				'staging_restrict_access' => true,
 				'scroll_top_icon_url' => 'https://source.example/wp-content/uploads/icon.svg',
 			)
 		);

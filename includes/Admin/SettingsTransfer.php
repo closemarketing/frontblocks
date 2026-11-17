@@ -117,7 +117,7 @@ class SettingsTransfer {
 	 *
 	 * @var string[]
 	 */
-	const SITE_BOUND_KEYS = array( 'enable_maintenance', 'enable_staging', 'scroll_top_icon_url' );
+	const SITE_BOUND_KEYS = array( 'enable_maintenance', 'enable_staging', 'staging_restrict_access', 'scroll_top_icon_url' );
 
 	/**
 	 * Whether an import is writing the option right now.
