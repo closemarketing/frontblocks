@@ -969,21 +969,141 @@ class SettingsTransferTest extends TestCase {
 
 	}
 
-	public function test_backup_url_points_at_the_settings_screen_wherever_it_is() {
-		// With the top-level menu, Settings::get_settings_url() gives the page of the tab.
-		// Without it, the screen is still under Appearance.
-		$base = method_exists( Settings::class, 'get_settings_url' )
-			? (string) call_user_func( array( Settings::class, 'get_settings_url' ), 'backup' )
-			: admin_url( 'themes.php?page=frontblocks-settings' );
-
+	public function test_backup_url_is_the_page_of_the_backup_tab() {
 		$method = new ReflectionMethod( SettingsTransfer::class, 'settings_url' );
 		$method->setAccessible( true );
 
-		$this->assertSame( $base . '#backup', $method->invoke( null ) );
+		$this->assertSame( admin_url( 'admin.php?page=frontblocks-settings-backup' ), $method->invoke( null ) );
 		$this->assertSame(
-			add_query_arg( array( 'frbl-transfer' => '1' ), $base ) . '#backup',
+			admin_url( 'admin.php?page=frontblocks-settings-backup&frbl-transfer=1' ),
 			$method->invoke( null, array( 'frbl-transfer' => '1' ) )
 		);
+	}
+
+	public function test_backup_closes_the_menu_before_license_after_the_post_types() {
+		global $submenu;
+		$saved   = $submenu;
+		$submenu = array();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		register_post_type(
+			'frbl_transfer_test',
+			array(
+				'label'        => 'Transfer test',
+				'show_ui'      => true,
+				'show_in_menu' => 'frontblocks-settings',
+			)
+		);
+
+		$transfer = new SettingsTransfer();
+		$settings = new Settings();
+		$settings->register_menu();
+		_add_post_type_submenus();
+		$transfer->move_menu_entry_last();
+		$settings->move_license_entry_last();
+
+		$slugs   = array_values( wp_list_pluck( $submenu['frontblocks-settings'], 2 ) );
+		$submenu = $saved;
+		unregister_post_type( 'frbl_transfer_test' );
+		remove_all_filters( 'frontblocks_settings_tabs' );
+
+		$this->assertSame( 97, has_action( 'admin_menu', array( $transfer, 'move_menu_entry_last' ) ) );
+		$this->assertSame( array( 'edit.php?post_type=frbl_transfer_test', 'frontblocks-settings-backup', 'frontblocks-settings-license' ), array_slice( $slugs, -3 ) );
+	}
+
+	public function test_a_file_nested_too_deeply_gets_its_own_message() {
+		$deep = array();
+		for ( $i = 0; $i < 20; $i++ ) {
+			$deep = array( 'a' => $deep );
+		}
+
+		$result = SettingsTransfer::parse_file_contents( $this->document( array(), array( 'content' => array( 'x' => $deep ) ) ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'frbl_transfer_too_deep', $result->get_error_code() );
+	}
+
+	public function test_only_exports_within_the_import_limits_are_importable() {
+		$deep = array();
+		for ( $i = 0; $i < 20; $i++ ) {
+			$deep = array( 'a' => $deep );
+		}
+
+		$this->assertTrue( SettingsTransfer::is_importable( $this->document( array( 'enable_popups' => true ) ) ) );
+		$this->assertFalse( SettingsTransfer::is_importable( wp_json_encode( $deep ) ) );
+		$this->assertFalse( SettingsTransfer::is_importable( wp_json_encode( array( 'x' => str_repeat( 'a', SettingsTransfer::MAX_FILE_SIZE ) ) ) ) );
+		$this->assertFalse( SettingsTransfer::is_importable( null ) );
+	}
+
+	public function test_export_dies_instead_of_downloading_a_file_that_cannot_be_imported() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->with_nonce( 'frbl_export_settings' );
+		add_filter( 'wp_die_handler', array( $this, 'get_wp_die_handler' ) );
+		add_filter(
+			'frontblocks_export_content',
+			function ( $content ) {
+				$content['huge'] = array( 'text' => str_repeat( 'a', SettingsTransfer::MAX_FILE_SIZE ) );
+				return $content;
+			}
+		);
+
+		$this->expectException( 'WPDieException' );
+
+		( new SettingsTransfer() )->handle_export();
+	}
+
+	public function test_only_the_imported_value_skips_the_form_sanitizer() {
+		update_option( 'frontblocks_settings', array( 'enable_back_button' => false ) );
+		$this->register_settings_filters();
+		$listener = function () {
+			// A write made while the import runs, without the settings form nonce.
+			update_option( 'frontblocks_settings', array( 'enable_back_button' => false, 'enable_popups' => false ) );
+		};
+		add_action( 'update_option_frontblocks_settings', $listener );
+
+		SettingsTransfer::import_from_string( $this->document( array( 'enable_back_button' => true ) ) );
+		remove_action( 'update_option_frontblocks_settings', $listener );
+		$saved = get_option( 'frontblocks_settings' );
+		remove_all_filters( 'sanitize_option_frontblocks_settings' );
+
+		$this->assertTrue( $saved['enable_back_button'], 'The listener write must not slip through the bypass.' );
+		$this->assertArrayNotHasKey( 'enable_popups', $saved );
+	}
+
+	public function test_a_setting_turned_off_by_the_exclusive_rule_is_not_counted_as_applied() {
+		$result = SettingsTransfer::import_from_string(
+			$this->document(
+				array(
+					'deactivate_short_description'      => true,
+					'move_content_to_short_description' => true,
+				)
+			)
+		);
+
+		$this->assertContains( 'deactivate_short_description', $result['applied'] );
+		$this->assertNotContains( 'move_content_to_short_description', $result['applied'] );
+		$this->assertArrayHasKey( 'move_content_to_short_description', $result['adjusted'] );
+	}
+
+	public function test_panel_warns_when_nothing_was_imported() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		set_transient(
+			'frbl_transfer_result_' . get_current_user_id(),
+			array(
+				'applied' => array(),
+				'skipped' => array( 'enable_popups' => 'not a boolean' ),
+			),
+			60
+		);
+		$_GET['frbl-transfer'] = '1';
+
+		ob_start();
+		( new SettingsTransfer() )->render_panel();
+		$html = ob_get_clean();
+		unset( $_GET['frbl-transfer'] );
+
+		$this->assertStringContainsString( 'No settings were imported from the file.', $html );
+		$this->assertStringContainsString( 'tw:bg-yellow-50', $html );
+		$this->assertStringNotContainsString( '0 settings imported', $html );
 	}
 
 	public function test_import_fires_the_settings_sanitize_action_with_the_merged_settings() {
@@ -1009,9 +1129,8 @@ class SettingsTransferTest extends TestCase {
 
 		$location = $this->run_import_request();
 
-		$this->assertStringContainsString( 'page=frontblocks-settings', $location );
+		$this->assertStringContainsString( 'page=frontblocks-settings-backup', $location );
 		$this->assertStringContainsString( 'frbl-transfer=1', $location );
-		$this->assertStringEndsWith( '#backup', $location );
 
 		$result = get_transient( 'frbl_transfer_result_' . get_current_user_id() );
 		$this->assertSame( 'Choose a settings file to import.', $result['error'] );

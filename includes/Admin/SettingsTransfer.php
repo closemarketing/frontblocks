@@ -55,18 +55,18 @@ class SettingsTransfer {
 	const MAX_FILE_SIZE = 2097152;
 
 	/**
+	 * Deepest nesting an imported file may have.
+	 *
+	 * @var int
+	 */
+	const MAX_DEPTH = 16;
+
+	/**
 	 * Option that stores the FrontBlocks settings.
 	 *
 	 * @var string
 	 */
 	const OPTION = 'frontblocks_settings';
-
-	/**
-	 * FrontBlocks settings page slug (registered in Admin\Settings).
-	 *
-	 * @var string
-	 */
-	const PAGE_SLUG = 'frontblocks-settings';
 
 	/**
 	 * Id of the settings tab.
@@ -145,6 +145,13 @@ class SettingsTransfer {
 	private static $importing = false;
 
 	/**
+	 * The value the import is writing, so only that value skips the form sanitizer.
+	 *
+	 * @var array|null
+	 */
+	private static $pending = null;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -152,6 +159,17 @@ class SettingsTransfer {
 		add_action( 'frontblocks_settings_tab_panels', array( $this, 'render_panel' ) );
 		add_action( 'admin_post_' . self::EXPORT_ACTION, array( $this, 'handle_export' ) );
 		add_action( 'admin_post_' . self::IMPORT_ACTION, array( $this, 'handle_import' ) );
+		// Backup goes to the end of the menu, before License (moved at priority 98).
+		add_action( 'admin_menu', array( $this, 'move_menu_entry_last' ), 97 );
+	}
+
+	/**
+	 * Move the Backup entry after the post types shown in the FrontBlocks menu.
+	 *
+	 * @return void
+	 */
+	public function move_menu_entry_last() {
+		Settings::move_tab_entry_last( self::TAB_ID );
 	}
 
 	/**
@@ -161,10 +179,19 @@ class SettingsTransfer {
 	 * an import has neither of. While this is true they hand the value back
 	 * untouched, because the import validated every value before saving.
 	 *
+	 * Pass the value being sanitized to check that it is the one the import is
+	 * writing: anything else written meanwhile (for example by a listener of the
+	 * option update) still goes through the usual checks.
+	 *
+	 * @param mixed $value Optional. Value being sanitized.
 	 * @return bool
 	 */
-	public static function is_importing() {
-		return self::$importing;
+	public static function is_importing( $value = null ) {
+		if ( ! self::$importing ) {
+			return false;
+		}
+
+		return 0 === func_num_args() || $value === self::$pending;
 	}
 
 	/**
@@ -485,7 +512,10 @@ class SettingsTransfer {
 			$raw = substr( $raw, 3 );
 		}
 
-		$data = json_decode( $raw, true, 16 );
+		$data = json_decode( $raw, true, self::MAX_DEPTH );
+		if ( JSON_ERROR_DEPTH === json_last_error() ) {
+			return new \WP_Error( 'frbl_transfer_too_deep', __( 'The file is nested too deeply to be a FrontBlocks settings export.', 'frontblocks' ) );
+		}
 		if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $data ) ) {
 			return new \WP_Error( 'frbl_transfer_invalid_json', __( 'The file is not valid JSON.', 'frontblocks' ) );
 		}
@@ -592,7 +622,7 @@ class SettingsTransfer {
 			$keep     = $turn_off === $move ? $deactivate : $move;
 
 			$merged[ $turn_off ] = false;
-			/* translators: 1: setting turned off, 2: setting kept on */
+			/* translators: %s: setting that stays on */
 			$adjusted[ $turn_off ] = sprintf( __( 'turned off, it cannot be on together with "%s"', 'frontblocks' ), $keep );
 		}
 
@@ -600,14 +630,22 @@ class SettingsTransfer {
 		do_action( 'frontblocks_sanitize_settings', $merged );
 
 		self::$importing = true;
+		self::$pending   = $merged;
 		try {
 			update_option( self::OPTION, $merged );
 		} finally {
 			self::$importing = false;
+			self::$pending   = null;
+		}
+
+		// A setting the exclusive rule just turned off was not applied as the file says.
+		$applied = array_keys( $valid );
+		if ( isset( $turn_off ) ) {
+			$applied = array_values( array_diff( $applied, array( $turn_off ) ) );
 		}
 
 		return array(
-			'applied'  => array_keys( $valid ),
+			'applied'  => $applied,
 			'adjusted' => $adjusted,
 		);
 	}
@@ -775,18 +813,11 @@ class SettingsTransfer {
 	/**
 	 * URL of the Backup tab.
 	 *
-	 * Uses `Settings::get_settings_url()` when this version of FrontBlocks has it,
-	 * and the settings screen under Appearance otherwise.
-	 *
 	 * @param array $args Query arguments to add.
 	 * @return string
 	 */
 	private static function settings_url( $args = array() ) {
-		$base = method_exists( Settings::class, 'get_settings_url' )
-			? (string) call_user_func( array( Settings::class, 'get_settings_url' ), self::TAB_ID )
-			: admin_url( 'themes.php?page=' . self::PAGE_SLUG );
-
-		return add_query_arg( $args, $base ) . '#' . self::TAB_ID;
+		return add_query_arg( $args, Settings::get_settings_url( self::TAB_ID ) );
 	}
 
 	/**
@@ -835,6 +866,11 @@ class SettingsTransfer {
 			wp_die( esc_html__( 'The settings could not be exported.', 'frontblocks' ), '', array( 'response' => 500 ) );
 		}
 
+		// A file that another site would refuse to import is no use: say so now.
+		if ( ! self::is_importable( $json ) ) {
+			wp_die( esc_html__( 'The settings could not be exported: the file would be larger than 2 MB or nested too deeply to be imported. This usually means an add-on adds too much content to it.', 'frontblocks' ), '', array( 'response' => 500 ) );
+		}
+
 		nocache_headers();
 		header( 'Content-Type: application/json; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename="' . self::get_export_filename() . '"' );
@@ -842,6 +878,22 @@ class SettingsTransfer {
 
 		echo $json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON document sent as a download, not HTML.
 		exit;
+	}
+
+	/**
+	 * Whether an exported document is within the limits an import accepts.
+	 *
+	 * @param string $json Encoded export.
+	 * @return bool
+	 */
+	public static function is_importable( $json ) {
+		if ( ! is_string( $json ) || strlen( $json ) > self::MAX_FILE_SIZE ) {
+			return false;
+		}
+
+		json_decode( $json, true, self::MAX_DEPTH );
+
+		return JSON_ERROR_NONE === json_last_error();
 	}
 
 	/**
@@ -1044,16 +1096,24 @@ class SettingsTransfer {
 		$applied  = isset( $result['applied'] ) ? (array) $result['applied'] : array();
 		$skipped  = isset( $result['skipped'] ) ? (array) $result['skipped'] : array();
 		$adjusted = isset( $result['adjusted'] ) ? (array) $result['adjusted'] : array();
+		// Nothing applied is not a success: show it as a warning.
+		$classes = empty( $applied )
+			? 'tw:bg-yellow-50 tw:border-yellow-200 tw:text-yellow-800'
+			: 'tw:bg-green-50 tw:border-green-200 tw:text-green-700';
 		?>
-		<div class="tw:mb-4 tw:p-3 tw:rounded-lg tw:bg-green-50 tw:border tw:border-green-200 tw:text-sm tw:text-green-700" role="status">
+		<div class="tw:mb-4 tw:p-3 tw:rounded-lg tw:border tw:text-sm <?php echo esc_attr( $classes ); ?>" role="status">
 			<?php
-			echo esc_html(
-				sprintf(
-					/* translators: %d: number of settings imported */
-					_n( '%d setting imported.', '%d settings imported.', count( $applied ), 'frontblocks' ),
-					count( $applied )
-				)
-			);
+			if ( empty( $applied ) ) {
+				esc_html_e( 'No settings were imported from the file.', 'frontblocks' );
+			} else {
+				echo esc_html(
+					sprintf(
+						/* translators: %d: number of settings imported */
+						_n( '%d setting imported.', '%d settings imported.', count( $applied ), 'frontblocks' ),
+						count( $applied )
+					)
+				);
+			}
 
 			if ( ! empty( $result['source_site'] ) ) {
 				echo ' ';

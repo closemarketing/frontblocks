@@ -1032,15 +1032,29 @@ class Settings {
 	 * @return void
 	 */
 	public function move_license_entry_last() {
+		self::move_tab_entry_last( 'license' );
+	}
+
+	/**
+	 * Move the menu entry of a tab to the end of the FrontBlocks menu.
+	 *
+	 * Tabs that belong at the end (Backup, License) use it once WordPress has added the
+	 * entries of the post types shown in the menu, which would otherwise come after them.
+	 *
+	 * @since 1.6.0
+	 * @param string $tab_id Tab id.
+	 * @return void
+	 */
+	public static function move_tab_entry_last( $tab_id ) {
 		global $submenu;
 
 		if ( empty( $submenu[ self::PAGE_SLUG ] ) || ! is_array( $submenu[ self::PAGE_SLUG ] ) ) {
 			return;
 		}
 
-		$license = self::get_page_slug( 'license' );
+		$slug = self::get_page_slug( $tab_id );
 		foreach ( $submenu[ self::PAGE_SLUG ] as $position => $entry ) {
-			if ( isset( $entry[2] ) && $license === $entry[2] ) {
+			if ( isset( $entry[2] ) && $slug === $entry[2] ) {
 				unset( $submenu[ self::PAGE_SLUG ][ $position ] );
 				$submenu[ self::PAGE_SLUG ][] = $entry; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Reorders the entries of this plugin's own menu.
 				return;
@@ -3911,8 +3925,8 @@ class Settings {
 	 */
 	public function sanitize_settings( $value ) {
 		// A settings import validates every value itself and has no form nonce.
-		if ( class_exists( __NAMESPACE__ . '\\SettingsTransfer' ) && SettingsTransfer::is_importing() ) {
-			return is_array( $value ) ? $value : array();
+		if ( class_exists( __NAMESPACE__ . '\\SettingsTransfer' ) && SettingsTransfer::is_importing( $value ) ) {
+			return $value;
 		}
 
 		// Nonce verification.

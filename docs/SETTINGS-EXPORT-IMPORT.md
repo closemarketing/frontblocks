@@ -1,6 +1,6 @@
 # Settings Export and Import
 
-Copy the FrontBlocks configuration from one site to another with a JSON file. Open the FrontBlocks settings screen and go to the **Backup** tab (**FrontBlocks > Backup** in the admin menu, or **Appearance > FrontBlocks > Backup** on versions where the settings screen is under Appearance).
+Copy the FrontBlocks configuration from one site to another with a JSON file. Open **FrontBlocks > Backup** in the admin menu.
 
 ## Using it
 
