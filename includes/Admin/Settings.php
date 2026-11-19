@@ -2487,30 +2487,50 @@ class Settings {
 	 * @return bool
 	 */
 	private function is_pro_feature( $field_id ) {
-		return in_array(
-			$field_id,
+		return in_array( $field_id, self::get_pro_option_keys(), true );
+	}
+
+	/**
+	 * Toggles of the WooCommerce features, which also need FrontBlocks PRO.
+	 *
+	 * @since 1.6.0
+	 * @return string[]
+	 */
+	public static function get_woocommerce_option_keys() {
+		return array(
+			'enable_gutenberg',
+			'enable_simple_prices_variable_products',
+			'enable_after_add_to_cart',
+			'deactivate_short_description',
+			'move_content_to_short_description',
+			'disable_zoom_images',
+			'add_share_buttons',
+			'deactivate_product_tabs',
+			'horizontal_product_form',
+			'enable_variant_display_mode',
+			'checkout_inline',
+			'disable_cart_coupon',
+			'disable_cart_cross_sells',
+			'disable_checkout_coupon',
+			'disable_checkout_order_notes',
+			'disable_checkout_login_prompt',
+		);
+	}
+
+	/**
+	 * Toggles of the features that need FrontBlocks PRO with a valid license.
+	 *
+	 * @since 1.6.0
+	 * @return string[]
+	 */
+	public static function get_pro_option_keys() {
+		return array_merge(
+			self::get_woocommerce_option_keys(),
 			array(
-				$this->option_enable_gutenberg,
-				$this->option_enable_simple_prices_variable_products,
-				$this->option_enable_after_add_to_cart,
-				$this->option_deactivate_short_description,
-				$this->option_move_content_to_short_description,
-				$this->option_disable_zoom_images,
-				$this->option_add_share_buttons,
-				$this->option_deactivate_product_tabs,
-				$this->option_horizontal_product_form,
-				$this->option_enable_variant_display_mode,
-				$this->option_enable_fullpage_scroll,
-				$this->option_enable_language_banner,
-				$this->option_enable_popups,
-				$this->option_checkout_inline,
-				$this->option_disable_cart_coupon,
-				$this->option_disable_cart_cross_sells,
-				$this->option_disable_checkout_coupon,
-				$this->option_disable_checkout_order_notes,
-				$this->option_disable_checkout_login_prompt,
-			),
-			true
+				'enable_fullpage_scroll',
+				'enable_language_banner',
+				'enable_popups',
+			)
 		);
 	}
 

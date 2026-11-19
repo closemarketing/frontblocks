@@ -374,6 +374,39 @@ class SettingsTransfer {
 	}
 
 	/**
+	 * Settings of the modules this site cannot use, which an export leaves out.
+	 *
+	 * Their toggles are off here only because the module is missing (no FrontBlocks
+	 * PRO with a valid license, or no WooCommerce). Exporting them as off would turn
+	 * the module off on a destination that uses it.
+	 *
+	 * @return string[]
+	 */
+	public static function get_unavailable_keys() {
+		$keys = array();
+
+		$has_pro = function_exists( 'frblp_is_license_valid' ) && frblp_is_license_valid();
+		if ( ! $has_pro ) {
+			// Custom post types are a PRO module too, with a section of their own.
+			$keys = array_merge( Settings::get_pro_option_keys(), array( 'enable_custom_post_types' ) );
+		}
+
+		if ( ! class_exists( 'WooCommerce' ) ) {
+			$keys = array_merge( $keys, Settings::get_woocommerce_option_keys() );
+		}
+
+		/**
+		 * Filters the settings an export leaves out because this site cannot use their module.
+		 *
+		 * @since 1.6.0
+		 * @param string[] $keys Setting keys.
+		 */
+		$keys = apply_filters( 'frontblocks_export_unavailable_keys', $keys );
+
+		return is_array( $keys ) ? array_values( array_unique( array_filter( $keys, 'is_string' ) ) ) : array();
+	}
+
+	/**
 	 * Build the document that an export downloads.
 	 *
 	 * @return array
@@ -385,8 +418,15 @@ class SettingsTransfer {
 		$boolean  = Settings::get_boolean_option_keys();
 		$defaults = self::get_unsaved_defaults();
 
+		$unavailable = self::get_unavailable_keys();
+
 		$settings = array();
 		foreach ( $schema as $key => $rule ) {
+			// A module this site cannot use says nothing about the destination: leave it to that site.
+			if ( in_array( $key, $unavailable, true ) ) {
+				continue;
+			}
+
 			if ( in_array( $key, $boolean, true ) ) {
 				// An unchecked toggle is never saved, so export its effective state.
 				$settings[ $key ] = ! empty( $options[ $key ] );

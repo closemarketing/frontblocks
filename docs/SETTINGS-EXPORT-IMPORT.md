@@ -16,7 +16,7 @@ The `frontblocks_settings` option, limited to the settings that make sense on an
 
 | Group | Keys |
 | --- | --- |
-| Module toggles | Every checkbox of the settings screen (blocks, optional features, WooCommerce, PRO toggles such as `enable_popups` or `enable_language_banner`). A toggle that was never saved is exported as `false` (`image_max_upload_dimension_enabled`, which is on until it is saved off, is exported as `true`). |
+| Module toggles | Every checkbox of the settings screen (blocks, optional features, WooCommerce, PRO toggles such as `enable_popups` or `enable_language_banner`). A toggle that was never saved is exported as `false` (`image_max_upload_dimension_enabled`, which is on until it is saved off, is exported as `true`). Toggles of modules the site cannot use are left out, see below. |
 | Options | `events_type`, `scroll_top_position`, `maintenance_title` |
 | Image Management | `image_format_target`, `image_max_upload_dimension_enabled`, `image_max_upload_dimension`, `image_format_quality_webp`, `image_format_quality_avif`. When Image Management was never saved, the values it uses are exported: `none`, `true`, `2048`, `82` and `60`. |
 
@@ -42,6 +42,7 @@ These belong to a single site or are secret, so they are never written to the fi
 - `scroll_top_icon_url`: it usually points to the media library of the source site, so the destination would hotlink it. If a file has it, it is skipped and listed.
 - The image size configuration (disabled, overridden and custom sizes) and the core size options it writes, because they depend on the sizes each theme registers.
 - Activation dates, dismissed notices and other per-site state.
+- Toggles of modules the exporting site cannot use: the PRO features (including custom post types) when FrontBlocks PRO is missing or has no valid license, and the WooCommerce features when WooCommerce is not active. They are off there only because the module is missing, so exporting them would turn the module off on a destination that uses it. An import leaves those settings as they are. Add-ons can change the list with the `frontblocks_export_unavailable_keys` filter.
 
 The file contains no credentials, so it is safe to keep in a repository.
 

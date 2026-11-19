@@ -23,6 +23,7 @@ class SettingsTransferTest extends TestCase {
 		remove_all_filters( 'frontblocks_import_settings_schema' );
 		remove_all_filters( 'frontblocks_export_settings' );
 		remove_all_filters( 'frontblocks_export_content' );
+		remove_all_filters( 'frontblocks_export_unavailable_keys' );
 		remove_all_filters( 'frontblocks_import_content' );
 		remove_all_filters( 'wp_image_editors' );
 		wp_cache_delete( 'wp_image_editor_choose', 'image_editor' );
@@ -227,6 +228,8 @@ class SettingsTransferTest extends TestCase {
 	}
 
 	public function test_export_lists_every_toggle_even_when_never_saved() {
+		// A source site with every module: FrontBlocks PRO with a license and WooCommerce.
+		add_filter( 'frontblocks_export_unavailable_keys', '__return_empty_array' );
 		update_option( 'frontblocks_settings', array( 'enable_back_button' => true ) );
 
 		$settings = SettingsTransfer::build_export_payload()['settings'];
@@ -720,6 +723,7 @@ class SettingsTransferTest extends TestCase {
 	}
 
 	public function test_export_then_import_reproduces_the_configuration() {
+		add_filter( 'frontblocks_export_unavailable_keys', '__return_empty_array' );
 		update_option(
 			'frontblocks_settings',
 			array(
@@ -743,6 +747,77 @@ class SettingsTransferTest extends TestCase {
 		$this->assertSame( 'bottom-left', $stored['scroll_top_position'] );
 		$this->assertSame( 'posts', $stored['events_type'] );
 		$this->assertSame( 64, $stored['image_format_quality_webp'] );
+	}
+
+	public function test_export_leaves_out_the_modules_this_site_cannot_use() {
+		// The test site has no FrontBlocks PRO, so its modules are off only because they are missing.
+		update_option( 'frontblocks_settings', array( 'enable_back_button' => true ) );
+
+		$unavailable = SettingsTransfer::get_unavailable_keys();
+		$settings    = SettingsTransfer::build_export_payload()['settings'];
+
+		foreach ( array_merge( Settings::get_pro_option_keys(), array( 'enable_custom_post_types' ) ) as $key ) {
+			$this->assertContains( $key, $unavailable, $key );
+			$this->assertArrayNotHasKey( $key, $settings, $key );
+		}
+		$this->assertTrue( $settings['enable_back_button'], 'Modules of FrontBlocks itself still travel.' );
+		$this->assertArrayHasKey( 'enable_testimonials', $settings );
+	}
+
+	public function test_woocommerce_toggles_are_left_out_without_woocommerce() {
+		add_filter(
+			'frontblocks_export_unavailable_keys',
+			function ( $keys ) {
+				// Keep only what WooCommerce decides, as on a site with a PRO license.
+				return array_values( array_diff( $keys, array( 'enable_fullpage_scroll', 'enable_language_banner', 'enable_popups', 'enable_custom_post_types' ) ) );
+			}
+		);
+
+		$unavailable = SettingsTransfer::get_unavailable_keys();
+
+		foreach ( Settings::get_woocommerce_option_keys() as $key ) {
+			if ( class_exists( 'WooCommerce' ) ) {
+				$this->assertNotContains( $key, $unavailable, $key );
+			} else {
+				$this->assertContains( $key, $unavailable, $key );
+			}
+		}
+	}
+
+	public function test_an_import_from_a_site_without_a_module_leaves_it_alone() {
+		// Source site: no FrontBlocks PRO.
+		update_option( 'frontblocks_settings', array( 'enable_back_button' => true ) );
+		$exported = wp_json_encode( SettingsTransfer::build_export_payload() );
+
+		// Destination site: uses popups and a WooCommerce feature.
+		update_option(
+			'frontblocks_settings',
+			array(
+				'enable_back_button'  => false,
+				'enable_popups'       => true,
+				'disable_cart_coupon' => true,
+			)
+		);
+		$this->register_settings_filters();
+		$result = SettingsTransfer::import_from_string( $exported );
+		remove_all_filters( 'sanitize_option_frontblocks_settings' );
+
+		$stored = get_option( 'frontblocks_settings' );
+		$this->assertTrue( $stored['enable_back_button'] );
+		$this->assertTrue( $stored['enable_popups'], 'A module the source site does not have stays as it was.' );
+		$this->assertTrue( $stored['disable_cart_coupon'] );
+		$this->assertNotContains( 'enable_popups', $result['applied'] );
+	}
+
+	public function test_pro_features_of_the_screen_match_the_pro_keys() {
+		$settings = new Settings();
+		$method   = new ReflectionMethod( Settings::class, 'is_pro_feature' );
+		$method->setAccessible( true );
+
+		foreach ( Settings::get_pro_option_keys() as $key ) {
+			$this->assertTrue( $method->invoke( $settings, $key ), $key );
+		}
+		$this->assertFalse( $method->invoke( $settings, 'enable_back_button' ) );
 	}
 
 	/*
