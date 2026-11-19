@@ -116,6 +116,68 @@ class EventsTest extends TestCase {
 		unregister_post_type( 'event' );
 	}
 
+	public function test_events_live_in_the_frontblocks_menu() {
+		update_option( 'frontblocks_settings', array( 'enable_events' => true ) );
+		$events = new Events();
+		$events->register_cpt_event();
+
+		$this->assertSame( 'frontblocks-settings', get_post_type_object( 'event' )->show_in_menu );
+		$this->assertNotFalse( has_action( 'admin_menu', array( $events, 'add_category_submenu' ) ) );
+		$this->assertNotFalse( has_filter( 'parent_file', array( $events, 'highlight_category_submenu' ) ) );
+
+		unregister_post_type( 'event' );
+	}
+
+	public function test_event_categories_get_an_entry_in_the_frontblocks_menu() {
+		global $submenu;
+		$saved   = $submenu;
+		$submenu = array();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		update_option( 'frontblocks_settings', array( 'enable_events' => true ) );
+		$events = new Events();
+		$events->register_cpt_event();
+		$events->register_taxonomy_event_category();
+		$events->add_category_submenu();
+
+		$entries = isset( $submenu['frontblocks-settings'] ) ? $submenu['frontblocks-settings'] : array();
+		$submenu = $saved;
+		unregister_taxonomy( 'event_category' );
+		unregister_post_type( 'event' );
+
+		$this->assertCount( 1, $entries );
+		$this->assertSame( 'edit-tags.php?taxonomy=event_category&post_type=event', $entries[0][2] );
+		$this->assertSame( 'manage_categories', $entries[0][1] );
+	}
+
+	public function test_no_category_entry_without_the_taxonomy() {
+		global $submenu;
+		$saved   = $submenu;
+		$submenu = array();
+
+		$events = new Events();
+		$events->add_category_submenu();
+
+		$entries = isset( $submenu['frontblocks-settings'] ) ? $submenu['frontblocks-settings'] : array();
+		$submenu = $saved;
+
+		$this->assertSame( array(), $entries );
+	}
+
+	public function test_the_menu_stays_open_on_the_event_categories_screen() {
+		global $taxnow;
+		$saved  = $taxnow;
+		$events = new Events();
+
+		$taxnow = 'event_category';
+		$this->assertSame( 'frontblocks-settings', $events->highlight_category_submenu( 'edit.php?post_type=event' ) );
+
+		$taxnow = 'category';
+		$this->assertSame( 'edit.php', $events->highlight_category_submenu( 'edit.php' ) );
+
+		$taxnow = $saved;
+	}
+
 	public function test_register_taxonomy_registers_event_category() {
 		update_option( 'frontblocks_settings', array( 'enable_events' => true ) );
 		$events = new Events();
