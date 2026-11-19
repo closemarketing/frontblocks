@@ -361,7 +361,8 @@ class Settings {
 						} else {
 							moveContentCheckbox.disabled = !isLicenseValid;
 							if (moveContentWrapper) {
-								moveContentWrapper.style.opacity = isLicenseValid ? '1' : '0.5';
+								// Leave the locked PRO look to the .frbl-feature-pro styles.
+								moveContentWrapper.style.opacity = '';
 								moveContentWrapper.style.filter = '';
 								const toggle = moveContentWrapper.querySelector('.frbl-toggle');
 								if (toggle) {
@@ -385,7 +386,8 @@ class Settings {
 						} else {
 							deactivateCheckbox.disabled = !isLicenseValid;
 							if (deactivateWrapper) {
-								deactivateWrapper.style.opacity = isLicenseValid ? '1' : '0.5';
+								// Leave the locked PRO look to the .frbl-feature-pro styles.
+								deactivateWrapper.style.opacity = '';
 								deactivateWrapper.style.filter = '';
 								const toggle = deactivateWrapper.querySelector('.frbl-toggle');
 								if (toggle) {
