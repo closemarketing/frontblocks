@@ -4,7 +4,7 @@ Staging Mode applies a set of safety measures when a site is a staging or copy e
 
 Everything is applied at runtime through filters. FrontBlocks never changes a stored option (`blog_public`, gateway settings...), so the behaviour is reversible and is not carried over by a database copy.
 
-The implementation is `FrontBlocks\Frontend\Staging` (`includes/Frontend/Staging.php`). Its settings live in the **Maintenance** tab of the FrontBlocks settings (Appearance → FrontBlocks), in the **Staging Mode** section below Maintenance Mode. That section also shows why staging mode is active.
+The implementation is `FrontBlocks\Frontend\Staging` (`includes/Frontend/Staging.php`). Its settings live in the **Maintenance** tab of the FrontBlocks settings (FrontBlocks → Maintenance in the admin menu), in the **Staging Mode** section below Maintenance Mode. That section also shows why staging mode is active.
 
 ## When it is active
 

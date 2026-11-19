@@ -68,6 +68,8 @@ class TestimonialsTest extends TestCase {
 		$this->assertTrue( post_type_supports( 'fbrl_testimonial', 'title' ) );
 		$this->assertTrue( post_type_supports( 'fbrl_testimonial', 'editor' ) );
 		$this->assertTrue( post_type_supports( 'fbrl_testimonial', 'thumbnail' ) );
+		// Testimonials live in the FrontBlocks menu, not in a menu of their own.
+		$this->assertSame( 'frontblocks-settings', $post_type_object->show_in_menu );
 	}
 
 	public function test_save_metabox_stars_ignores_request_without_valid_nonce() {

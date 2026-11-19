@@ -10,6 +10,8 @@
 
 namespace FrontBlocks\Frontend;
 
+use FrontBlocks\Admin\Settings;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -96,7 +98,7 @@ class Testimonials {
 			'name'          => _x( 'Testimonials', 'Post Type General Name', 'frontblocks' ),
 			'singular_name' => _x( 'Testimonial', 'Post Type Singular Name', 'frontblocks' ),
 			'menu_name'     => __( 'Testimonials', 'frontblocks' ),
-			'all_items'     => __( 'All Testimonials', 'frontblocks' ),
+			'all_items'     => __( 'Testimonials', 'frontblocks' ),
 			'add_new_item'  => __( 'Add New Testimonial', 'frontblocks' ),
 			'add_new'       => __( 'Add New', 'frontblocks' ),
 			'new_item'      => __( 'New Testimonial', 'frontblocks' ),
@@ -108,15 +110,13 @@ class Testimonials {
 		);
 
 		$args = array(
-			'label'         => __( 'Testimonials', 'frontblocks' ),
-			'labels'        => $labels,
-			'supports'      => array( 'title', 'editor', 'thumbnail' ),
-			'public'        => true,
-			'show_ui'       => true,
-			'show_in_menu'  => true,
-			'menu_position' => 5,
-			'menu_icon'     => 'dashicons-testimonial',
-			'can_export'    => true,
+			'label'        => __( 'Testimonials', 'frontblocks' ),
+			'labels'       => $labels,
+			'supports'     => array( 'title', 'editor', 'thumbnail' ),
+			'public'       => true,
+			'show_ui'      => true,
+			'show_in_menu' => Settings::PAGE_SLUG,
+			'can_export'   => true,
 		);
 
 		register_post_type( 'fbrl_testimonial', $args );

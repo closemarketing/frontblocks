@@ -286,7 +286,11 @@ class Settings {
 		// Check license via FrontBlocks PRO helper function.
 		$this->is_license_valid = function_exists( 'frblp_is_license_valid' ) && frblp_is_license_valid();
 
-		add_action( 'admin_menu', array( $this, 'register_menu' ) );
+		// Before WordPress adds the entries of the post types shown in this menu (priority 10),
+		// so the settings come first and the menu opens them.
+		add_action( 'admin_menu', array( $this, 'register_menu' ), 9 );
+		// After every other entry, so License closes the menu.
+		add_action( 'admin_menu', array( $this, 'move_license_entry_last' ), 98 );
 		add_action( 'admin_menu', array( $this, 'redirect_legacy_url' ), 99 );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
@@ -361,7 +365,8 @@ class Settings {
 						} else {
 							moveContentCheckbox.disabled = !isLicenseValid;
 							if (moveContentWrapper) {
-								moveContentWrapper.style.opacity = isLicenseValid ? '1' : '0.5';
+								// Leave the locked PRO look to the .frbl-feature-pro styles.
+								moveContentWrapper.style.opacity = '';
 								moveContentWrapper.style.filter = '';
 								const toggle = moveContentWrapper.querySelector('.frbl-toggle');
 								if (toggle) {
@@ -385,7 +390,8 @@ class Settings {
 						} else {
 							deactivateCheckbox.disabled = !isLicenseValid;
 							if (deactivateWrapper) {
-								deactivateWrapper.style.opacity = isLicenseValid ? '1' : '0.5';
+								// Leave the locked PRO look to the .frbl-feature-pro styles.
+								deactivateWrapper.style.opacity = '';
 								deactivateWrapper.style.filter = '';
 								const toggle = deactivateWrapper.querySelector('.frbl-toggle');
 								if (toggle) {
@@ -711,17 +717,22 @@ class Settings {
 				}
 
 				// Point the address bar at the page of the tab, so a reload or a copied link opens it.
+				// A tab without a page of its own keeps the current page and is opened by its #hash.
 				function updateUrl(tabId) {
 					var page = tabPages[tabId];
 
-					if (! page || ! window.history || ! window.history.replaceState) {
+					if (! tabId || ! window.history || ! window.history.replaceState) {
 						return;
 					}
 
 					var url = new URL(window.location.href);
-					url.search = '';
-					url.hash = '';
-					url.searchParams.set('page', page);
+					if (page) {
+						url.search = '';
+						url.hash = '';
+						url.searchParams.set('page', page);
+					} else {
+						url.hash = tabId;
+					}
 					window.history.replaceState(null, '', url.toString());
 				}
 
@@ -807,7 +818,20 @@ class Settings {
 						var active = document.querySelector('.frbl-tab-btn.is-active');
 						var tabId  = active ? active.getAttribute('data-tab-target') : initialTab;
 						var url    = referer.value.split('#')[0];
-						referer.value = url + '#' + tabId;
+						var page   = tabPages[tabId];
+
+						// Return to the page of the active tab, so the URL and the tab match.
+						if (page) {
+							try {
+								var parsed = new URL(url, window.location.href);
+								parsed.searchParams.set('page', page);
+								url = parsed.pathname + parsed.search;
+							} catch (error) {
+								page = '';
+							}
+						}
+
+						referer.value = page ? url : url + '#' + tabId;
 					});
 				}
 
@@ -965,7 +989,63 @@ class Settings {
 	 * @return bool
 	 */
 	public static function is_settings_screen( $screen_id ) {
-		return is_string( $screen_id ) && false !== strpos( $screen_id, self::PAGE_SLUG );
+		if ( ! is_string( $screen_id ) ) {
+			return false;
+		}
+
+		// The page slug, or the page slug and a tab id, alone or after the "<menu>_page_" prefix of a hook.
+		$pattern = '/^(?:[a-z0-9_-]+_page_)?' . preg_quote( self::PAGE_SLUG, '/' ) . '(?:-[a-z0-9_-]+)?$/';
+
+		return 1 === preg_match( $pattern, $screen_id );
+	}
+
+	/**
+	 * Slug of the menu page of a tab, when the tab gets one.
+	 *
+	 * The menu and the tab script both follow this rule, so the script never points
+	 * the address bar at a page that was not registered.
+	 *
+	 * @since 1.6.0
+	 * @param mixed $tab Tab definition, as returned by the frontblocks_settings_tabs filter.
+	 * @return string The page slug, or an empty string when the tab has no menu page.
+	 */
+	private static function get_tab_menu_page( $tab ) {
+		if ( ! is_array( $tab ) || ! isset( $tab['id'], $tab['label'] ) || ! is_string( $tab['id'] ) || ! is_string( $tab['label'] ) || '' === sanitize_key( $tab['id'] ) ) {
+			return '';
+		}
+
+		// A companion plugin can keep a tab out of the menu with 'menu' => false.
+		if ( isset( $tab['menu'] ) && false === $tab['menu'] ) {
+			return '';
+		}
+
+		return self::get_page_slug( $tab['id'] );
+	}
+
+	/**
+	 * Move the License entry to the end of the FrontBlocks menu.
+	 *
+	 * The post types shown in the menu (Testimonials, Events, Popups) are added by
+	 * WordPress after the settings tabs, so License would end up in the middle.
+	 *
+	 * @since 1.6.0
+	 * @return void
+	 */
+	public function move_license_entry_last() {
+		global $submenu;
+
+		if ( empty( $submenu[ self::PAGE_SLUG ] ) || ! is_array( $submenu[ self::PAGE_SLUG ] ) ) {
+			return;
+		}
+
+		$license = self::get_page_slug( 'license' );
+		foreach ( $submenu[ self::PAGE_SLUG ] as $position => $entry ) {
+			if ( isset( $entry[2] ) && $license === $entry[2] ) {
+				unset( $submenu[ self::PAGE_SLUG ][ $position ] );
+				$submenu[ self::PAGE_SLUG ][] = $entry; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Reorders the entries of this plugin's own menu.
+				return;
+			}
+		}
 	}
 
 	/**
@@ -988,23 +1068,29 @@ class Settings {
 			60.5
 		);
 
+		$entries = array();
 		foreach ( $this->get_tabs() as $tab ) {
-			if ( ! isset( $tab['id'], $tab['label'] ) || ! is_string( $tab['id'] ) || ! is_string( $tab['label'] ) || '' === $tab['id'] ) {
-				continue;
-			}
+			$page = self::get_tab_menu_page( $tab );
 
-			// A companion plugin can keep a tab out of the menu with 'menu' => false.
-			if ( isset( $tab['menu'] ) && false === $tab['menu'] ) {
-				continue;
+			if ( '' !== $page && ! isset( $entries[ $page ] ) ) {
+				$entries[ $page ] = $tab['label'];
 			}
+		}
 
+		// The page of the menu itself always gets the first entry, even when a filter
+		// removes or hides the first tab, so its URL never opens an empty page.
+		if ( ! isset( $entries[ self::PAGE_SLUG ] ) ) {
+			$entries = array( self::PAGE_SLUG => __( 'Settings', 'frontblocks' ) ) + $entries;
+		}
+
+		foreach ( $entries as $page => $label ) {
 			add_submenu_page(
 				self::PAGE_SLUG,
 				/* translators: %s: name of the settings tab, for example Backup */
-				sprintf( __( 'FrontBlocks: %s', 'frontblocks' ), $tab['label'] ),
-				$tab['label'],
+				sprintf( __( 'FrontBlocks: %s', 'frontblocks' ), $label ),
+				$label,
 				self::CAPABILITY,
-				self::get_page_slug( $tab['id'] ),
+				$page,
 				array( $this, 'render_page' )
 			);
 		}
@@ -1030,6 +1116,12 @@ class Settings {
 			return;
 		}
 
+		// A form still posting to the old URL would lose its data in a redirect, so only links are sent on.
+		$method = isset( $_SERVER['REQUEST_METHOD'] ) && is_string( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( sanitize_key( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) : 'GET';
+		if ( 'GET' !== $method && 'HEAD' !== $method ) {
+			return;
+		}
+
 		$args = array();
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only forwards sanitized values to the new URL.
 		foreach ( $_GET as $key => $value ) {
@@ -1038,7 +1130,8 @@ class Settings {
 			}
 		}
 
-		wp_safe_redirect( add_query_arg( $args, self::get_settings_url() ) );
+		// The values are encoded, as add_query_arg() does not, so '&', '#', '=' and '+' survive.
+		wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', $args ), self::get_settings_url() ) );
 		exit;
 	}
 
@@ -1478,7 +1571,7 @@ class Settings {
 	 * @return void
 	 */
 	public function render_page() {
-		if ( ! current_user_can( 'edit_theme_options' ) ) {
+		if ( ! current_user_can( self::CAPABILITY ) ) {
 			return;
 		}
 
@@ -1509,8 +1602,10 @@ class Settings {
 		$default_tab    = self::get_tab_from_page( $requested_page );
 		$tab_pages      = array();
 		foreach ( $tabs as $tab ) {
-			if ( isset( $tab['id'] ) && is_string( $tab['id'] ) ) {
-				$tab_pages[ $tab['id'] ] = self::get_page_slug( $tab['id'] );
+			// Only the tabs with a page of their own in the menu, so a reload of the address bar opens a registered page.
+			$tab_page = self::get_tab_menu_page( $tab );
+			if ( '' !== $tab_page ) {
+				$tab_pages[ $tab['id'] ] = $tab_page;
 			}
 		}
 		?>
