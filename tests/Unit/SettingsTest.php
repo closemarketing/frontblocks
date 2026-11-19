@@ -280,10 +280,11 @@ class SettingsTest extends TestCase {
 	public function test_the_admin_script_has_no_class_selector_with_an_unescaped_colon() {
 		$script = $this->get_admin_inline_script();
 
-		$found = preg_match_all( "/(?:closest|querySelector|querySelectorAll|matches)\(\s*'([^']*)'/", $script, $matches );
+		// Single quotes, double quotes and template literals.
+		$found = preg_match_all( '/(?:closest|querySelector|querySelectorAll|matches)\(\s*([\'"`])(.*?)\1/', $script, $matches );
 		$this->assertGreaterThan( 5, $found, 'The script must be found, with its selectors.' );
 
-		foreach ( $matches[1] as $selector ) {
+		foreach ( $matches[2] as $selector ) {
 			// Attribute values can hold anything, only classes and ids can break.
 			$selector = preg_replace( '/\[[^\]]*\]/', '', $selector );
 
@@ -298,6 +299,11 @@ class SettingsTest extends TestCase {
 
 		$this->assertStringContainsString( "deactivateCheckbox.closest('.frbl-feature-card')", $script );
 		$this->assertStringContainsString( "moveContentCheckbox.closest('.frbl-feature-card')", $script );
+		// Without a license the card already looks locked (.frbl-feature-pro), so the
+		// script must not dim the whole card, badge and title included, on top of it.
+		$this->assertStringNotContainsString( "isLicenseValid ? '1' : '0.5'", $script );
+		$this->assertStringContainsString( "moveContentWrapper.style.opacity = '';", $script );
+		$this->assertStringContainsString( "deactivateWrapper.style.opacity = '';", $script );
 
 		wp_dequeue_style( 'frontblocks-admin-settings' );
 	}
