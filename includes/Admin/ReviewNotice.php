@@ -51,8 +51,8 @@ class ReviewNotice {
 		}
 
 		if ( ! $debug ) {
-			$allowed_screens = array( 'appearance_page_frontblocks-settings', 'dashboard' );
-			if ( ! in_array( $screen->id, $allowed_screens, true ) && false === strpos( $screen->id, 'frontblocks' ) ) {
+			$allowed_screens = array( 'dashboard' );
+			if ( ! in_array( $screen->id, $allowed_screens, true ) && ! Settings::is_settings_screen( $screen->id ) && false === strpos( $screen->id, 'frontblocks' ) ) {
 				return;
 			}
 		}

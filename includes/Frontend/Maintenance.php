@@ -49,7 +49,7 @@ class Maintenance {
 			array(
 				'id'    => 'frbl-maintenance-status',
 				'title' => '<span style="background:#d63638;color:#fff;padding:2px 8px;border-radius:3px;font-weight:600;">' . esc_html__( 'Maintenance: ON', 'frontblocks' ) . '</span>',
-				'href'  => admin_url( 'themes.php?page=frontblocks-settings' ),
+				'href'  => class_exists( '\FrontBlocks\Admin\Settings' ) ? \FrontBlocks\Admin\Settings::get_settings_url( 'maintenance' ) : admin_url( 'admin.php?page=frontblocks-settings-maintenance' ),
 				'meta'  => array(
 					'title' => esc_attr__( 'Maintenance mode is currently enabled. Click to manage it.', 'frontblocks' ),
 				),

@@ -417,7 +417,7 @@ class ImageManagement {
 	 * @return void
 	 */
 	public function enqueue_assets( $hook ) {
-		if ( 'appearance_page_' . $this->page_slug !== $hook ) {
+		if ( ! Settings::is_settings_screen( $hook ) ) {
 			return;
 		}
 

@@ -14,7 +14,7 @@ password. It uses [Google Identity Services](https://developers.google.com/ident
 on the browser side and verifies the resulting ID token server-side —
 no third-party PHP library or Google API client is required.
 
-Enable it from **Appearance → FrontBlocks → Google Sign-In**. The button
+Enable it from **FrontBlocks → Social Login**. The button
 stays hidden everywhere until a Client ID and Client Secret are set there.
 
 ## Settings
