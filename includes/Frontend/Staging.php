@@ -25,7 +25,7 @@ defined( 'ABSPATH' ) || exit;
  * the manual toggle is stored; domain, environment and constant detection
  * are evaluated on every request.
  *
- * @since 1.6.0
+ * @since 1.5.6
  */
 class Staging {
 

@@ -52,7 +52,7 @@ The file contains no credentials, so it is safe to keep in a repository.
 {
   "format": "frontblocks-settings",
   "format_version": 1,
-  "plugin_version": "1.6.0",
+  "plugin_version": "1.5.6",
   "exported_at": "2026-11-11T10:00:00Z",
   "source_site": "example.com",
   "settings": {

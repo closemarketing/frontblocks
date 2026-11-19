@@ -4,8 +4,8 @@ Tags: carrusel, lightweight, generatepress, gutenberg, maintenance-mode
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.8
 Tested up to: 7.1
-Stable tag: 1.5.5
-Version: 1.5.5
+Stable tag: 1.5.6
+Version: 1.5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -223,7 +223,7 @@ More information in the [FrontBlocks PRO](https://close.technology/en/wordpress-
 
 == Changelog ==
 
-= Unreleased =
+= 1.5.6 =
 *   Added: Export and import the FrontBlocks settings as a JSON file from the new Backup tab, to clone a configuration between sites. Credentials, license keys and values tied to a site are never exported, every imported value is validated, and add-ons can extend it with the `frontblocks_import_settings_schema` and `frontblocks_export_settings` filters, and move content such as the popups of FrontBlocks PRO with `frontblocks_export_content` and `frontblocks_import_content`.
 *   Changed: FrontBlocks has a menu of its own in the admin sidebar, with a submenu entry for each settings tab, instead of a page under Appearance. Testimonials and Events (with their categories) move into the same menu. The old Appearance URL redirects to the new menu, keeping its arguments and tab. Companion plugins can link to a tab with `Settings::get_settings_url()` and recognize its screens with `Settings::is_settings_screen()`.
 *   Added: Staging Mode. It is activated automatically on domains starting with `beta.` (filterable), when the environment type is `staging` or `development`, with a manual toggle in the Maintenance tab, or with the `FRBL_STAGING` constant (`false` forces it off). It blocks indexing (noindex, X-Robots-Tag, closed robots.txt, no sitemaps), blocks outgoing email with a log (or redirects it to one address), can restrict the frontend to logged-in users, adds a STAGING admin bar node, a [STAGING] title prefix and notices, adds WooCommerce safety (test site notice, manual Subscriptions renewals, paused webhooks), can pause WP-Cron and Action Scheduler, block requests to selected hosts and remove Google Analytics/Tag Manager snippets. Add-ons can check `frontblocks_is_staging()`.

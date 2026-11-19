@@ -31,7 +31,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * McpAbilities class.
  *
- * @since 1.6.0
+ * @since 1.5.6
  */
 class McpAbilities {
 

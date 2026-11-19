@@ -29,7 +29,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * See docs/SETTINGS-EXPORT-IMPORT.md for the file format and the extension hooks.
  *
- * @since 1.6.0
+ * @since 1.5.6
  */
 class SettingsTransfer {
 
@@ -252,7 +252,7 @@ class SettingsTransfer {
 		 * `type` of bool, enum (with `values`), url, text (with an optional `max`)
 		 * or int (with optional `min` and `max`).
 		 *
-		 * @since 1.6.0
+		 * @since 1.5.6
 		 * @param array $schema Setting key => rule.
 		 */
 		$schema = apply_filters( 'frontblocks_import_settings_schema', $schema );
@@ -398,7 +398,7 @@ class SettingsTransfer {
 		/**
 		 * Filters the settings an export leaves out because this site cannot use their module.
 		 *
-		 * @since 1.6.0
+		 * @since 1.5.6
 		 * @param string[] $keys Setting keys.
 		 */
 		$keys = apply_filters( 'frontblocks_export_unavailable_keys', $keys );
@@ -455,7 +455,7 @@ class SettingsTransfer {
 		 * Add-ons can add the keys they declared on `frontblocks_import_settings_schema`.
 		 * Never add credentials or values that only make sense on this site.
 		 *
-		 * @since 1.6.0
+		 * @since 1.5.6
 		 * @param array $settings Setting key => value.
 		 * @param array $options  The stored `frontblocks_settings` option.
 		 */
@@ -503,7 +503,7 @@ class SettingsTransfer {
 		 * IDs that only mean something on this site (pages, media) with something
 		 * that can be found again on another site, such as a path.
 		 *
-		 * @since 1.6.0
+		 * @since 1.5.6
 		 * @param array $content Section id => data to export.
 		 */
 		$content = apply_filters( 'frontblocks_export_content', array() );
@@ -778,7 +778,7 @@ class SettingsTransfer {
 		 * needs a review). It runs after the settings are applied, only for users who
 		 * can import settings, and the add-on must still check what the user may create.
 		 *
-		 * @since 1.6.0
+		 * @since 1.5.6
 		 * @param array $report   Section id => report, filled by the handlers.
 		 * @param array $sections Section id => data from the file.
 		 */

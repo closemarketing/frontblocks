@@ -909,7 +909,7 @@ class Settings {
 	/**
 	 * Slug of the settings page, and of its first tab.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @var string
 	 */
 	const PAGE_SLUG = 'frontblocks-settings';
@@ -917,7 +917,7 @@ class Settings {
 	/**
 	 * Tab that opens when none is requested.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @var string
 	 */
 	const DEFAULT_TAB = 'blocks';
@@ -925,7 +925,7 @@ class Settings {
 	/**
 	 * Capability needed to open the settings screen and its menu.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @var string
 	 */
 	const CAPABILITY = 'edit_theme_options';
@@ -935,7 +935,7 @@ class Settings {
 	 *
 	 * The first tab uses the slug of the menu itself, every other tab adds its id.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @param string $tab Tab id, empty for the first tab.
 	 * @return string
 	 */
@@ -948,7 +948,7 @@ class Settings {
 	/**
 	 * Tab id behind the slug of a menu page.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @param string $page Menu page slug.
 	 * @return string The tab id, or an empty string when the slug is not a settings page.
 	 */
@@ -971,7 +971,7 @@ class Settings {
 	 *
 	 * Use it instead of building the URL by hand, so a link keeps working wherever the menu is.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @param string $tab Tab id, empty for the first tab.
 	 * @return string
 	 */
@@ -984,7 +984,7 @@ class Settings {
 	 *
 	 * It matches the screens of every tab, and the one the page had under Appearance.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @param mixed $screen_id Screen ID or hook suffix.
 	 * @return bool
 	 */
@@ -1005,7 +1005,7 @@ class Settings {
 	 * The menu and the tab script both follow this rule, so the script never points
 	 * the address bar at a page that was not registered.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @param mixed $tab Tab definition, as returned by the frontblocks_settings_tabs filter.
 	 * @return string The page slug, or an empty string when the tab has no menu page.
 	 */
@@ -1028,7 +1028,7 @@ class Settings {
 	 * The post types shown in the menu (Testimonials, Events, Popups) are added by
 	 * WordPress after the settings tabs, so License would end up in the middle.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @return void
 	 */
 	public function move_license_entry_last() {
@@ -1041,7 +1041,7 @@ class Settings {
 	 * Tabs that belong at the end (Backup, License) use it once WordPress has added the
 	 * entries of the post types shown in the menu, which would otherwise come after them.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @param string $tab_id Tab id.
 	 * @return void
 	 */
@@ -1117,7 +1117,7 @@ class Settings {
 	 * themes.php?page=frontblocks-settings. The query arguments and the #tab of the
 	 * old link are kept, so a link that opened a tab or showed a notice still does.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @return void
 	 */
 	public function redirect_legacy_url() {
@@ -1508,7 +1508,7 @@ class Settings {
 	/**
 	 * Tabs of the settings screen, which are also the entries of the submenu.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @param array $counts Tab id => array( toggles on, toggles total ), to show next to a tab. The settings fields they come from exist once the page renders, not when the menu is registered.
 	 * @return array
 	 */
@@ -2493,7 +2493,7 @@ class Settings {
 	/**
 	 * Toggles of the WooCommerce features, which also need FrontBlocks PRO.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @return string[]
 	 */
 	public static function get_woocommerce_option_keys() {
@@ -2520,7 +2520,7 @@ class Settings {
 	/**
 	 * Toggles of the features that need FrontBlocks PRO with a valid license.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @return string[]
 	 */
 	public static function get_pro_option_keys() {
@@ -3900,7 +3900,7 @@ class Settings {
 	 *
 	 * Shared with the settings export/import, so both agree on which settings are toggles.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @return string[]
 	 */
 	public static function get_boolean_option_keys() {

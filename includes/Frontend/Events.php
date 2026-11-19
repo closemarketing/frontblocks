@@ -161,7 +161,7 @@ class Events {
 	 * WordPress only adds the taxonomy entries of a post type that has a menu of its own,
 	 * so the categories need an entry of their own once events are in the FrontBlocks menu.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @return void
 	 */
 	public function add_category_submenu() {
@@ -182,7 +182,7 @@ class Events {
 	/**
 	 * Keep the FrontBlocks menu open on the event categories screen.
 	 *
-	 * @since 1.6.0
+	 * @since 1.5.6
 	 * @param string $parent_file Parent file of the current admin screen.
 	 * @return string
 	 */
