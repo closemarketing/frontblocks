@@ -340,8 +340,8 @@ class Settings {
 				
 				if (deactivateCheckbox && moveContentCheckbox) {
 					function updateMutualExclusion() {
-						const deactivateWrapper = deactivateCheckbox.closest('.tw:flex');
-						const moveContentWrapper = moveContentCheckbox.closest('.tw:flex');
+						const deactivateWrapper = deactivateCheckbox.closest('.frbl-feature-card');
+						const moveContentWrapper = moveContentCheckbox.closest('.frbl-feature-card');
 						
 						// Check if license is valid (not just PRO active).
 						const isLicenseValid = " . ( $this->is_license_valid ? 'true' : 'false' ) . ";
