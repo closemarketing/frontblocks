@@ -712,7 +712,7 @@ class StagingTest extends TestCase {
 		$staging = $this->boot_staging();
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 
-		foreach ( array( 'dashboard', 'appearance_page_frontblocks-settings' ) as $screen ) {
+		foreach ( array( 'dashboard', 'toplevel_page_frontblocks-settings', 'frontblocks_page_frontblocks-settings-maintenance', 'appearance_page_frontblocks-settings' ) as $screen ) {
 			set_current_screen( $screen );
 			$html = $this->capture( array( $staging, 'render_admin_notice' ) );
 

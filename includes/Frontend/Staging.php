@@ -885,7 +885,7 @@ class Staging {
 		);
 
 		if ( current_user_can( 'manage_options' ) ) {
-			$node['href'] = admin_url( 'themes.php?page=frontblocks-settings' );
+			$node['href'] = class_exists( '\FrontBlocks\Admin\Settings' ) ? \FrontBlocks\Admin\Settings::get_settings_url( 'maintenance' ) : admin_url( 'admin.php?page=frontblocks-settings-maintenance' );
 		}
 
 		$wp_admin_bar->add_node( $node );
@@ -963,7 +963,7 @@ class Staging {
 		}
 
 		$screen = get_current_screen();
-		if ( ! $screen || ! in_array( $screen->id, array( 'dashboard', 'appearance_page_frontblocks-settings' ), true ) ) {
+		if ( ! $screen || ( 'dashboard' !== $screen->id && ! \FrontBlocks\Admin\Settings::is_settings_screen( $screen->id ) ) ) {
 			return;
 		}
 

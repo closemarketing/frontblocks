@@ -106,7 +106,7 @@ Always run `composer lint` and `composer phpstan` before considering PHP work do
 1. **`frontblocks.php`** — entry point; defines constants (`FRBL_VERSION`, `FRBL_PLUGIN`, `FRBL_PLUGIN_URL`, `FRBL_PLUGIN_PATH`), loads Composer autoloader, hooks `plugins_loaded` → singleton `FrontBlocks\Plugin_Main::get_instance()`.
 2. **`includes/Plugin_Main.php`** — singleton; `load_modules()` instantiates all frontend and admin feature classes.
 3. **`includes/Frontend/*.php`** — each feature is a self-contained class; constructor calls `init_hooks()` which registers the WordPress actions/filters it needs (block filtering for block-related features; other hooks — uploads, `wp_head`, `template_redirect`, etc. — for general site-tool features).
-4. **`includes/Admin/Settings.php`** — settings page at `themes.php?page=frontblocks-settings`.
+4. **`includes/Admin/Settings.php`** — the FrontBlocks menu (`admin.php?page=frontblocks-settings`) with a submenu for each settings tab. Build links with `Settings::get_settings_url( $tab )` and recognize its screens with `Settings::is_settings_screen( $screen_id )`, never with a hard-coded URL or screen ID.
 
 ### Module Pattern
 

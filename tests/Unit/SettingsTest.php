@@ -176,27 +176,6 @@ class SettingsTest extends TestCase {
 		$this->assertFalse( $sanitized['move_content_to_short_description'] );
 	}
 
-	public function test_register_menu_adds_the_settings_page_under_appearance() {
-		global $submenu;
-
-		set_current_screen( 'dashboard' );
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-
-		$this->settings->register_menu();
-
-		$this->assertArrayHasKey( 'themes.php', $submenu );
-
-		$found = false;
-		foreach ( $submenu['themes.php'] as $item ) {
-			if ( 'frontblocks-settings' === $item[2] ) {
-				$found = true;
-				break;
-			}
-		}
-
-		$this->assertTrue( $found, 'Expected a "frontblocks-settings" entry under the Appearance menu.' );
-	}
-
 	public function test_settings_tab_extensions_render_matching_tabs_and_panels() {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 
@@ -253,10 +232,73 @@ class SettingsTest extends TestCase {
 	}
 
 	public function test_enqueue_admin_styles_enqueues_assets_on_the_settings_page_hook() {
-		$this->settings->enqueue_admin_styles( 'appearance_page_frontblocks-settings' );
+		$this->settings->enqueue_admin_styles( 'toplevel_page_frontblocks-settings' );
 
 		$this->assertTrue( wp_style_is( 'frontblocks-admin-settings', 'enqueued' ) );
 
 		wp_dequeue_style( 'frontblocks-admin-settings' );
+	}
+
+	/**
+	 * The inline script that drives the settings screen.
+	 *
+	 * @return string
+	 */
+	private function get_admin_inline_script() {
+		$this->settings->enqueue_admin_styles( 'appearance_page_frontblocks-settings' );
+
+		return implode( "\n", (array) wp_scripts()->get_data( 'jquery', 'after' ) );
+	}
+
+	/**
+	 * Tailwind 4 class names contain a colon (tw:flex). As a CSS selector the
+	 * colon must be escaped, otherwise querySelector() and closest() throw a
+	 * SyntaxError, and a script that throws while loading stops running, which
+	 * took the events, scroll-to-top and short description controls down with it.
+	 */
+	public function test_the_admin_script_has_no_class_selector_with_an_unescaped_colon() {
+		$script = $this->get_admin_inline_script();
+
+		$found = preg_match_all( "/(?:closest|querySelector|querySelectorAll|matches)\(\s*'([^']*)'/", $script, $matches );
+		$this->assertGreaterThan( 5, $found, 'The script must be found, with its selectors.' );
+
+		foreach ( $matches[1] as $selector ) {
+			// Attribute values can hold anything, only classes and ids can break.
+			$selector = preg_replace( '/\[[^\]]*\]/', '', $selector );
+
+			$this->assertSame( 0, preg_match( '/[.#][A-Za-z0-9_-]+:/', $selector ), 'Selector with an unescaped colon: ' . $selector );
+		}
+
+		wp_dequeue_style( 'frontblocks-admin-settings' );
+	}
+
+	public function test_the_short_description_options_dim_the_card_that_holds_them() {
+		$script = $this->get_admin_inline_script();
+
+		$this->assertStringContainsString( "deactivateCheckbox.closest('.frbl-feature-card')", $script );
+		$this->assertStringContainsString( "moveContentCheckbox.closest('.frbl-feature-card')", $script );
+
+		wp_dequeue_style( 'frontblocks-admin-settings' );
+	}
+
+	public function test_the_short_description_toggles_are_inside_the_card_the_script_looks_for() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->settings->register_settings();
+
+		ob_start();
+		$this->settings->render_page();
+		$html = ob_get_clean();
+
+		$document = new DOMDocument();
+		libxml_use_internal_errors( true );
+		$document->loadHTML( '<?xml encoding="utf-8" ?>' . $html );
+		libxml_clear_errors();
+		$xpath = new DOMXPath( $document );
+
+		foreach ( array( 'deactivate_short_description', 'move_content_to_short_description' ) as $id ) {
+			$cards = $xpath->query( '//input[@id="' . $id . '"]/ancestor::div[contains(concat(" ", normalize-space(@class), " "), " frbl-feature-card ")]' );
+
+			$this->assertSame( 1, $cards->length, $id . ' must be inside one toggle card.' );
+		}
 	}
 }

@@ -13,7 +13,7 @@ and other tracking integrations) has been removed from FrontBlocks. Sites that
 had it enabled will show no cookie banner at all until FrontConsent is
 installed — this is intentional, to push migration forward.
 
-**Appearance → FrontBlocks → Cookie Notice** is now a static promo panel: it
+**FrontBlocks → Cookie Notice** is now a static promo panel: it
 explains the move and links to install FrontConsent. If FrontConsent isn't
 installed yet, that link only installs it — WordPress still requires a
 separate activation step (a confirmation screen with an "Activate Plugin"

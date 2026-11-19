@@ -139,8 +139,8 @@ class CookieNoticeDeprecationNotice {
 			return;
 		}
 
-		$allowed_screens = array( 'appearance_page_frontblocks-settings', 'dashboard', 'plugins' );
-		if ( ! in_array( $screen->id, $allowed_screens, true ) ) {
+		$allowed_screens = array( 'dashboard', 'plugins' );
+		if ( ! in_array( $screen->id, $allowed_screens, true ) && ! Settings::is_settings_screen( $screen->id ) ) {
 			return;
 		}
 
