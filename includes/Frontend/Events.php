@@ -10,6 +10,8 @@
 
 namespace FrontBlocks\Frontend;
 
+use FrontBlocks\Admin\Settings;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -33,6 +35,13 @@ class Events {
 	private $option_events_type = 'events_type';
 
 	/**
+	 * Screen of the event categories, as an entry of the FrontBlocks menu.
+	 *
+	 * @var string
+	 */
+	const CATEGORY_SCREEN = 'edit-tags.php?taxonomy=event_category&post_type=event';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -46,6 +55,10 @@ class Events {
 			// Register CPT and taxonomy.
 			add_action( 'init', array( $this, 'register_cpt_event' ) );
 			add_action( 'init', array( $this, 'register_taxonomy_event_category' ) );
+
+			// Events live in the FrontBlocks menu, with their categories next to them.
+			add_action( 'admin_menu', array( $this, 'add_category_submenu' ) );
+			add_filter( 'parent_file', array( $this, 'highlight_category_submenu' ) );
 
 			// Meta boxes for CPT.
 			add_action( 'add_meta_boxes', array( $this, 'add_metaboxes' ) );
@@ -87,7 +100,7 @@ class Events {
 			'name'          => __( 'Events', 'frontblocks' ),
 			'singular_name' => __( 'Event', 'frontblocks' ),
 			'menu_name'     => __( 'Events', 'frontblocks' ),
-			'all_items'     => __( 'All events', 'frontblocks' ),
+			'all_items'     => __( 'Events', 'frontblocks' ),
 			'add_new'       => __( 'Add event', 'frontblocks' ),
 			'add_new_item'  => __( 'Add new event', 'frontblocks' ),
 			'edit_item'     => __( 'Edit event', 'frontblocks' ),
@@ -98,17 +111,16 @@ class Events {
 		);
 
 		$args = array(
-			'label'         => __( 'Events', 'frontblocks' ),
-			'labels'        => $labels,
-			'public'        => true,
-			'show_ui'       => true,
-			'show_in_rest'  => true,
-			'has_archive'   => true,
-			'menu_position' => 6,
-			'menu_icon'     => 'dashicons-calendar-alt',
-			'supports'      => array( 'title', 'editor', 'excerpt', 'thumbnail' ),
-			'rewrite'       => array( 'slug' => 'evento' ),
-			'taxonomies'    => array( 'post_tag', 'event_category' ),
+			'label'        => __( 'Events', 'frontblocks' ),
+			'labels'       => $labels,
+			'public'       => true,
+			'show_ui'      => true,
+			'show_in_menu' => Settings::PAGE_SLUG,
+			'show_in_rest' => true,
+			'has_archive'  => true,
+			'supports'     => array( 'title', 'editor', 'excerpt', 'thumbnail' ),
+			'rewrite'      => array( 'slug' => 'evento' ),
+			'taxonomies'   => array( 'post_tag', 'event_category' ),
 		);
 
 		register_post_type( 'event', $args );
@@ -141,6 +153,47 @@ class Events {
 		);
 
 		register_taxonomy( 'event_category', array( 'event' ), $args );
+	}
+
+	/**
+	 * Add the event categories to the FrontBlocks menu.
+	 *
+	 * WordPress only adds the taxonomy entries of a post type that has a menu of its own,
+	 * so the categories need an entry of their own once events are in the FrontBlocks menu.
+	 *
+	 * @since 1.6.0
+	 * @return void
+	 */
+	public function add_category_submenu() {
+		$taxonomy = get_taxonomy( 'event_category' );
+		if ( ! $taxonomy ) {
+			return;
+		}
+
+		add_submenu_page(
+			Settings::PAGE_SLUG,
+			$taxonomy->labels->name,
+			$taxonomy->labels->name,
+			$taxonomy->cap->manage_terms,
+			self::CATEGORY_SCREEN
+		);
+	}
+
+	/**
+	 * Keep the FrontBlocks menu open on the event categories screen.
+	 *
+	 * @since 1.6.0
+	 * @param string $parent_file Parent file of the current admin screen.
+	 * @return string
+	 */
+	public function highlight_category_submenu( $parent_file ) {
+		global $taxnow;
+
+		if ( 'event_category' === $taxnow ) {
+			return Settings::PAGE_SLUG;
+		}
+
+		return $parent_file;
 	}
 
 	/**

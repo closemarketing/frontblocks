@@ -26,7 +26,7 @@ class SettingsMenuTest extends TestCase {
 		parent::set_up();
 
 		global $menu, $submenu, $admin_page_hooks, $_registered_pages, $_parent_pages, $pagenow;
-		$this->saved = array( $menu, $submenu, $admin_page_hooks, $_registered_pages, $_parent_pages, $pagenow );
+		$this->saved = array( $menu, $submenu, $admin_page_hooks, $_registered_pages, $_parent_pages, $pagenow, isset( $_SERVER['REQUEST_METHOD'] ) ? $_SERVER['REQUEST_METHOD'] : null );
 		$menu        = array();
 		$submenu     = array();
 
@@ -36,7 +36,12 @@ class SettingsMenuTest extends TestCase {
 
 	public function tear_down() {
 		global $menu, $submenu, $admin_page_hooks, $_registered_pages, $_parent_pages, $pagenow;
-		list( $menu, $submenu, $admin_page_hooks, $_registered_pages, $_parent_pages, $pagenow ) = $this->saved;
+		list( $menu, $submenu, $admin_page_hooks, $_registered_pages, $_parent_pages, $pagenow, $request_method ) = $this->saved;
+		if ( null === $request_method ) {
+			unset( $_SERVER['REQUEST_METHOD'] );
+		} else {
+			$_SERVER['REQUEST_METHOD'] = $request_method;
+		}
 
 		unset( $_GET['page'] );
 		$_GET = array();
@@ -209,12 +214,50 @@ class SettingsMenuTest extends TestCase {
 		$this->assertCount( 10, $this->submenu_slugs() );
 	}
 
-	public function test_a_filter_that_returns_something_else_than_tabs_leaves_the_menu_without_entries() {
+	public function test_a_filter_that_returns_something_else_than_tabs_leaves_only_the_main_entry() {
 		add_filter( 'frontblocks_settings_tabs', '__return_false' );
 
 		$this->settings->register_menu();
 
-		$this->assertSame( array(), $this->submenu_slugs() );
+		$this->assertSame( array( 'frontblocks-settings' ), $this->submenu_slugs() );
+	}
+
+	public function test_the_main_page_is_registered_even_when_the_first_tab_is_removed_or_hidden() {
+		global $wp_filter;
+
+		$filters = array(
+			'removed' => function ( $tabs ) {
+				return array_values(
+					array_filter(
+						$tabs,
+						function ( $tab ) {
+							return 'blocks' !== $tab['id'];
+						}
+					)
+				);
+			},
+			'hidden'  => function ( $tabs ) {
+				$tabs[0]['menu'] = false;
+				return $tabs;
+			},
+		);
+
+		foreach ( $filters as $case => $filter ) {
+			global $submenu;
+			$submenu = array();
+			remove_all_filters( 'frontblocks_settings_tabs' );
+			remove_all_actions( 'toplevel_page_frontblocks-settings' );
+			add_filter( 'frontblocks_settings_tabs', $filter );
+
+			$this->settings->register_menu();
+
+			$slugs = $this->submenu_slugs();
+			$this->assertSame( 'frontblocks-settings', $slugs[0], $case );
+			$this->assertCount( 1, array_keys( $slugs, 'frontblocks-settings', true ), $case );
+			$this->assertContains( 'frontblocks-settings-pro', $slugs, $case );
+			$this->assertSame( 10, has_action( 'toplevel_page_frontblocks-settings', array( $this->settings, 'render_page' ) ), $case );
+			$this->assertCount( 1, $wp_filter['toplevel_page_frontblocks-settings']->callbacks[10], $case );
+		}
 	}
 
 	public function test_the_page_is_rendered_once_per_entry_and_not_twice_for_the_first() {
@@ -267,7 +310,24 @@ class SettingsMenuTest extends TestCase {
 		$this->assertTrue( Settings::is_settings_screen( 'frontblocks_page_frontblocks-settings-image-management' ) );
 		$this->assertTrue( Settings::is_settings_screen( 'appearance_page_frontblocks-settings' ), 'The screen the page had under Appearance.' );
 
-		foreach ( array( 'dashboard', 'plugins', 'edit-post', 'toplevel_page_woocommerce', '', null, array(), 5 ) as $other ) {
+		$this->assertTrue( Settings::is_settings_screen( 'frontblocks-settings' ), 'The page slug alone.' );
+
+		$others = array(
+			'dashboard',
+			'plugins',
+			'edit-post',
+			'toplevel_page_woocommerce',
+			'edit-frontblocks-settings-log',
+			'toplevel_page_my-frontblocks-settings',
+			'frontblocks_page_frontblocks-settingsx',
+			'frontblocks-settings_page_other',
+			'frontblocks_page_frontblocks-settings-backup/extra',
+			'',
+			null,
+			array(),
+			5,
+		);
+		foreach ( $others as $other ) {
 			$this->assertFalse( Settings::is_settings_screen( $other ), wp_json_encode( $other ) );
 		}
 	}
@@ -324,6 +384,64 @@ class SettingsMenuTest extends TestCase {
 		$this->assertSame( 'frontblocks-settings-google-signin', $pages['google-signin'] );
 	}
 
+	public function test_tabs_without_a_menu_page_are_not_handed_to_the_script() {
+		add_filter(
+			'frontblocks_settings_tabs',
+			function ( $tabs ) {
+				$tabs[] = array(
+					'id'    => 'hidden-one',
+					'label' => 'Hidden one',
+					'menu'  => false,
+				);
+				$tabs[] = array(
+					'id'    => 'no-label',
+					'label' => 5,
+				);
+				$tabs[] = array(
+					'id'    => '!!!',
+					'label' => 'Empty slug',
+				);
+				$tabs[] = array(
+					'id'    => 'leads',
+					'label' => 'Leads',
+				);
+				return $tabs;
+			}
+		);
+
+		$html = $this->render_page_for( 'frontblocks-settings' );
+
+		$this->assertSame( 1, preg_match( '/data-tab-pages="([^"]*)"/', $html, $found ) );
+		$pages = json_decode( html_entity_decode( $found[1], ENT_QUOTES ), true );
+
+		$this->assertArrayNotHasKey( 'hidden-one', $pages, 'A tab kept out of the menu has no page.' );
+		$this->assertArrayNotHasKey( 'no-label', $pages, 'A tab the menu skips has no page.' );
+		$this->assertArrayNotHasKey( '!!!', $pages, 'A tab the menu skips has no page.' );
+		$this->assertSame( 'frontblocks-settings-leads', $pages['leads'] );
+
+		// Every page handed to the script is one the menu registers.
+		$this->settings->register_menu();
+		$this->assertSame( array(), array_diff( array_values( $pages ), $this->submenu_slugs() ) );
+	}
+
+	public function test_a_hidden_first_tab_is_not_handed_to_the_script() {
+		add_filter(
+			'frontblocks_settings_tabs',
+			function ( $tabs ) {
+				$tabs[0]['menu'] = false;
+				return $tabs;
+			}
+		);
+
+		$html = $this->render_page_for( 'frontblocks-settings' );
+
+		$this->assertSame( 1, preg_match( '/data-tab-pages="([^"]*)"/', $html, $found ) );
+		$pages = json_decode( html_entity_decode( $found[1], ENT_QUOTES ), true );
+
+		$this->assertArrayNotHasKey( 'blocks', $pages );
+		$this->assertSame( 'frontblocks-settings-pro', $pages['pro'] );
+	}
+
 	public function test_the_page_still_shows_the_toggle_counts_of_the_tabs() {
 		$html = $this->render_page_for( 'frontblocks-settings' );
 
@@ -339,6 +457,7 @@ class SettingsMenuTest extends TestCase {
 		$this->assertStringContainsString( 'function updateUrl', $script );
 		$this->assertStringContainsString( "addEventListener('hashchange'", $script );
 		$this->assertStringContainsString( 'toplevel_page_frontblocks-settings', $script );
+		$this->assertStringContainsString( "parsed.searchParams.set('page', page)", $script, 'A save returns to the page of the active tab.' );
 		$this->assertNotSame( '', $html );
 	}
 
@@ -376,6 +495,45 @@ class SettingsMenuTest extends TestCase {
 		$this->assertStringNotContainsString( 'list', $location );
 		$this->assertStringContainsString( 'gsi-error=Bad%20thing', $location );
 		$this->assertStringContainsString( 'weirdkey=x', $location );
+	}
+
+	public function test_the_old_url_keeps_reserved_characters_of_the_values() {
+		global $pagenow;
+		$pagenow = 'themes.php';
+		$_GET    = array(
+			'page'      => 'frontblocks-settings',
+			'gsi-error' => 'a&b=c#d+e',
+		);
+
+		$location = $this->legacy_redirect_location();
+
+		$this->assertStringContainsString( 'gsi-error=a%26b%3Dc%23d%2Be', $location );
+		$this->assertStringNotContainsString( '#', $location );
+
+		$query = array();
+		wp_parse_str( (string) wp_parse_url( $location, PHP_URL_QUERY ), $query );
+		$this->assertSame( 'a&b=c#d+e', $query['gsi-error'] );
+		$this->assertSame( 'frontblocks-settings', $query['page'] );
+	}
+
+	public function test_only_get_and_head_requests_to_the_old_url_are_redirected() {
+		global $pagenow;
+
+		foreach ( array( 'GET', 'HEAD' ) as $method ) {
+			$pagenow                   = 'themes.php';
+			$_GET                      = array( 'page' => 'frontblocks-settings' );
+			$_SERVER['REQUEST_METHOD'] = $method;
+			$this->assertSame( admin_url( 'admin.php?page=frontblocks-settings' ), $this->legacy_redirect_location(), $method );
+			remove_all_filters( 'wp_redirect' );
+		}
+
+		foreach ( array( 'POST', 'PUT' ) as $method ) {
+			$pagenow                   = 'themes.php';
+			$_GET                      = array( 'page' => 'frontblocks-settings' );
+			$_SERVER['REQUEST_METHOD'] = $method;
+			$this->assertNull( $this->legacy_redirect_location(), $method );
+			remove_all_filters( 'wp_redirect' );
+		}
 	}
 
 	public function test_the_old_url_never_leaves_the_site() {
@@ -423,7 +581,61 @@ class SettingsMenuTest extends TestCase {
 
 	public function test_the_redirect_runs_while_the_menu_is_built() {
 		$this->assertSame( 99, has_action( 'admin_menu', array( $this->settings, 'redirect_legacy_url' ) ) );
-		$this->assertSame( 10, has_action( 'admin_menu', array( $this->settings, 'register_menu' ) ) );
+		$this->assertSame( 9, has_action( 'admin_menu', array( $this->settings, 'register_menu' ) ) );
+		$this->assertSame( 98, has_action( 'admin_menu', array( $this->settings, 'move_license_entry_last' ) ) );
+	}
+
+	public function test_post_types_of_the_menu_come_after_the_settings() {
+		register_post_type(
+			'frbl_menu_test',
+			array(
+				'label'        => 'Menu test',
+				'show_ui'      => true,
+				'show_in_menu' => 'frontblocks-settings',
+			)
+		);
+
+		// The order of admin_menu: the settings at 9, then WordPress adds the post types at 10.
+		$this->settings->register_menu();
+		_add_post_type_submenus();
+		unregister_post_type( 'frbl_menu_test' );
+
+		$slugs = $this->submenu_slugs();
+		$this->assertSame( 'frontblocks-settings', $slugs[0], 'The menu must open the settings.' );
+		$this->assertSame( 'edit.php?post_type=frbl_menu_test', end( $slugs ) );
+	}
+
+	public function test_license_closes_the_menu_after_the_post_types() {
+		register_post_type(
+			'frbl_menu_test',
+			array(
+				'label'        => 'Menu test',
+				'show_ui'      => true,
+				'show_in_menu' => 'frontblocks-settings',
+			)
+		);
+
+		$this->settings->register_menu();
+		_add_post_type_submenus();
+		$this->settings->move_license_entry_last();
+		unregister_post_type( 'frbl_menu_test' );
+
+		$slugs = array_values( $this->submenu_slugs() );
+		$this->assertSame( 'frontblocks-settings', $slugs[0] );
+		$this->assertSame( 'frontblocks-settings-license', end( $slugs ) );
+		$this->assertContains( 'edit.php?post_type=frbl_menu_test', $slugs );
+		$this->assertSame( 1, count( array_keys( $slugs, 'frontblocks-settings-license', true ) ) );
+	}
+
+	public function test_moving_license_is_harmless_without_the_menu_or_the_entry() {
+		global $submenu;
+
+		$this->settings->move_license_entry_last();
+		$this->assertSame( array(), $this->submenu_slugs() );
+
+		$submenu['frontblocks-settings'] = array( array( 'Blocks', 'edit_theme_options', 'frontblocks-settings' ) );
+		$this->settings->move_license_entry_last();
+		$this->assertSame( array( 'frontblocks-settings' ), $this->submenu_slugs() );
 	}
 
 	/*
