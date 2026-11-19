@@ -161,6 +161,35 @@ class SettingsTransferTest extends TestCase {
 		$this->assertFalse( SettingsTransfer::sanitize_value( 5, $rule )['ok'] );
 	}
 
+	public function test_text_length_is_counted_in_characters_not_bytes() {
+		$rule = array(
+			'type' => 'text',
+			'max'  => 20,
+		);
+
+		$japanese = str_repeat( '日', 20 );
+		$greek    = str_repeat( 'λ', 20 );
+		$this->assertGreaterThan( 20, strlen( $japanese ), 'The text takes more bytes than the limit.' );
+
+		$this->assertSame( $japanese, SettingsTransfer::sanitize_value( $japanese, $rule )['value'] );
+		$this->assertSame( $greek, SettingsTransfer::sanitize_value( $greek, $rule )['value'] );
+		$this->assertFalse( SettingsTransfer::sanitize_value( $japanese . '日', $rule )['ok'] );
+	}
+
+	public function test_a_multibyte_maintenance_title_travels_between_sites() {
+		$title = str_repeat( 'メンテナンス中', 28 );
+		$this->assertSame( 196, mb_strlen( $title ) );
+
+		update_option( 'frontblocks_settings', array( 'maintenance_title' => $title ) );
+		$this->assertSame( $title, SettingsTransfer::build_export_payload()['settings']['maintenance_title'], 'It is not dropped on export.' );
+
+		delete_option( 'frontblocks_settings' );
+		$result = SettingsTransfer::import_from_string( $this->document( array( 'maintenance_title' => $title ) ) );
+
+		$this->assertContains( 'maintenance_title', $result['applied'] );
+		$this->assertSame( $title, get_option( 'frontblocks_settings' )['maintenance_title'] );
+	}
+
 	public function test_int_values_are_bounded() {
 		$rule = array(
 			'type' => 'int',
@@ -277,6 +306,52 @@ class SettingsTransferTest extends TestCase {
 
 		update_option( 'frontblocks_settings', array( 'image_max_upload_dimension_enabled' => false ) );
 		$this->assertFalse( SettingsTransfer::build_export_payload()['settings']['image_max_upload_dimension_enabled'] );
+	}
+
+	public function test_export_includes_the_image_values_in_effect_when_image_management_was_never_saved() {
+		update_option( 'frontblocks_settings', array( 'enable_back_button' => true ) );
+		$settings = SettingsTransfer::build_export_payload()['settings'];
+
+		$this->assertSame( 2048, $settings['image_max_upload_dimension'] );
+		$this->assertSame( 82, $settings['image_format_quality_webp'] );
+		$this->assertSame( 60, $settings['image_format_quality_avif'] );
+		$this->assertSame( 'none', $settings['image_format_target'] );
+		$this->assertSame( ImageManagement::DEFAULT_MAX_UPLOAD_DIMENSION, $settings['image_max_upload_dimension'] );
+		$this->assertSame( ImageManagement::DEFAULT_QUALITY_WEBP, $settings['image_format_quality_webp'] );
+		$this->assertSame( ImageManagement::DEFAULT_QUALITY_AVIF, $settings['image_format_quality_avif'] );
+		$this->assertSame( ImageManagement::DEFAULT_FORMAT_TARGET, $settings['image_format_target'] );
+	}
+
+	public function test_export_prefers_saved_image_values_over_the_defaults() {
+		update_option(
+			'frontblocks_settings',
+			array(
+				'image_max_upload_dimension' => 3000,
+				'image_format_quality_webp'  => 70,
+				'image_format_quality_avif'  => 45,
+				'image_format_target'        => 'webp',
+			)
+		);
+		$settings = SettingsTransfer::build_export_payload()['settings'];
+
+		$this->assertSame( 3000, $settings['image_max_upload_dimension'] );
+		$this->assertSame( 70, $settings['image_format_quality_webp'] );
+		$this->assertSame( 45, $settings['image_format_quality_avif'] );
+		$this->assertSame( 'webp', $settings['image_format_target'] );
+	}
+
+	public function test_the_image_defaults_are_valid_against_the_schema() {
+		$schema = SettingsTransfer::get_schema();
+		$values = array(
+			'image_max_upload_dimension' => ImageManagement::DEFAULT_MAX_UPLOAD_DIMENSION,
+			'image_format_quality_webp'  => ImageManagement::DEFAULT_QUALITY_WEBP,
+			'image_format_quality_avif'  => ImageManagement::DEFAULT_QUALITY_AVIF,
+			'image_format_target'        => ImageManagement::DEFAULT_FORMAT_TARGET,
+		);
+
+		foreach ( $values as $key => $value ) {
+			$this->assertTrue( SettingsTransfer::sanitize_value( $value, $schema[ $key ] )['ok'], $key );
+		}
 	}
 
 	public function test_export_drops_stored_values_that_no_longer_validate() {
@@ -545,6 +620,10 @@ class SettingsTransferTest extends TestCase {
 		foreach ( array_keys( $result['skipped'] ) as $key ) {
 			$this->assertLessThanOrEqual( 60, strlen( $key ) );
 		}
+	}
+
+	public function test_site_bound_keys_use_the_staging_constant() {
+		$this->assertContains( \FrontBlocks\Frontend\Staging::RESTRICT_ACCESS, SettingsTransfer::SITE_BOUND_KEYS );
 	}
 
 	public function test_the_skipped_list_is_not_capped_when_it_is_short() {
@@ -890,6 +969,39 @@ class SettingsTransferTest extends TestCase {
 
 	}
 
+	public function test_backup_url_points_at_the_settings_screen_wherever_it_is() {
+		// With the top-level menu, Settings::get_settings_url() gives the page of the tab.
+		// Without it, the screen is still under Appearance.
+		$base = method_exists( Settings::class, 'get_settings_url' )
+			? (string) call_user_func( array( Settings::class, 'get_settings_url' ), 'backup' )
+			: admin_url( 'themes.php?page=frontblocks-settings' );
+
+		$method = new ReflectionMethod( SettingsTransfer::class, 'settings_url' );
+		$method->setAccessible( true );
+
+		$this->assertSame( $base . '#backup', $method->invoke( null ) );
+		$this->assertSame(
+			add_query_arg( array( 'frbl-transfer' => '1' ), $base ) . '#backup',
+			$method->invoke( null, array( 'frbl-transfer' => '1' ) )
+		);
+	}
+
+	public function test_import_fires_the_settings_sanitize_action_with_the_merged_settings() {
+		update_option( 'frontblocks_settings', array( 'enable_back_button' => true ) );
+		$received = array();
+		$listener = function ( $settings ) use ( &$received ) {
+			$received[] = $settings;
+		};
+		add_action( 'frontblocks_sanitize_settings', $listener );
+
+		SettingsTransfer::import_from_string( $this->document( array( 'enable_popups' => true ) ) );
+		remove_action( 'frontblocks_sanitize_settings', $listener );
+
+		$this->assertCount( 1, $received );
+		$this->assertTrue( $received[0]['enable_back_button'] );
+		$this->assertTrue( $received[0]['enable_popups'] );
+	}
+
 	public function test_import_request_without_a_file_reports_it_and_returns_to_the_backup_tab() {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$this->with_nonce( 'frbl_import_settings' );
@@ -1055,15 +1167,101 @@ class SettingsTransferTest extends TestCase {
 		$this->assertSame(
 			array(
 				'popups' => array(
-					'label'   => 'Popups',
-					'created' => 2,
-					'updated' => 4,
-					'skipped' => array( 'Old' => 'gone' ),
-					'notes'   => array( 'Welcome' => 'check the form' ),
+					'label'        => 'Popups',
+					'created'      => 2,
+					'updated'      => 4,
+					'skipped'      => array( 'Old' => 'gone' ),
+					'skipped_more' => 0,
+					'notes'        => array( 'Welcome' => 'check the form' ),
+					'notes_more'   => 0,
 				),
 			),
 			$result
 		);
+	}
+
+	public function test_the_number_of_content_sections_is_capped() {
+		$received = null;
+		add_filter(
+			'frontblocks_import_content',
+			function ( $report, $sections ) use ( &$received ) {
+				$received = $sections;
+				return $report;
+			},
+			10,
+			2
+		);
+
+		$content = array();
+		for ( $i = 0; $i < 500; $i++ ) {
+			$content[ 'a' . $i ] = array();
+		}
+
+		$result = SettingsTransfer::import_content( $content );
+
+		$this->assertCount( SettingsTransfer::MAX_CONTENT_SECTIONS, $received, 'Only the first sections reach the add-ons.' );
+		$this->assertSame( 'a0', key( $received ) );
+		$this->assertCount( SettingsTransfer::MAX_CONTENT_SECTIONS + 1, $result, 'The overflow is reported as one entry.' );
+		$this->assertArrayNotHasKey( 'a' . SettingsTransfer::MAX_CONTENT_SECTIONS, $result );
+
+		$more = $result[ SettingsTransfer::MORE_SECTIONS_ID ];
+		$this->assertSame( 0, $more['created'] );
+		$this->assertSame( array( '480 more sections' ), array_keys( $more['skipped'] ) );
+		$this->assertStringContainsString( (string) SettingsTransfer::MAX_CONTENT_SECTIONS, current( $more['skipped'] ) );
+	}
+
+	public function test_content_sections_up_to_the_cap_are_not_reported_as_overflow() {
+		$content = array();
+		for ( $i = 0; $i < SettingsTransfer::MAX_CONTENT_SECTIONS; $i++ ) {
+			$content[ 'a' . $i ] = array( 'x' );
+		}
+
+		$result = SettingsTransfer::import_content( $content );
+
+		$this->assertCount( SettingsTransfer::MAX_CONTENT_SECTIONS, $result );
+		$this->assertArrayNotHasKey( SettingsTransfer::MORE_SECTIONS_ID, $result );
+	}
+
+	public function test_invalid_sections_do_not_count_toward_the_cap() {
+		$content = array();
+		for ( $i = 0; $i < 30; $i++ ) {
+			$content[ 'Bad ' . $i ] = array( 'x' );
+		}
+		$content['popups'] = array( 'x' );
+
+		$result = SettingsTransfer::import_content( $content );
+
+		$this->assertSame( array( 'popups' ), array_keys( $result ) );
+	}
+
+	public function test_the_lists_of_an_add_on_report_are_capped() {
+		add_filter(
+			'frontblocks_import_content',
+			function ( $report ) {
+				$skipped = array();
+				$notes   = array();
+				for ( $i = 0; $i < 120; $i++ ) {
+					$skipped[ 'Item ' . $i . ' ' . str_repeat( 'x', 100 ) ] = 'invalid';
+					$notes[ 'Note ' . $i ]                                 = 'check it';
+				}
+				$report['popups'] = array(
+					'label'   => 'Popups',
+					'skipped' => $skipped,
+					'notes'   => $notes,
+				);
+				return $report;
+			}
+		);
+
+		$section = SettingsTransfer::import_content( array( 'popups' => array( 'x' ) ) )['popups'];
+
+		$this->assertCount( SettingsTransfer::MAX_REPORTED_SKIPPED, $section['skipped'] );
+		$this->assertSame( 70, $section['skipped_more'] );
+		$this->assertCount( SettingsTransfer::MAX_REPORTED_SKIPPED, $section['notes'] );
+		$this->assertSame( 70, $section['notes_more'] );
+		foreach ( array_keys( $section['skipped'] ) as $label ) {
+			$this->assertLessThanOrEqual( 60, mb_strlen( $label ) );
+		}
 	}
 
 	public function test_import_reports_content_that_no_add_on_handles() {
@@ -1146,11 +1344,12 @@ class SettingsTransferTest extends TestCase {
 				'adjusted' => array(),
 				'content'  => array(
 					'popups' => array(
-						'label'   => 'Popups',
-						'created' => 2,
-						'updated' => 1,
-						'skipped' => array( 'Old offer' => 'no permission' ),
-						'notes'   => array( '<script>x</script>' => '<img src=x onerror=alert(1)>' ),
+						'label'        => 'Popups',
+						'created'      => 2,
+						'updated'      => 1,
+						'skipped'      => array( 'Old offer' => 'no permission' ),
+						'skipped_more' => 7,
+						'notes'        => array( '<script>x</script>' => '<img src=x onerror=alert(1)>' ),
 					),
 				),
 			),
@@ -1168,6 +1367,7 @@ class SettingsTransferTest extends TestCase {
 		$this->assertStringContainsString( 'Popups: needs a review', $html );
 		$this->assertStringContainsString( 'Popups: skipped', $html );
 		$this->assertStringContainsString( 'Old offer', $html );
+		$this->assertStringContainsString( 'and 7 more', $html );
 		$this->assertStringNotContainsString( '<script>x', $html );
 		$this->assertStringNotContainsString( '<img src=x', $html );
 	}

@@ -61,6 +61,26 @@ class ImageManagement {
 	const JOB_TYPES = array( 'regenerate', 'convert', 'cleanup' );
 
 	/**
+	 * Max upload width/height, in pixels, until the module is saved.
+	 */
+	const DEFAULT_MAX_UPLOAD_DIMENSION = 2048;
+
+	/**
+	 * WebP quality until the module is saved.
+	 */
+	const DEFAULT_QUALITY_WEBP = 82;
+
+	/**
+	 * AVIF quality until the module is saved.
+	 */
+	const DEFAULT_QUALITY_AVIF = 60;
+
+	/**
+	 * Modern format target until the module is saved: no conversion.
+	 */
+	const DEFAULT_FORMAT_TARGET = 'none';
+
+	/**
 	 * Register the settings section and fields.
 	 *
 	 * @return void
@@ -189,10 +209,10 @@ class ImageManagement {
 		$disabled                     = (array) ( $options['image_sizes_disabled'] ?? array() );
 		$overrides                    = (array) ( $options['image_sizes_overrides'] ?? array() );
 		$custom                       = (array) ( $options['image_sizes_custom'] ?? array() );
-		$format_target                = (string) ( $options['image_format_target'] ?? 'none' );
+		$format_target                = (string) ( $options['image_format_target'] ?? self::DEFAULT_FORMAT_TARGET );
 		$quality_by_fmt               = FrontendImageManagement::get_quality_settings( $options );
 		$max_upload_dimension_enabled = (bool) ( $options['image_max_upload_dimension_enabled'] ?? true );
-		$max_upload_dimension         = (int) ( $options['image_max_upload_dimension'] ?? 2048 );
+		$max_upload_dimension         = (int) ( $options['image_max_upload_dimension'] ?? self::DEFAULT_MAX_UPLOAD_DIMENSION );
 
 		$sizes_info = $this->get_registered_sizes_info();
 		$usage      = FrontendImageManagement::estimate_disk_usage_by_size( wp_list_pluck( $sizes_info, 'name' ) );
@@ -333,20 +353,20 @@ class ImageManagement {
 		$posted = wp_unslash( $_POST['frontblocks_settings'] ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- nonce verified above; every value read from $posted below is sanitized individually.
 
 		$allowed_targets              = array( 'none', 'webp', 'avif', 'both' );
-		$posted_target                = $posted['image_format_target'] ?? 'none';
-		$requested_target             = in_array( $posted_target, $allowed_targets, true ) ? $posted_target : 'none';
+		$posted_target                = $posted['image_format_target'] ?? self::DEFAULT_FORMAT_TARGET;
+		$requested_target             = in_array( $posted_target, $allowed_targets, true ) ? $posted_target : self::DEFAULT_FORMAT_TARGET;
 		$value['image_format_target'] = self::downgrade_target_to_supported_formats( $requested_target );
 
 		$value['image_max_upload_dimension_enabled'] = ! empty( $posted['image_max_upload_dimension_enabled'] );
 
-		$max_dimension                       = absint( $posted['image_max_upload_dimension'] ?? 2048 );
-		$value['image_max_upload_dimension'] = $max_dimension >= 300 ? min( $max_dimension, 10000 ) : 2048;
+		$max_dimension                       = absint( $posted['image_max_upload_dimension'] ?? self::DEFAULT_MAX_UPLOAD_DIMENSION );
+		$value['image_max_upload_dimension'] = $max_dimension >= 300 ? min( $max_dimension, 10000 ) : self::DEFAULT_MAX_UPLOAD_DIMENSION;
 
-		$webp_quality                       = absint( $posted['image_format_quality_webp'] ?? 82 );
-		$value['image_format_quality_webp'] = $webp_quality > 0 ? min( $webp_quality, 100 ) : 82;
+		$webp_quality                       = absint( $posted['image_format_quality_webp'] ?? self::DEFAULT_QUALITY_WEBP );
+		$value['image_format_quality_webp'] = $webp_quality > 0 ? min( $webp_quality, 100 ) : self::DEFAULT_QUALITY_WEBP;
 
-		$avif_quality                       = absint( $posted['image_format_quality_avif'] ?? 60 );
-		$value['image_format_quality_avif'] = $avif_quality > 0 ? min( $avif_quality, 100 ) : 60;
+		$avif_quality                       = absint( $posted['image_format_quality_avif'] ?? self::DEFAULT_QUALITY_AVIF );
+		$value['image_format_quality_avif'] = $avif_quality > 0 ? min( $avif_quality, 100 ) : self::DEFAULT_QUALITY_AVIF;
 
 		$config = array();
 		if ( ! empty( $posted['image_sizes_config'] ) ) {

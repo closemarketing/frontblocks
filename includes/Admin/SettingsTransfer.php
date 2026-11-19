@@ -10,6 +10,8 @@
 
 namespace FrontBlocks\Admin;
 
+use FrontBlocks\Frontend\Staging;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -110,6 +112,22 @@ class SettingsTransfer {
 	const MAX_REPORTED_SKIPPED = 50;
 
 	/**
+	 * Most content sections handed to the add-ons and listed in the import summary.
+	 * The section ids come straight from the file, so the number is capped.
+	 *
+	 * @var int
+	 */
+	const MAX_CONTENT_SECTIONS = 20;
+
+	/**
+	 * Key of the summary entry that reports the content sections over the cap.
+	 * It is not a valid section id, so it never replaces the report of a real section.
+	 *
+	 * @var string
+	 */
+	const MORE_SECTIONS_ID = '+more';
+
+	/**
 	 * Settings that describe the state of one site, not its configuration.
 	 *
 	 * They are neither exported nor imported: importing them would turn maintenance
@@ -117,7 +135,7 @@ class SettingsTransfer {
 	 *
 	 * @var string[]
 	 */
-	const SITE_BOUND_KEYS = array( 'enable_maintenance', 'enable_staging', 'staging_restrict_access', 'scroll_top_icon_url' );
+	const SITE_BOUND_KEYS = array( 'enable_maintenance', 'enable_staging', Staging::RESTRICT_ACCESS, 'scroll_top_icon_url' );
 
 	/**
 	 * Whether an import is writing the option right now.
@@ -265,7 +283,7 @@ class SettingsTransfer {
 					return self::invalid( __( 'expected text', 'frontblocks' ) );
 				}
 				$max = isset( $rule['max'] ) ? (int) $rule['max'] : 255;
-				if ( strlen( $value ) > $max ) {
+				if ( mb_strlen( $value ) > $max ) {
 					/* translators: %d: maximum number of characters */
 					return self::invalid( sprintf( __( 'longer than %d characters', 'frontblocks' ), $max ) );
 				}
@@ -321,6 +339,10 @@ class SettingsTransfer {
 	private static function get_unsaved_defaults() {
 		return array(
 			'image_max_upload_dimension_enabled' => true,
+			'image_max_upload_dimension'         => ImageManagement::DEFAULT_MAX_UPLOAD_DIMENSION,
+			'image_format_quality_webp'          => ImageManagement::DEFAULT_QUALITY_WEBP,
+			'image_format_quality_avif'          => ImageManagement::DEFAULT_QUALITY_AVIF,
+			'image_format_target'                => ImageManagement::DEFAULT_FORMAT_TARGET,
 		);
 	}
 
@@ -344,7 +366,7 @@ class SettingsTransfer {
 				continue;
 			}
 
-			// A toggle that is on until it is saved off would otherwise be missing, and an import could not turn it back on.
+			// A setting that was never saved would otherwise be missing, and the destination would keep its own value.
 			if ( ! array_key_exists( $key, $options ) && array_key_exists( $key, $defaults ) ) {
 				$settings[ $key ] = $defaults[ $key ];
 				continue;
@@ -574,6 +596,9 @@ class SettingsTransfer {
 			$adjusted[ $turn_off ] = sprintf( __( 'turned off, it cannot be on together with "%s"', 'frontblocks' ), $keep );
 		}
 
+		// Listeners of the settings form sanitizer see the imported settings too, as on a form save.
+		do_action( 'frontblocks_sanitize_settings', $merged );
+
 		self::$importing = true;
 		try {
 			update_option( self::OPTION, $merged );
@@ -619,11 +644,14 @@ class SettingsTransfer {
 	}
 
 	/**
-	 * Keep the skipped list small enough to store: the keys come from the file.
+	 * Keep a list of the summary small enough to store: its keys come from the file.
 	 *
-	 * @param array $skipped Setting key => reason.
+	 * Used for the skipped settings and for the `skipped` and `notes` lists of the
+	 * content sections.
+	 *
+	 * @param array $skipped Key => reason.
 	 * @return array {
-	 *     @type array $list Setting key => reason, at most MAX_REPORTED_SKIPPED entries.
+	 *     @type array $list Key => reason, at most MAX_REPORTED_SKIPPED entries.
 	 *     @type int   $more How many entries were left out.
 	 * }
 	 */
@@ -651,10 +679,16 @@ class SettingsTransfer {
 		}
 
 		$sections = array();
+		$more     = 0;
 		foreach ( $content as $id => $data ) {
-			if ( self::is_valid_section_id( $id ) && is_array( $data ) ) {
-				$sections[ $id ] = $data;
+			if ( ! self::is_valid_section_id( $id ) || ! is_array( $data ) ) {
+				continue;
 			}
+			if ( count( $sections ) >= self::MAX_CONTENT_SECTIONS ) {
+				++$more;
+				continue;
+			}
+			$sections[ $id ] = $data;
 		}
 
 		/**
@@ -678,12 +712,30 @@ class SettingsTransfer {
 			$result[ $id ] = isset( $report[ $id ] ) && is_array( $report[ $id ] )
 				? self::normalize_section_report( $id, $report[ $id ] )
 				: array(
-					'label'   => $id,
-					'created' => 0,
-					'updated' => 0,
-					'skipped' => array( $id => __( 'nothing on this site can import this content', 'frontblocks' ) ),
-					'notes'   => array(),
+					'label'        => $id,
+					'created'      => 0,
+					'updated'      => 0,
+					'skipped'      => array( $id => __( 'nothing on this site can import this content', 'frontblocks' ) ),
+					'skipped_more' => 0,
+					'notes'        => array(),
+					'notes_more'   => 0,
 				);
+		}
+
+		if ( $more > 0 ) {
+			/* translators: %d: number of content sections that were not imported */
+			$more_label = sprintf( _n( '%d more section', '%d more sections', $more, 'frontblocks' ), $more );
+
+			$result[ self::MORE_SECTIONS_ID ] = array(
+				'label'        => __( 'Content', 'frontblocks' ),
+				'created'      => 0,
+				'updated'      => 0,
+				/* translators: %d: maximum number of content sections */
+				'skipped'      => array( $more_label => sprintf( __( 'a file can carry at most %d content sections, so the rest was not imported', 'frontblocks' ), self::MAX_CONTENT_SECTIONS ) ),
+				'skipped_more' => 0,
+				'notes'        => array(),
+				'notes_more'   => 0,
+			);
 		}
 
 		return $result;
@@ -699,33 +751,42 @@ class SettingsTransfer {
 	private static function normalize_section_report( $id, $report ) {
 		$lists = array();
 		foreach ( array( 'skipped', 'notes' ) as $list ) {
-			$lists[ $list ] = array();
+			$clean = array();
 			foreach ( isset( $report[ $list ] ) && is_array( $report[ $list ] ) ? $report[ $list ] : array() as $label => $text ) {
 				if ( is_scalar( $text ) ) {
-					$lists[ $list ][ sanitize_text_field( (string) $label ) ] = sanitize_text_field( (string) $text );
+					$clean[ sanitize_text_field( (string) $label ) ] = sanitize_text_field( (string) $text );
 				}
 			}
+			// The labels often come from the file, so these lists are capped like the skipped settings.
+			$lists[ $list ] = self::cap_skipped( $clean );
 		}
 
 		return array(
-			'label'   => isset( $report['label'] ) && is_string( $report['label'] ) && '' !== $report['label'] ? sanitize_text_field( $report['label'] ) : $id,
-			'created' => isset( $report['created'] ) ? absint( $report['created'] ) : 0,
-			'updated' => isset( $report['updated'] ) ? absint( $report['updated'] ) : 0,
-			'skipped' => $lists['skipped'],
-			'notes'   => $lists['notes'],
+			'label'        => isset( $report['label'] ) && is_string( $report['label'] ) && '' !== $report['label'] ? sanitize_text_field( $report['label'] ) : $id,
+			'created'      => isset( $report['created'] ) ? absint( $report['created'] ) : 0,
+			'updated'      => isset( $report['updated'] ) ? absint( $report['updated'] ) : 0,
+			'skipped'      => $lists['skipped']['list'],
+			'skipped_more' => $lists['skipped']['more'],
+			'notes'        => $lists['notes']['list'],
+			'notes_more'   => $lists['notes']['more'],
 		);
 	}
 
 	/**
 	 * URL of the Backup tab.
 	 *
+	 * Uses `Settings::get_settings_url()` when this version of FrontBlocks has it,
+	 * and the settings screen under Appearance otherwise.
+	 *
 	 * @param array $args Query arguments to add.
 	 * @return string
 	 */
 	private static function settings_url( $args = array() ) {
-		$url = add_query_arg( $args, admin_url( 'themes.php?page=' . self::PAGE_SLUG ) );
+		$base = method_exists( Settings::class, 'get_settings_url' )
+			? (string) call_user_func( array( Settings::class, 'get_settings_url' ), self::TAB_ID )
+			: admin_url( 'themes.php?page=' . self::PAGE_SLUG );
 
-		return $url . '#' . self::TAB_ID;
+		return add_query_arg( $args, $base ) . '#' . self::TAB_ID;
 	}
 
 	/**
@@ -945,7 +1006,7 @@ class SettingsTransfer {
 			<div class="tw:max-w-xl tw:p-6 tw:bg-blue-50 tw:border tw:border-blue-200 tw:rounded-lg">
 				<p class="tw:text-base tw:font-medium tw:text-blue-900 tw:mt-0 tw:mb-2"><?php esc_html_e( 'What is not included', 'frontblocks' ); ?></p>
 				<p class="tw:text-sm tw:text-blue-800 tw:mb-0">
-					<?php esc_html_e( 'Google Sign-In credentials, license keys, the maintenance image and the image size configuration are left out because they belong to a single site or are secret. Set them up again on each site.', 'frontblocks' ); ?>
+					<?php esc_html_e( 'Google Sign-In credentials, license keys, the maintenance image, the scroll-to-top icon and the image size configuration are left out because they belong to a single site or are secret. Set them up again on each site. Maintenance mode and staging mode (with its access restriction) are never exported or imported either, so an import cannot turn them on.', 'frontblocks' ); ?>
 				</p>
 			</div>
 		</div>
@@ -1042,12 +1103,14 @@ class SettingsTransfer {
 		$this->render_notes(
 			isset( $section['notes'] ) ? (array) $section['notes'] : array(),
 			/* translators: %s: kind of content, for example Popups */
-			sprintf( __( '%s: needs a review', 'frontblocks' ), $label )
+			sprintf( __( '%s: needs a review', 'frontblocks' ), $label ),
+			isset( $section['notes_more'] ) ? (int) $section['notes_more'] : 0
 		);
 		$this->render_notes(
 			isset( $section['skipped'] ) ? (array) $section['skipped'] : array(),
 			/* translators: %s: kind of content, for example Popups */
-			sprintf( __( '%s: skipped', 'frontblocks' ), $label )
+			sprintf( __( '%s: skipped', 'frontblocks' ), $label ),
+			isset( $section['skipped_more'] ) ? (int) $section['skipped_more'] : 0
 		);
 	}
 

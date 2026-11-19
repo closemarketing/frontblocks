@@ -1,6 +1,6 @@
 # Settings Export and Import
 
-Copy the FrontBlocks configuration from one site to another with a JSON file. Open **Appearance > FrontBlocks > Backup**.
+Copy the FrontBlocks configuration from one site to another with a JSON file. Open the FrontBlocks settings screen and go to the **Backup** tab (**FrontBlocks > Backup** in the admin menu, or **Appearance > FrontBlocks > Backup** on versions where the settings screen is under Appearance).
 
 ## Using it
 
@@ -18,7 +18,7 @@ The `frontblocks_settings` option, limited to the settings that make sense on an
 | --- | --- |
 | Module toggles | Every checkbox of the settings screen (blocks, optional features, WooCommerce, PRO toggles such as `enable_popups` or `enable_language_banner`). A toggle that was never saved is exported as `false` (`image_max_upload_dimension_enabled`, which is on until it is saved off, is exported as `true`). |
 | Options | `events_type`, `scroll_top_position`, `maintenance_title` |
-| Image Management | `image_format_target`, `image_max_upload_dimension_enabled`, `image_max_upload_dimension`, `image_format_quality_webp`, `image_format_quality_avif` |
+| Image Management | `image_format_target`, `image_max_upload_dimension_enabled`, `image_max_upload_dimension`, `image_format_quality_webp`, `image_format_quality_avif`. When Image Management was never saved, the values it uses are exported: `none`, `true`, `2048`, `82` and `60`. |
 
 ## Content from add-ons
 
@@ -28,6 +28,8 @@ Settings are not the only thing an add-on may want to move. The file has an opti
 - The import applies the settings first, then hands every section to the add-on that knows it. An add-on may depend on a toggle that was just imported.
 - The result shows, for each section, how many items were created and updated, what was skipped and why, and what needs a review.
 - A section that no add-on on this site can import is reported as skipped. Nothing is created for it.
+- At most 20 sections are imported. Any section after that is not handed to the add-ons and is reported as one skipped entry.
+- The `skipped` and `notes` lists of each section keep at most 50 entries in the summary, which says how many more there were.
 - Each add-on checks what the current user may create, because the import only requires `edit_theme_options`.
 
 ## What is not exported
@@ -76,6 +78,7 @@ The file contains no credentials, so it is safe to keep in a repository.
 - **Unknown keys are skipped** and listed, so a file cannot write arbitrary data into the option. The summary keeps at most 50 skipped entries (key names cut to 60 characters) and says how many more there were, so a file full of unknown keys cannot make a huge stored result.
 - **Values that depend on the server are adjusted.** An image format target the server cannot produce, for example AVIF without support, is downgraded the same way the settings screen does, and the summary says so.
 - **The two short description options exclude each other**, as they do on the settings screen. If an import would turn both on, one is turned off and the summary says which.
+- **The `frontblocks_sanitize_settings` action runs** with the merged settings, right before they are stored, as it does when the settings screen is saved.
 - **Limits.** The file must be valid JSON, declare `"format": "frontblocks-settings"`, be at most 2 MB and have the `.json` extension. The file is only decoded, never executed or included. A rejected file changes nothing.
 
 ## Extending it
@@ -114,7 +117,7 @@ Supported rule types:
 | `bool` | | `true`, `false`, `1`, `0`, `"1"`, `"0"` |
 | `enum` | `values` | one of the listed strings |
 | `url` | | an empty string or an `http` or `https` URL |
-| `text` | `max` (default 255) | text up to `max` characters, sanitized with `sanitize_text_field()` |
+| `text` | `max` (default 255) | text up to `max` characters (counted with `mb_strlen()`, so multibyte text is not penalized), sanitized with `sanitize_text_field()` |
 | `int` | `min`, `max` | a whole number between the bounds |
 
 ### Content sections
