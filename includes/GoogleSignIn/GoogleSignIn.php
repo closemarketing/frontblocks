@@ -544,7 +544,7 @@ class GoogleSignIn {
 			return '';
 		}
 
-		return '<p class="frbl-google-signin-notice">' . esc_html__( 'Google Sign-In is not configured yet. Add your Client ID and Client Secret under Appearance → FrontBlocks → Google Sign-In.', 'frontblocks' ) . '</p>';
+		return '<p class="frbl-google-signin-notice">' . esc_html__( 'Google Sign-In is not configured yet. Add your Client ID and Client Secret under FrontBlocks → Social Login.', 'frontblocks' ) . '</p>';
 	}
 
 	/**
