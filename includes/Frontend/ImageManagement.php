@@ -10,6 +10,8 @@
 
 namespace FrontBlocks\Frontend;
 
+use FrontBlocks\Admin\ImageManagement as AdminImageManagement;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -127,7 +129,7 @@ class ImageManagement {
 			return false;
 		}
 
-		$max = absint( $options['image_max_upload_dimension'] ?? 2048 );
+		$max = absint( $options['image_max_upload_dimension'] ?? AdminImageManagement::DEFAULT_MAX_UPLOAD_DIMENSION );
 
 		return $max > 0 ? $max : $threshold;
 	}
@@ -191,7 +193,7 @@ class ImageManagement {
 	 */
 	public function maybe_generate_modern_formats( $metadata, $attachment_id ) {
 		$options = $this->get_options();
-		$target  = (string) ( $options['image_format_target'] ?? 'none' );
+		$target  = (string) ( $options['image_format_target'] ?? AdminImageManagement::DEFAULT_FORMAT_TARGET );
 
 		if ( 'none' === $target || empty( $metadata ) ) {
 			return $metadata;
@@ -209,8 +211,8 @@ class ImageManagement {
 	 */
 	public static function get_quality_settings( $options ) {
 		return array(
-			'webp' => (int) ( $options['image_format_quality_webp'] ?? 82 ),
-			'avif' => (int) ( $options['image_format_quality_avif'] ?? 60 ),
+			'webp' => (int) ( $options['image_format_quality_webp'] ?? AdminImageManagement::DEFAULT_QUALITY_WEBP ),
+			'avif' => (int) ( $options['image_format_quality_avif'] ?? AdminImageManagement::DEFAULT_QUALITY_AVIF ),
 		);
 	}
 
@@ -286,7 +288,7 @@ class ImageManagement {
 				continue;
 			}
 
-			$editor->set_quality( $quality[ $format ] ?? 82 );
+			$editor->set_quality( $quality[ $format ] ?? AdminImageManagement::DEFAULT_QUALITY_WEBP );
 
 			$target_path = preg_replace( '/\.[^.]+$/', '.' . $format, $source_path );
 			$saved       = $editor->save( $target_path, $mime );
@@ -318,7 +320,7 @@ class ImageManagement {
 		}
 
 		$options = get_option( 'frontblocks_settings', array() );
-		$target  = (string) ( $options['image_format_target'] ?? 'none' );
+		$target  = (string) ( $options['image_format_target'] ?? AdminImageManagement::DEFAULT_FORMAT_TARGET );
 
 		if ( 'none' === $target ) {
 			return false;
