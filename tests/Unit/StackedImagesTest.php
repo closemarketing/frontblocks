@@ -31,6 +31,30 @@ class StackedImagesTest extends TestCase {
 		$this->assertSame( 500, $block_type->attributes['containerHeight']['default'] );
 	}
 
+	public function test_block_is_registered_with_api_version_3() {
+		$block_type = WP_Block_Type_Registry::get_instance()->get_registered( 'frontblocks/stacked-images' );
+
+		$this->assertSame( 3, $block_type->api_version );
+	}
+
+	/**
+	 * The editor stylesheet must be enqueued on enqueue_block_assets (admin
+	 * only) so it reaches the iframed canvas of an API version 3 block.
+	 */
+	public function test_editor_canvas_style_is_enqueued_on_enqueue_block_assets_in_admin_only() {
+		$this->assertNotFalse( has_action( 'enqueue_block_assets', array( $this->stacked_images, 'enqueue_editor_canvas_style' ) ) );
+
+		wp_dequeue_style( 'frontblocks-stacked-images-style' );
+		$this->stacked_images->enqueue_editor_canvas_style();
+		$this->assertFalse( wp_style_is( 'frontblocks-stacked-images-style', 'enqueued' ) );
+
+		set_current_screen( 'post' );
+		$this->stacked_images->enqueue_editor_canvas_style();
+		$this->assertTrue( wp_style_is( 'frontblocks-stacked-images-style', 'enqueued' ) );
+		wp_dequeue_style( 'frontblocks-stacked-images-style' );
+		set_current_screen( 'front' );
+	}
+
 	public function test_render_returns_a_placeholder_when_no_images_are_set() {
 		$output = $this->stacked_images->render_stacked_images_block( array( 'images' => array() ) );
 
