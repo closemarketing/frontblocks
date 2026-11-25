@@ -606,6 +606,7 @@ class GoogleSignIn {
 		register_block_type(
 			'frontblocks/google-login',
 			array(
+				'api_version'     => 3,
 				'editor_script'   => 'frontblocks-google-login-block-editor',
 				'render_callback' => array( $this, 'render_block' ),
 				'attributes'      => $this->get_block_attributes(),
