@@ -1,7 +1,6 @@
 "use strict";
 
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
@@ -17,7 +16,8 @@ var registerBlockType = wp.blocks.registerBlockType;
 var _wp$element = wp.element,
   Fragment = _wp$element.Fragment,
   useState = _wp$element.useState,
-  useEffect = _wp$element.useEffect;
+  useEffect = _wp$element.useEffect,
+  useRef = _wp$element.useRef;
 var useSelect = wp.data.useSelect;
 var _wp$blockEditor = wp.blockEditor,
   InspectorControls = _wp$blockEditor.InspectorControls,
@@ -108,16 +108,24 @@ var TEXT_ALIGN_OPTIONS = [{
 
 /**
  * Resolve a CSS var like "var(--wp--preset--font-size--large)" to a real value
- * using computed styles on the document root.
+ * using computed styles on the root of the document that holds the block.
+ *
+ * The editor canvas is an iframe (block API version 3) and the theme presets
+ * are defined inside it, so the lookup must go through the block's own
+ * ownerDocument rather than the global document of the wp-admin page.
  */
-function resolveCssVar(value) {
+function resolveCssVar(value, element) {
   if (!value || !value.startsWith('var(')) return value;
   var match = value.match(/var\(\s*(--[^,)]+)/);
   if (!match) return value;
-  var resolved = getComputedStyle(document.documentElement).getPropertyValue(match[1]).trim();
+  var doc = element ? element.ownerDocument : null;
+  var view = doc ? doc.defaultView : null;
+  if (!doc || !view) return value;
+  var resolved = view.getComputedStyle(doc.documentElement).getPropertyValue(match[1]).trim();
   return resolved || value;
 }
 registerBlockType('frontblocks/user-text', {
+  apiVersion: 3,
   title: __('User Text', 'frontblocks'),
   description: __('Text pattern with logged-in user data placeholders.', 'frontblocks'),
   category: 'text',
@@ -176,6 +184,9 @@ registerBlockType('frontblocks/user-text', {
       textAlign = attributes.textAlign,
       loggedOutText = attributes.loggedOutText;
 
+    // Ref on the block root, used to reach the (iframed) canvas document.
+    var blockRef = useRef(null);
+
     // ── Current user (with email, needs context=edit) ──────────────────
     var _useState = useState(null),
       _useState2 = _slicedToArray(_useState, 2),
@@ -211,7 +222,7 @@ registerBlockType('frontblocks/user-text', {
         // Resolve CSS vars to real values for display
         var resolved = {};
         Object.keys(merged).forEach(function (k) {
-          resolved[k] = resolveCssVar(merged[k]);
+          resolved[k] = resolveCssVar(merged[k], blockRef.current);
         });
         setThemeTypo(resolved);
       }).catch(function () {});
@@ -246,7 +257,9 @@ registerBlockType('frontblocks/user-text', {
       fontWeight: fontWeight || undefined,
       textAlign: textAlign || undefined
     };
-    var blockProps = useBlockProps();
+    var blockProps = useBlockProps({
+      ref: blockRef
+    });
     var Tag = htmlTag || 'p';
 
     // Helper: placeholder showing theme default when field is empty
@@ -355,7 +368,7 @@ registerBlockType('frontblocks/user-text', {
         },
         label: __('Text Color on Hover', 'frontblocks')
       }]
-    })), /*#__PURE__*/React.createElement(Tag, _extends({}, blockProps, {
+    })), /*#__PURE__*/React.createElement(Tag, _objectSpread(_objectSpread({}, blockProps), {}, {
       style: _objectSpread(_objectSpread({}, inlineStyle), {}, {
         margin: 0
       })

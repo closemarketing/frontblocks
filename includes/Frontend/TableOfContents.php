@@ -127,6 +127,7 @@ class TableOfContents {
 		}
 
 		$args = array(
+			'api_version'     => 3,
 			'editor_script'   => 'frontblocks-toc-option',
 			'render_callback' => array( $this, 'render_placeholder' ),
 			'attributes'      => array(

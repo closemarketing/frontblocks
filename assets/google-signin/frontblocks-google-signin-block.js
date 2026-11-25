@@ -12,6 +12,7 @@
 	var __ = i18n.__;
 	var registerBlockType = blocks.registerBlockType;
 	var InspectorControls = blockEditor.InspectorControls;
+	var useBlockProps = blockEditor.useBlockProps;
 	var PanelBody = components.PanelBody;
 	var SelectControl = components.SelectControl;
 	var TextControl = components.TextControl;
@@ -27,10 +28,13 @@
 	);
 
 	registerBlockType( 'frontblocks/google-login', {
+		apiVersion: 3,
 		icon: googleIcon,
 		edit: function ( props ) {
 			var attributes = props.attributes;
 			var setAttributes = props.setAttributes;
+			// API version 3: the root element of the edit output must carry the block props.
+			var blockProps = useBlockProps();
 
 			return el(
 				Fragment,
@@ -62,18 +66,22 @@
 						} )
 					)
 				),
-				ServerSideRender
-					? el( ServerSideRender, {
-							block: 'frontblocks/google-login',
-							attributes: attributes,
-					  } )
-					: el(
-							'p',
-							{},
-							'signup' === attributes.mode
-								? __( 'Sign up with Google', 'frontblocks' )
-								: __( 'Sign in with Google', 'frontblocks' )
-					  )
+				el(
+					'div',
+					blockProps,
+					ServerSideRender
+						? el( ServerSideRender, {
+								block: 'frontblocks/google-login',
+								attributes: attributes,
+						  } )
+						: el(
+								'p',
+								{},
+								'register' === attributes.mode
+									? __( 'Sign up with Google', 'frontblocks' )
+									: __( 'Sign in with Google', 'frontblocks' )
+						  )
+				)
 			);
 		},
 		save: function () {

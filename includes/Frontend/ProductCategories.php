@@ -28,6 +28,7 @@ class ProductCategories {
 		add_action( 'init', array( $this, 'register_product_categories_block' ), 20 );
 		add_action( 'init', array( $this, 'enable_rest_api_for_product_cat' ), 20 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_editor_canvas_style' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
 		add_action( 'rest_api_init', array( $this, 'register_rest_fields' ) );
 	}
@@ -124,19 +125,33 @@ class ProductCategories {
 	}
 
 	/**
-	 * Enqueue block editor assets.
+	 * Enqueue the block's stylesheet inside the editor canvas.
+	 *
+	 * The block uses API version 3, so the canvas is an iframe. Styles enqueued
+	 * on enqueue_block_editor_assets only reach the wp-admin document, while
+	 * enqueue_block_assets (in the admin) is mirrored into the iframe.
 	 *
 	 * @return void
 	 */
-	public function enqueue_block_editor_assets() {
-		// Enqueue styles for editor.
+	public function enqueue_editor_canvas_style() {
+		if ( ! is_admin() ) {
+			return;
+		}
+
 		wp_enqueue_style(
 			'frontblocks-product-categories-grid-style',
 			FRBL_PLUGIN_URL . 'assets/product-categories/frontblocks-product-categories.css',
 			array(),
 			FRBL_VERSION
 		);
+	}
 
+	/**
+	 * Enqueue block editor assets.
+	 *
+	 * @return void
+	 */
+	public function enqueue_block_editor_assets() {
 		wp_enqueue_script(
 			'frontblocks-product-categories-option',
 			FRBL_PLUGIN_URL . 'assets/product-categories/frontblocks-product-categories.js',
@@ -161,16 +176,13 @@ class ProductCategories {
 	}
 
 	/**
-	 * Register the Product Categories block.
+	 * Arguments the Product Categories block is registered with.
 	 *
-	 * @return void
+	 * @return array
 	 */
-	public function register_product_categories_block() {
-		if ( ! class_exists( 'WooCommerce' ) ) {
-			return;
-		}
-
-		$args = array(
+	public function get_block_args() {
+		return array(
+			'api_version'     => 3,
 			'editor_script'   => 'frontblocks-product-categories-option',
 			'render_callback' => array( $this, 'render_product_categories_block' ),
 			'attributes'      => array(
@@ -306,6 +318,19 @@ class ProductCategories {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Register the Product Categories block.
+	 *
+	 * @return void
+	 */
+	public function register_product_categories_block() {
+		if ( ! class_exists( 'WooCommerce' ) ) {
+			return;
+		}
+
+		$args = $this->get_block_args();
 
 		if ( ! WP_Block_Type_Registry::get_instance()->is_registered( 'frontblocks/product-categories' ) ) {
 			register_block_type(

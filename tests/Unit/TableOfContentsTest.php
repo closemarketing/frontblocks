@@ -295,4 +295,20 @@ class TableOfContentsTest extends TestCase {
 		$this->assertStringContainsString( '<a class="frbl-toc__link" href="#overview-2">Overview</a>', $result );
 		$this->assertStringContainsString( '<h2 id="overview-2"', $result );
 	}
+
+	/**
+	 * The block opts into block API version 3 (iframed editor canvas).
+	 */
+	public function test_block_is_registered_with_api_version_3() {
+		$registry = \WP_Block_Type_Registry::get_instance();
+		if ( $registry->is_registered( 'frontblocks/table-of-contents' ) ) {
+			unregister_block_type( 'frontblocks/table-of-contents' );
+		}
+
+		$this->toc->register_block();
+
+		$block_type = $registry->get_registered( 'frontblocks/table-of-contents' );
+		$this->assertNotNull( $block_type );
+		$this->assertSame( 3, $block_type->api_version );
+	}
 }

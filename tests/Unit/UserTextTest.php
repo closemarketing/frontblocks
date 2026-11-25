@@ -43,6 +43,27 @@ class UserTextTest extends TestCase {
 		$this->assertSame( array( $this->user_text, 'render_block' ), $block_type->render_callback );
 	}
 
+	public function test_block_is_registered_with_api_version_3() {
+		$this->user_text->register_block();
+
+		$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( 'frontblocks/user-text' );
+
+		$this->assertSame( 3, $block_type->api_version );
+	}
+
+	/**
+	 * The editor stylesheet is attached as the block's editor_style so it is
+	 * loaded inside the iframed canvas of an API version 3 block.
+	 */
+	public function test_editor_style_is_attached_to_the_block_for_the_iframed_canvas() {
+		$this->user_text->register_block();
+
+		$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( 'frontblocks/user-text' );
+
+		$this->assertContains( 'frontblocks-user-text-editor', $block_type->editor_style_handles );
+		$this->assertTrue( wp_style_is( 'frontblocks-user-text-editor', 'registered' ) );
+	}
+
 	public function test_render_block_returns_empty_string_when_no_filter_is_hooked() {
 		$output = $this->user_text->render_block( array( 'textPattern' => 'Hello {first_name}' ) );
 

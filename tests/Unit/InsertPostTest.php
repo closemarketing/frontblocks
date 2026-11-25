@@ -29,6 +29,13 @@ class InsertPostTest extends TestCase {
 		$this->assertSame( 5, has_action( 'init', array( $this->insert_post, 'register_custom_attributes' ) ) );
 	}
 
+	public function test_block_is_registered_with_api_version_3() {
+		$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( 'frontblocks/insert-post' );
+
+		$this->assertNotNull( $block_type );
+		$this->assertSame( 3, $block_type->api_version );
+	}
+
 	public function test_render_returns_empty_placeholder_when_no_post_selected() {
 		$result = $this->insert_post->render_insert_post_block( array( 'selectedPostId' => 0 ) );
 

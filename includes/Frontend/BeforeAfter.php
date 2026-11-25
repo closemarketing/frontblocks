@@ -27,6 +27,7 @@ class BeforeAfter {
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_before_after_block' ), 20 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_editor_canvas_style' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_scripts' ) );
 	}
 
@@ -58,18 +59,33 @@ class BeforeAfter {
 	}
 
 	/**
-	 * Enqueue block editor assets.
+	 * Enqueue the block's stylesheet inside the editor canvas.
+	 *
+	 * The block uses API version 3, so the canvas is an iframe. Styles enqueued
+	 * on enqueue_block_editor_assets only reach the wp-admin document, while
+	 * enqueue_block_assets (in the admin) is mirrored into the iframe.
 	 *
 	 * @return void
 	 */
-	public function enqueue_block_editor_assets() {
+	public function enqueue_editor_canvas_style() {
+		if ( ! is_admin() ) {
+			return;
+		}
+
 		wp_enqueue_style(
 			'frontblocks-before-after-style',
 			FRBL_PLUGIN_URL . 'assets/before-after/frontblocks-before-after.css',
 			array(),
 			FRBL_VERSION
 		);
+	}
 
+	/**
+	 * Enqueue block editor assets.
+	 *
+	 * @return void
+	 */
+	public function enqueue_block_editor_assets() {
 		wp_enqueue_script( 'frontblocks-a11y-utils' );
 
 		wp_enqueue_script(
@@ -92,6 +108,7 @@ class BeforeAfter {
 		}
 
 		$args = array(
+			'api_version'     => 3,
 			'editor_script'   => 'frontblocks-before-after-option',
 			'render_callback' => array( $this, 'render_before_after_block' ),
 			'attributes'      => array(

@@ -191,4 +191,32 @@ class BeforeAfterTest extends TestCase {
 
 		$this->assertTrue( \WP_Block_Type_Registry::get_instance()->is_registered( 'frontblocks/before-after' ) );
 	}
+
+	/**
+	 * The block opts into block API version 3 (iframed editor canvas).
+	 */
+	public function test_block_is_registered_with_api_version_3() {
+		$this->before_after->register_before_after_block();
+
+		$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( 'frontblocks/before-after' );
+
+		$this->assertSame( 3, $block_type->api_version );
+	}
+
+	/**
+	 * The editor stylesheet is hooked on enqueue_block_assets, the only editor
+	 * hook whose styles are mirrored into the iframed canvas, and is enqueued
+	 * in the admin only.
+	 */
+	public function test_editor_canvas_style_is_enqueued_on_enqueue_block_assets_in_admin_only() {
+		$this->assertNotFalse( has_action( 'enqueue_block_assets', array( $this->before_after, 'enqueue_editor_canvas_style' ) ) );
+
+		$this->before_after->enqueue_editor_canvas_style();
+		$this->assertFalse( wp_style_is( 'frontblocks-before-after-style', 'enqueued' ) );
+
+		set_current_screen( 'post' );
+		$this->before_after->enqueue_editor_canvas_style();
+		$this->assertTrue( wp_style_is( 'frontblocks-before-after-style', 'enqueued' ) );
+		set_current_screen( 'front' );
+	}
 }

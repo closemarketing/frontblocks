@@ -164,4 +164,22 @@ class TextAnimationTest extends TestCase {
 		$this->assertTrue( wp_style_is( 'frontblocks-text-animation', 'enqueued' ) );
 		$this->assertTrue( wp_script_is( 'frontblocks-text-animation-frontend', 'enqueued' ) );
 	}
+
+	/**
+	 * The block opts into block API version 3 and keeps its stylesheet as the
+	 * editor_style handle, which is what loads it inside the iframed canvas.
+	 */
+	public function test_block_is_registered_with_api_version_3_and_editor_style() {
+		$registry = \WP_Block_Type_Registry::get_instance();
+		if ( $registry->is_registered( 'frontblocks/text-animation' ) ) {
+			unregister_block_type( 'frontblocks/text-animation' );
+		}
+
+		$this->text_animation->register_block();
+
+		$block_type = $registry->get_registered( 'frontblocks/text-animation' );
+		$this->assertNotNull( $block_type );
+		$this->assertSame( 3, $block_type->api_version );
+		$this->assertContains( 'frontblocks-text-animation', $block_type->editor_style_handles );
+	}
 }

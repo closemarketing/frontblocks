@@ -139,6 +139,7 @@ class ReadingTime {
 	 */
 	public function register_reading_time_block() {
 		$args = array(
+			'api_version'     => 3,
 			'editor_script'   => 'frontblocks-reading-time-option',
 			'render_callback' => array( $this, 'render_reading_time_block' ),
 			'attributes'      => array(
