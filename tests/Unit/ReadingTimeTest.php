@@ -165,6 +165,12 @@ class ReadingTimeTest extends TestCase {
 		$this->assertSame( 'left', $block_type->attributes['alignment']['default'] );
 	}
 
+	public function test_block_is_registered_with_api_version_3() {
+		$block_type = WP_Block_Type_Registry::get_instance()->get_registered( 'frontblocks/reading-time' );
+
+		$this->assertSame( 3, $block_type->api_version );
+	}
+
 	public function test_enqueue_style_only_loads_on_the_frontend_when_the_block_is_present() {
 		$post_id = self::factory()->post->create(
 			array( 'post_content' => '<!-- wp:frontblocks/reading-time /-->' )
