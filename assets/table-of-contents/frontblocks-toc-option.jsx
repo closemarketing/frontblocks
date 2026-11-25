@@ -151,6 +151,7 @@ function TableOfContentsEdit( props ) {
 }
 
 registerBlockType( 'frontblocks/table-of-contents', {
+	apiVersion: 3,
 	title: __( 'FrontBlocks - Table of Content', 'frontblocks' ),
 	description: __( 'An accessible table of contents generated from the headings in this post.', 'frontblocks' ),
 	category: 'widgets',
