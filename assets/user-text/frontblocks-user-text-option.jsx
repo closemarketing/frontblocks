@@ -1,5 +1,5 @@
 const { registerBlockType }               = wp.blocks;
-const { Fragment, useState, useEffect }   = wp.element;
+const { Fragment, useState, useEffect, useRef } = wp.element;
 const { useSelect }                       = wp.data;
 const {
 	InspectorControls,
@@ -51,19 +51,28 @@ const TEXT_ALIGN_OPTIONS = [
 
 /**
  * Resolve a CSS var like "var(--wp--preset--font-size--large)" to a real value
- * using computed styles on the document root.
+ * using computed styles on the root of the document that holds the block.
+ *
+ * The editor canvas is an iframe (block API version 3) and the theme presets
+ * are defined inside it, so the lookup must go through the block's own
+ * ownerDocument rather than the global document of the wp-admin page.
  */
-function resolveCssVar( value ) {
+function resolveCssVar( value, element ) {
 	if ( ! value || ! value.startsWith( 'var(' ) ) return value;
 	const match = value.match( /var\(\s*(--[^,)]+)/ );
 	if ( ! match ) return value;
-	const resolved = getComputedStyle( document.documentElement )
+	const doc  = element ? element.ownerDocument : null;
+	const view = doc ? doc.defaultView : null;
+	if ( ! doc || ! view ) return value;
+	const resolved = view
+		.getComputedStyle( doc.documentElement )
 		.getPropertyValue( match[1] )
 		.trim();
 	return resolved || value;
 }
 
 registerBlockType( 'frontblocks/user-text', {
+	apiVersion: 3,
 	title:       __( 'User Text', 'frontblocks' ),
 	description: __( 'Text pattern with logged-in user data placeholders.', 'frontblocks' ),
 	category:    'text',
@@ -87,6 +96,9 @@ registerBlockType( 'frontblocks/user-text', {
 			textPattern, htmlTag, textColor, hoverTextColor, fontSize,
 			fontFamily, fontWeight, textAlign, loggedOutText,
 		} = attributes;
+
+		// Ref on the block root, used to reach the (iframed) canvas document.
+		const blockRef = useRef( null );
 
 		// ── Current user (with email, needs context=edit) ──────────────────
 		const [ currentUser, setCurrentUser ] = useState( null );
@@ -116,7 +128,7 @@ registerBlockType( 'frontblocks/user-text', {
 					// Resolve CSS vars to real values for display
 					const resolved = {};
 					Object.keys( merged ).forEach( ( k ) => {
-						resolved[ k ] = resolveCssVar( merged[ k ] );
+						resolved[ k ] = resolveCssVar( merged[ k ], blockRef.current );
 					} );
 					setThemeTypo( resolved );
 				} )
@@ -151,7 +163,7 @@ registerBlockType( 'frontblocks/user-text', {
 			textAlign:  textAlign  || undefined,
 		};
 
-		const blockProps = useBlockProps();
+		const blockProps = useBlockProps( { ref: blockRef } );
 		const Tag        = htmlTag || 'p';
 
 		// Helper: placeholder showing theme default when field is empty

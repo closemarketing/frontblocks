@@ -59,6 +59,7 @@ class UserText {
 		register_block_type(
 			'frontblocks/user-text',
 			array(
+				'api_version'     => 3,
 				'editor_script'   => 'frontblocks-user-text-editor',
 				'editor_style'    => 'frontblocks-user-text-editor',
 				'render_callback' => array( $this, 'render_block' ),
