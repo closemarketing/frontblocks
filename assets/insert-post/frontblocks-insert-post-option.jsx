@@ -270,6 +270,7 @@ function InsertPostBlock(props) {
 const { registerBlockType } = wp.blocks;
 
 registerBlockType('frontblocks/insert-post', {
+	apiVersion: 3,
 	title: __('FrontBlocks - Insert Post', 'frontblocks'),
 	description: __('Display content from another post or page', 'frontblocks'),
 	category: 'generateblocks',

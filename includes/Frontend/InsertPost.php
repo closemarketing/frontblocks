@@ -145,6 +145,7 @@ class InsertPost {
 		register_block_type(
 			'frontblocks/insert-post',
 			array(
+				'api_version'     => 3,
 				'editor_script'   => 'frontblocks-insert-post-option',
 				'render_callback' => array( $this, 'render_insert_post_block' ),
 				'attributes'      => array(
