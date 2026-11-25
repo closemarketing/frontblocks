@@ -337,6 +337,7 @@ class TextAnimation {
 		register_block_type(
 			'frontblocks/text-animation',
 			array(
+				'api_version'   => 3,
 				'editor_script' => 'frontblocks-text-animation-editor',
 				'editor_style'  => 'frontblocks-text-animation',
 				'style'         => 'frontblocks-text-animation',

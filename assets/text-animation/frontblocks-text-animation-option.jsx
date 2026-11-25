@@ -415,8 +415,8 @@ const ANIMATION_PREVIEWS = {
 				if ( ! el ) return;
 				el.innerHTML = '';
 
-				const textSpan         = document.createElement( 'span' );
-				const cursor           = document.createElement( 'span' );
+				const textSpan         = el.ownerDocument.createElement( 'span' );
+				const cursor           = el.ownerDocument.createElement( 'span' );
 				cursor.style.cssText   = 'display:inline-block;width:0.6em;height:1.1em;background:currentColor;margin-left:4px;vertical-align:middle;animation:frblBlinkCursor 1s infinite;';
 
 				el.appendChild( textSpan );
@@ -469,11 +469,11 @@ const ANIMATION_PREVIEWS = {
 				el.style.overflow = 'hidden';
 				el.innerHTML      = '';
 
-				const textSpan           = document.createElement( 'span' );
+				const textSpan           = el.ownerDocument.createElement( 'span' );
 				textSpan.textContent     = text;
 				textSpan.style.cssText   = 'display:inline-block;opacity:0;';
 
-				const block           = document.createElement( 'span' );
+				const block           = el.ownerDocument.createElement( 'span' );
 				block.style.cssText   = 'position:absolute;top:0;left:0;width:100%;height:100%;background:currentColor;transform-origin:left;transform:scaleX(0);transition:transform 0.5s cubic-bezier(0.86,0,0.07,1);';
 
 				el.appendChild( textSpan );
@@ -530,7 +530,7 @@ const ANIMATION_PREVIEWS = {
 				const indices = chars.map( ( _, i ) => i ).sort( () => Math.random() - 0.5 );
 
 				const spanList = chars.map( ( char ) => {
-					const span           = document.createElement( 'span' );
+					const span           = el.ownerDocument.createElement( 'span' );
 					span.className       = 'frbl-char';
 					span.textContent     = char;
 					span.style.cssText   = 'display:inline-block;white-space:pre;opacity:0;';
@@ -831,7 +831,7 @@ const ANIMATION_PREVIEWS = {
 
 				const chars    = text.split( '' );
 				const spanList = chars.map( ( char ) => {
-					const span       = document.createElement( 'span' );
+					const span       = el.ownerDocument.createElement( 'span' );
 					span.className   = 'frbl-char';
 					el.appendChild( span );
 					return { el: span, char, isSpace: char === ' ' };
@@ -1245,12 +1245,17 @@ function TextAnimationEdit( props ) {
 			</InspectorControls>
 
 			{ showPreview ? (
-				<AnimationPreview
-					animationType={ animationType }
-					text={ stripHtml( content ) || __( 'Write your text here…', 'frontblocks' ) }
-					style={ previewStyle }
-					Tag={ htmlTag }
-				/>
+				// API version 3: the edit output must always carry the block props on its
+				// root element. The preview Tag has its own typography, so the wrapper only
+				// keeps the block identity (ref, data attributes, classes) and the margins.
+				<div { ...blockProps } style={ { marginLeft: 0, marginRight: 'auto' } }>
+					<AnimationPreview
+						animationType={ animationType }
+						text={ stripHtml( content ) || __( 'Write your text here…', 'frontblocks' ) }
+						style={ previewStyle }
+						Tag={ htmlTag }
+					/>
+				</div>
 			) : (
 				<RichText
 					{ ...blockProps }
@@ -1266,6 +1271,7 @@ function TextAnimationEdit( props ) {
 }
 
 registerBlockType( 'frontblocks/text-animation', {
+	apiVersion: 3,
 	title:       __( 'FrontBlocks - Text Animation', 'frontblocks' ),
 	description: __( 'Animated text block with typography controls. Add animation effects from the sidebar.', 'frontblocks' ),
 	category:    'text',

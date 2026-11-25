@@ -1,7 +1,6 @@
 "use strict";
 
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
@@ -705,8 +704,8 @@ var ANIMATION_PREVIEWS = {
         var el = containerRef.current;
         if (!el) return;
         el.innerHTML = '';
-        var textSpan = document.createElement('span');
-        var cursor = document.createElement('span');
+        var textSpan = el.ownerDocument.createElement('span');
+        var cursor = el.ownerDocument.createElement('span');
         cursor.style.cssText = 'display:inline-block;width:0.6em;height:1.1em;background:currentColor;margin-left:4px;vertical-align:middle;animation:frblBlinkCursor 1s infinite;';
         el.appendChild(textSpan);
         el.appendChild(cursor);
@@ -772,10 +771,10 @@ var ANIMATION_PREVIEWS = {
         el.style.position = 'relative';
         el.style.overflow = 'hidden';
         el.innerHTML = '';
-        var textSpan = document.createElement('span');
+        var textSpan = el.ownerDocument.createElement('span');
         textSpan.textContent = text;
         textSpan.style.cssText = 'display:inline-block;opacity:0;';
-        var block = document.createElement('span');
+        var block = el.ownerDocument.createElement('span');
         block.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;background:currentColor;transform-origin:left;transform:scaleX(0);transition:transform 0.5s cubic-bezier(0.86,0,0.07,1);';
         el.appendChild(textSpan);
         el.appendChild(block);
@@ -851,7 +850,7 @@ var ANIMATION_PREVIEWS = {
           return Math.random() - 0.5;
         });
         var spanList = chars.map(function (char) {
-          var span = document.createElement('span');
+          var span = el.ownerDocument.createElement('span');
           span.className = 'frbl-char';
           span.textContent = char;
           span.style.cssText = 'display:inline-block;white-space:pre;opacity:0;';
@@ -1274,7 +1273,7 @@ var ANIMATION_PREVIEWS = {
         el.innerHTML = '';
         var chars = text.split('');
         var spanList = chars.map(function (char) {
-          var span = document.createElement('span');
+          var span = el.ownerDocument.createElement('span');
           span.className = 'frbl-char';
           el.appendChild(span);
           return {
@@ -1866,12 +1865,22 @@ function TextAnimationEdit(props) {
         });
       }
     }]
-  })), showPreview ? /*#__PURE__*/React.createElement(AnimationPreview, {
+  })), showPreview ?
+  /*#__PURE__*/
+  // API version 3: the edit output must always carry the block props on its
+  // root element. The preview Tag has its own typography, so the wrapper only
+  // keeps the block identity (ref, data attributes, classes) and the margins.
+  React.createElement("div", _objectSpread(_objectSpread({}, blockProps), {}, {
+    style: {
+      marginLeft: 0,
+      marginRight: 'auto'
+    }
+  }), /*#__PURE__*/React.createElement(AnimationPreview, {
     animationType: animationType,
     text: stripHtml(content) || __('Write your text here…', 'frontblocks'),
     style: previewStyle,
     Tag: htmlTag
-  }) : /*#__PURE__*/React.createElement(RichText, _extends({}, blockProps, {
+  })) : /*#__PURE__*/React.createElement(RichText, _objectSpread(_objectSpread({}, blockProps), {}, {
     tagName: htmlTag,
     value: content,
     onChange: function onChange(value) {
@@ -1884,6 +1893,7 @@ function TextAnimationEdit(props) {
   })));
 }
 registerBlockType('frontblocks/text-animation', {
+  apiVersion: 3,
   title: __('FrontBlocks - Text Animation', 'frontblocks'),
   description: __('Animated text block with typography controls. Add animation effects from the sidebar.', 'frontblocks'),
   category: 'text',
