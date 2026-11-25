@@ -83,6 +83,42 @@ class ProductCategoriesTest extends TestCase {
 		);
 	}
 
+	/**
+	 * Registration itself is gated on WooCommerce, which this environment does
+	 * not load, so the arguments are registered here under a throwaway name to
+	 * check what WordPress reports for them.
+	 */
+	public function test_block_arguments_declare_api_version_3() {
+		$args = $this->product_categories->get_block_args();
+
+		$this->assertSame( 3, $args['api_version'] );
+
+		$registry = WP_Block_Type_Registry::get_instance();
+		$block    = register_block_type( 'frontblocks/product-categories-apiv3-test', $args );
+		$this->assertSame( 3, $block->api_version );
+		$registry->unregister( 'frontblocks/product-categories-apiv3-test' );
+	}
+
+	/**
+	 * The editor stylesheet is hooked on enqueue_block_assets, the only editor
+	 * hook whose styles are mirrored into the iframed canvas, and is enqueued
+	 * in the admin only.
+	 */
+	public function test_editor_canvas_style_is_enqueued_on_enqueue_block_assets_in_admin_only() {
+		$this->assertNotFalse( has_action( 'enqueue_block_assets', array( $this->product_categories, 'enqueue_editor_canvas_style' ) ) );
+
+		wp_dequeue_style( 'frontblocks-product-categories-grid-style' );
+		$this->product_categories->enqueue_editor_canvas_style();
+		$this->assertFalse( wp_style_is( 'frontblocks-product-categories-grid-style', 'enqueued' ) );
+
+		set_current_screen( 'post' );
+		$this->product_categories->enqueue_editor_canvas_style();
+		$this->assertTrue( wp_style_is( 'frontblocks-product-categories-grid-style', 'enqueued' ) );
+
+		wp_dequeue_style( 'frontblocks-product-categories-grid-style' );
+		set_current_screen( 'front' );
+	}
+
 	public function test_render_product_categories_block_returns_empty_without_woocommerce() {
 		$result = $this->product_categories->render_product_categories_block( array( 'count' => 5 ) );
 
