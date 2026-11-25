@@ -62,6 +62,7 @@ jobs:
           npm run test:table-of-contents
           npm run test:accessibility-utils
           npm run test:carousel-accessibility
+          npm run test:carousel-init-api
           npm run test:text-animation
 
   phpunit:
