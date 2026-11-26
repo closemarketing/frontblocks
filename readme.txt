@@ -3,7 +3,7 @@ Contributors: davidperez, sacrajaimez, alexbreagarcia, matiasquero, amulero, mit
 Tags: carrusel, lightweight, generatepress, gutenberg, maintenance-mode
 Donate link: https://close.marketing/go/donate/
 Requires at least: 5.8
-Tested up to: 7.1
+Tested up to: 7.2
 Stable tag: 1.5.6
 Version: 1.5.6
 License: GPLv2 or later
