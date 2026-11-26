@@ -1,5 +1,18 @@
-window.addEventListener('load', function (event) {
-    const carouselItem = document.querySelectorAll('.frontblocks-carousel');
+/**
+ * FrontBlocks carousel.
+ *
+ * Starts every ".frontblocks-carousel" list on window "load". Code that adds lists later (AJAX, REST) can call
+ * window.frontblocksCarousel.init( container ) to start only the new lists inside "container" (default: the whole
+ * document). Lists that are already running are skipped, so calling it again is safe.
+ */
+window.frontblocksCarousel = window.frontblocksCarousel || {};
+window.frontblocksCarousel.init = function (root) {
+    const scope = root && root.querySelectorAll ? root : document;
+    // A running carousel has "glide__slides"; it is skipped so the list is never wrapped twice.
+    const carouselItem = Array.prototype.filter.call(
+        scope.querySelectorAll('.frontblocks-carousel'),
+        (el) => ! el.classList.contains('glide__slides')
+    );
 
     if (carouselItem.length > 0) {
         carouselItem.forEach((item) => {
@@ -127,7 +140,7 @@ window.addEventListener('load', function (event) {
                 const leftSvg = carouselArrowLeftUrl ? '<img src="' + carouselArrowLeftUrl + '" alt="" aria-hidden="true">' : defaultLeftSvg;
                 const rightSvg = carouselArrowRightUrl ? '<img src="' + carouselArrowRightUrl + '" alt="" aria-hidden="true">' : defaultRightSvg;
 
-                arrowsHTML = '<button class="glide__arrow glide__arrow--left" data-glide-dir="<"';
+                let arrowsHTML = '<button class="glide__arrow glide__arrow--left" data-glide-dir="<"';
                 arrowsHTML += ' aria-label="Previous slide"';
                 arrowsHTML += ' style="background-color: ' + carouselbuttonsBackgroundColor + '"';
                 arrowsHTML += '>' + leftSvg + '</button>';
@@ -168,7 +181,7 @@ window.addEventListener('load', function (event) {
                     const currentIndex = glideFrontBlocks.index;
                     const lastIndex = glideFrontBlocks.selector.querySelectorAll('.glide__slide').length;
 
-                    actualView = parseInt(currentIndex) + parseInt(carouselView);
+                    const actualView = parseInt(currentIndex) + parseInt(carouselView);
 
                     if (actualView > lastIndex) {
                         setTimeout(() => {
@@ -202,4 +215,12 @@ window.addEventListener('load', function (event) {
             }
         });
     }
-});
+};
+
+if (document.readyState === 'complete') {
+    window.frontblocksCarousel.init();
+} else {
+    window.addEventListener('load', function () {
+        window.frontblocksCarousel.init();
+    });
+}
